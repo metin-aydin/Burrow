@@ -161,3 +161,39 @@ func TestMaxAccepts(t *testing.T) {
 		t.Fatal("third connection accepted")
 	}
 }
+
+func TestSealAndAcceptWindow(t *testing.T) {
+	echo := echoServer(t)
+	f := &Forwarder{Dialer: &net.Dialer{}, Target: echo, MaxConns: 1, MaxAccepts: 4, AcceptWindow: 200 * time.Millisecond}
+	addr, err := f.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	time.Sleep(400 * time.Millisecond)
+	if c, err := net.DialTimeout("tcp", addr, time.Second); err == nil {
+		c.Close()
+		t.Fatal("connection accepted after the accept window")
+	}
+
+	g := &Forwarder{Dialer: &net.Dialer{}, Target: echo, MaxConns: 1, MaxAccepts: 4}
+	addr2, _ := g.Start()
+	defer g.Close()
+	c, err := net.Dial("tcp", addr2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	g.Seal()
+	time.Sleep(50 * time.Millisecond)
+	if c2, err := net.DialTimeout("tcp", addr2, time.Second); err == nil {
+		c2.Close()
+		t.Fatal("connection accepted after Seal")
+	}
+	c.Write([]byte("y")) // the established connection still works
+	buf := make([]byte, 1)
+	c.SetReadDeadline(time.Now().Add(2 * time.Second))
+	if _, err := c.Read(buf); err != nil {
+		t.Fatalf("established connection broken by Seal: %v", err)
+	}
+}

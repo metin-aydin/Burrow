@@ -4,6 +4,8 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Güvenlik incelemesi (yönlendirici): çoklu kabul yalnız bağlantı kurulurken — RDP oturumu `connected` olunca
+  `NetcoreForwardSeal` dinleyiciyi kapatıyor, ayrıca en geç 60 sn'de kendiliğinden kapanıyor (`AcceptWindow`). Testli.
 - ✅ **GP girişi uygulama içinde kurumda başarılı** (çift OTP: portal formu → gateway 512 → ikinci form yeni OTP →
   tünel 172.16.100.x, ESP yok → HTTPS). RDP bağlanmadı; iki neden: (1) openconnect macOS/BSD'de tun paketlerine 4 baytlık
   AF başlığı ekliyor (yalnız --script-tun'da eklemiyor) → netstack'e `AFPrefix` seçeneği; (2) FreeRDP müzakere sırasında

@@ -39,6 +39,10 @@ type Forwarder struct {
 	// clients may reconnect during security negotiation, so tunnel forwards allow a few.
 	MaxAccepts int
 
+	// AcceptWindow closes the listener this long after Start even if MaxAccepts wasn't reached
+	// (0 = no limit). Call Seal as soon as the client is connected to close it earlier.
+	AcceptWindow time.Duration
+
 	ln       net.Listener
 	accepted int
 	wg     sync.WaitGroup
@@ -61,7 +65,17 @@ func (f *Forwarder) Start() (string, error) {
 	f.ctx, f.cancel = context.WithCancel(context.Background())
 	f.wg.Add(1)
 	go f.acceptLoop()
+	if f.AcceptWindow > 0 {
+		time.AfterFunc(f.AcceptWindow, f.Seal)
+	}
 	return ln.Addr().String(), nil
+}
+
+// Seal stops accepting new connections; established ones keep running.
+func (f *Forwarder) Seal() {
+	if f.ln != nil {
+		_ = f.ln.Close()
+	}
 }
 
 // Close stops listening and tears down all active connections.

@@ -173,7 +173,10 @@ func NetcoreStartTunnelForward(tunnelHandle C.int, target *C.char, outAddr **C.c
 		Dialer:     dialerFunc(t.DialContext),
 		Target:     C.GoString(target),
 		MaxConns:   1,
-		MaxAccepts: 4, // RDP may reconnect during security negotiation / auto-reconnect
+		// FreeRDP may reconnect during security negotiation, so a few accepts are allowed — but only
+		// until the session is up (the app calls NetcoreForwardSeal) and never longer than a minute.
+		MaxAccepts:   4,
+		AcceptWindow: time.Minute,
 	}
 	addr, err := f.Start()
 	if err != nil {
@@ -194,4 +197,17 @@ func (f dialerFunc) DialContext(ctx context.Context, network, address string) (n
 	ctx2, cancel := context.WithTimeout(ctx, 20*time.Second)
 	defer cancel()
 	return f(ctx2, network, address)
+}
+
+// NetcoreForwardSeal stops a forward from accepting new connections (call once the RDP session is
+// connected); the established connection keeps running.
+//
+//export NetcoreForwardSeal
+func NetcoreForwardSeal(handle C.int) {
+	mu.Lock()
+	f := forwards[handle]
+	mu.Unlock()
+	if f != nil {
+		f.Seal()
+	}
 }

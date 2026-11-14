@@ -504,6 +504,10 @@ QString AppController::startSession(const Model::Device &dev, const QString &use
                 d.certFingerprint = fp;
         persist();
     });
+    connect(session, &RdpSession::stateChanged, this, [session, forward] {
+        if (session->state() == QLatin1String("connected"))
+            TunnelManager::sealForward(forward);
+    });
     connect(session, &RdpSession::closed, this, [this, forward](RdpSession *s) {
         TunnelManager::closeForward(forward);
         const QImage last = s->frame();

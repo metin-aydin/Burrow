@@ -132,6 +132,12 @@ void TunnelManager::closeForward(int forwardHandle)
         NetcoreStopForward(forwardHandle);
 }
 
+void TunnelManager::sealForward(int forwardHandle)
+{
+    if (forwardHandle > 0)
+        NetcoreForwardSeal(forwardHandle);
+}
+
 void TunnelManager::submitOtp(const QString &tunnelId, const QString &code)
 {
     QByteArray c = code.toUtf8();

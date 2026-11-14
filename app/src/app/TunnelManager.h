@@ -32,6 +32,7 @@ public:
     // Opens a one-shot forward to `target` through the tunnel; returns "127.0.0.1:port" or "".
     QString openForward(const QString &tunnelId, const QString &target, int *forwardHandle);
     static void closeForward(int forwardHandle);
+    static void sealForward(int forwardHandle);   // stop accepting once the session is connected
 
     void submitOtp(const QString &tunnelId, const QString &code);
     void stop(const QString &tunnelId);
