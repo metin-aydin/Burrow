@@ -1,4 +1,4 @@
-find_package(Qt6 6.5 REQUIRED COMPONENTS Gui Quick QuickControls2 Svg LinguistTools)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Gui Network Quick QuickControls2 Svg LinguistTools)
 find_package(FreeRDP 3 QUIET)
 find_package(FreeRDP-Client 3 QUIET)
 
@@ -12,6 +12,8 @@ qt_add_executable(burrow
     src/app/ListModels.h
     src/app/PreviewProvider.cpp
     src/app/PreviewProvider.h
+    src/app/Updater.cpp
+    src/app/Updater.h
     src/net/NetCore.cpp
     src/net/NetCore.h
     src/rdp/RdpEngine.h
@@ -53,7 +55,7 @@ endif()
 
 target_include_directories(burrow PRIVATE src)
 target_compile_definitions(burrow PRIVATE BURROW_VERSION="${PROJECT_VERSION}")
-target_link_libraries(burrow PRIVATE Qt6::Gui Qt6::Quick Qt6::QuickControls2 Qt6::Svg netcore::netcore)
+target_link_libraries(burrow PRIVATE Qt6::Gui Qt6::Network Qt6::Quick Qt6::QuickControls2 Qt6::Svg netcore::netcore)
 
 if(FreeRDP_FOUND AND FreeRDP-Client_FOUND)
     message(STATUS "FreeRDP found: ${FreeRDP_VERSION}")
@@ -87,9 +89,10 @@ install(TARGETS burrow BUNDLE DESTINATION . RUNTIME DESTINATION bin)
 find_package(Qt6 6.5 QUIET COMPONENTS Test)
 if(Qt6Test_FOUND)
     qt_add_executable(tst_vault tests/tst_vault.cpp
-        src/vault/Model.cpp src/vault/VaultStore.cpp src/net/NetCore.cpp)
+        src/vault/Model.cpp src/vault/VaultStore.cpp src/net/NetCore.cpp
+        src/app/Updater.cpp src/app/Updater.h)
     set_target_properties(tst_vault PROPERTIES MACOSX_BUNDLE OFF)
     target_include_directories(tst_vault PRIVATE src)
-    target_link_libraries(tst_vault PRIVATE Qt6::Core Qt6::Test netcore::netcore)
+    target_link_libraries(tst_vault PRIVATE Qt6::Core Qt6::Network Qt6::Test netcore::netcore)
     add_test(NAME tst_vault COMMAND tst_vault)
 endif()

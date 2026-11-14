@@ -41,6 +41,12 @@ Rectangle {
                 }
             }
             Item { Layout.fillWidth: true }
+            Chip {
+                visible: ["available", "downloading", "ready"].indexOf(App.updater.state) >= 0
+                kind: "accent"
+                text: qsTr("Update %1").arg(App.updater.latestVersion)
+                onClicked: root.openSettings()
+            }
             // Search
             Rectangle {
                 Layout.preferredWidth: 240

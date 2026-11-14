@@ -2,9 +2,8 @@ name: CI
 
 on:
   push:
-    branches: [development]
-  pull_request:
     branches: [development, master]
+  pull_request:
 
 permissions:
   contents: read
@@ -36,6 +35,20 @@ jobs:
       - name: Install dependencies
         run: brew install cmake ninja qt freerdp
       - name: Configure
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$(brew --prefix qt)"
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$(brew --prefix freerdp)"
       - name: Build
         run: cmake --build build
+      - name: Tests
+        run: cd build && ctest --output-on-failure
+      - name: Translations
+        run: |
+          cmake --build build --target Burrow_lupdate
+          python3 .github/scripts/i18n-check.py app/i18n/*.ts
+          git diff --exit-code -- app/i18n || (echo "::error::Run the Burrow_lupdate target and commit app/i18n"; exit 1)
+
+  scripts:
+    name: Release scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 .github/scripts/release-notes-test.py

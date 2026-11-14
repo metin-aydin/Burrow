@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Release + güncelleme JumpDesk/UPaste gibi (ADR 0002 güncellendi):** yeni `release.yml` (prepare/taslak →
+  macOS arm64 imza+notarize → `latest.json` + yayımla → hata olursa sil), `release-notes.py` + testi, PR şablonu,
+  `entitlements.mac.plist`, CI'a Qt testleri ve çeviri kontrolü. Sparkle bırakıldı; `Updater` (C++): 15 sn/6 saat
+  denetim, sormadan indirmez, SHA-256 + aynı ekip imzası, ayrık yardımcıyla paket değişimi. Ayarlar → Güncellemeler,
+  galeride "Güncelleme X" çipi. `tst_vault`'a yerel sahte sürümle güncelleyici testi (kurcalanmış dosya reddi dahil).
+  Workflow GitHub'da henüz çalıştırılmadı (gizli değerler/ortam yok).
 - Logo (UPaste/JumpDesk tarzı, kullanıcı rengi seçti: Toprak) + ikon setleri (`tools/render-icons.sh`), uygulama
   teması bu renge göre güncellendi; macOS paketine `.icns`, Windows için `.rc/.ico` eklendi.
 - **Çoklu dil (ADR 0006):** kaynak metinler İngilizceye çevrildi, Türkçe katalog (`app/i18n/burrow_tr.ts`, 173

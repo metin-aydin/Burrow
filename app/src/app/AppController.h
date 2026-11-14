@@ -6,6 +6,7 @@
 #include <QVariantMap>
 
 #include "app/ListModels.h"
+#include "app/Updater.h"
 #include "vault/VaultStore.h"
 
 // The single object QML talks to (exposed as the `App` singleton). Owns the
@@ -21,6 +22,7 @@ class AppController : public QObject
     Q_PROPERTY(DeviceModel *devices READ devices CONSTANT)
     Q_PROPERTY(TunnelModel *tunnels READ tunnels CONSTANT)
     Q_PROPERTY(DeviceFilterModel *gallery READ gallery CONSTANT)
+    Q_PROPERTY(Updater *updater READ updater CONSTANT)
     Q_PROPERTY(bool touchIdAvailable READ touchIdAvailable CONSTANT)
     Q_PROPERTY(bool touchIdEnabled READ touchIdEnabled NOTIFY touchIdEnabledChanged)
     Q_PROPERTY(QString versionInfo READ versionInfo CONSTANT)
@@ -33,6 +35,7 @@ public:
     DeviceModel *devices() { return &m_devices; }
     TunnelModel *tunnels() { return &m_tunnels; }
     DeviceFilterModel *gallery() { return &m_gallery; }
+    Updater *updater() { return &m_updater; }
     bool touchIdAvailable() const;
     bool touchIdEnabled() const;
     QString versionInfo() const;
@@ -95,6 +98,7 @@ private:
     DeviceModel m_devices;
     TunnelModel m_tunnels;
     DeviceFilterModel m_gallery;
+    Updater m_updater;
     QString m_demoOpen;
     QTranslator m_translator;
     QQmlEngine *m_engine = nullptr;

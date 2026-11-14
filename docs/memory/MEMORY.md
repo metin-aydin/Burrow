@@ -8,7 +8,7 @@ Her satır bir hafıza kaydını gösterir. Kayıt içerikleri ilgili dosyadadı
 - [GlobalProtect kurum akışı](project-gp-auth-flow.md) — portal + gateway çift OTP akışı
 - [Teknoloji yığını](project-stack-status.md) — Qt 6 + FreeRDP 3 + Go netcore, açık kaynak, önce macOS
 - [GitHub sadece MCP ile](feedback-github-via-mcp.md) — gh/tarayıcı alternatifi sorma
-- [Release ve otomatik güncelleme](project-release-flow.md) — GitHub Releases + Sparkle, development→master otomatik release
+- [Release ve otomatik güncelleme](project-release-flow.md) — JumpDesk/UPaste ile aynı akış, gizli değer adları, eksikler
 - [Kimlik doğrulamada tekrar yok](feedback-auth-retry-safety.md) — test betiği hesabı kilitletti; ilk hatada dur
 - [Arayüz: Baş Harfler Büyük](feedback-ui-title-case.md) — buton/başlık/menü/input etiketlerinde her kelimenin baş harfi büyük
 - [GitHub repo bilgileri](project-github-meta.md) — repo açıklaması ve etiketleri (MCP bekliyor)

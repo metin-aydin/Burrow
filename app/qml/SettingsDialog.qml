@@ -53,6 +53,57 @@ BDialog {
         }
     }
 
+    SectionTitle { text: qsTr("Updates") }
+    BSwitch {
+        Layout.fillWidth: true
+        enabled: App.updater.supported
+        title: qsTr("Check For Updates Automatically")
+        description: App.updater.supported ? qsTr("Checks GitHub every 6 hours. Nothing is downloaded without asking.")
+                                           : qsTr("Automatic updates aren't available on this platform yet.")
+        checked: App.updater.autoCheck
+        onToggled: App.updater.autoCheck = checked
+    }
+    RowLayout {
+        visible: App.updater.supported
+        spacing: 8
+        Text {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            font.pixelSize: 12
+            color: App.updater.state === "error" ? Theme.danger : Theme.textSecondary
+            text: {
+                const u = App.updater
+                switch (u.state) {
+                case "checking": return qsTr("Checking for updates…")
+                case "upToDate": return qsTr("Burrow is up to date.")
+                case "available": return qsTr("Burrow %1 is available.").arg(u.latestVersion)
+                case "downloading": return qsTr("Downloading %1… %2%").arg(u.latestVersion).arg(Math.round(u.progress * 100))
+                case "ready": return qsTr("Burrow %1 is ready to install. Burrow restarts to finish.").arg(u.latestVersion)
+                case "installing": return qsTr("Installing…")
+                case "error": return u.error
+                }
+                return ""
+            }
+        }
+        BButton {
+            visible: App.updater.state === "idle" || App.updater.state === "upToDate" || App.updater.state === "error"
+            text: qsTr("Check Now")
+            onClicked: App.updater.checkNow()
+        }
+        BButton {
+            visible: App.updater.state === "available"
+            variant: "primary"
+            text: qsTr("Download Update")
+            onClicked: App.updater.download()
+        }
+        BButton {
+            visible: App.updater.state === "ready"
+            variant: "primary"
+            text: qsTr("Restart And Update")
+            onClicked: App.updater.install()
+        }
+    }
+
     SectionTitle { text: qsTr("About") }
     Text { text: App.versionInfo; color: Theme.textSecondary; font.pixelSize: 12 }
 

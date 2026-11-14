@@ -1,6 +1,8 @@
+#include <QCryptographicHash>
 #include <QTemporaryDir>
 #include <QtTest>
 
+#include "app/Updater.h"
 #include "net/NetCore.h"
 #include "vault/VaultStore.h"
 
@@ -93,6 +95,49 @@ private slots:
         QCOMPARE(code.size(), 6);
         QVERIFY(left > 0 && left <= 30);
         QVERIFY(NetCore::parseTotp("https://example.com").isEmpty());
+    }
+
+    void versionCompare()
+    {
+        QCOMPARE(Updater::compareVersions("1.10.0", "1.9.3"), 1);
+        QCOMPARE(Updater::compareVersions("0.2.0", "0.2.0"), 0);
+        QCOMPARE(Updater::compareVersions("v0.1.9", "0.2"), -1);
+        QVERIFY(Updater::platformKey().startsWith("mac-"));
+    }
+
+    void updaterFlow()
+    {
+        // Fake release: manifest + asset in a temp dir, served over file://.
+        const QByteArray payload = "fake zip bytes";
+        const QString platform = Updater::platformKey();
+        QFile asset(m_dir.filePath("Burrow-9.9.9-" + platform + ".zip"));
+        QVERIFY(asset.open(QIODevice::WriteOnly));
+        asset.write(payload);
+        asset.close();
+        auto writeManifest = [&](const QByteArray &sha) {
+            QFile m(m_dir.filePath("latest.json"));
+            QVERIFY(m.open(QIODevice::WriteOnly));
+            m.write("{\"version\":\"9.9.9\",\"notes\":\"- New\",\"assets\":{\"" + platform.toUtf8()
+                    + "\":{\"name\":\"Burrow-9.9.9-" + platform.toUtf8() + ".zip\",\"sha256\":\"" + sha + "\"}}}");
+        };
+        writeManifest(QCryptographicHash::hash(payload, QCryptographicHash::Sha256).toHex());
+        qputenv("BURROW_UPDATE_URL", QUrl::fromLocalFile(m_dir.filePath("latest.json")).toString().toUtf8());
+
+        Updater u;
+        u.checkNow();
+        QTRY_COMPARE(u.state(), QString("available"));
+        QCOMPARE(u.latestVersion(), QString("9.9.9"));
+        u.download();
+        QTRY_COMPARE(u.state(), QString("ready"));
+
+        // A tampered asset is rejected.
+        writeManifest(QByteArray(64, 'a'));
+        Updater bad;
+        bad.checkNow();
+        QTRY_COMPARE(bad.state(), QString("available"));
+        bad.download();
+        QTRY_COMPARE(bad.state(), QString("error"));
+        qunsetenv("BURROW_UPDATE_URL");
     }
 
 private:

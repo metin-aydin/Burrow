@@ -1,113 +1,212 @@
-# Runs when development is merged into master (ADR 0002):
-# compute version -> build -> sign + notarize -> package -> GitHub Release.
-# Sparkle appcast generation is added together with the in-app updater.
+# Every merge into master publishes a new release (ADR 0002, same flow as the author's JumpDesk/UPaste):
+# the version comes from Conventional Commits (.github/scripts/next-version.sh), the merged PR's description becomes
+# the release notes, each platform's packages are uploaded to a draft release, and once all builds succeed a
+# latest.json update manifest is attached and the release is published. A failed run deletes its draft.
+# The in-app updater reads releases/latest/download/latest.json.
 name: Release
 
 on:
   push:
     branches: [master]
-
-permissions:
-  contents: write
+  workflow_dispatch:
 
 concurrency:
   group: release
   cancel-in-progress: false
 
+permissions:
+  contents: write
+
 jobs:
-  release:
-    runs-on: macos-15
-    env:
-      # Secrets can't be read in step-level `if:`; expose presence flags instead.
-      HAS_SIGNING: ${{ secrets.APPLE_CERT_P12 != '' && secrets.APPLE_TEAM_ID != '' }}
-      HAS_NOTARY: ${{ secrets.APPLE_NOTARY_KEY != '' }}
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Compute next version
+      - name: Version
         id: version
+        run: echo "version=$(bash .github/scripts/next-version.sh)" >> "$GITHUB_OUTPUT"
+      - name: Release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          v=$(bash .github/scripts/next-version.sh)
-          echo "version=$v" >> "$GITHUB_OUTPUT"
-          echo "Next version: $v"
+          pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" \
+            --jq '[.[] | select(.merged_at != null)][0].number // empty')
+          body=""
+          if [ -n "$pr" ]; then
+            body=$(gh pr view "$pr" --json body --jq .body | python3 .github/scripts/release-notes.py)
+          fi
+          last=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
+          if [ -z "$(printf '%s' "$body" | tr -d '[:space:]')" ]; then
+            body=$(git log ${last:+$last..}HEAD --no-merges --format='- %s')
+          fi
+          {
+            printf '%s\n' "$body"
+            if [ -n "$last" ]; then
+              printf '\n**Full changelog**: https://github.com/%s/compare/%s...v%s\n' \
+                "$GITHUB_REPOSITORY" "$last" "$VERSION"
+            fi
+          } > notes.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: notes
+          path: notes.md
+      - name: Draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          # A draft left behind by an earlier, failed run is removed first.
+          if gh release view "v$VERSION" --json isDraft --jq .isDraft 2>/dev/null | grep -q true; then
+            gh release delete "v$VERSION" --yes
+          fi
+          gh release create "v$VERSION" --draft --target "$GITHUB_SHA" \
+            --title "Burrow $VERSION" --notes-file notes.md
 
+  build:
+    needs: prepare
+    # Signing secrets live in the "release" environment, which only protected branches can use.
+    environment: release
+    strategy:
+      matrix:
+        include:
+          # Apple Silicon. Intel, Ubuntu (AppImage, deb) and Windows (installer) join the matrix as those ports land.
+          - os: macos-15
+            platform: mac-arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: netcore/go.mod
-
       - name: Install dependencies
         run: brew install cmake ninja qt freerdp
-
+      # The macOS build must be signed with Developer ID and notarized; without the secrets the release stops
+      # (an unsigned app is blocked by Gatekeeper and cannot update itself). Same secret names as JumpDesk.
+      - name: Check signing secrets
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          for name in CSC_LINK CSC_KEY_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret $name is missing; the macOS build cannot be signed."
+              exit 1
+            fi
+          done
       - name: Build
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="$(brew --prefix qt)" \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$(brew --prefix freerdp)" \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \
-            -DBURROW_VERSION=${{ steps.version.outputs.version }}
+            -DBURROW_VERSION=${{ needs.prepare.outputs.version }}
           cmake --build build
-
-      - name: Bundle dependencies
+          (cd build && ctest --output-on-failure)
+      - name: Bundle Qt, QML and libraries
         run: |
-          "$(brew --prefix qt)/bin/macdeployqt" build/app/Burrow.app -always-overwrite
-
+          "$(brew --prefix qt)/bin/macdeployqt" build/app/Burrow.app -qmldir=app/qml -always-overwrite
       - name: Import signing certificate
-        if: env.HAS_SIGNING == 'true'
         env:
-          APPLE_CERT_P12: ${{ secrets.APPLE_CERT_P12 }}
-          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
         run: |
           kc="$RUNNER_TEMP/signing.keychain-db"
           kcpass=$(uuidgen)
-          echo "$APPLE_CERT_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          printf '%s' "$CSC_LINK" | base64 --decode > "$RUNNER_TEMP/cert.p12"
           security create-keychain -p "$kcpass" "$kc"
           security set-keychain-settings -lut 21600 "$kc"
           security unlock-keychain -p "$kcpass" "$kc"
-          security import "$RUNNER_TEMP/cert.p12" -P "$APPLE_CERT_PASSWORD" -A -t cert -f pkcs12 -k "$kc"
+          security import "$RUNNER_TEMP/cert.p12" -P "$CSC_KEY_PASSWORD" -A -t cert -f pkcs12 -k "$kc"
           security set-key-partition-list -S apple-tool:,apple: -k "$kcpass" "$kc"
           security list-keychains -d user -s "$kc" $(security list-keychains -d user | tr -d '"')
           rm "$RUNNER_TEMP/cert.p12"
-
       - name: Sign
-        if: env.HAS_SIGNING == 'true'
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           codesign --force --deep --options runtime --timestamp \
+            --entitlements app/resources/entitlements.mac.plist \
             --sign "Developer ID Application" build/app/Burrow.app
-          codesign --verify --deep --strict build/app/Burrow.app
-
+          codesign --verify --deep --strict --verbose=2 build/app/Burrow.app
       - name: Package
         run: |
-          v=${{ steps.version.outputs.version }}
+          v=${{ needs.prepare.outputs.version }}
           mkdir -p dist
-          ditto -c -k --keepParent build/app/Burrow.app "dist/Burrow-$v-mac.zip"
-          hdiutil create -volname Burrow -srcfolder build/app/Burrow.app -ov -format UDZO "dist/Burrow-$v-mac.dmg"
-
+          hdiutil create -volname Burrow -srcfolder build/app/Burrow.app -ov -format UDZO \
+            "dist/Burrow-$v-${{ matrix.platform }}.dmg"
       - name: Notarize
-        if: env.HAS_SIGNING == 'true' && env.HAS_NOTARY == 'true'
         env:
-          APPLE_NOTARY_KEY: ${{ secrets.APPLE_NOTARY_KEY }}
-          APPLE_NOTARY_KEY_ID: ${{ secrets.APPLE_NOTARY_KEY_ID }}
-          APPLE_NOTARY_ISSUER: ${{ secrets.APPLE_NOTARY_ISSUER }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          v=${{ steps.version.outputs.version }}
-          echo "$APPLE_NOTARY_KEY" > "$RUNNER_TEMP/notary.p8"
-          xcrun notarytool submit "dist/Burrow-$v-mac.dmg" \
-            --key "$RUNNER_TEMP/notary.p8" --key-id "$APPLE_NOTARY_KEY_ID" \
-            --issuer "$APPLE_NOTARY_ISSUER" --wait
-          xcrun stapler staple "dist/Burrow-$v-mac.dmg"
-          rm "$RUNNER_TEMP/notary.p8"
-
-      - name: Checksums
-        run: cd dist && shasum -a 256 * > SHA256SUMS.txt
-
-      - name: Create GitHub Release
+          v=${{ needs.prepare.outputs.version }}
+          xcrun notarytool submit "dist/Burrow-$v-${{ matrix.platform }}.dmg" \
+            --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID" --wait
+          xcrun stapler staple "dist/Burrow-$v-${{ matrix.platform }}.dmg"
+          # The update package is the stapled app itself, zipped.
+          xcrun stapler staple build/app/Burrow.app
+          ditto -c -k --keepParent build/app/Burrow.app "dist/Burrow-$v-${{ matrix.platform }}.zip"
+      - name: Update manifest fragment
+        run: |
+          v=${{ needs.prepare.outputs.version }}
+          f="Burrow-$v-${{ matrix.platform }}.zip"
+          python3 - "$f" "${{ matrix.platform }}" <<'PY'
+          import hashlib, json, os, sys
+          name, platform = sys.argv[1], sys.argv[2]
+          path = os.path.join("dist", name)
+          digest = hashlib.sha256(open(path, "rb").read()).hexdigest()
+          json.dump({platform: {"name": name, "sha256": digest, "size": os.path.getsize(path)}},
+                    open(f"fragment-{platform}.json", "w"))
+          PY
+      - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
+        run: gh release upload "v${{ needs.prepare.outputs.version }}" dist/* --clobber
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fragment-${{ matrix.platform }}
+          path: fragment-${{ matrix.platform }}.json
+
+  publish:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+      - name: Update manifest
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
-          v=${{ steps.version.outputs.version }}
-          git tag "v$v"
-          git push origin "v$v"
-          gh release create "v$v" dist/* --title "Burrow $v" --generate-notes
+          python3 - <<'PY'
+          import glob, json, os
+          assets = {}
+          for f in glob.glob("fragment-*/*.json"):
+              assets.update(json.load(open(f)))
+          manifest = {"version": os.environ["VERSION"], "notes": open("notes/notes.md").read(), "assets": assets}
+          json.dump(manifest, open("latest.json", "w"), indent=1)
+          PY
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          gh release upload "v$VERSION" latest.json --repo "$GITHUB_REPOSITORY" --clobber
+          gh release edit "v$VERSION" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+
+  discard:
+    needs: [prepare, build, publish]
+    if: failure() && needs.prepare.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: gh release delete "v$VERSION" --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag

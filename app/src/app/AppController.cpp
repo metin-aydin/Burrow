@@ -33,6 +33,9 @@ AppController::AppController(QObject *parent)
     , m_tunnels(&m_store)
 {
     m_gallery.setSourceModel(&m_devices);
+    connect(&m_updater, &Updater::updateAvailable, this, [this](const QString &v) {
+        emit toast(tr("Burrow %1 is available. Install it from Settings.").arg(v));
+    });
 }
 
 QString AppController::state() const
