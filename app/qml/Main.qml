@@ -55,6 +55,7 @@ ApplicationWindow {
     }
 
     function startSession(id, user, pass) {
+        if (App.state !== "unlocked") { win.show(); return }
         const r = App.connectDevice(id, user || "", pass || "")
         if (r === "credentials") {
             const d = App.device(id)

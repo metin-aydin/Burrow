@@ -4,6 +4,9 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Tray menüsü (`app/src/app/Tray.*`, QSystemTrayIcon; uygulama artık QApplication): kayıtlı bilgisayarlar (tıklayınca
+  bağlanır, gerekirse önce kilit açtırır), Burrow'u Aç, Kilitle, Çık. macOS'ta tek renkli şablon simge. Pencereyi kapatmak
+  uygulamayı tray'de bırakır. macOS'ta durum öğesinin oluştuğu erişilebilirlik API'siyle doğrulandı.
 - OTP içe aktarma: boş alanda "İçe Aktar" panodaki otpauth bağlantısını kullanıyor, yoksa ne yapıştırılacağını
   anlatan ipucu gösteriyor; QR butonu: görsel dosyası, panodaki görsel, kamera (QtMultimedia, `NSCameraUsageDescription`,
   özel Info.plist). Çözücü: gozxing (Apache-2.0) `netcore/internal/qr` + `NetcoreDecodeQR`; görüntüler yalnız bellekte.

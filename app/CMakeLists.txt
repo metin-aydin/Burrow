@@ -1,4 +1,4 @@
-find_package(Qt6 6.5 REQUIRED COMPONENTS Gui Network Quick QuickControls2 Svg Multimedia LinguistTools)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Gui Widgets Network Quick QuickControls2 Svg Multimedia LinguistTools)
 find_package(FreeRDP 3 REQUIRED)
 find_package(FreeRDP-Client 3 REQUIRED)
 find_package(WinPR 3 REQUIRED)
@@ -13,6 +13,8 @@ qt_add_executable(burrow
     src/app/ListModels.h
     src/app/PreviewProvider.cpp
     src/app/PreviewProvider.h
+    src/app/Tray.cpp
+    src/app/Tray.h
     src/app/TunnelManager.cpp
     src/app/TunnelManager.h
     src/app/Updater.cpp
@@ -66,7 +68,7 @@ endif()
 
 target_include_directories(burrow PRIVATE src)
 target_compile_definitions(burrow PRIVATE BURROW_VERSION="${PROJECT_VERSION}")
-target_link_libraries(burrow PRIVATE Qt6::Gui Qt6::Network Qt6::Quick Qt6::QuickControls2 Qt6::Svg Qt6::Multimedia netcore::netcore)
+target_link_libraries(burrow PRIVATE Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Quick Qt6::QuickControls2 Qt6::Svg Qt6::Multimedia netcore::netcore)
 
 message(STATUS "FreeRDP found: ${FreeRDP_VERSION}")
 target_link_libraries(burrow PRIVATE freerdp freerdp-client winpr)

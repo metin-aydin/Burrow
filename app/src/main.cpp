@@ -1,17 +1,19 @@
-#include <QGuiApplication>
+#include <QApplication>
 #include <QIcon>
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
 #include <QQuickWindow>
 #include <QTimer>
+#include <QWindow>
 
 #include "app/AppController.h"
 #include "app/PreviewProvider.h"
+#include "app/Tray.h"
 #include "rdp/RdpView.h"
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);   // QApplication: the tray menu uses widgets on every platform
     QGuiApplication::setApplicationName(QStringLiteral("Burrow"));
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Burrow"));
     QGuiApplication::setOrganizationDomain(QStringLiteral("metin-aydin.github.io"));
@@ -38,6 +40,17 @@ int main(int argc, char *argv[])
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app,
                      [] { QCoreApplication::exit(1); }, Qt::QueuedConnection);
     engine.loadFromModule("Burrow", "Main");
+
+    // Closing the window keeps Burrow in the menu bar / tray; Quit is in the tray menu (and Cmd+Q).
+    QGuiApplication::setQuitOnLastWindowClosed(false);
+    Tray tray(&controller);
+    if (auto *window = qobject_cast<QWindow *>(engine.rootObjects().value(0))) {
+        tray.setWindow(window);
+        QObject::connect(&tray, &Tray::connectRequested, window, [window](const QString &id) {
+            QMetaObject::invokeMethod(window, "startSession", Q_ARG(QVariant, id), Q_ARG(QVariant, QString()),
+                                      Q_ARG(QVariant, QString()));
+        });
+    }
 
     // Development helpers (only with --seed-demo): BURROW_DEMO_PASSWORD unlocks or creates
     // the vault automatically, BURROW_GRAB=<file.png> saves a window capture after 2.5 s.

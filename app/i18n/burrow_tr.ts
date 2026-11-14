@@ -689,17 +689,17 @@
         <translation>VPN Şifresi</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="108" />
+        <location filename="../qml/Main.qml" line="109" />
         <source>One-Time Code For %1</source>
         <translation>%1 İçin Tek Kullanımlık Kod</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="108" />
+        <location filename="../qml/Main.qml" line="109" />
         <source>Enter the code from your authenticator app.</source>
         <translation>Authenticator uygulamasındaki kodu gir.</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="109" />
+        <location filename="../qml/Main.qml" line="110" />
         <source>Code</source>
         <translation>Kod</translation>
     </message>
@@ -1038,6 +1038,39 @@
         <location filename="../qml/TailscaleLoginDialog.qml" line="27" />
         <source>Open Sign-In Page</source>
         <translation>Giriş Sayfasını Aç</translation>
+    </message>
+</context>
+<context>
+    <name>Tray</name>
+    <message>
+        <location filename="../src/app/Tray.cpp" line="52" />
+        <source>Computers</source>
+        <translation>Bilgisayarlar</translation>
+    </message>
+    <message>
+        <location filename="../src/app/Tray.cpp" line="56" />
+        <source>No Computers Yet</source>
+        <translation>Henüz Bilgisayar Yok</translation>
+    </message>
+    <message>
+        <location filename="../src/app/Tray.cpp" line="68" />
+        <source>Open Burrow</source>
+        <translation>Burrow'u Aç</translation>
+    </message>
+    <message>
+        <location filename="../src/app/Tray.cpp" line="69" />
+        <source>Lock</source>
+        <translation>Kilitle</translation>
+    </message>
+    <message>
+        <location filename="../src/app/Tray.cpp" line="71" />
+        <source>Unlock Burrow…</source>
+        <translation>Burrow'un Kilidini Aç…</translation>
+    </message>
+    <message>
+        <location filename="../src/app/Tray.cpp" line="74" />
+        <source>Quit Burrow</source>
+        <translation>Burrow'dan Çık</translation>
     </message>
 </context>
 <context>
