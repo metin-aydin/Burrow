@@ -16,6 +16,8 @@ cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug \
 cmake --build build
 ```
 
+- cgo'lu Go paketlerini (`internal/gp`) test ederken de Xcode SDK'sı gerekir:
+  `SDKROOT=$(xcrun --sdk macosx --show-sdk-path) CC=$(xcrun -f clang) go test ./...`
 - `go` PATH'te ServBay alias'ı olarak görünüyor ama çalışmıyor; `/opt/homebrew/bin/go` kullan.
 - Homebrew FreeRDP dylib'leri macOS 27.2 için derlenmiş → lokal linkte uyarı verir, zararsız.
   Dağıtım CI'da yapılır.

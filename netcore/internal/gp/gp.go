@@ -23,6 +23,7 @@ import (
 	"net"
 	"net/netip"
 	"os"
+	"regexp"
 	"runtime"
 	"runtime/cgo"
 	"strings"
@@ -68,9 +69,30 @@ type Tunnel struct {
 
 var initSSL sync.Once
 
-// BURROW_DEBUG_GP=1 prints openconnect's progress and the form steps to stderr. Values are never
-// printed (no passwords, codes or cookies), only field names and step numbers.
+// BURROW_DEBUG_GP=1 prints a scrubbed view of openconnect's progress and the form steps to stderr:
+// lines that mention credentials are dropped, URLs lose their query strings and user info, and form
+// values are never printed (only field names and step numbers).
 var debug = os.Getenv("BURROW_DEBUG_GP") != ""
+
+var (
+	urlRe     = regexp.MustCompile(`(?i)\b([a-z][a-z0-9+.-]*://)([^/\s@]+@)?([^\s?#]+)(\?[^\s#]*)?(#\S*)?`)
+	secretRe  = regexp.MustCompile(`(?i)(cookie|token|secret|passw|assertion|samlresponse|otp|auth=|prelogin-cookie|portal-userauthcookie|session)`)
+)
+
+// redactSecrets removes anything that might carry a credential from an openconnect message.
+func redactSecrets(s string) string {
+	if secretRe.MatchString(s) {
+		return "[line omitted: may contain credentials]"
+	}
+	return urlRe.ReplaceAllStringFunc(s, func(u string) string {
+		m := urlRe.FindStringSubmatch(u)
+		out := m[1] + m[3]
+		if m[4] != "" {
+			out += "?[redacted]"
+		}
+		return out
+	})
+}
 
 func debugf(format string, args ...any) {
 	if debug {
@@ -273,7 +295,8 @@ func (t *Tunnel) authForm(form *C.struct_oc_auth_form) C.int {
 		for opt := form.opts; opt != nil; opt = C.burrow_oc_opt_next(opt) {
 			fields = append(fields, fmt.Sprintf("%s(type %d)", C.GoString(opt.name), int(opt._type)))
 		}
-		debugf("auth form: message=%q error=%q fields=%v", C.GoString(form.message), C.GoString(form.error), fields)
+		debugf("auth form: message=%q error=%q fields=%v", redactSecrets(C.GoString(form.message)),
+			redactSecrets(C.GoString(form.error)), fields)
 	}
 	if hasPassword {
 		t.mu.Lock()
@@ -428,14 +451,14 @@ func goGPProgress(h C.uintptr_t, level C.int, msg *C.char) {
 	if t == nil {
 		return
 	}
-	s := strings.TrimSpace(C.GoString(msg))
-	if s == "" || strings.Contains(strings.ToLower(s), "cookie") {
-		return // never keep or print session cookies
+	s := redactSecrets(strings.TrimSpace(C.GoString(msg)))
+	if s == "" {
+		return
 	}
 	if level <= C.PRG_INFO {
 		debugf("%s", s)
 	}
-	if level == C.PRG_ERR {
+	if level == C.PRG_ERR && !strings.HasPrefix(s, "[line omitted") {
 		t.setError(s)
 	}
 }

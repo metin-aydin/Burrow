@@ -4,6 +4,11 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Arayüz düzeltmeleri (kullanıcı geri bildirimi): Türkçe kalan örnek metinler, yazarken genişleyen alanlar (BField/
+  BCombo sabit implicitWidth), küçük pencerede alta taşan diyalog (yükseklik sınırı + kaydırma). Kullanıcı Cloudflare
+  Tunnel'ın üçüncü tünel türü olarak eklenmesini onayladı.
+- Güvenlik incelemesi (GP tanılama logu): openconnect mesajları artık `redactSecrets` ile temizleniyor (kimlik bilgisi
+  geçen satır atılır, URL sorgu/kullanıcı bilgisi silinir); testli.
 - **Uygulama içi tüneller:** netcore'a `tunnel` (ortak arabirim), `netstack` (gVisor, socketpair üzerinde; iki yığınlı
   64 KB TCP testi geçti — macOS datagram soket arabelleği büyütülmeli, yoksa patlamada paket kaybı/kilitlenme),
   `ts` (tsnet, durum kasada şifreli, log yükleme kapalı), `gp` (libopenconnect cgo, çift OTP, tekrar yok, public
