@@ -2,6 +2,7 @@ package cf
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -95,4 +96,42 @@ func mustHost(t *testing.T, raw string) string {
 		t.Fatal(err)
 	}
 	return u.Host
+}
+
+func TestValidAuthDomain(t *testing.T) {
+	for d, want := range map[string]bool{
+		"team.cloudflareaccess.com":     true,
+		"team.fed.cloudflareaccess.com": true,
+		"evil.example.com":              false,
+		"cloudflareaccess.com.evil.io":  false,
+		"a@team.cloudflareaccess.com":   false,
+	} {
+		if validAuthDomain(d) != want {
+			t.Errorf("validAuthDomain(%q) != %v", d, want)
+		}
+	}
+}
+
+// A redirect away from the app and the Access domain must not receive the org token.
+func TestExchangeRefusesForeignRedirect(t *testing.T) {
+	var leaked bool
+	evil := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, err := r.Cookie("CF_Authorization"); err == nil {
+			leaked = true
+		}
+	}))
+	defer evil.Close()
+	app := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, evil.URL+"/cdn-cgi/access/login/x", http.StatusFound)
+	}))
+	defer app.Close()
+	exchangeTransport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}} // test servers only
+	defer func() { exchangeTransport = nil }()
+	u, _ := url.Parse(app.URL)
+	if _, err := exchangeOrgToken(u, "team.cloudflareaccess.com", "secret-org-token"); err == nil {
+		t.Fatal("exchange followed a foreign redirect")
+	}
+	if leaked {
+		t.Fatal("org token was sent to a foreign host")
+	}
 }

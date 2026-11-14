@@ -4,6 +4,8 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Güvenlik incelemesi (Cloudflare, 1 bulgu): org anahtarı değişiminde yönlendirmeler yalnız https ve yalnız uygulama
+  host'u ile Access alanına izinli; org anahtarı yalnız `*.cloudflareaccess.com` alanına gidiyor. Testli.
 - Güvenlik incelemesi (log temizleyici, 3 bulgu): URL'ler `net/url` ile ayrıştırılıp yalnız `scheme://host` bırakılıyor
   (yol/sorgu/kullanıcı bilgisi yok), uzun anahtar benzeri diziler maskeleniyor, gizlenen hata satırı sabit mesajla
   kaydediliyor (sunucu metninden durum çıkarımı yok).

@@ -118,11 +118,14 @@ func (t *Tunnel) fetchToken(host string) error {
 		return fmt.Errorf("no Cloudflare Access application found at %s (%v)", host, err)
 	}
 	// An org token from an earlier sign-in gets a new app token without the browser.
+	if !validAuthDomain(info.AuthDomain) {
+		return fmt.Errorf("unexpected Cloudflare Access domain %q", info.AuthDomain)
+	}
 	t.mu.Lock()
 	org := t.tokens.OrgTokens[info.AuthDomain]
 	t.mu.Unlock()
 	if org != "" {
-		if app, err := exchangeOrgToken(appURL, org); err == nil {
+		if app, err := exchangeOrgToken(appURL, info.AuthDomain, org); err == nil {
 			t.mu.Lock()
 			t.tokens.AppTokens[host] = app
 			t.persist()
@@ -208,16 +211,35 @@ func expired(jwt string) bool {
 	return time.Now().Add(time.Minute).After(time.Unix(claims.Exp, 0))
 }
 
+// validAuthDomain accepts only Cloudflare Access team domains.
+func validAuthDomain(d string) bool {
+	d = strings.ToLower(strings.TrimSuffix(d, "."))
+	return strings.HasSuffix(d, ".cloudflareaccess.com") && !strings.ContainsAny(d, "/@:")
+}
+
+func sameHost(u *url.URL, host string) bool {
+	return strings.EqualFold(strings.TrimSuffix(u.Hostname(), "."), strings.TrimSuffix(host, "."))
+}
+
 // exchangeOrgToken follows Access' SSO redirects with the org token and returns a fresh app token.
+// The org token is only ever sent over https to the Access team domain, and redirects to any host
+// other than the app and that domain are refused.
 // Adapted from cloudflared's token package (Apache-2.0, github.com/cloudflare/cloudflared).
-func exchangeOrgToken(appURL *url.URL, orgToken string) (string, error) {
+// exchangeTransport is replaced in tests (local TLS servers); nil = default transport.
+var exchangeTransport http.RoundTripper
+
+func exchangeOrgToken(appURL *url.URL, authDomain, orgToken string) (string, error) {
 	client := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout:   10 * time.Second,
+		Transport: exchangeTransport,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			if strings.Contains(req.URL.Path, token.AccessLoginWorkerPath) {
+			if req.URL.Scheme != "https" || (!sameHost(req.URL, appURL.Hostname()) && !sameHost(req.URL, authDomain)) {
+				return fmt.Errorf("refusing redirect to %s", req.URL.Host)
+			}
+			if sameHost(req.URL, authDomain) && strings.Contains(req.URL.Path, token.AccessLoginWorkerPath) {
 				req.AddCookie(&http.Cookie{Name: "CF_Authorization", Value: orgToken})
 			}
-			if strings.Contains(req.URL.Path, token.AccessAuthorizedWorkerPath) {
+			if sameHost(req.URL, appURL.Hostname()) && strings.Contains(req.URL.Path, token.AccessAuthorizedWorkerPath) {
 				for _, prev := range via {
 					if prev != nil && prev.Response != nil {
 						for _, c := range prev.Response.Cookies() {
