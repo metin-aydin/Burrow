@@ -35,6 +35,9 @@ BDialog {
     property string issuer
     property string account
 
+    // Development: show every section for screenshots.
+    function demoExpand() { otpOn.checked = true; otpSource.value = "totp" }
+
     function currentTotp() {
         return { secret: secret.text, algorithm: alg.value, digits: digits.value,
                  period: parseInt(period.text) || 30, issuer: issuer, account: account }
@@ -81,7 +84,7 @@ BDialog {
 
     RowLayout {
         spacing: 12
-        BField { id: nameField; Layout.fillWidth: true; label: qsTr("Profile Name"); placeholder: qsTr("Work VPN") }
+        BField { id: nameField; Layout.fillWidth: true; Layout.preferredWidth: 300; label: qsTr("Profile Name"); placeholder: qsTr("Work VPN") }
         ColumnLayout {
             spacing: 6
             Text { text: qsTr("Type"); color: Theme.textSecondary; font.pixelSize: 12; font.weight: Font.Medium }
@@ -99,8 +102,8 @@ BDialog {
         spacing: 14
         RowLayout {
             spacing: 12
-            BField { id: gpHost; Layout.fillWidth: true; label: qsTr("Server"); placeholder: "vpn.sirket.com" }
-            BField { id: gpGroup; Layout.preferredWidth: 170; label: qsTr("Gateway / Group"); placeholder: qsTr("Optional") }
+            BField { id: gpHost; Layout.fillWidth: true; Layout.preferredWidth: 300; label: qsTr("Server"); placeholder: "vpn.example.com" }
+            BField { id: gpGroup; Layout.fillWidth: true; Layout.preferredWidth: 150; label: qsTr("Gateway / Group"); placeholder: qsTr("Optional") }
         }
         BField { id: gpUser; Layout.fillWidth: true; label: qsTr("Username") }
         BSwitch { id: gpSave; Layout.fillWidth: true; title: qsTr("Save Password In Vault"); description: qsTr("If not saved, it's asked on every connection.") }
@@ -125,7 +128,7 @@ BDialog {
                 spacing: 14
                 RowLayout {
                     spacing: 8
-                    BField { id: uri; Layout.fillWidth: true; label: qsTr("Authenticator Link"); placeholder: "otpauth://… veya otpauth-migration://…"; onAccepted: root.importUri() }
+                    BField { id: uri; Layout.fillWidth: true; label: qsTr("Authenticator Link"); placeholder: qsTr("otpauth://… or otpauth-migration://…"); onAccepted: root.importUri() }
                     BButton { Layout.alignment: Qt.AlignBottom; text: qsTr("Import"); onClicked: root.importUri() }
                 }
                 // Several accounts in a migration QR: pick one.
@@ -140,7 +143,7 @@ BDialog {
                 }
                 RowLayout {
                     spacing: 12
-                    BField { id: secret; Layout.fillWidth: true; label: qsTr("Key"); password: true; placeholder: qsTr("Base32") }
+                    BField { id: secret; Layout.fillWidth: true; Layout.preferredWidth: 260; label: qsTr("Key"); password: true; placeholder: qsTr("Base32") }
                     BCombo { id: alg; Layout.preferredWidth: 110; label: qsTr("Algorithm")
                         options: [{ text: "SHA1", value: "SHA1" }, { text: "SHA256", value: "SHA256" }, { text: "SHA512", value: "SHA512" }] }
                     BCombo { id: digits; Layout.preferredWidth: 80; label: qsTr("Digits")

@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net"
 	"net/netip"
+	"os"
 	"runtime"
 	"runtime/cgo"
 	"strings"
@@ -66,6 +67,16 @@ type Tunnel struct {
 }
 
 var initSSL sync.Once
+
+// BURROW_DEBUG_GP=1 prints openconnect's progress and the form steps to stderr. Values are never
+// printed (no passwords, codes or cookies), only field names and step numbers.
+var debug = os.Getenv("BURROW_DEBUG_GP") != ""
+
+func debugf(format string, args ...any) {
+	if debug {
+		fmt.Fprintf(os.Stderr, "[gp] "+format+"\n", args...)
+	}
+}
 
 // Start begins connecting in the background; watch Status.
 func Start(cfg Config) (*Tunnel, error) {
@@ -171,6 +182,7 @@ func (t *Tunnel) run() {
 	t.mu.Unlock()
 	defer st.Close()
 
+	debugf("tunnel up: address %s, mtu %d, %d DNS server(s)", local, int(mtu), len(dns))
 	t.status.Set(tunnel.Status{State: tunnel.Connected, Address: local.String()})
 	rc := C.openconnect_mainloop(t.vpn, 300, 10)
 	t.mu.Lock()
@@ -256,12 +268,21 @@ func (t *Tunnel) authForm(form *C.struct_oc_auth_form) C.int {
 			hasPassword = true
 		}
 	}
+	if debug {
+		var fields []string
+		for opt := form.opts; opt != nil; opt = C.burrow_oc_opt_next(opt) {
+			fields = append(fields, fmt.Sprintf("%s(type %d)", C.GoString(opt.name), int(opt._type)))
+		}
+		debugf("auth form: message=%q error=%q fields=%v", C.GoString(form.message), C.GoString(form.error), fields)
+	}
 	if hasPassword {
 		t.mu.Lock()
 		t.passwordForms++
 		n := t.passwordForms
 		t.mu.Unlock()
+		debugf("password form #%d", n)
 		if n > 2 {
+			debugf("third password prompt: login rejected, cancelling (no retry)")
 			// Portal + gateway are expected; a third prompt means the login was rejected.
 			return C.OC_FORM_RESULT_CANCELLED
 		}
@@ -404,14 +425,19 @@ func goGPAuthForm(h C.uintptr_t, form *C.struct_oc_auth_form) C.int {
 //export goGPProgress
 func goGPProgress(h C.uintptr_t, level C.int, msg *C.char) {
 	t := fromHandle(h)
-	if t == nil || level != C.PRG_ERR {
+	if t == nil {
 		return
 	}
 	s := strings.TrimSpace(C.GoString(msg))
 	if s == "" || strings.Contains(strings.ToLower(s), "cookie") {
-		return // never keep session cookies
+		return // never keep or print session cookies
 	}
-	t.setError(s)
+	if level <= C.PRG_INFO {
+		debugf("%s", s)
+	}
+	if level == C.PRG_ERR {
+		t.setError(s)
+	}
 }
 
 //export goGPCertRejected

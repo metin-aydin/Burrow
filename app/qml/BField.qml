@@ -24,6 +24,8 @@ ColumnLayout {
     TextField {
         id: field
         Layout.fillWidth: true
+        // Fixed implicit width: the layout decides the width, so typing never resizes the field.
+        implicitWidth: 120
         implicitHeight: Theme.controlHeight
         echoMode: root.password ? TextInput.Password : TextInput.Normal
         color: Theme.text

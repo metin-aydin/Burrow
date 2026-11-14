@@ -26,6 +26,7 @@ ColumnLayout {
     ComboBox {
         id: combo
         Layout.fillWidth: true
+        implicitWidth: 120
         implicitHeight: Theme.controlHeight
         model: root.options
         textRole: "text"

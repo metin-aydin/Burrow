@@ -14,7 +14,8 @@ Popup {
     parent: Overlay.overlay
     anchors.centerIn: parent
     width: Math.min(dialogWidth, parent ? parent.width - 48 : dialogWidth)
-    height: Math.min(implicitHeight, parent ? parent.height - 48 : implicitHeight)
+    // Never taller than the window (with a margin); the body scrolls instead.
+    height: Math.min(implicitHeight, parent ? parent.height - 80 : implicitHeight)
     modal: true
     focus: true
     padding: 0
@@ -60,6 +61,7 @@ Popup {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.preferredHeight: content.implicitHeight + 16
+            Layout.minimumHeight: 60
             contentWidth: availableWidth
             clip: true
             ColumnLayout {

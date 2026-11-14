@@ -61,7 +61,7 @@ BDialog {
         spacing: 14
         RowLayout {
             spacing: 12
-            BField { id: nameField; Layout.fillWidth: true; label: qsTr("Name"); placeholder: qsTr("Work PC"); text: root.d.name || "" }
+            BField { id: nameField; Layout.fillWidth: true; Layout.preferredWidth: 300; label: qsTr("Name"); placeholder: qsTr("Work PC"); text: root.d.name || "" }
             ColumnLayout {
                 spacing: 6
                 Text { text: qsTr("System"); color: Theme.textSecondary; font.pixelSize: 12; font.weight: Font.Medium }
@@ -74,14 +74,14 @@ BDialog {
         }
         RowLayout {
             spacing: 12
-            BField { id: hostField; Layout.fillWidth: true; label: qsTr("Address"); placeholder: "10.0.0.5"; text: root.d.host || "" }
+            BField { id: hostField; Layout.fillWidth: true; Layout.preferredWidth: 300; label: qsTr("Address"); placeholder: "10.0.0.5"; text: root.d.host || "" }
             BField { id: portField; Layout.preferredWidth: 96; label: qsTr("Port"); text: String(root.d.port || 3389); field.validator: IntValidator { bottom: 1; top: 65535 } }
         }
         BCombo { id: tunnelCombo; Layout.fillWidth: true; label: qsTr("Connection"); value: root.d.tunnelId || "" }
         RowLayout {
             spacing: 12
-            BField { id: userField; Layout.fillWidth: true; label: qsTr("Username"); placeholder: qsTr("Asked when connecting if left empty"); text: root.d.username || "" }
-            BField { id: domainField; Layout.preferredWidth: 160; label: qsTr("Domain"); placeholder: qsTr("Optional"); text: root.d.domain || "" }
+            BField { id: userField; Layout.fillWidth: true; Layout.preferredWidth: 300; label: qsTr("Username"); placeholder: qsTr("Asked when connecting if left empty"); text: root.d.username || "" }
+            BField { id: domainField; Layout.fillWidth: true; Layout.preferredWidth: 150; label: qsTr("Domain"); placeholder: qsTr("Optional"); text: root.d.domain || "" }
         }
         BSwitch {
             id: savePw

@@ -632,17 +632,17 @@
         <translation>VPN Şifresi</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="92" />
+        <location filename="../qml/Main.qml" line="94" />
         <source>One-Time Code For %1</source>
         <translation>%1 İçin Tek Kullanımlık Kod</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="92" />
+        <location filename="../qml/Main.qml" line="94" />
         <source>Enter the code from your authenticator app.</source>
         <translation>Authenticator uygulamasındaki kodu gir.</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="93" />
+        <location filename="../qml/Main.qml" line="95" />
         <source>Code</source>
         <translation>Kod</translation>
     </message>
@@ -915,177 +915,182 @@
         <translation>Profil adı kartlarda ve filtrelerde görünür.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="51" />
+        <location filename="../qml/TunnelEditor.qml" line="54" />
         <source>This is not a valid otpauth link.</source>
         <translation>Bu metin geçerli bir otpauth bağlantısı değil.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="84" />
+        <location filename="../qml/TunnelEditor.qml" line="87" />
         <source>Profile Name</source>
         <translation>Profil Adı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="84" />
+        <location filename="../qml/TunnelEditor.qml" line="87" />
         <source>Work VPN</source>
         <translation>İş VPN</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="87" />
+        <location filename="../qml/TunnelEditor.qml" line="90" />
         <source>Type</source>
         <translation>Tür</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="102" />
+        <location filename="../qml/TunnelEditor.qml" line="105" />
         <source>Server</source>
         <translation>Sunucu</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="103" />
+        <location filename="../qml/TunnelEditor.qml" line="106" />
         <source>Gateway / Group</source>
         <translation>Gateway / Grup</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="103" />
+        <location filename="../qml/TunnelEditor.qml" line="106" />
         <source>Optional</source>
         <translation>Opsiyonel</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="105" />
+        <location filename="../qml/TunnelEditor.qml" line="108" />
         <source>Username</source>
         <translation>Kullanıcı Adı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="106" />
+        <location filename="../qml/TunnelEditor.qml" line="109" />
         <source>Save Password In Vault</source>
         <translation>Şifreyi Kasada Sakla</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="106" />
+        <location filename="../qml/TunnelEditor.qml" line="109" />
         <source>If not saved, it's asked on every connection.</source>
         <translation>Saklanmazsa her bağlantıda sorulur.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="107" />
+        <location filename="../qml/TunnelEditor.qml" line="110" />
         <source>Password</source>
         <translation>Şifre</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="109" />
+        <location filename="../qml/TunnelEditor.qml" line="112" />
         <source>One-Time Password (OTP)</source>
         <translation>Tek Kullanımlık Şifre (OTP)</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="110" />
+        <location filename="../qml/TunnelEditor.qml" line="113" />
         <source>Use OTP</source>
         <translation>OTP Kullan</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="110" />
+        <location filename="../qml/TunnelEditor.qml" line="113" />
         <source>An authenticator code is required in addition to the password.</source>
         <translation>Girişte şifreye ek olarak authenticator kodu istenir.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="117" />
+        <location filename="../qml/TunnelEditor.qml" line="120" />
         <source>OTP Type</source>
         <translation>OTP Tipi</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="118" />
+        <location filename="../qml/TunnelEditor.qml" line="121" />
         <source>Append to password</source>
         <translation>Şifrenin sonuna ekle</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="118" />
+        <location filename="../qml/TunnelEditor.qml" line="121" />
         <source>Separate prompt (challenge)</source>
         <translation>Ayrı soru (challenge)</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="119" />
+        <location filename="../qml/TunnelEditor.qml" line="122" />
         <source>OTP Source</source>
         <translation>OTP Kaynağı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="120" />
+        <location filename="../qml/TunnelEditor.qml" line="123" />
         <source>Automatic (authenticator key)</source>
         <translation>Otomatik (authenticator anahtarı)</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="120" />
+        <location filename="../qml/TunnelEditor.qml" line="123" />
         <source>Enter manually each time</source>
         <translation>Her bağlantıda elle gir</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="128" />
+        <location filename="../qml/TunnelEditor.qml" line="131" />
         <source>Authenticator Link</source>
         <translation>Authenticator Bağlantısı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="129" />
+        <location filename="../qml/TunnelEditor.qml" line="131" />
+        <source>otpauth://… or otpauth-migration://…</source>
+        <translation>otpauth://… veya otpauth-migration://…</translation>
+    </message>
+    <message>
+        <location filename="../qml/TunnelEditor.qml" line="132" />
         <source>Import</source>
         <translation>İçe Aktar</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="143" />
+        <location filename="../qml/TunnelEditor.qml" line="146" />
         <source>Key</source>
         <translation>Anahtar</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="143" />
+        <location filename="../qml/TunnelEditor.qml" line="146" />
         <source>Base32</source>
         <translation>Base32</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="144" />
+        <location filename="../qml/TunnelEditor.qml" line="147" />
         <source>Algorithm</source>
         <translation>Algoritma</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="146" />
+        <location filename="../qml/TunnelEditor.qml" line="149" />
         <source>Digits</source>
         <translation>Hane</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="148" />
+        <location filename="../qml/TunnelEditor.qml" line="151" />
         <source>Period (Sec)</source>
         <translation>Süre (Sn)</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="161" />
+        <location filename="../qml/TunnelEditor.qml" line="164" />
         <source>Current Code</source>
         <translation>Şu Anki Kod</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="172" />
+        <location filename="../qml/TunnelEditor.qml" line="175" />
         <source>Should match the code on your phone</source>
         <translation>Telefondaki kodla aynı olmalı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="186" />
+        <location filename="../qml/TunnelEditor.qml" line="189" />
         <source>Control Server</source>
         <translation>Control Server</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="186" />
+        <location filename="../qml/TunnelEditor.qml" line="189" />
         <source>Tailscale if empty (enter a URL for Headscale)</source>
         <translation>Boş bırakılırsa Tailscale (Headscale için URL gir)</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="187" />
+        <location filename="../qml/TunnelEditor.qml" line="190" />
         <source>Node Name</source>
         <translation>Düğüm Adı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="187" />
+        <location filename="../qml/TunnelEditor.qml" line="190" />
         <source>The Tailscale sign-in page opens on first connection.</source>
         <translation>İlk bağlantıda Tailscale giriş sayfası açılır.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="201" />
+        <location filename="../qml/TunnelEditor.qml" line="204" />
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="202" />
+        <location filename="../qml/TunnelEditor.qml" line="205" />
         <source>Save</source>
         <translation>Kaydet</translation>
     </message>

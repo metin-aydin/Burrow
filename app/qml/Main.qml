@@ -79,6 +79,8 @@ ApplicationWindow {
             else if (App.demoOpen === "tunnels") tunnels.open()
             else if (App.demoOpen === "settings") settings.open()
             else if (App.demoOpen === "tunnel") tunnelEditor.openFor(App.tunnels.count ? "" : "")
+            else if (App.demoOpen === "tunnel-otp") { tunnelEditor.openFor(""); tunnelEditor.demoExpand() }
+            else if (App.demoOpen === "tunnel-otp-small") { win.height = 560; tunnelEditor.openFor(""); tunnelEditor.demoExpand() }
         }
     }
 
