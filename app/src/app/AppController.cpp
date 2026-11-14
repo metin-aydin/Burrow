@@ -5,7 +5,10 @@
 #include <QFileInfo>
 #include <QJsonObject>
 #include <QLinearGradient>
+#include <QCoreApplication>
+#include <QLocale>
 #include <QPainter>
+#include <QQmlEngine>
 #include <QSettings>
 
 #include "app/PreviewProvider.h"
@@ -55,28 +58,74 @@ QString AppController::versionInfo() const
         .arg(QStringLiteral(BURROW_VERSION), NetCore::version(), FreeRdpEngine::engineVersion());
 }
 
+// --- Language ----------------------------------------------------------------
+
+namespace {
+const char kLanguageKey[] = "ui/language";
+
+QString resolveLanguage(const QString &setting)
+{
+    if (setting == QLatin1String("en") || setting == QLatin1String("tr"))
+        return setting;
+    // First run / "system": follow the device language; English otherwise.
+    return QLocale::system().language() == QLocale::Turkish ? QStringLiteral("tr")
+                                                            : QStringLiteral("en");
+}
+} // namespace
+
+QString AppController::language() const
+{
+    return QSettings().value(kLanguageKey, QStringLiteral("system")).toString();
+}
+
+void AppController::setLanguage(const QString &lang)
+{
+    if (lang == language())
+        return;
+    QSettings().setValue(kLanguageKey, lang);
+    applyLanguage(m_engine);
+    emit languageChanged();
+}
+
+void AppController::applyLanguage(QQmlEngine *engine)
+{
+    if (engine)
+        m_engine = engine;
+    QCoreApplication::removeTranslator(&m_translator);
+    // BURROW_LANG overrides the setting (screenshots, testing).
+    const QString env = qEnvironmentVariable("BURROW_LANG");
+    const QString lang = resolveLanguage(env.isEmpty() ? language() : env);
+    // English is the source language; other languages load a compiled catalog.
+    if (lang != QLatin1String("en")
+        && m_translator.load(QStringLiteral(":/i18n/burrow_%1.qm").arg(lang)))
+        QCoreApplication::installTranslator(&m_translator);
+    QLocale::setDefault(QLocale(lang == QLatin1String("tr") ? QLocale::Turkish : QLocale::English));
+    if (m_engine)
+        m_engine->retranslate();
+}
+
 // --- Vault -------------------------------------------------------------------
 
 QString AppController::createVault(const QString &password, const QString &confirm)
 {
     if (password.size() < kMinPasswordLength)
-        return tr("Şifre en az %1 karakter olmalı.").arg(kMinPasswordLength);
+        return tr("The password must be at least %1 characters.").arg(kMinPasswordLength);
     if (password != confirm)
-        return tr("Şifreler aynı değil.");
+        return tr("The passwords don't match.");
     return finishUnlock(m_store.create(password));
 }
 
 QString AppController::unlock(const QString &password)
 {
     if (password.isEmpty())
-        return tr("Ana şifreni gir.");
+        return tr("Enter your master password.");
     return finishUnlock(m_store.open(password));
 }
 
 QString AppController::unlockWithTouchId()
 {
     QString err;
-    QByteArray key = Biometric::loadKey(tr("Burrow kasasının kilidini aç"), &err);
+    QByteArray key = Biometric::loadKey(tr("Unlock the Burrow vault"), &err);
     if (key.isEmpty())
         return err;
     const VaultStore::Result r = m_store.openWithKey(key);
@@ -86,7 +135,7 @@ QString AppController::unlockWithTouchId()
         Biometric::removeKey();
         QSettings().setValue(kTouchIdKey, false);
         emit touchIdEnabledChanged();
-        return tr("Touch ID anahtarı geçersiz; ana şifreyle aç.");
+        return tr("The Touch ID key is no longer valid; unlock with your master password.");
     }
     return finishUnlock(r);
 }
@@ -117,11 +166,11 @@ QString AppController::changePassword(const QString &current, const QString &nex
                                       const QString &again)
 {
     if (next.size() < kMinPasswordLength)
-        return tr("Yeni şifre en az %1 karakter olmalı.").arg(kMinPasswordLength);
+        return tr("The new password must be at least %1 characters.").arg(kMinPasswordLength);
     if (next != again)
-        return tr("Yeni şifreler aynı değil.");
+        return tr("The new passwords don't match.");
     if (!m_store.verifyPassword(current))
-        return tr("Mevcut şifre yanlış.");
+        return tr("The current password is wrong.");
     const VaultStore::Result r = m_store.changePassword(next);
     if (r != VaultStore::Result::Ok)
         return VaultStore::message(r);
@@ -135,11 +184,11 @@ QString AppController::changePassword(const QString &current, const QString &nex
             Biometric::removeKey();
             QSettings().setValue(kTouchIdKey, false);
             emit touchIdEnabledChanged();
-            emit toast(tr("Ana şifre değiştirildi. Touch ID kapatıldı: %1").arg(err));
+            emit toast(tr("Master password changed. Touch ID was turned off: %1").arg(err));
             return {};
         }
     }
-    emit toast(tr("Ana şifre değiştirildi."));
+    emit toast(tr("Master password changed."));
     return {};
 }
 
@@ -168,7 +217,7 @@ QString AppController::persist()
 {
     const VaultStore::Result r = m_store.save();
     return r == VaultStore::Result::Ok
-        ? QString() : tr("Değişiklik kaydedilemedi: %1").arg(VaultStore::message(r));
+        ? QString() : tr("Couldn't save the change: %1").arg(VaultStore::message(r));
 }
 
 void AppController::reloadModels()
@@ -205,7 +254,7 @@ QString AppController::saveDevice(const QVariantMap &map)
     d.name = d.name.trimmed();
     d.host = d.host.trimmed();
     if (d.name.isEmpty() || d.host.isEmpty())
-        return tr("Ad ve adres boş olamaz.");
+        return tr("Name and address can't be empty.");
     if (!d.savePassword) {
         d.password.clear();
         d.autoLogin = false;
@@ -238,7 +287,7 @@ void AppController::duplicateDevice(const QString &id)
             continue;
         Model::Device copy = devices.at(i);
         copy.id = Model::newId();
-        copy.name = tr("%1 (Kopya)").arg(copy.name);
+        copy.name = tr("%1 (Copy)").arg(copy.name);
         copy.layout = {};
         devices.insert(i + 1, copy);
         break;
@@ -268,7 +317,7 @@ void AppController::deleteDevice(const QString &id)
 void AppController::connectDevice(const QString &id)
 {
     Q_UNUSED(id)
-    emit toast(tr("RDP motoru bir sonraki adımda eklenecek."));
+    emit toast(tr("The RDP engine is coming in the next step."));
 }
 
 void AppController::setPreview(const QString &deviceId, const QImage &image)
@@ -304,14 +353,14 @@ QString AppController::saveTunnel(const QVariantMap &map)
     Model::Tunnel t = Model::tunnelFromJson(QJsonObject::fromVariantMap(map));
     t.name = t.name.trimmed();
     if (t.name.isEmpty())
-        return tr("Profil adı boş olamaz.");
+        return tr("The profile name can't be empty.");
     if (t.type == Model::Tunnel::Type::GlobalProtect) {
         t.gpHost = t.gpHost.trimmed();
         if (t.gpHost.isEmpty() || t.gpUsername.trimmed().isEmpty())
-            return tr("Sunucu ve kullanıcı adı boş olamaz.");
+            return tr("Server and username can't be empty.");
         if (t.otpEnabled && t.otpSource == QLatin1String("totp")
             && NetCore::totpCode(t.totp).isEmpty())
-            return tr("OTP anahtarı geçersiz.");
+            return tr("The OTP key is invalid.");
         if (!t.otpEnabled || t.otpSource != QLatin1String("totp"))
             t.totp = {};
     }
@@ -353,7 +402,7 @@ void AppController::deleteTunnel(const QString &id)
 
 QVariantList AppController::tunnelChoices() const
 {
-    QVariantList out{QVariantMap{{"id", QString()}, {"name", tr("Doğrudan (Tünelsiz)")},
+    QVariantList out{QVariantMap{{"id", QString()}, {"name", tr("Direct (No Tunnel)")},
                                  {"type", QStringLiteral("direct")}}};
     for (const Model::Tunnel &t : m_store.doc().tunnels)
         out.append(QVariantMap{{"id", t.id}, {"name", t.name},
@@ -387,7 +436,7 @@ QVariantMap AppController::totpCode(const QVariantMap &m) const
     int left = 0;
     const QString code = NetCore::totpCode(t, &left);
     if (code.isEmpty())
-        return {{"error", tr("Geçersiz anahtar")}};
+        return {{"error", tr("Invalid key")}};
     return {{"code", code}, {"remaining", left}};
 }
 
@@ -445,26 +494,26 @@ void AppController::seedDemo()
         return;
     Model::Tunnel vpn;
     vpn.id = Model::newId();
-    vpn.name = tr("Şirket VPN");
+    vpn.name = tr("Company VPN");
     vpn.gpHost = QStringLiteral("vpn.example.com");
     vpn.gpUsername = QStringLiteral("demo");
     Model::Tunnel ts;
     ts.id = Model::newId();
-    ts.name = tr("Ev Ağı");
+    ts.name = tr("Home Network");
     ts.type = Model::Tunnel::Type::Tailscale;
     m_store.doc().tunnels = {vpn, ts};
 
     struct Sample { const char *name, *host, *os; QString tunnel; QColor a, b; };
     const Sample samples[] = {
-        {"İş Bilgisayarı", "10.0.7.155", "ubuntu", vpn.id, QColor(233, 84, 32), QColor(119, 33, 111)},
-        {"Toplantı Odası", "10.0.9.20", "windows", vpn.id, QColor(0, 120, 212), QColor(80, 40, 160)},
-        {"Ev Masaüstü", "ev-pc", "windows", ts.id, QColor(20, 140, 120), QColor(10, 60, 90)},
-        {"Laboratuvar", "10.0.3.8", "ubuntu", vpn.id, {}, {}},
+        {QT_TR_NOOP("Work PC"), "10.0.7.155", "ubuntu", vpn.id, QColor(233, 84, 32), QColor(119, 33, 111)},
+        {QT_TR_NOOP("Meeting Room"), "10.0.9.20", "windows", vpn.id, QColor(0, 120, 212), QColor(80, 40, 160)},
+        {QT_TR_NOOP("Home Desktop"), "home-pc", "windows", ts.id, QColor(20, 140, 120), QColor(10, 60, 90)},
+        {QT_TR_NOOP("Lab Server"), "10.0.3.8", "ubuntu", vpn.id, {}, {}},
     };
     for (const Sample &s : samples) {
         Model::Device d;
         d.id = Model::newId();
-        d.name = QString::fromUtf8(s.name);
+        d.name = tr(s.name);
         d.host = QString::fromUtf8(s.host);
         d.os = QString::fromUtf8(s.os);
         d.tunnelId = s.tunnel;

@@ -2,6 +2,7 @@
 
 #include <QImage>
 #include <QObject>
+#include <QTranslator>
 #include <QVariantMap>
 
 #include "app/ListModels.h"
@@ -11,6 +12,8 @@
 // vault and exposes devices / tunnels as models plus edit operations that take
 // and return plain maps. Methods returning QString return "" on success and a
 // user-facing error otherwise.
+class QQmlEngine;
+
 class AppController : public QObject
 {
     Q_OBJECT
@@ -21,6 +24,7 @@ class AppController : public QObject
     Q_PROPERTY(bool touchIdAvailable READ touchIdAvailable CONSTANT)
     Q_PROPERTY(bool touchIdEnabled READ touchIdEnabled NOTIFY touchIdEnabledChanged)
     Q_PROPERTY(QString versionInfo READ versionInfo CONSTANT)
+    Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)   // system | en | tr
     Q_PROPERTY(QString demoOpen MEMBER m_demoOpen CONSTANT)   // dev: dialog to open on start
 public:
     explicit AppController(QObject *parent = nullptr);
@@ -33,6 +37,12 @@ public:
     bool touchIdEnabled() const;
     QString versionInfo() const;
     VaultStore *store() { return &m_store; }
+
+    // --- Language ----------------------------------------------------------
+    QString language() const;
+    void setLanguage(const QString &lang);
+    // Installs the translator for the saved (or system) language. Call before loading QML.
+    void applyLanguage(QQmlEngine *engine = nullptr);
 
     // --- Vault -------------------------------------------------------------
     Q_INVOKABLE QString createVault(const QString &password, const QString &confirm);
@@ -73,6 +83,7 @@ signals:
     void stateChanged();
     void touchIdEnabledChanged();
     void toast(const QString &message);
+    void languageChanged();
 
 private:
     QString finishUnlock(VaultStore::Result r);
@@ -85,4 +96,6 @@ private:
     TunnelModel m_tunnels;
     DeviceFilterModel m_gallery;
     QString m_demoOpen;
+    QTranslator m_translator;
+    QQmlEngine *m_engine = nullptr;
 };

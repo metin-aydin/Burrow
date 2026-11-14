@@ -7,8 +7,8 @@ import QtQuick.Layouts
 BDialog {
     id: root
     dialogWidth: 560
-    title: qsTr("Tünel Profilleri")
-    subtitle: qsTr("Cihazlar bu profiller üzerinden bağlanır. Tünel yalnızca Burrow'un içinde açılır, bilgisayarın geri kalanı etkilenmez.")
+    title: qsTr("Tunnel Profiles")
+    subtitle: qsTr("Devices connect through these profiles. The tunnel runs only inside Burrow; the rest of your computer is not affected.")
     signal confirm(string title, string message, string button, var fn)
     signal editTunnel(string id)
 
@@ -37,7 +37,7 @@ BDialog {
                     Text { text: model.name; color: Theme.text; font.pixelSize: 14; font.weight: Font.Medium }
                     Text {
                         text: (model.type === "tailscale" ? "Tailscale" : "GlobalProtect") + " · " + model.host
-                              + " · " + qsTr("%1 cihaz").arg(model.users)
+                              + " · " + qsTr("%1 devices").arg(model.users)
                         color: Theme.textSecondary; font.pixelSize: 12
                         elide: Text.ElideRight; Layout.fillWidth: true
                     }
@@ -47,10 +47,10 @@ BDialog {
                     variant: "ghost"; iconName: "trash"
                     onClicked: {
                         const id = model.tunnelId, n = model.users
-                        root.confirm(qsTr("Profili Sil"),
-                            n > 0 ? qsTr("\"%1\" profilini %2 cihaz kullanıyor; silinirse bu cihazlar doğrudan bağlantıya geçer.").arg(model.name).arg(n)
-                                  : qsTr("\"%1\" profili silinecek.").arg(model.name),
-                            qsTr("Sil"), function() { App.deleteTunnel(id) })
+                        root.confirm(qsTr("Delete Profile"),
+                            n > 0 ? qsTr("\"%1\" is used by %2 devices; if deleted, they switch to a direct connection.").arg(model.name).arg(n)
+                                  : qsTr("The profile \"%1\" will be deleted.").arg(model.name),
+                            qsTr("Delete"), function() { App.deleteTunnel(id) })
                     }
                 }
             }
@@ -59,16 +59,16 @@ BDialog {
     Text {
         visible: App.tunnels.count === 0
         Layout.fillWidth: true
-        text: qsTr("Henüz profil yok. GlobalProtect VPN'in veya Tailscale ağın için bir profil ekle.")
+        text: qsTr("No profiles yet. Add one for your GlobalProtect VPN or Tailscale network.")
         color: Theme.textSecondary
         font.pixelSize: 13
         wrapMode: Text.WordWrap
     }
 
     footer: [
-        BButton { iconName: "plus"; text: qsTr("Yeni Profil"); onClicked: root.editTunnel("") },
+        BButton { iconName: "plus"; text: qsTr("New Profile"); onClicked: root.editTunnel("") },
         Item { Layout.fillWidth: true },
-        BButton { variant: "primary"; text: qsTr("Bitti"); onClicked: root.close() }
+        BButton { variant: "primary"; text: qsTr("Done"); onClicked: root.close() }
     ]
 
 }

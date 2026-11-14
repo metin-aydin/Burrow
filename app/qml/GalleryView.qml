@@ -39,7 +39,7 @@ Rectangle {
                 spacing: 0
                 Text { text: "Burrow"; color: Theme.text; font.pixelSize: 20; font.weight: Font.Bold }
                 Text {
-                    text: App.devices.count === 1 ? qsTr("1 cihaz") : qsTr("%1 cihaz").arg(App.devices.count)
+                    text: App.devices.count === 1 ? qsTr("1 device") : qsTr("%1 devices").arg(App.devices.count)
                     color: Theme.textSecondary; font.pixelSize: 12
                 }
             }
@@ -56,7 +56,7 @@ Rectangle {
                 TextField {
                     id: search
                     anchors { left: sIcon.right; right: parent.right; top: parent.top; bottom: parent.bottom; leftMargin: 4 }
-                    placeholderText: qsTr("Cihaz ara")
+                    placeholderText: qsTr("Search devices")
                     placeholderTextColor: Theme.textMuted
                     color: Theme.text
                     font.pixelSize: 13
@@ -64,9 +64,9 @@ Rectangle {
                     onTextChanged: App.gallery.query = text
                 }
             }
-            BButton { iconName: "tunnel"; text: qsTr("Tünel Profilleri"); onClicked: root.openTunnels() }
-            BButton { iconName: "settings"; variant: "ghost"; onClicked: root.openSettings(); ToolTip.visible: hovered; ToolTip.text: qsTr("Ayarlar") }
-            BButton { iconName: "plus"; variant: "primary"; text: qsTr("Yeni Cihaz"); onClicked: root.newDevice() }
+            BButton { iconName: "tunnel"; text: qsTr("Tunnel Profiles"); onClicked: root.openTunnels() }
+            BButton { iconName: "settings"; variant: "ghost"; onClicked: root.openSettings(); ToolTip.visible: hovered; ToolTip.text: qsTr("Settings") }
+            BButton { iconName: "plus"; variant: "primary"; text: qsTr("New Device"); onClicked: root.newDevice() }
         }
 
         // --- Tunnel filter chips ---------------------------------------------
@@ -77,7 +77,7 @@ Rectangle {
             Layout.topMargin: 18
             spacing: 8
             visible: App.tunnels.count > 0
-            Chip { text: qsTr("Tümü"); selected: root.filterTunnel === "*"; onClicked: root.filterTunnel = "*" }
+            Chip { text: qsTr("All"); selected: root.filterTunnel === "*"; onClicked: root.filterTunnel = "*" }
             Repeater {
                 model: App.tunnels
                 Chip {
@@ -87,7 +87,7 @@ Rectangle {
                     onClicked: root.filterTunnel = model.tunnelId
                 }
             }
-            Chip { text: qsTr("Doğrudan"); selected: root.filterTunnel === ""; onClicked: root.filterTunnel = "" }
+            Chip { text: qsTr("Direct"); selected: root.filterTunnel === ""; onClicked: root.filterTunnel = "" }
         }
 
         // --- Grid ------------------------------------------------------------
@@ -137,7 +137,7 @@ Rectangle {
             visible: App.devices.count > 0 && App.gallery.count === 0
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-            text: qsTr("Eşleşen cihaz yok.")
+            text: qsTr("No matching devices.")
             color: Theme.textSecondary
             font.pixelSize: 14
         }
@@ -159,7 +159,7 @@ Rectangle {
                 }
                 Text {
                     Layout.alignment: Qt.AlignHCenter
-                    text: qsTr("İlk Bilgisayarını Ekle")
+                    text: qsTr("Add Your First Computer")
                     color: Theme.text; font.pixelSize: 20; font.weight: Font.DemiBold
                 }
                 Text {
@@ -167,13 +167,13 @@ Rectangle {
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WordWrap
                     color: Theme.textSecondary; font.pixelSize: 13
-                    text: qsTr("Bağlanmak istediğin bilgisayarı ekle. VPN veya Tailscale üzerinden bağlanacaksan önce bir tünel profili oluştur.")
+                    text: qsTr("Add the computer you want to reach. If you connect through a VPN or Tailscale, create a tunnel profile first.")
                 }
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter
                     spacing: 8
-                    BButton { iconName: "tunnel"; text: qsTr("Tünel Profili Ekle"); onClicked: root.openTunnels() }
-                    BButton { iconName: "plus"; variant: "primary"; text: qsTr("Yeni Cihaz"); onClicked: root.newDevice() }
+                    BButton { iconName: "tunnel"; text: qsTr("Add Tunnel Profile"); onClicked: root.openTunnels() }
+                    BButton { iconName: "plus"; variant: "primary"; text: qsTr("New Device"); onClicked: root.newDevice() }
                 }
             }
         }

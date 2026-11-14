@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
     }
 
     QQmlApplicationEngine engine;
+    controller.applyLanguage(&engine);
     engine.addImageProvider(QStringLiteral("preview"), new PreviewProvider(controller.store()));
     qmlRegisterSingletonInstance("Burrow.Core", 1, 0, "App", &controller);
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app,

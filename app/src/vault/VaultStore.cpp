@@ -173,17 +173,17 @@ QString VaultStore::message(Result r)
 {
     switch (r) {
     case Result::Ok: return {};
-    case Result::WrongPassword: return QCoreApplication::translate("VaultStore", "Ana şifre yanlış.");
+    case Result::WrongPassword: return QCoreApplication::translate("VaultStore", "Wrong master password.");
     case Result::Corrupt:
         return QCoreApplication::translate("VaultStore",
-            "Kasa dosyası bozuk veya desteklenmeyen bir sürüm. Yanında .bak yedeği olabilir.");
-    case Result::Exists: return QCoreApplication::translate("VaultStore", "Kasa zaten var.");
+            "The vault file is damaged or from an unsupported version. There may be a .bak backup next to it.");
+    case Result::Exists: return QCoreApplication::translate("VaultStore", "A vault already exists.");
     case Result::BadSchema:
         return QCoreApplication::translate("VaultStore",
-            "Kasa açıldı ama içeriği bu sürümde okunamıyor (uygulamayı güncelle).");
+            "The vault opened, but this version can't read its contents. Update the app.");
     case Result::IoError: break;
     }
-    return QCoreApplication::translate("VaultStore", "Kasa dosyası okunamadı/yazılamadı.");
+    return QCoreApplication::translate("VaultStore", "Couldn't read or write the vault file.");
 }
 
 bool VaultStore::putBlob(const QString &name, const QByteArray &data)

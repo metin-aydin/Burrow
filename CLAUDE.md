@@ -55,6 +55,8 @@ type: user | feedback | project | reference
 
 - İletişim dili: **Türkçe** (kod, tanımlayıcılar ve teknik terimler orijinal halinde).
 - Kod yorumları ve commit mesajları: İngilizce.
+- Arayüz metinleri: kaynak dil İngilizce, her yeni metnin Türkçe çevirisi `app/i18n/burrow_tr.ts`'e eklenir
+  (ADR 0006). GitHub içeriği (README, ekran görüntüleri, açıklama) İngilizcedir.
 - Önemli teknoloji/mimari kararlar kullanıcıyla tartışılmadan kesinleştirilmez; karar
   verilince ADR olarak `docs/decisions/` altına yazılır.
 - Güvenlik: şifreler, OTP secret'ları ve cihaz bilgileri yalnızca şifreli lokal kasada tutulur;

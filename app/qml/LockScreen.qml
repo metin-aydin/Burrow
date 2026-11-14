@@ -72,7 +72,7 @@ Rectangle {
             }
             Text {
                 Layout.alignment: Qt.AlignHCenter
-                text: root.setup ? qsTr("Burrow'a Hoş Geldin") : qsTr("Burrow Kilitli")
+                text: root.setup ? qsTr("Welcome To Burrow") : qsTr("Burrow Is Locked")
                 color: Theme.text
                 font.pixelSize: 22
                 font.weight: Font.DemiBold
@@ -84,13 +84,13 @@ Rectangle {
                 color: Theme.textSecondary
                 font.pixelSize: 13
                 text: root.setup
-                    ? qsTr("Cihazların, şifrelerin ve OTP anahtarların bu ana şifreyle şifrelenip yalnızca bu bilgisayarda saklanır. Şifreyi unutursan veriler kurtarılamaz.")
-                    : qsTr("Devam etmek için ana şifreni gir.")
+                    ? qsTr("Your devices, passwords and OTP keys are encrypted with this master password and stored only on this computer. If you forget it, the data cannot be recovered.")
+                    : qsTr("Enter your master password to continue.")
             }
             BField {
                 id: pw
                 Layout.fillWidth: true
-                label: qsTr("Ana Şifre")
+                label: qsTr("Master Password")
                 password: true
                 onAccepted: root.setup ? pw2.field.forceActiveFocus() : root.submit()
             }
@@ -98,9 +98,9 @@ Rectangle {
                 id: pw2
                 visible: root.setup
                 Layout.fillWidth: true
-                label: qsTr("Ana Şifre (Tekrar)")
+                label: qsTr("Master Password (Again)")
                 password: true
-                hint: qsTr("En az 8 karakter.")
+                hint: qsTr("At least 8 characters.")
                 onAccepted: root.submit()
             }
             Text {
@@ -115,8 +115,8 @@ Rectangle {
                 id: submitBtn
                 Layout.fillWidth: true
                 variant: "primary"
-                text: busy.running ? qsTr("Anahtar Türetiliyor…")
-                    : root.setup ? qsTr("Kasayı Oluştur") : qsTr("Kilidi Aç")
+                text: busy.running ? qsTr("Deriving Key…")
+                    : root.setup ? qsTr("Create Vault") : qsTr("Unlock")
                 onClicked: root.submit()
             }
             BButton {
@@ -124,7 +124,7 @@ Rectangle {
                 Layout.fillWidth: true
                 variant: "ghost"
                 iconName: "fingerprint"
-                text: qsTr("Touch ID İle Aç")
+                text: qsTr("Unlock With Touch ID")
                 onClicked: { const e = App.unlockWithTouchId(); if (e) root.error = e }
             }
             BusyIndicator { id: busy; running: false; visible: false }

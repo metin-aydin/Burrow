@@ -17,7 +17,7 @@ QString FreeRdpEngine::engineVersion()
 bool FreeRdpEngine::connectTo(const RdpConnectParams &params)
 {
     Q_UNUSED(params);
-    emit disconnected(tr("RDP motoru henüz uygulanmadı"));
+    emit disconnected(tr("RDP engine not implemented yet"));
     return false;
 }
 

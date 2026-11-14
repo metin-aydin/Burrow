@@ -71,7 +71,7 @@ Item {
                             Icon { anchors.horizontalCenter: parent.horizontalCenter; name: "monitor"; size: 34; color: "#E6FFFFFF" }
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                text: qsTr("Önizleme İlk Bağlantıdan Sonra")
+                                text: qsTr("Preview After First Connection")
                                 color: "#CCFFFFFF"
                                 font.pixelSize: 11
                             }
@@ -180,7 +180,7 @@ Item {
                     RowLayout {
                         spacing: 6
                         Chip {
-                            text: root.tunnelName !== "" ? root.tunnelName : qsTr("Doğrudan")
+                            text: root.tunnelName !== "" ? root.tunnelName : qsTr("Direct")
                             kind: root.tunnelType
                         }
                         Text {
@@ -194,7 +194,7 @@ Item {
                 }
                 BButton {
                     variant: "primary"
-                    text: qsTr("Bağlan")
+                    text: qsTr("Connect")
                     onClicked: root.connectRequested()
                 }
             }
@@ -223,8 +223,8 @@ Item {
             }
             background: Rectangle { radius: 6; color: mi.highlighted ? Theme.hover : "transparent" }
         }
-        MenuRow { text: qsTr("Düzenle"); iconName: "edit"; onTriggered: root.editRequested() }
-        MenuRow { text: qsTr("Kopyala"); iconName: "copy"; onTriggered: root.duplicateRequested() }
-        MenuRow { text: qsTr("Sil"); iconName: "trash"; danger: true; onTriggered: root.deleteRequested() }
+        MenuRow { text: qsTr("Edit"); iconName: "edit"; onTriggered: root.editRequested() }
+        MenuRow { text: qsTr("Duplicate"); iconName: "copy"; onTriggered: root.duplicateRequested() }
+        MenuRow { text: qsTr("Delete"); iconName: "trash"; danger: true; onTriggered: root.deleteRequested() }
     }
 }

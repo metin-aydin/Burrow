@@ -14,5 +14,5 @@ Her satır bir hafıza kaydını gösterir. Kayıt içerikleri ilgili dosyadadı
 - [GitHub repo bilgileri](project-github-meta.md) — repo açıklaması ve etiketleri (MCP bekliyor)
 - [Lokal derleme](reference-local-build.md) — bu Mac'te Xcode SDK bayrakları şart; go yolu
 - [Araştırmalar](../research/) — RDP motoru/UI ve tünel/TOTP araştırmaları (2026-11-14)
-- [Kararlar (ADR)](../decisions/) — 0001 teknoloji yığını, 0002 release + otomatik güncelleme, 0003 Ubuntu oturum stratejisi (burrow-agent), 0004 kasa + Touch ID
+- [Kararlar (ADR)](../decisions/) — 0001 teknoloji yığını, 0002 release + otomatik güncelleme, 0003 Ubuntu oturum stratejisi (burrow-agent), 0004 kasa + Touch ID, 0005 QML arayüz, 0006 çoklu dil
 - [İş günlüğü](LOG.md) — yapılan işlerin kronolojik kaydı

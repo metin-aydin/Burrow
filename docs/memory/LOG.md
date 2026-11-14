@@ -4,6 +4,15 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Çoklu dil (ADR 0006):** kaynak metinler İngilizceye çevrildi, Türkçe katalog (`app/i18n/burrow_tr.ts`, 173
+  metin) eklendi; ilk açılışta sistem diline göre seçiliyor, Ayarlar → Dil ile değişiyor (canlı). CI çeviri
+  kontrolü betiği eklendi. İki dilde ekran görüntüsüyle kontrol edildi.
+- GitHub MCP kontrol edildi: `plugin:engineering:github` hâlâ "Incompatible auth server: does not support
+  dynamic client registration" → yeniden bağlanmakla düzelmez; kullanıcının PAT ile yapılandırması gerekiyor.
+- Referans incelendi: kullanıcının UPaste ve JumpDesk repoları (logo tarzı: renkli yuvarlak kare + parlaklık +
+  alt beyaz şerit + kalın beyaz çizgi sembol; release: prepare/taslak → 3 platform build → yayımla/sil, PR
+  açıklaması sürüm notu, `release` ortamı, aynı Apple gizli değer adları; güncelleme: açılıştan 15 sn sonra
+  ve 6 saatte bir denetim, sormadan indirmez).
 - Güvenlik incelemesi (otomatik): ana şifre değişince `.bak` eski şifreyle açılabiliyor ve DEK aynı kaldığı
   için güncel kasayı da açıyordu. Düzeltme: şifre değişiminde DEK yenileniyor, belge + blob'lar yeniden
   şifreleniyor, `.bak` siliniyor, Touch ID kopyası yenileniyor (olmazsa Touch ID kapanıyor). Go + Qt

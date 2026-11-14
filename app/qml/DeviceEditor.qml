@@ -13,8 +13,8 @@ BDialog {
 
     function openFor(id) {
         d = id ? App.device(id) : App.newDevice()
-        title = id ? qsTr("Cihazı Düzenle") : qsTr("Yeni Cihaz")
-        subtitle = id ? d.name : qsTr("Bağlanmak istediğin bilgisayarın bilgilerini gir.")
+        title = id ? qsTr("Edit Device") : qsTr("New Device")
+        subtitle = id ? d.name : qsTr("Enter the details of the computer you want to connect to.")
         tunnelCombo.options = App.tunnelChoices().map(t => ({ text: t.name, value: t.id }))
         // Controls lose their bindings once edited, so reset them explicitly.
         nameField.text = d.name || ""; hostField.text = d.host || ""; portField.text = String(d.port || 3389)
@@ -47,9 +47,9 @@ BDialog {
 
     Segmented {
         Layout.fillWidth: true
-        options: [{ text: qsTr("Genel"), value: "general" },
-                  { text: qsTr("Oturum"), value: "session" },
-                  { text: qsTr("Pano Ve Klavye"), value: "input" }]
+        options: [{ text: qsTr("General"), value: "general" },
+                  { text: qsTr("Session"), value: "session" },
+                  { text: qsTr("Clipboard And Keyboard"), value: "input" }]
         value: root.tab
         onValueChanged: root.tab = value
     }
@@ -61,10 +61,10 @@ BDialog {
         spacing: 14
         RowLayout {
             spacing: 12
-            BField { id: nameField; Layout.fillWidth: true; label: qsTr("Ad"); placeholder: qsTr("İş Bilgisayarı"); text: root.d.name || "" }
+            BField { id: nameField; Layout.fillWidth: true; label: qsTr("Name"); placeholder: qsTr("Work PC"); text: root.d.name || "" }
             ColumnLayout {
                 spacing: 6
-                Text { text: qsTr("Sistem"); color: Theme.textSecondary; font.pixelSize: 12; font.weight: Font.Medium }
+                Text { text: qsTr("System"); color: Theme.textSecondary; font.pixelSize: 12; font.weight: Font.Medium }
                 Segmented {
                     id: osSeg
                     options: [{ text: "Windows", value: "windows" }, { text: "Ubuntu", value: "ubuntu" }]
@@ -74,27 +74,27 @@ BDialog {
         }
         RowLayout {
             spacing: 12
-            BField { id: hostField; Layout.fillWidth: true; label: qsTr("Adres"); placeholder: "10.0.0.5"; text: root.d.host || "" }
+            BField { id: hostField; Layout.fillWidth: true; label: qsTr("Address"); placeholder: "10.0.0.5"; text: root.d.host || "" }
             BField { id: portField; Layout.preferredWidth: 96; label: qsTr("Port"); text: String(root.d.port || 3389); field.validator: IntValidator { bottom: 1; top: 65535 } }
         }
-        BCombo { id: tunnelCombo; Layout.fillWidth: true; label: qsTr("Bağlantı"); value: root.d.tunnelId || "" }
+        BCombo { id: tunnelCombo; Layout.fillWidth: true; label: qsTr("Connection"); value: root.d.tunnelId || "" }
         RowLayout {
             spacing: 12
-            BField { id: userField; Layout.fillWidth: true; label: qsTr("Kullanıcı Adı"); placeholder: qsTr("Boş bırakılırsa bağlanırken sorulur"); text: root.d.username || "" }
-            BField { id: domainField; Layout.preferredWidth: 160; label: qsTr("Domain"); placeholder: qsTr("Opsiyonel"); text: root.d.domain || "" }
+            BField { id: userField; Layout.fillWidth: true; label: qsTr("Username"); placeholder: qsTr("Asked when connecting if left empty"); text: root.d.username || "" }
+            BField { id: domainField; Layout.preferredWidth: 160; label: qsTr("Domain"); placeholder: qsTr("Optional"); text: root.d.domain || "" }
         }
         BSwitch {
             id: savePw
             Layout.fillWidth: true
-            title: qsTr("Şifreyi Kasada Sakla")
-            description: qsTr("Bilgisayarın şifresi şifreli kasada tutulur.")
+            title: qsTr("Save Password In Vault")
+            description: qsTr("The computer's password is kept in the encrypted vault.")
             checked: !!root.d.savePassword
         }
         BField {
             id: pwField
             visible: savePw.checked
             Layout.fillWidth: true
-            label: qsTr("Şifre")
+            label: qsTr("Password")
             password: true
             text: root.d.password || ""
         }
@@ -102,8 +102,8 @@ BDialog {
             id: autoLogin
             visible: savePw.checked
             Layout.fillWidth: true
-            title: qsTr("Otomatik Giriş")
-            description: qsTr("Bağlanınca kayıtlı şifreyle giriş yapılır; giriş ekranı çıkarsa şifre oraya da yazılır.")
+            title: qsTr("Automatic Sign-In")
+            description: qsTr("Signs in with the saved password when connecting; if a login screen appears, the password is typed there too.")
             checked: !!root.d.autoLogin
         }
     }
@@ -116,25 +116,25 @@ BDialog {
         BCombo {
             id: sessionCombo
             Layout.fillWidth: true
-            label: qsTr("Oturum")
-            options: [{ text: qsTr("Mevcut oturuma bağlan"), value: "existing" },
-                      { text: qsTr("Yeni oturum aç"), value: "new" },
-                      { text: qsTr("Her bağlantıda sor"), value: "ask" }]
+            label: qsTr("Session")
+            options: [{ text: qsTr("Connect to the existing session"), value: "existing" },
+                      { text: qsTr("Start a new session"), value: "new" },
+                      { text: qsTr("Ask every time"), value: "ask" }]
             value: root.d.sessionMode || "existing"
         }
         BSwitch {
             id: lockSw
             Layout.fillWidth: true
-            title: qsTr("Bağlantı Kapanınca Kilitle")
-            description: qsTr("Pencereyi kapattığında veya bağlantı koptuğunda uzak bilgisayarın ekranı kilitli kalır.")
+            title: qsTr("Lock When Disconnected")
+            description: qsTr("The remote screen stays locked when you close the window or the connection drops.")
             checked: root.d.lockOnDisconnect !== false
         }
         BCombo {
             id: onDisc
             Layout.fillWidth: true
-            label: qsTr("Bağlantı Kapanınca")
-            options: [{ text: qsTr("Oturumu açık bırak (kilitli)"), value: "keep_locked" },
-                      { text: qsTr("Oturumu kapat (sign out)"), value: "sign_out" }]
+            label: qsTr("When Disconnected")
+            options: [{ text: qsTr("Keep the session (locked)"), value: "keep_locked" },
+                      { text: qsTr("Sign out"), value: "sign_out" }]
             value: root.d.onDisconnect || "keep_locked"
         }
     }
@@ -147,20 +147,20 @@ BDialog {
         BCombo {
             id: clipCombo
             Layout.fillWidth: true
-            label: qsTr("Pano Paylaşımı")
-            options: [{ text: qsTr("Çift yönlü"), value: "both" },
-                      { text: qsTr("Sadece bu bilgisayardan uzağa"), value: "to_remote" },
-                      { text: qsTr("Sadece uzaktan bu bilgisayara"), value: "to_local" },
-                      { text: qsTr("Kapalı"), value: "off" }]
+            label: qsTr("Clipboard Sharing")
+            options: [{ text: qsTr("Both directions"), value: "both" },
+                      { text: qsTr("Only from this computer to remote"), value: "to_remote" },
+                      { text: qsTr("Only from remote to this computer"), value: "to_local" },
+                      { text: qsTr("Off"), value: "off" }]
             value: root.d.clipboard || "both"
         }
         BCombo {
             id: keyCombo
             Layout.fillWidth: true
-            label: qsTr("Mac Kısayolları")
-            options: [{ text: qsTr("Kısayolları çevir (Cmd+C → Ctrl+C)"), value: "shortcuts" },
-                      { text: qsTr("Cmd ↔ Ctrl tamamen yer değiştir"), value: "swap" },
-                      { text: qsTr("Kapalı (tuşlar olduğu gibi)"), value: "off" }]
+            label: qsTr("Mac Shortcuts")
+            options: [{ text: qsTr("Translate shortcuts (Cmd+C → Ctrl+C)"), value: "shortcuts" },
+                      { text: qsTr("Swap Cmd ↔ Ctrl completely"), value: "swap" },
+                      { text: qsTr("Off (keys as they are)"), value: "off" }]
             value: root.d.keyMap || "shortcuts"
         }
     }
@@ -176,7 +176,7 @@ BDialog {
 
     footer: [
         Item { Layout.fillWidth: true },
-        BButton { text: qsTr("İptal"); onClicked: root.close() },
-        BButton { variant: "primary"; text: qsTr("Kaydet"); onClicked: root.save() }
+        BButton { text: qsTr("Cancel"); onClicked: root.close() },
+        BButton { variant: "primary"; text: qsTr("Save"); onClicked: root.save() }
     ]
 }

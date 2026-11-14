@@ -1,4 +1,4 @@
-find_package(Qt6 6.5 REQUIRED COMPONENTS Gui Quick QuickControls2 Svg)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Gui Quick QuickControls2 Svg LinguistTools)
 find_package(FreeRDP 3 QUIET)
 find_package(FreeRDP-Client 3 QUIET)
 
@@ -34,6 +34,12 @@ qt_add_qml_module(burrow
     RESOURCES ${BURROW_ICONS}
     NO_RESOURCE_TARGET_PATH
 )
+
+# Translations: English is the source language; Turkish ships as a compiled catalog.
+qt_add_translations(burrow
+    TS_FILES i18n/burrow_tr.ts
+    RESOURCE_PREFIX /i18n
+    LUPDATE_OPTIONS -no-obsolete)
 
 if(APPLE)
     enable_language(OBJCXX)

@@ -24,7 +24,7 @@ BDialog {
     }
     footer: [
         Item { Layout.fillWidth: true },
-        BButton { text: qsTr("İptal"); onClicked: root.close() },
+        BButton { text: qsTr("Cancel"); onClicked: root.close() },
         BButton { variant: "danger"; text: root.confirmText; onClicked: { root.close(); if (root.onConfirm) root.onConfirm() } }
     ]
 }

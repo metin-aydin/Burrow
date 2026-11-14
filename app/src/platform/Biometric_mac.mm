@@ -1,5 +1,7 @@
 #include "platform/Biometric.h"
 
+#include <QCoreApplication>
+
 #import <Foundation/Foundation.h>
 #import <LocalAuthentication/LocalAuthentication.h>
 #import <Security/Security.h>
@@ -22,16 +24,16 @@ NSMutableDictionary *baseQuery()
 QString statusMessage(OSStatus st)
 {
     if (st == errSecMissingEntitlement)
-        return QStringLiteral("Touch ID bu build'de kullanılamıyor (imzalı sürüm gerekir).");
+        return QCoreApplication::translate("Biometric", "Touch ID isn't available in this build (requires a signed release).");
     if (st == errSecUserCanceled || st == errSecAuthFailed)
-        return QStringLiteral("Touch ID doğrulaması yapılmadı.");
+        return QCoreApplication::translate("Biometric", "Touch ID was not confirmed.");
     if (st == errSecItemNotFound)
-        return QStringLiteral("Touch ID için kayıtlı anahtar yok; ana şifreyle aç.");
+        return QCoreApplication::translate("Biometric", "No key is saved for Touch ID; unlock with your master password.");
     CFStringRef s = SecCopyErrorMessageString(st, nullptr);
     QString msg = s ? QString::fromCFString(s) : QString::number(st);
     if (s)
         CFRelease(s);
-    return QStringLiteral("Keychain hatası: %1").arg(msg);
+    return QCoreApplication::translate("Biometric", "Keychain error: %1").arg(msg);
 }
 
 } // namespace
@@ -56,7 +58,7 @@ bool storeKey(const QByteArray &key, QString *error)
             kSecAccessControlBiometryCurrentSet, &cfErr);
         if (!access) {
             if (error)
-                *error = QStringLiteral("Erişim kontrolü oluşturulamadı.");
+                *error = QCoreApplication::translate("Biometric", "Couldn't create the access control.");
             if (cfErr)
                 CFRelease(cfErr);
             return false;

@@ -14,8 +14,8 @@ BDialog {
     function openFor(id) {
         t = id ? App.tunnel(id) : App.newTunnel()
         const gp = t.gp || {}, ts = t.tailscale || {}, totp = gp.totp || {}
-        title = id ? qsTr("Tünel Profilini Düzenle") : qsTr("Yeni Tünel Profili")
-        subtitle = qsTr("Profil adı kartlarda ve filtrelerde görünür.")
+        title = id ? qsTr("Edit Tunnel Profile") : qsTr("New Tunnel Profile")
+        subtitle = qsTr("The profile name appears on cards and filters.")
         nameField.text = t.name || ""
         typeSeg.value = t.type || "globalprotect"
         gpHost.text = gp.host || ""; gpUser.text = gp.username || ""
@@ -48,7 +48,7 @@ BDialog {
 
     function importUri() {
         const list = App.parseTotp(uri.text)
-        if (list.length === 0) { error = qsTr("Bu metin geçerli bir otpauth bağlantısı değil."); return }
+        if (list.length === 0) { error = qsTr("This is not a valid otpauth link."); return }
         error = ""
         if (list.length === 1) applyAccount(list[0])
         else accounts = list
@@ -81,10 +81,10 @@ BDialog {
 
     RowLayout {
         spacing: 12
-        BField { id: nameField; Layout.fillWidth: true; label: qsTr("Profil Adı"); placeholder: qsTr("İş VPN") }
+        BField { id: nameField; Layout.fillWidth: true; label: qsTr("Profile Name"); placeholder: qsTr("Work VPN") }
         ColumnLayout {
             spacing: 6
-            Text { text: qsTr("Tür"); color: Theme.textSecondary; font.pixelSize: 12; font.weight: Font.Medium }
+            Text { text: qsTr("Type"); color: Theme.textSecondary; font.pixelSize: 12; font.weight: Font.Medium }
             Segmented {
                 id: typeSeg
                 options: [{ text: "GlobalProtect", value: "globalprotect" }, { text: "Tailscale", value: "tailscale" }]
@@ -99,25 +99,25 @@ BDialog {
         spacing: 14
         RowLayout {
             spacing: 12
-            BField { id: gpHost; Layout.fillWidth: true; label: qsTr("Sunucu"); placeholder: "vpn.sirket.com" }
-            BField { id: gpGroup; Layout.preferredWidth: 170; label: qsTr("Gateway / Grup"); placeholder: qsTr("Opsiyonel") }
+            BField { id: gpHost; Layout.fillWidth: true; label: qsTr("Server"); placeholder: "vpn.sirket.com" }
+            BField { id: gpGroup; Layout.preferredWidth: 170; label: qsTr("Gateway / Group"); placeholder: qsTr("Optional") }
         }
-        BField { id: gpUser; Layout.fillWidth: true; label: qsTr("Kullanıcı Adı") }
-        BSwitch { id: gpSave; Layout.fillWidth: true; title: qsTr("Şifreyi Kasada Sakla"); description: qsTr("Saklanmazsa her bağlantıda sorulur.") }
-        BField { id: gpPw; visible: gpSave.checked; Layout.fillWidth: true; label: qsTr("Şifre"); password: true }
+        BField { id: gpUser; Layout.fillWidth: true; label: qsTr("Username") }
+        BSwitch { id: gpSave; Layout.fillWidth: true; title: qsTr("Save Password In Vault"); description: qsTr("If not saved, it's asked on every connection.") }
+        BField { id: gpPw; visible: gpSave.checked; Layout.fillWidth: true; label: qsTr("Password"); password: true }
 
-        SectionTitle { text: qsTr("Tek Kullanımlık Şifre (OTP)") }
-        BSwitch { id: otpOn; Layout.fillWidth: true; title: qsTr("OTP Kullan"); description: qsTr("Girişte şifreye ek olarak authenticator kodu istenir.") }
+        SectionTitle { text: qsTr("One-Time Password (OTP)") }
+        BSwitch { id: otpOn; Layout.fillWidth: true; title: qsTr("Use OTP"); description: qsTr("An authenticator code is required in addition to the password.") }
         ColumnLayout {
             Layout.fillWidth: true
             visible: otpOn.checked
             spacing: 14
             RowLayout {
                 spacing: 12
-                BCombo { id: otpMode; Layout.fillWidth: true; label: qsTr("OTP Tipi")
-                    options: [{ text: qsTr("Şifrenin sonuna ekle"), value: "append" }, { text: qsTr("Ayrı soru (challenge)"), value: "separate" }] }
-                BCombo { id: otpSource; Layout.fillWidth: true; label: qsTr("OTP Kaynağı")
-                    options: [{ text: qsTr("Otomatik (authenticator anahtarı)"), value: "totp" }, { text: qsTr("Her bağlantıda elle gir"), value: "manual" }] }
+                BCombo { id: otpMode; Layout.fillWidth: true; label: qsTr("OTP Type")
+                    options: [{ text: qsTr("Append to password"), value: "append" }, { text: qsTr("Separate prompt (challenge)"), value: "separate" }] }
+                BCombo { id: otpSource; Layout.fillWidth: true; label: qsTr("OTP Source")
+                    options: [{ text: qsTr("Automatic (authenticator key)"), value: "totp" }, { text: qsTr("Enter manually each time"), value: "manual" }] }
             }
             ColumnLayout {
                 Layout.fillWidth: true
@@ -125,8 +125,8 @@ BDialog {
                 spacing: 14
                 RowLayout {
                     spacing: 8
-                    BField { id: uri; Layout.fillWidth: true; label: qsTr("Authenticator Bağlantısı"); placeholder: "otpauth://… veya otpauth-migration://…"; onAccepted: root.importUri() }
-                    BButton { Layout.alignment: Qt.AlignBottom; text: qsTr("İçe Aktar"); onClicked: root.importUri() }
+                    BField { id: uri; Layout.fillWidth: true; label: qsTr("Authenticator Link"); placeholder: "otpauth://… veya otpauth-migration://…"; onAccepted: root.importUri() }
+                    BButton { Layout.alignment: Qt.AlignBottom; text: qsTr("Import"); onClicked: root.importUri() }
                 }
                 // Several accounts in a migration QR: pick one.
                 Flow {
@@ -140,12 +140,12 @@ BDialog {
                 }
                 RowLayout {
                     spacing: 12
-                    BField { id: secret; Layout.fillWidth: true; label: qsTr("Anahtar"); password: true; placeholder: qsTr("Base32") }
-                    BCombo { id: alg; Layout.preferredWidth: 110; label: qsTr("Algoritma")
+                    BField { id: secret; Layout.fillWidth: true; label: qsTr("Key"); password: true; placeholder: qsTr("Base32") }
+                    BCombo { id: alg; Layout.preferredWidth: 110; label: qsTr("Algorithm")
                         options: [{ text: "SHA1", value: "SHA1" }, { text: "SHA256", value: "SHA256" }, { text: "SHA512", value: "SHA512" }] }
-                    BCombo { id: digits; Layout.preferredWidth: 80; label: qsTr("Hane")
+                    BCombo { id: digits; Layout.preferredWidth: 80; label: qsTr("Digits")
                         options: [{ text: "6", value: 6 }, { text: "8", value: 8 }] }
-                    BField { id: period; Layout.preferredWidth: 70; label: qsTr("Süre (Sn)"); field.validator: IntValidator { bottom: 10; top: 300 } }
+                    BField { id: period; Layout.preferredWidth: 70; label: qsTr("Period (Sec)"); field.validator: IntValidator { bottom: 10; top: 300 } }
                 }
                 Rectangle {
                     Layout.fillWidth: true
@@ -158,7 +158,7 @@ BDialog {
                         spacing: 14
                         ColumnLayout {
                             spacing: 2
-                            Text { text: qsTr("Şu Anki Kod"); color: Theme.textSecondary; font.pixelSize: 11 }
+                            Text { text: qsTr("Current Code"); color: Theme.textSecondary; font.pixelSize: 11 }
                             Text { id: codeText; text: "—"; color: Theme.text; font.pixelSize: 22; font.weight: Font.DemiBold; font.family: "Menlo" }
                         }
                         ProgressBar {
@@ -169,7 +169,7 @@ BDialog {
                             contentItem: Item { Rectangle { width: remain.visualPosition * parent.width; height: 4; radius: 2; color: Theme.accent } }
                         }
                         Text {
-                            text: qsTr("Telefondaki kodla aynı olmalı")
+                            text: qsTr("Should match the code on your phone")
                             color: Theme.textMuted; font.pixelSize: 11
                         }
                     }
@@ -183,8 +183,8 @@ BDialog {
         Layout.fillWidth: true
         visible: typeSeg.value === "tailscale"
         spacing: 14
-        BField { id: tsControl; Layout.fillWidth: true; label: qsTr("Control Server"); placeholder: qsTr("Boş bırakılırsa Tailscale (Headscale için URL gir)") }
-        BField { id: tsHost; Layout.fillWidth: true; label: qsTr("Düğüm Adı"); hint: qsTr("İlk bağlantıda Tailscale giriş sayfası açılır.") }
+        BField { id: tsControl; Layout.fillWidth: true; label: qsTr("Control Server"); placeholder: qsTr("Tailscale if empty (enter a URL for Headscale)") }
+        BField { id: tsHost; Layout.fillWidth: true; label: qsTr("Node Name"); hint: qsTr("The Tailscale sign-in page opens on first connection.") }
     }
 
     Text {
@@ -198,7 +198,7 @@ BDialog {
 
     footer: [
         Item { Layout.fillWidth: true },
-        BButton { text: qsTr("İptal"); onClicked: root.close() },
-        BButton { variant: "primary"; text: qsTr("Kaydet"); onClicked: root.save() }
+        BButton { text: qsTr("Cancel"); onClicked: root.close() },
+        BButton { variant: "primary"; text: qsTr("Save"); onClicked: root.save() }
     ]
 }

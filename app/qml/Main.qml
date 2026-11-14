@@ -27,9 +27,9 @@ ApplicationWindow {
             onOpenTunnels: tunnels.open()
             onOpenSettings: settings.open()
             onConfirmDelete: (id, name) => confirm.ask(
-                qsTr("Cihazı Sil"),
-                qsTr("\"%1\" ve kayıtlı önizlemesi silinecek. Bu işlem geri alınamaz.").arg(name),
-                qsTr("Sil"), function() { App.deleteDevice(id) })
+                qsTr("Delete Device"),
+                qsTr("\"%1\" and its saved preview will be deleted. This can't be undone.").arg(name),
+                qsTr("Delete"), function() { App.deleteDevice(id) })
         }
     }
 
