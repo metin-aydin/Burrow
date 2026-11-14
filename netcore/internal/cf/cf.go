@@ -100,7 +100,7 @@ func (t *Tunnel) Prepare(address string) {
 	}
 	t.busy = true
 	t.mu.Unlock()
-	t.status.Set(tunnel.Status{State: tunnel.Starting})
+	t.status.Set(tunnel.Status{State: tunnel.Starting, Step: "app"})
 	go func() {
 		defer func() { t.mu.Lock(); t.busy = false; t.mu.Unlock() }()
 		if err := t.fetchToken(host); err != nil {
@@ -133,7 +133,7 @@ func (t *Tunnel) fetchToken(host string) error {
 			return nil
 		}
 	}
-	t.status.Set(tunnel.Status{State: tunnel.NeedsLogin, Prompt: host})
+	t.status.Set(tunnel.Status{State: tunnel.NeedsLogin, Prompt: host, Step: "login"})
 	nop := zerolog.Nop()
 	data, err := token.RunTransfer(appURL, info.AppAUD, "token", "token", "", true, false, true, false, &nop, "")
 	if err != nil {

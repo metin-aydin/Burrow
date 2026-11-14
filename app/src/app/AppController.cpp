@@ -12,6 +12,7 @@
 #include <QPainter>
 #include <QQmlEngine>
 #include <QSettings>
+#include <QTimer>
 
 #include "app/PreviewProvider.h"
 #include "net/NetCore.h"
@@ -20,6 +21,8 @@
 
 namespace {
 constexpr int kMinPasswordLength = 8;
+// A closed session keeps its tunnel this long, so reconnecting or opening another device is quick.
+constexpr int kTunnelIdleMs = 20 * 1000;
 const char kTouchIdKey[] = "security/touchIdEnabled";
 
 void wipe(QByteArray &b)
@@ -183,6 +186,7 @@ void AppController::shutdown()
 void AppController::lock()
 {
     m_tunnelMgr.stopAll();
+    m_sessionTunnels.clear();
     m_pending.clear();
     for (RdpSession *s : std::as_const(m_sessions)) {
         s->close();
@@ -389,9 +393,9 @@ QString AppController::connectDevice(const QString &id, const QString &username,
     // Cloudflare re-checks the device's Access token on every connect; others connect at once if up.
     if (m_tunnelMgr.isConnected(t->id) && t->type != Model::Tunnel::Type::Cloudflare)
         return startSession(*dev, user, pass, t->id);
-    // Connect as soon as the tunnel is up (see onTunnelState).
+    // Connect as soon as the tunnel is up (see onTunnelState); the UI shows the tunnel's progress.
     m_pending.append({dev->id, user, pass, t->id});
-    emit toast(tr("Connecting %1 through %2…").arg(dev->name, t->name));
+    emit deviceConnecting(dev->id, t->id);
     return {};
 }
 
@@ -427,6 +431,46 @@ void AppController::disconnectTunnel(const QString &tunnelId)
     m_tunnelMgr.stop(tunnelId);
 }
 
+QVariantMap AppController::testTunnel(const QVariantMap &profile, const QString &password, const QString &target)
+{
+    Model::Tunnel t = Model::tunnelFromJson(QJsonObject::fromVariantMap(profile));
+    if (t.id.isEmpty())
+        t.id = Model::newId();
+    if (t.type == Model::Tunnel::Type::GlobalProtect && (t.gpHost.trimmed().isEmpty() || t.gpUsername.trimmed().isEmpty()))
+        return {{"error", tr("Server and username can't be empty.")}};
+    if (t.type == Model::Tunnel::Type::Cloudflare && t.cfBastion.isEmpty() && target.trimmed().isEmpty())
+        return {{"error", tr("Enter a device hostname to test with.")}};
+    m_tunnelMgr.stop(t.id);   // a fresh run every time
+    m_tunnelTesting.insert(t.id);
+    const QString tgt = t.type == Model::Tunnel::Type::Cloudflare
+        ? (target.trimmed().isEmpty() ? t.cfBastion + QStringLiteral(":3389") : target.trimmed() + QStringLiteral(":3389"))
+        : QString();
+    const QString err = m_tunnelMgr.ensure(t, password, tgt);
+    if (!err.isEmpty()) {
+        m_tunnelTesting.remove(t.id);
+        return {{"error", err}};
+    }
+    return {{"id", t.id}};
+}
+
+void AppController::stopTunnelTest(const QString &tunnelId)
+{
+    m_tunnelTesting.remove(tunnelId);
+    stopTunnelIfIdle(tunnelId);
+}
+
+QVariantMap AppController::deviceTunnel(const QString &deviceId) const
+{
+    for (const Model::Device &d : m_store.doc().devices)
+        if (d.id == deviceId)
+            if (const Model::Tunnel *t = m_store.doc().tunnel(d.tunnelId))
+                return {{"id", t->id}, {"name", t->name},
+                        {"type", t->type == Model::Tunnel::Type::Tailscale ? QStringLiteral("tailscale")
+                                 : t->type == Model::Tunnel::Type::Cloudflare ? QStringLiteral("cloudflare")
+                                 : QStringLiteral("globalprotect")}};
+    return {};
+}
+
 QString AppController::tunnelName(const QString &tunnelId) const
 {
     const Model::Tunnel *t = m_store.doc().tunnel(tunnelId);
@@ -454,14 +498,30 @@ void AppController::onTunnelState(const QString &tunnelId, const QString &state,
                 }
         }
     } else if (state == QLatin1String("failed") || state == QLatin1String("stopped")) {
+        bool notified = false;
         for (int i = m_pending.size() - 1; i >= 0; --i)
             if (m_pending.at(i).tunnelId == tunnelId) {
+                emit deviceConnectFailed(m_pending.at(i).deviceId, error);
+                notified = true;
                 m_pending[i].password.fill(QChar(0));
                 m_pending.removeAt(i);
             }
-        if (!error.isEmpty())
+        if (!error.isEmpty() && !notified && !m_tunnelTesting.contains(tunnelId))
             emit toast(tr("%1: %2").arg(tunnelName(tunnelId), error));
     }
+}
+
+void AppController::stopTunnelIfIdle(const QString &tunnelId)
+{
+    if (m_tunnelTesting.contains(tunnelId))
+        return;
+    for (const QString &t : std::as_const(m_sessionTunnels))
+        if (t == tunnelId)
+            return;
+    for (const Pending &p : std::as_const(m_pending))
+        if (p.tunnelId == tunnelId)
+            return;
+    m_tunnelMgr.stop(tunnelId);
 }
 
 QString AppController::startSession(const Model::Device &dev, const QString &user, const QString &pass,
@@ -495,6 +555,8 @@ QString AppController::startSession(const Model::Device &dev, const QString &use
 
     auto *session = new RdpSession(p, this);
     m_sessions.append(session);
+    if (!tunnelId.isEmpty())
+        m_sessionTunnels.insert(session, tunnelId);
     connect(session, &RdpSession::certificateTrusted, this, [this](const QString &devId, const QString &fp) {
         for (Model::Device &d : m_store.doc().devices)
             if (d.id == devId && d.certFingerprint.isEmpty())   // write-once; replace only via forgetCertificate
@@ -502,6 +564,10 @@ QString AppController::startSession(const Model::Device &dev, const QString &use
         persist();
     });
     connect(session, &RdpSession::closed, this, [this](RdpSession *s) {
+        // The VPN only stays up while a session uses it (many gateways allow one session per user).
+        const QString tid = m_sessionTunnels.take(s);
+        if (!tid.isEmpty())
+            QTimer::singleShot(kTunnelIdleMs, this, [this, tid] { stopTunnelIfIdle(tid); });
         const QImage last = s->frame();
         if (!last.isNull() && m_store.isOpen())
             setPreview(s->deviceId(), last);

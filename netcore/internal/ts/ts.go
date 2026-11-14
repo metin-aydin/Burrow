@@ -44,7 +44,7 @@ func Start(id, hostname, controlURL, dir string, store tunnel.BlobStore) (*Tunne
 			UserLogf:   func(string, ...any) {},
 		},
 	}
-	t.status.Set(tunnel.Status{State: tunnel.Starting})
+	t.status.Set(tunnel.Status{State: tunnel.Starting, Step: "start"})
 	ctx, cancel := context.WithCancel(context.Background())
 	t.cancel = cancel
 	go t.run(ctx)
@@ -66,10 +66,11 @@ func (t *Tunnel) run(ctx context.Context) {
 	for {
 		st, err := lc.StatusWithoutPeers(ctx)
 		if err == nil {
-			s := tunnel.Status{State: tunnel.Starting}
+			s := tunnel.Status{State: tunnel.Starting, Step: "start"}
 			switch st.BackendState {
 			case ipn.NeedsLogin.String(), ipn.NeedsMachineAuth.String():
 				s.State = tunnel.NeedsLogin
+				s.Step = "login"
 				s.AuthURL = st.AuthURL
 			case ipn.Running.String():
 				s.State = tunnel.Connected

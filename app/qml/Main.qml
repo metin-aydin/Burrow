@@ -42,6 +42,7 @@ ApplicationWindow {
     Component { id: sessionWindow; SessionWindow {} }
 
     PromptDialog { id: prompt }
+    ConnectProgress { id: connectProgress; onRetry: (id) => win.startSession(id, "", "") }
     TailscaleLoginDialog { id: tsLogin }
 
     function askTunnelPassword(tunnelId, name, retryDevice, user, pass) {
@@ -80,6 +81,12 @@ ApplicationWindow {
             else if (App.demoOpen === "settings") settings.open()
             else if (App.demoOpen === "tunnel") tunnelEditor.openFor(App.tunnels.count ? "" : "")
             else if (App.demoOpen === "tunnel-otp") { tunnelEditor.openFor(""); tunnelEditor.demoExpand() }
+            else if (App.demoOpen === "tunnel-test") {
+                for (let i = 0; i < App.tunnels.count; ++i) {
+                    const id = App.tunnels.data(App.tunnels.index(i, 0), 257)
+                    if (App.tunnel(id).type === "tailscale") { tunnelEditor.openFor(id); tunnelEditor.startTest() }
+                }
+            }
             else if (App.demoOpen === "tunnel-cf") { tunnelEditor.openFor(""); tunnelEditor.demoCloudflare() }
             else if (App.demoOpen === "tunnel-otp-small") { win.height = 560; tunnelEditor.openFor(""); tunnelEditor.demoExpand() }
         }
@@ -88,7 +95,13 @@ ApplicationWindow {
     Connections {
         target: App
         function onToast(message) { toast.show(message) }
-        function onSessionOpened(session) { sessionWindow.createObject(null, { session: session }) }
+        function onSessionOpened(session) {
+            if (connectProgress.visible && connectProgress.deviceId === session.deviceId)
+                connectProgress.close()
+            sessionWindow.createObject(null, { session: session })
+        }
+        function onDeviceConnecting(deviceId, tunnelId) { connectProgress.show(deviceId) }
+        function onDeviceConnectFailed(deviceId, error) { connectProgress.fail(deviceId, error) }
         function onTunnelLoginRequired(tunnelId, name, url) { tsLogin.show(name, url) }
         function onTunnelPasswordRequired(tunnelId, name) { win.askTunnelPassword(tunnelId, name, "", "", "") }
         function onTunnelOtpRequired(tunnelId, name, label) {
@@ -97,7 +110,7 @@ ApplicationWindow {
         }
         function onStateChanged() {
             if (App.state !== "unlocked") {
-                deviceEditor.close(); tunnels.close(); tunnelEditor.close(); prompt.close(); tsLogin.close(); settings.close(); confirm.close()
+                deviceEditor.close(); tunnels.close(); tunnelEditor.close(); prompt.close(); tsLogin.close(); connectProgress.close(); settings.close(); confirm.close()
             }
         }
     }

@@ -4,6 +4,14 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Arayüz: eşit genişlikte segment/sekmeler, diyalog altında boşluk, yeni yay animasyonlu yükleme simgesi (`Spinner`),
+  çarkın yanında kilit butonu, kartta oynat katmanı kaldırıldı ve menü açıkken kart büyük kalıyor.
+- Tünel yaşam döngüsü: tünel yalnız bağlanırken açılıyor, son oturum kapandıktan 20 sn sonra kapanıyor; aynı tüneli
+  kullanan cihazlar aynı oturumu paylaşıyor (VPN'de tek oturum). Tünel Profilleri'nde elle "Bağlan" kaldırıldı.
+- Bağlantı testi + adım adım ilerleme: Go durumuna `step`/`wait` (OTP penceresi geri sayımı); `ConnectionSteps`
+  (onay animasyonu, yay, geri sayım halkası), tünel düzenleyicide "Bağlantıyı Test Et" (GP başarılı olunca tüneli hemen
+  kapatır), tünel beklenirken `ConnectProgress` diyaloğu (hata + Tekrar Dene), oturum penceresinde RDP aşamaları
+  (bağlanma → sertifika → giriş → masaüstü). Tailscale testiyle görsel olarak doğrulandı.
 - ✅✅ **Uçtan uca hedefe ulaşıldı:** Burrow kendi içinde GlobalProtect tüneli açıp (sudo/sistem VPN'i yok, çift OTP otomatik)
   iş bilgisayarına (Ubuntu 24.04, GNOME Remote Desktop) kendi RDP penceresinde bağlandı. Önceki NLA hatası yanlış
   girilen paylaşım bilgilerindendi.

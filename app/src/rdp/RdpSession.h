@@ -23,6 +23,7 @@ class RdpSession : public QObject
     Q_PROPERTY(QString title READ title CONSTANT)
     Q_PROPERTY(QString state READ state NOTIFY stateChanged)       // connecting | connected | closed
     Q_PROPERTY(QString error READ error NOTIFY stateChanged)
+    Q_PROPERTY(QString phase READ phase NOTIFY phaseChanged)   // connecting | certificate | signing_in | opening | connected
     Q_PROPERTY(QSize desktopSize READ desktopSize NOTIFY desktopSizeChanged)
 public:
     struct Params
@@ -49,6 +50,8 @@ public:
     QString title() const { return m_p.title; }
     QString state() const { return m_state; }
     QString error() const { return m_error; }
+    QString phase() const { return m_phase; }
+    void setPhase(const QString &phase);   // any thread
     QSize desktopSize() const;
 
     void start();
@@ -80,6 +83,7 @@ public:
 
 signals:
     void stateChanged();
+    void phaseChanged();
     void desktopSizeChanged();
     void frameUpdated(const QRect &rect);
     void certificatePrompt(const QString &address, const QString &fingerprint);
@@ -100,6 +104,7 @@ private:
     std::atomic_bool m_stop{false};
     QString m_state = QStringLiteral("connecting");
     QString m_error;
+    QString m_phase = QStringLiteral("connecting");
     mutable QMutex m_frameLock;
     QImage m_frame;
     KeyMapper m_keys;

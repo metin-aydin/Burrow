@@ -59,9 +59,10 @@ BDialog {
                     font.pixelSize: 12
                 }
                 BButton {
-                    text: parent.st.state && parent.st.state !== "failed" ? qsTr("Disconnect") : qsTr("Connect")
-                    onClicked: parent.st.state && parent.st.state !== "failed" ? App.disconnectTunnel(model.tunnelId)
-                                                                                : App.connectTunnel(model.tunnelId)
+                    // Tunnels open by themselves when a device connects; here they can only be closed.
+                    visible: !!parent.st.state && parent.st.state !== "failed"
+                    text: qsTr("Disconnect")
+                    onClicked: App.disconnectTunnel(model.tunnelId)
                 }
                 BButton { variant: "ghost"; iconName: "edit"; onClicked: root.editTunnel(model.tunnelId) }
                 BButton {

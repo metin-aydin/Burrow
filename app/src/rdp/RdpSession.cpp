@@ -92,6 +92,7 @@ BOOL preConnect(freerdp *instance)
 
 BOOL postConnect(freerdp *instance)
 {
+    sessionOf(instance->context)->setPhase(QStringLiteral("opening"));
     if (!gdi_init(instance, PIXEL_FORMAT_BGRX32))
         return FALSE;
     instance->context->update->EndPaint = endPaint;
@@ -288,6 +289,7 @@ void RdpSession::run()
         return;
     }
     m_instance = instance;
+    setPhase(QStringLiteral("connected"));
     setState(QStringLiteral("connected"));
 
     while (!m_stop && !freerdp_shall_disconnect_context(ctx)) {
@@ -358,12 +360,15 @@ unsigned RdpSession::onVerifyCertificate(const QString &fingerprint)
         const bool match = known.contains(QLatin1Char('|'))
             ? known == pin
             : known == fingerprint.trimmed().toLower();   // legacy bare fingerprint
-        if (match)
+        if (match) {
+            setPhase(QStringLiteral("signing_in"));
             return 2;
+        }
         m_certChanged = true;
         return 0;
     }
     // No pin yet: ask the user and wait (up to 2 minutes).
+    setPhase(QStringLiteral("certificate"));
     QMutexLocker lock(&m_certLock);
     m_certAnswer = -1;
     QMetaObject::invokeMethod(this, [this, fingerprint] {
@@ -374,6 +379,7 @@ unsigned RdpSession::onVerifyCertificate(const QString &fingerprint)
     if (m_certAnswer != 1 || m_stop)
         return 0;
     emit certificateTrusted(m_p.deviceId, pin);
+    setPhase(QStringLiteral("signing_in"));
     return 2; // accept for this session; Burrow keeps the pin itself
 }
 
@@ -511,4 +517,14 @@ int RdpSession::connectSocket(const char *hostname, int port)
         return -1;
     }
     return fds[0];
+}
+
+void RdpSession::setPhase(const QString &phase)
+{
+    QMetaObject::invokeMethod(this, [this, phase] {
+        if (m_phase == phase)
+            return;
+        m_phase = phase;
+        emit phaseChanged();
+    }, Qt::QueuedConnection);
 }

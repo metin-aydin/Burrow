@@ -27,6 +27,8 @@ type Status struct {
 	Error   string `json:"error,omitempty"`
 	Address string `json:"address,omitempty"` // this side's address inside the tunnel
 	Prompt  string `json:"prompt,omitempty"`  // label of a pending OTP prompt
+	Step    string `json:"step,omitempty"`    // current step id, for the progress UI
+	Wait    int    `json:"wait,omitempty"`    // seconds left while waiting (e.g. next OTP window)
 }
 
 // Tunnel is a userspace network path to a private network.

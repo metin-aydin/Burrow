@@ -2,6 +2,7 @@
 
 #include <QImage>
 #include <QObject>
+#include <QSet>
 #include <QTranslator>
 #include <QVariantMap>
 
@@ -79,6 +80,11 @@ public:
     Q_INVOKABLE void connectTunnel(const QString &tunnelId);
     Q_INVOKABLE void disconnectTunnel(const QString &tunnelId);
     Q_INVOKABLE QString tunnelName(const QString &tunnelId) const;
+    // Test a (possibly unsaved) profile from the editor: starts the tunnel and reports progress in
+    // tunnelStates[id]. `target` is a device address for Cloudflare. Returns the id used or an error.
+    Q_INVOKABLE QVariantMap testTunnel(const QVariantMap &profile, const QString &password, const QString &target);
+    Q_INVOKABLE void stopTunnelTest(const QString &tunnelId);
+    Q_INVOKABLE QVariantMap deviceTunnel(const QString &deviceId) const;   // {id, name, type} or {}
     Q_INVOKABLE void forgetCertificate(const QString &id);
 
     // Stores a preview image for a device (called by the RDP session on close).
@@ -109,6 +115,8 @@ signals:
     void tunnelLoginRequired(const QString &tunnelId, const QString &name, const QString &url);
     void tunnelOtpRequired(const QString &tunnelId, const QString &name, const QString &prompt);
     void tunnelPasswordRequired(const QString &tunnelId, const QString &name);
+    void deviceConnecting(const QString &deviceId, const QString &tunnelId);   // waiting for the tunnel
+    void deviceConnectFailed(const QString &deviceId, const QString &error);
 
 private:
     QString finishUnlock(VaultStore::Result r);
@@ -118,6 +126,7 @@ private:
     QString startSession(const Model::Device &dev, const QString &user, const QString &pass,
                          const QString &tunnelId);
     void onTunnelState(const QString &tunnelId, const QString &state, const QString &error);
+    void stopTunnelIfIdle(const QString &tunnelId);
     struct Pending { QString deviceId, username, password, tunnelId; };
 
     VaultStore m_store;
@@ -127,6 +136,8 @@ private:
     Updater m_updater;
     TunnelManager m_tunnelMgr{&m_store};
     QList<Pending> m_pending;
+    QHash<RdpSession *, QString> m_sessionTunnels;   // session -> tunnel it runs through
+    QSet<QString> m_tunnelTesting;                    // tunnels opened by "Test Connection"
     QString m_demoOpen;
     QList<RdpSession *> m_sessions;
     QTranslator m_translator;

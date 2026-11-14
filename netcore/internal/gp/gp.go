@@ -123,9 +123,20 @@ func Start(cfg Config) (*Tunnel, error) {
 	}
 	t := &Tunnel{cfg: cfg, otpCh: make(chan string, 1), done: make(chan struct{})}
 	t.handle = cgo.NewHandle(t)
-	t.status.Set(tunnel.Status{State: tunnel.Starting})
+	t.status.Set(tunnel.Status{State: tunnel.Starting, Step: "connect"})
 	go t.run()
 	return t, nil
+}
+
+// step reports progress while connecting (kept until the next step or a final state).
+func (t *Tunnel) step(id string) {
+	t.status.Update(func(s *tunnel.Status) {
+		if s.State == tunnel.Starting || s.State == tunnel.NeedsOTP {
+			s.State = tunnel.Starting
+			s.Step = id
+			s.Wait = 0
+		}
+	})
 }
 
 func (t *Tunnel) fail(msg string) {
@@ -164,10 +175,12 @@ func (t *Tunnel) run() {
 		return
 	}
 
+	t.step("connect")
 	if C.openconnect_obtain_cookie(t.vpn) != 0 {
 		t.fail(t.loginError())
 		return
 	}
+	t.step("tunnel")
 	if C.openconnect_make_cstp_connection(t.vpn) != 0 {
 		t.fail(t.errorOr("couldn't open the tunnel"))
 		return
@@ -258,7 +271,7 @@ func (t *Tunnel) loginError() string {
 // when needed (GlobalProtect rejects a reused code at the gateway step).
 func (t *Tunnel) nextOTP(prompt string) (string, error) {
 	if t.cfg.OTPSource == "manual" {
-		t.status.Set(tunnel.Status{State: tunnel.NeedsOTP, Prompt: prompt})
+		t.status.Set(tunnel.Status{State: tunnel.NeedsOTP, Prompt: prompt, Step: "otp_manual"})
 		select {
 		case code := <-t.otpCh:
 			t.status.Set(tunnel.Status{State: tunnel.Starting})
@@ -268,6 +281,7 @@ func (t *Tunnel) nextOTP(prompt string) (string, error) {
 		}
 	}
 	deadline := time.Now().Add(time.Duration(t.cfg.TOTP.Period+5) * time.Second)
+	waiting := false
 	for {
 		code, err := t.cfg.TOTP.Code(time.Now())
 		if err != nil {
@@ -280,8 +294,15 @@ func (t *Tunnel) nextOTP(prompt string) (string, error) {
 		}
 		t.mu.Unlock()
 		if fresh {
+			if waiting {
+				t.status.Update(func(s *tunnel.Status) { s.Wait = 0 })
+			}
 			return code, nil
 		}
+		// Same code as the previous form: wait for the next TOTP window and show the countdown.
+		waiting = true
+		left := int(t.cfg.TOTP.Remaining(time.Now()).Seconds()) + 1
+		t.status.Update(func(s *tunnel.Status) { s.Step = "otp_wait"; s.Wait = left })
 		if time.Now().After(deadline) {
 			return "", errors.New("no new OTP")
 		}
@@ -290,6 +311,9 @@ func (t *Tunnel) nextOTP(prompt string) (string, error) {
 }
 
 func (t *Tunnel) authForm(form *C.struct_oc_auth_form) C.int {
+	if form.authgroup_opt != nil && !hasPasswordOpt(form) {
+		t.step("gateway")
+	}
 	if form.authgroup_opt != nil && t.cfg.AuthGroup != "" {
 		opt := &form.authgroup_opt.form
 		if !t.selectChoice(opt, t.cfg.AuthGroup) {
@@ -320,6 +344,11 @@ func (t *Tunnel) authForm(form *C.struct_oc_auth_form) C.int {
 		t.passwordForms++
 		n := t.passwordForms
 		t.mu.Unlock()
+		if n == 1 {
+			t.step("portal")
+		} else {
+			t.step("gateway")
+		}
 		debugf("password form #%d", n)
 		if n > 2 {
 			debugf("third password prompt: login rejected, cancelling (no retry)")
@@ -388,6 +417,15 @@ func (t *Tunnel) authForm(form *C.struct_oc_auth_form) C.int {
 		C.free(unsafe.Pointer(cv))
 	}
 	return C.OC_FORM_RESULT_OK
+}
+
+func hasPasswordOpt(form *C.struct_oc_auth_form) bool {
+	for opt := form.opts; opt != nil; opt = C.burrow_oc_opt_next(opt) {
+		if opt._type == C.OC_FORM_OPT_PASSWORD || opt._type == C.OC_FORM_OPT_TOKEN {
+			return true
+		}
+	}
+	return false
 }
 
 func (t *Tunnel) selectChoice(opt *C.struct_oc_form_opt, want string) bool {

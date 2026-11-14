@@ -2,6 +2,7 @@ import QtQuick
 import Burrow.Core
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
+import "Steps.js" as Steps
 
 // Add / edit a tunnel profile (SPEC §3).
 BDialog {
@@ -57,6 +58,54 @@ BDialog {
         error = ""
         if (list.length === 1) applyAccount(list[0])
         else accounts = list
+    }
+
+    // --- Connection test -------------------------------------------------------------
+    property string testId: ""
+    property var testResult: ({})      // last status seen, kept after the test tunnel stops
+    property bool testing: testId !== "" && !testFinished
+    property bool testFinished: false
+    StepLabels { id: labels }
+
+    function profileMap() {
+        return Object.assign({}, t, {
+            name: nameField.text, type: typeSeg.value,
+            gp: { host: gpHost.text, username: gpUser.text, savePassword: gpSave.checked,
+                  password: gpSave.checked ? gpPw.text : "", authGroup: gpGroup.text,
+                  otpEnabled: otpOn.checked, otpMode: otpMode.value, otpSource: otpSource.value,
+                  totp: currentTotp() },
+            tailscale: { controlUrl: tsControl.text, hostname: tsHost.text },
+            cloudflare: { bastion: cfBastion.text.trim() }
+        })
+    }
+    function startTest() {
+        error = ""
+        testFinished = false
+        testResult = ({})
+        const r = App.testTunnel(profileMap(), gpPw.text, cfTestHost.text)
+        if (r.error) { error = r.error; return }
+        testId = r.id
+        t = Object.assign({}, t, { id: r.id })   // saving keeps the same profile id (and its state)
+    }
+    function stopTest() {
+        if (testId) App.stopTunnelTest(testId)
+        testId = ""
+        testFinished = false
+    }
+    onClosed: stopTest()
+    Connections {
+        target: App
+        function onTunnelStatesChanged() {
+            if (!root.testId || root.testFinished) return
+            const st = App.tunnelStates[root.testId]
+            if (!st) return
+            root.testResult = st
+            if (st.state === "connected" || st.state === "failed") {
+                root.testFinished = true
+                // A working GlobalProtect session is closed right away: many gateways allow one per user.
+                App.stopTunnelTest(root.testId)
+            }
+        }
     }
 
     function save() {
@@ -212,6 +261,71 @@ BDialog {
             label: qsTr("Bastion Hostname")
             placeholder: qsTr("Optional, e.g. bastion.example.com")
             hint: qsTr("With a bastion, devices use their internal address and Burrow reaches them through this one Access application.")
+        }
+    }
+
+    // --- Test panel ---------------------------------------------------------------------
+    Rectangle {
+        Layout.fillWidth: true
+        Layout.topMargin: 4
+        radius: Theme.radius
+        color: Theme.surfaceSunken
+        implicitHeight: testCol.implicitHeight + 28
+        ColumnLayout {
+            id: testCol
+            anchors.left: parent.left; anchors.right: parent.right; anchors.top: parent.top
+            anchors.margins: 14
+            spacing: 12
+            RowLayout {
+                spacing: 10
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 2
+                    Text { text: qsTr("Test Connection"); color: Theme.text; font.pixelSize: 13; font.weight: Font.DemiBold }
+                    Text {
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                        color: Theme.textSecondary
+                        font.pixelSize: 12
+                        text: typeSeg.value === "globalprotect"
+                              ? qsTr("Signs in once and closes the tunnel again. A rejected login is never retried.")
+                              : qsTr("Checks that the tunnel can be opened with these settings.")
+                    }
+                }
+                BButton {
+                    text: root.testing ? qsTr("Stop") : qsTr("Run Test")
+                    variant: root.testing ? "secondary" : "primary"
+                    onClicked: root.testing ? root.stopTest() : root.startTest()
+                }
+            }
+            BField {
+                id: cfTestHost
+                visible: typeSeg.value === "cloudflare" && cfBastion.text.trim() === ""
+                Layout.fillWidth: true
+                label: qsTr("Device Hostname")
+                placeholder: "rdp.example.com"
+            }
+            ConnectionSteps {
+                Layout.fillWidth: true
+                visible: root.testId !== ""
+                steps: Steps.tunnelSteps(typeSeg.value, labels)
+                current: Steps.tunnelCurrent(root.testResult)
+                failed: root.testResult.state === "failed"
+                wait: root.testResult.wait || 0
+                waitTotal: parseInt(period.text) || 30
+                detail: root.testResult.state === "needs_login" ? qsTr("Finish signing in in your browser.") : ""
+            }
+            Text {
+                visible: root.testFinished
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                font.pixelSize: 13
+                font.weight: Font.Medium
+                color: root.testResult.state === "connected" ? Theme.success : Theme.danger
+                text: root.testResult.state === "connected"
+                      ? qsTr("Connection works. The test tunnel was closed.")
+                      : (root.testResult.error || qsTr("The connection failed."))
+            }
         }
     }
 

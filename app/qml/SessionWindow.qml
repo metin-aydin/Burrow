@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Window
 import QtQuick.Layouts
+import "Steps.js" as Steps
 import Burrow.Core
 
 // One remote desktop in its own window.
@@ -26,20 +27,44 @@ Window {
         Component.onCompleted: forceActiveFocus()
     }
 
-    // Connecting overlay
+    // Connecting overlay: what is happening, step by step.
+    StepLabels { id: labels }
     Rectangle {
         anchors.fill: parent
         color: Theme.bg
         visible: !!win.session && win.session.state === "connecting"
-        Column {
+        opacity: visible ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: 200 } }
+        Rectangle {
             anchors.centerIn: parent
-            spacing: 14
-            Spinner { anchors.horizontalCenter: parent.horizontalCenter; size: 44; running: parent.visible }
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: qsTr("Connecting to %1…").arg(win.session ? win.session.title : "")
-                color: Theme.text
-                font.pixelSize: 15
+            width: 380
+            height: steps.implicitHeight + 92
+            radius: 18
+            color: Theme.surface
+            border.color: Theme.border
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 24
+                spacing: 16
+                RowLayout {
+                    spacing: 12
+                    Image { source: "../resources/icons/256x256.png"; Layout.preferredWidth: 32; Layout.preferredHeight: 32; sourceSize: Qt.size(64, 64) }
+                    Text {
+                        Layout.fillWidth: true
+                        text: win.session ? win.session.title : ""
+                        color: Theme.text
+                        font.pixelSize: 17
+                        font.weight: Font.DemiBold
+                        elide: Text.ElideRight
+                    }
+                }
+                ConnectionSteps {
+                    id: steps
+                    Layout.fillWidth: true
+                    steps: Steps.rdpSteps(labels, win.session ? win.session.title : "")
+                    current: win.session ? win.session.phase : ""
+                    detail: win.session && win.session.phase === "certificate" ? qsTr("Confirm the certificate to continue.") : ""
+                }
             }
         }
     }
