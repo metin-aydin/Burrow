@@ -1,0 +1,26 @@
+# Build output
+/build/
+/out/
+*.o
+*.a
+*.dylib
+*.so
+*.dll
+
+# Go
+/netcore/bin/
+
+# Qt / CMake
+CMakeLists.txt.user*
+CMakeCache.txt
+CMakeFiles/
+compile_commands.json
+
+# macOS
+.DS_Store
+
+# Secrets (never commit)
+*.p12
+*.p8
+*.pem
+.env

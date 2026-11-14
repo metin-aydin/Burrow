@@ -1,0 +1,113 @@
+# Runs when development is merged into master (ADR 0002):
+# compute version -> build -> sign + notarize -> package -> GitHub Release.
+# Sparkle appcast generation is added together with the in-app updater.
+name: Release
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: macos-15
+    env:
+      # Secrets can't be read in step-level `if:`; expose presence flags instead.
+      HAS_SIGNING: ${{ secrets.APPLE_CERT_P12 != '' && secrets.APPLE_TEAM_ID != '' }}
+      HAS_NOTARY: ${{ secrets.APPLE_NOTARY_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute next version
+        id: version
+        run: |
+          v=$(bash .github/scripts/next-version.sh)
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "Next version: $v"
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: netcore/go.mod
+
+      - name: Install dependencies
+        run: brew install cmake ninja qt freerdp
+
+      - name: Build
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix qt)" \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DGREMOTE_VERSION=${{ steps.version.outputs.version }}
+          cmake --build build
+
+      - name: Bundle dependencies
+        run: |
+          "$(brew --prefix qt)/bin/macdeployqt" build/app/gremote.app -always-overwrite
+
+      - name: Import signing certificate
+        if: env.HAS_SIGNING == 'true'
+        env:
+          APPLE_CERT_P12: ${{ secrets.APPLE_CERT_P12 }}
+          APPLE_CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+        run: |
+          kc="$RUNNER_TEMP/signing.keychain-db"
+          kcpass=$(uuidgen)
+          echo "$APPLE_CERT_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$kcpass" "$kc"
+          security set-keychain-settings -lut 21600 "$kc"
+          security unlock-keychain -p "$kcpass" "$kc"
+          security import "$RUNNER_TEMP/cert.p12" -P "$APPLE_CERT_PASSWORD" -A -t cert -f pkcs12 -k "$kc"
+          security set-key-partition-list -S apple-tool:,apple: -k "$kcpass" "$kc"
+          security list-keychains -d user -s "$kc" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/cert.p12"
+
+      - name: Sign
+        if: env.HAS_SIGNING == 'true'
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          codesign --force --deep --options runtime --timestamp \
+            --sign "Developer ID Application" build/app/gremote.app
+          codesign --verify --deep --strict build/app/gremote.app
+
+      - name: Package
+        run: |
+          v=${{ steps.version.outputs.version }}
+          mkdir -p dist
+          ditto -c -k --keepParent build/app/gremote.app "dist/gremote-$v-mac.zip"
+          hdiutil create -volname gremote -srcfolder build/app/gremote.app -ov -format UDZO "dist/gremote-$v-mac.dmg"
+
+      - name: Notarize
+        if: env.HAS_SIGNING == 'true' && env.HAS_NOTARY == 'true'
+        env:
+          APPLE_NOTARY_KEY: ${{ secrets.APPLE_NOTARY_KEY }}
+          APPLE_NOTARY_KEY_ID: ${{ secrets.APPLE_NOTARY_KEY_ID }}
+          APPLE_NOTARY_ISSUER: ${{ secrets.APPLE_NOTARY_ISSUER }}
+        run: |
+          v=${{ steps.version.outputs.version }}
+          echo "$APPLE_NOTARY_KEY" > "$RUNNER_TEMP/notary.p8"
+          xcrun notarytool submit "dist/gremote-$v-mac.dmg" \
+            --key "$RUNNER_TEMP/notary.p8" --key-id "$APPLE_NOTARY_KEY_ID" \
+            --issuer "$APPLE_NOTARY_ISSUER" --wait
+          xcrun stapler staple "dist/gremote-$v-mac.dmg"
+          rm "$RUNNER_TEMP/notary.p8"
+
+      - name: Checksums
+        run: cd dist && shasum -a 256 * > SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v=${{ steps.version.outputs.version }}
+          git tag "v$v"
+          git push origin "v$v"
+          gh release create "v$v" dist/* --title "gremote $v" --generate-notes

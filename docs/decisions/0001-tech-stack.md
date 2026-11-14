@@ -1,0 +1,59 @@
+# ADR 0001 — Teknoloji yığını
+
+- **Durum:** KABUL EDİLDİ (2026-11-14)
+- **Tarih:** 2026-11-14
+- **Araştırma:** [RDP motoru + UI](../research/2026-11-14-rdp-engine-ui.md),
+  [Tüneller + TOTP](../research/2026-11-14-tunnels-totp.md)
+
+## Bağlam
+Uygulama içi (userspace) GlobalProtect + Tailscale tüneli, uygulama penceresinde çizilen RDP,
+sekme/pencere çoklu monitör, Mac + Windows + Ubuntu. Bkz. [SPEC](../SPEC.md).
+
+## Bulgulardan çıkan sabitler
+- **Tailscale → Go zorunlu.** Kullanılabilir tek gömülü Tailscale `tsnet` (Go). Rust sürümü
+  kullanılamaz durumda, C API (libtailscale) Windows'ta yok.
+- **GlobalProtect → libopenconnect.** Olgun tek açık kaynak GP istemcisi. Windows'ta userspace
+  için küçük bir yama gerekiyor.
+- Bu yüzden hangi arayüz/RDP yığını seçilirse seçilsin, ağ katmanı bir **Go "netcore"** olur.
+
+## Önerilen mimari
+```
+┌──────────────── gremote uygulaması ────────────────┐
+│  Arayüz + RDP (Qt 6 / C++ + FreeRDP 3)             │
+│     │  RDP TCP                                      │
+│     ▼                                               │
+│  Go netcore (c-shared kütüphane)                    │
+│   ├─ tsnet (Tailscale, userspace)                   │
+│   ├─ libopenconnect (GP) → gVisor netstack          │
+│   └─ 127.0.0.1:rastgele port → tünel                │
+└─────────────────────────────────────────────────────┘
+```
+
+## Seçenekler
+| | A: Qt 6 + FreeRDP 3 (önerilen) | B: Rust + IronRDP + wgpu |
+|---|---|---|
+| RDP olgunluğu | En kapsamlı; AVC444, RemoteFX, Kerberos, Gateway | Hızla gelişiyor; **AVC444 yok**, EGFX hataları açık |
+| Çoklu monitör | Var; SDL3 istemcisi monitör başına pencere açıyor (referans) | Protokol desteği var; masaüstünde uçtan uca kanıtlanmamış |
+| GPU çizim | Hazır HW decoder'lar (VideoToolbox, MF, VAAPI) + Qt RHI | Tüm çizimi biz yazarız |
+| Güvenlik | C, sık CVE | Rust, bellek güvenli |
+| Derleme | Ağır (OpenSSL, FFmpeg, codec lisansı) | `cargo` ile kolay |
+| Risk | Multimon kodu genç; derleme | Eksik özellikler geç ortaya çıkabilir; API kırılmaları |
+
+Orta yol: RDP motorunu bir arayüzün arkasına koymak; FreeRDP ile çıkmak, IronRDP olgunlaşınca
+ikinci motor olarak eklemek.
+
+## Açık sorular (karar için)
+1. RDP motoru: FreeRDP mi, IronRDP mi?
+2. Proje açık kaynak mı, kapalı kaynak mı? (Qt LGPL, openconnect LGPL, H.264 lisansı etkiler)
+3. Platform önceliği: hangi işletim sistemi önce? (Windows'ta openconnect yaması gerekiyor)
+
+## Karar (2026-11-14, kullanıcıyla birlikte)
+1. **RDP motoru: FreeRDP 3.** Arayüz: **Qt 6 (C++)**. RDP motoru bir soyutlama katmanı arkasında
+   tutulur; ileride IronRDP ikinci motor olarak eklenebilir.
+2. **Ağ katmanı: Go netcore** (c-shared): tsnet + libopenconnect (dinamik bağlı) + gVisor netstack.
+3. **Proje açık kaynak.** Bağımlılıklar buna uygun: FreeRDP Apache-2.0, Qt LGPL-3 (dinamik),
+   libopenconnect LGPL-2.1 (dinamik), tsnet BSD-3, gVisor Apache-2.0. **Proje lisansı: MIT**
+   (kullanıcı seçimi, 2026-11-14). LGPL kütüphaneler dinamik bağlanır ve dağıtımda kaynak/lisans
+   bildirimleri eklenir.
+4. **Platform sırası: önce macOS**, sonra Ubuntu, en son Windows (libopenconnect tun-win32 yaması gerekir).
+   macOS'ta H.264 için sistemin VideoToolbox decoder'ı kullanılır (FFmpeg/codec lisansı derdi yok).
