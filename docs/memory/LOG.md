@@ -4,6 +4,8 @@ En yeni kayıt en üstte.
 
 ## 2026-11-14
 
+- İlk push: `development` dalı `github.com/metin-aydin/Burrow`'a gönderildi (4 commit). `master` henüz yok;
+  varsayılan dal/master koruması ve repo açıklaması GitHub MCP bağlanınca ayarlanacak.
 - Input etiketleri de baş harfleri büyük yapıldı ("Kullanıcı Adı", "Ana Şifre (Tekrar)"); kural kaydı
   güncellendi. Tam genişlikteki butonlarda metin ortalandı.
 - **Arayüz QML'e taşındı (ADR 0005 KABUL):** kullanıcı B (kart galerisi) tasarımını seçti, kartlarda son ekran
