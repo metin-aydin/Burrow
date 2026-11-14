@@ -31,6 +31,8 @@ QtObject {
     readonly property color gpSoft:        dark ? "#3A1C1E" : "#FBE5E5"
     readonly property color ts:            dark ? "#5EEAD4" : "#0F8A7A"
     readonly property color tsSoft:        dark ? "#13332F" : "#DDF4F0"
+    readonly property color cf:            dark ? "#FBA65C" : "#D9670F"
+    readonly property color cfSoft:        dark ? "#3A2611" : "#FDEBD9"
 
     readonly property int radius: 10
     readonly property int radiusLarge: 16

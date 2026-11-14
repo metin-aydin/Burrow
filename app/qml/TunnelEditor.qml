@@ -28,6 +28,7 @@ BDialog {
         issuer = totp.issuer || ""; account = totp.account || ""
         uri.text = ""
         tsControl.text = ts.controlUrl || ""; tsHost.text = ts.hostname || "burrow"
+        cfBastion.text = (t.cloudflare || {}).bastion || ""
         error = ""
         open()
         nameField.field.forceActiveFocus()
@@ -37,6 +38,7 @@ BDialog {
 
     // Development: show every section for screenshots.
     function demoExpand() { otpOn.checked = true; otpSource.value = "totp" }
+    function demoCloudflare() { typeSeg.value = "cloudflare"; nameField.text = qsTr("Home Lab") }
 
     function currentTotp() {
         return { secret: secret.text, algorithm: alg.value, digits: digits.value,
@@ -64,7 +66,8 @@ BDialog {
                   password: gpSave.checked ? gpPw.text : "", authGroup: gpGroup.text,
                   otpEnabled: otpOn.checked, otpMode: otpMode.value, otpSource: otpSource.value,
                   totp: currentTotp() },
-            tailscale: { controlUrl: tsControl.text, hostname: tsHost.text }
+            tailscale: { controlUrl: tsControl.text, hostname: tsHost.text },
+            cloudflare: { bastion: cfBastion.text.trim() }
         })
         const err = App.saveTunnel(m)
         if (err) { error = err; return }
@@ -90,7 +93,8 @@ BDialog {
             Text { text: qsTr("Type"); color: Theme.textSecondary; font.pixelSize: 12; font.weight: Font.Medium }
             Segmented {
                 id: typeSeg
-                options: [{ text: "GlobalProtect", value: "globalprotect" }, { text: "Tailscale", value: "tailscale" }]
+                options: [{ text: "GlobalProtect", value: "globalprotect" }, { text: "Tailscale", value: "tailscale" },
+                          { text: "Cloudflare", value: "cloudflare" }]
             }
         }
     }
@@ -188,6 +192,27 @@ BDialog {
         spacing: 14
         BField { id: tsControl; Layout.fillWidth: true; label: qsTr("Control Server"); placeholder: qsTr("Tailscale if empty (enter a URL for Headscale)") }
         BField { id: tsHost; Layout.fillWidth: true; label: qsTr("Node Name"); hint: qsTr("The Tailscale sign-in page opens on first connection.") }
+    }
+
+    // --- Cloudflare ----------------------------------------------------------------
+    ColumnLayout {
+        Layout.fillWidth: true
+        visible: typeSeg.value === "cloudflare"
+        spacing: 14
+        Text {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            color: Theme.textSecondary
+            font.pixelSize: 12
+            text: qsTr("Publish the computer's RDP port with cloudflared and protect it with a Cloudflare Access application (free Zero Trust plan). Each device's address is then its Access hostname, e.g. rdp.example.com. You sign in once in the browser; the token is kept in the encrypted vault.")
+        }
+        BField {
+            id: cfBastion
+            Layout.fillWidth: true
+            label: qsTr("Bastion Hostname")
+            placeholder: qsTr("Optional, e.g. bastion.example.com")
+            hint: qsTr("With a bastion, devices use their internal address and Burrow reaches them through this one Access application.")
+        }
     }
 
     Text {

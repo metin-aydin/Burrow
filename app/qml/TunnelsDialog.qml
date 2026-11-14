@@ -27,16 +27,16 @@ BDialog {
                 spacing: 12
                 Rectangle {
                     width: 34; height: 34; radius: 10
-                    color: model.type === "tailscale" ? Theme.tsSoft : Theme.gpSoft
-                    Icon { anchors.centerIn: parent; name: model.type === "tailscale" ? "globe" : "shield"; size: 17
-                           color: model.type === "tailscale" ? Theme.ts : Theme.gp }
+                    color: model.type === "tailscale" ? Theme.tsSoft : model.type === "cloudflare" ? Theme.cfSoft : Theme.gpSoft
+                    Icon { anchors.centerIn: parent; name: model.type === "tailscale" ? "globe" : model.type === "cloudflare" ? "cloud" : "shield"; size: 17
+                           color: model.type === "tailscale" ? Theme.ts : model.type === "cloudflare" ? Theme.cf : Theme.gp }
                 }
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 1
                     Text { text: model.name; color: Theme.text; font.pixelSize: 14; font.weight: Font.Medium }
                     Text {
-                        text: (model.type === "tailscale" ? "Tailscale" : "GlobalProtect") + " · " + model.host
+                        text: (model.type === "tailscale" ? "Tailscale" : model.type === "cloudflare" ? "Cloudflare" : "GlobalProtect") + " · " + model.host
                               + " · " + qsTr("%1 devices").arg(model.users)
                         color: Theme.textSecondary; font.pixelSize: 12
                         elide: Text.ElideRight; Layout.fillWidth: true
@@ -80,7 +80,7 @@ BDialog {
     Text {
         visible: App.tunnels.count === 0
         Layout.fillWidth: true
-        text: qsTr("No profiles yet. Add one for your GlobalProtect VPN or Tailscale network.")
+        text: qsTr("No profiles yet. Add one for your GlobalProtect VPN, Tailscale network or Cloudflare Tunnel.")
         color: Theme.textSecondary
         font.pixelSize: 13
         wrapMode: Text.WordWrap

@@ -28,8 +28,9 @@ Totp totpFromJson(const QJsonObject &o)
 
 QJsonObject tunnelToJsonImpl(const Tunnel &t)
 {
-    QJsonObject o{{"id", t.id}, {"name", t.name},
-                  {"type", t.type == Tunnel::Type::Tailscale ? "tailscale" : "globalprotect"}};
+    const char *type = t.type == Tunnel::Type::Tailscale ? "tailscale"
+                     : t.type == Tunnel::Type::Cloudflare ? "cloudflare" : "globalprotect";
+    QJsonObject o{{"id", t.id}, {"name", t.name}, {"type", type}};
     if (t.type == Tunnel::Type::GlobalProtect) {
         o["gp"] = QJsonObject{
             {"host", t.gpHost}, {"username", t.gpUsername},
@@ -37,8 +38,10 @@ QJsonObject tunnelToJsonImpl(const Tunnel &t)
             {"savePassword", t.gpSavePassword}, {"authGroup", t.gpAuthGroup},
             {"otpEnabled", t.otpEnabled}, {"otpMode", t.otpMode},
             {"otpSource", t.otpSource}, {"totp", totpToJson(t.totp)}};
-    } else {
+    } else if (t.type == Tunnel::Type::Tailscale) {
         o["tailscale"] = QJsonObject{{"controlUrl", t.tsControlUrl}, {"hostname", t.tsHostname}};
+    } else {
+        o["cloudflare"] = QJsonObject{{"bastion", t.cfBastion}};
     }
     return o;
 }
@@ -48,8 +51,9 @@ Tunnel tunnelFromJsonImpl(const QJsonObject &o)
     Tunnel t;
     t.id = o.value("id").toString();
     t.name = o.value("name").toString();
-    t.type = o.value("type").toString() == "tailscale" ? Tunnel::Type::Tailscale
-                                                       : Tunnel::Type::GlobalProtect;
+    const QString type = o.value("type").toString();
+    t.type = type == "tailscale" ? Tunnel::Type::Tailscale
+           : type == "cloudflare" ? Tunnel::Type::Cloudflare : Tunnel::Type::GlobalProtect;
     const QJsonObject gp = o.value("gp").toObject();
     t.gpHost = gp.value("host").toString();
     t.gpUsername = gp.value("username").toString();
@@ -63,6 +67,7 @@ Tunnel tunnelFromJsonImpl(const QJsonObject &o)
     const QJsonObject ts = o.value("tailscale").toObject();
     t.tsControlUrl = ts.value("controlUrl").toString();
     t.tsHostname = ts.value("hostname").toString();
+    t.cfBastion = o.value("cloudflare").toObject().value("bastion").toString();
     return t;
 }
 

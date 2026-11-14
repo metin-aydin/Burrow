@@ -382,10 +382,12 @@ QString AppController::connectDevice(const QString &id, const QString &username,
         return startSession(*dev, user, pass, QString());
     if (m_tunnelMgr.needsPassword(*t))
         return QStringLiteral("tunnel_password:") + t->id;
-    const QString err = m_tunnelMgr.ensure(*t);
+    const QString target = QStringLiteral("%1:%2").arg(dev->host).arg(dev->port);
+    const QString err = m_tunnelMgr.ensure(*t, {}, target);
     if (!err.isEmpty())
         return err;
-    if (m_tunnelMgr.isConnected(t->id))
+    // Cloudflare re-checks the device's Access token on every connect; others connect at once if up.
+    if (m_tunnelMgr.isConnected(t->id) && t->type != Model::Tunnel::Type::Cloudflare)
         return startSession(*dev, user, pass, t->id);
     // Connect as soon as the tunnel is up (see onTunnelState).
     m_pending.append({dev->id, user, pass, t->id});
@@ -433,6 +435,9 @@ QString AppController::tunnelName(const QString &tunnelId) const
 
 void AppController::onTunnelState(const QString &tunnelId, const QString &state, const QString &error)
 {
+    const Model::Tunnel *tun = m_store.doc().tunnel(tunnelId);
+    if (state == QLatin1String("needs_login") && tun && tun->type == Model::Tunnel::Type::Cloudflare)
+        emit toast(tr("Sign in to Cloudflare Access in the browser window that opened."));
     if (state == QLatin1String("connected")) {
         const auto pending = m_pending;
         m_pending.clear();
@@ -608,9 +613,9 @@ QVariantList AppController::tunnelChoices() const
                                  {"type", QStringLiteral("direct")}}};
     for (const Model::Tunnel &t : m_store.doc().tunnels)
         out.append(QVariantMap{{"id", t.id}, {"name", t.name},
-                               {"type", t.type == Model::Tunnel::Type::Tailscale
-                                            ? QStringLiteral("tailscale")
-                                            : QStringLiteral("globalprotect")}});
+                               {"type", t.type == Model::Tunnel::Type::Tailscale ? QStringLiteral("tailscale")
+                                        : t.type == Model::Tunnel::Type::Cloudflare ? QStringLiteral("cloudflare")
+                                        : QStringLiteral("globalprotect")}});
     return out;
 }
 

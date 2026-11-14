@@ -21,7 +21,8 @@ public:
 
     // Starts the tunnel unless it is already running. `password` overrides a profile without a
     // saved password (kept in memory for this app session only). Returns "" or an error.
-    QString ensure(const Model::Tunnel &t, const QString &password = {});
+    // `target` (host:port) lets a tunnel prepare for a device (Cloudflare: sign in for its Access app).
+    QString ensure(const Model::Tunnel &t, const QString &password = {}, const QString &target = {});
     bool needsPassword(const Model::Tunnel &t) const;
 
     QVariantMap status(const QString &tunnelId) const;   // {state, error, authUrl, address, prompt}

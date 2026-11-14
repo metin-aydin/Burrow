@@ -4,6 +4,13 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Güvenlik incelemesi (log temizleyici, 3 bulgu): URL'ler `net/url` ile ayrıştırılıp yalnız `scheme://host` bırakılıyor
+  (yol/sorgu/kullanıcı bilgisi yok), uzun anahtar benzeri diziler maskeleniyor, gizlenen hata satırı sabit mesajla
+  kaydediliyor (sunucu metninden durum çıkarımı yok).
+- **Cloudflare Tunnel (ADR 0007 KABUL):** `netcore/internal/cf` — cloudflared `token` paketiyle doğrulanmış uygulama
+  bilgisi + tarayıcı girişi, org anahtarıyla tarayıcısız yenileme, anahtarlar kasada (`cloudflare-<id>`), TCP-over-
+  WebSocket (`cf-access-token`, bastion için `Cf-Access-Jump-Destination`). Yerel TLS WebSocket sunucusuyla testli.
+  Arayüz: üçüncü tünel türü, bastion alanı, turuncu çip/bulut ikonu. Gerçek bir Cloudflare hesabında denenmedi.
 - Arayüz düzeltmeleri (kullanıcı geri bildirimi): Türkçe kalan örnek metinler, yazarken genişleyen alanlar (BField/
   BCombo sabit implicitWidth), küçük pencerede alta taşan diyalog (yükseklik sınırı + kaydırma). Kullanıcı Cloudflare
   Tunnel'ın üçüncü tünel türü olarak eklenmesini onayladı.

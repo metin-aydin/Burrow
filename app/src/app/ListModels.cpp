@@ -5,8 +5,11 @@
 namespace {
 QString tunnelType(const Model::Tunnel &t)
 {
-    return t.type == Model::Tunnel::Type::Tailscale ? QStringLiteral("tailscale")
-                                                    : QStringLiteral("globalprotect");
+    switch (t.type) {
+    case Model::Tunnel::Type::Tailscale: return QStringLiteral("tailscale");
+    case Model::Tunnel::Type::Cloudflare: return QStringLiteral("cloudflare");
+    default: return QStringLiteral("globalprotect");
+    }
 }
 } // namespace
 
@@ -93,9 +96,11 @@ QVariant TunnelModel::data(const QModelIndex &index, int role) const
     case NameRole: return t.name;
     case TypeRole: return tunnelType(t);
     case HostRole:
-        return t.type == Model::Tunnel::Type::Tailscale
-            ? (t.tsControlUrl.isEmpty() ? QStringLiteral("tailscale.com") : t.tsControlUrl)
-            : t.gpHost;
+        if (t.type == Model::Tunnel::Type::Tailscale)
+            return t.tsControlUrl.isEmpty() ? QStringLiteral("tailscale.com") : t.tsControlUrl;
+        if (t.type == Model::Tunnel::Type::Cloudflare)
+            return t.cfBastion.isEmpty() ? QStringLiteral("Cloudflare Access") : t.cfBastion;
+        return t.gpHost;
     case UsersRole: {
         int n = 0;
         for (const Model::Device &d : m_store->doc().devices)

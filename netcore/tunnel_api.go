@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"burrow/netcore/internal/cf"
 	"burrow/netcore/internal/forward"
 	"burrow/netcore/internal/gp"
 	"burrow/netcore/internal/totp"
@@ -55,6 +56,31 @@ func NetcoreTunnelStartTailscale(vaultHandle C.int, id, hostname, controlURL, di
 		return 0
 	}
 	return registerTunnel(t)
+}
+
+// NetcoreTunnelStartCloudflare starts a Cloudflare Access tunnel profile (ADR 0007); tokens are kept in
+// the open vault. `bastion` is optional. Returns a handle > 0 or 0.
+//
+//export NetcoreTunnelStartCloudflare
+func NetcoreTunnelStartCloudflare(vaultHandle C.int, id, bastion *C.char) C.int {
+	v := lookupVault(vaultHandle)
+	if v == nil {
+		return 0
+	}
+	t, err := cf.Start(cf.Config{ID: C.GoString(id), Bastion: C.GoString(bastion)}, v)
+	if err != nil {
+		return 0
+	}
+	return registerTunnel(t)
+}
+
+// NetcoreTunnelPrepare readies a tunnel for a target before connecting (Cloudflare: sign-in/token).
+//
+//export NetcoreTunnelPrepare
+func NetcoreTunnelPrepare(h C.int, target *C.char) {
+	if p, ok := lookupTunnel(h).(interface{ Prepare(string) }); ok {
+		p.Prepare(C.GoString(target))
+	}
 }
 
 type gpParams struct {

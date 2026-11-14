@@ -55,6 +55,13 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
 - İlk girişte Tailscale login linki uygulama içinden açılır; düğüm durumu kasada saklanır.
 - (İsteğe bağlı) Headscale / özel control server URL'si.
 
+### 3.3 Cloudflare Tunnel (ADR 0007)
+- Hedef bilgisayarda `cloudflared` RDP portunu bir Cloudflare Access uygulaması olarak yayınlar (ücretsiz Zero Trust
+  planı yeterli; Cloudflare'de bir alan adı gerekir).
+- Cihazın adresi Access host adıdır (ör. `rdp.example.com`); opsiyonel bastion ile iç ağ adresleri de kullanılabilir.
+- İlk bağlantıda tarayıcıda Access girişi; erişim anahtarları kasada şifreli. Trafik WebSocket üzerinden, yalnız
+  uygulamanın içinde (WARP gibi sistem geneli istemci kullanılmaz).
+
 ## 4. Cihazlar
 
 - Cihaz kaydı: ad, host/IP, port (varsayılan 3389), kullanıcı adı, şifre (opsiyonel sakla),

@@ -44,10 +44,19 @@ bool TunnelManager::needsPassword(const Model::Tunnel &t) const
         && (!t.gpSavePassword || t.gpPassword.isEmpty()) && !m_passwords.contains(t.id);
 }
 
-QString TunnelManager::ensure(const Model::Tunnel &t, const QString &password)
+QString TunnelManager::ensure(const Model::Tunnel &t, const QString &password, const QString &target)
 {
-    if (m_handles.contains(t.id))
+    if (m_handles.contains(t.id)) {
+        if (!target.isEmpty() && t.type == Model::Tunnel::Type::Cloudflare) {
+            QByteArray tg = target.toUtf8();
+            NetcoreTunnelPrepare(m_handles.value(t.id), tg.data());
+            m_states.insert(t.id, QVariantMap{{"state", "starting"}});
+            emit statesChanged();
+            if (!m_timer.isActive())
+                m_timer.start();
+        }
         return {};
+    }
     int handle = 0;
     if (t.type == Model::Tunnel::Type::Tailscale) {
         const QString dir = QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
@@ -57,6 +66,15 @@ QString TunnelManager::ensure(const Model::Tunnel &t, const QString &password)
         handle = NetcoreTunnelStartTailscale(m_store->handle(), id.data(), host.data(), control.data(), d.data());
         if (handle <= 0)
             return tr("Couldn't start Tailscale.");
+    } else if (t.type == Model::Tunnel::Type::Cloudflare) {
+        QByteArray id = t.id.toUtf8(), bastion = t.cfBastion.toUtf8();
+        handle = NetcoreTunnelStartCloudflare(m_store->handle(), id.data(), bastion.data());
+        if (handle <= 0)
+            return tr("Couldn't start the Cloudflare tunnel.");
+        if (!target.isEmpty()) {
+            QByteArray tg = target.toUtf8();
+            NetcoreTunnelPrepare(handle, tg.data());
+        }
     } else {
         if (!password.isEmpty())
             m_passwords.insert(t.id, password);

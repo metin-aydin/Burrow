@@ -25,7 +25,7 @@ struct Totp
 // A tunnel profile (SPEC §3). Devices reference it by id.
 struct Tunnel
 {
-    enum class Type { GlobalProtect, Tailscale };
+    enum class Type { GlobalProtect, Tailscale, Cloudflare };
 
     QString id;
     QString name;
@@ -45,6 +45,9 @@ struct Tunnel
     // Tailscale
     QString tsControlUrl;    // empty = default control plane
     QString tsHostname;
+
+    // Cloudflare (ADR 0007): empty bastion = each device's host is its Access application
+    QString cfBastion;
 };
 
 // A saved remote computer (SPEC §4, §4.1).

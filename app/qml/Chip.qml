@@ -14,11 +14,13 @@ Rectangle {
     color: selected ? Theme.accent
          : kind === "globalprotect" ? Theme.gpSoft
          : kind === "tailscale" ? Theme.tsSoft
+         : kind === "cloudflare" ? Theme.cfSoft
          : kind === "accent" ? Theme.accentSoft
          : mouse.containsMouse ? Theme.hover : Theme.surfaceSunken
     readonly property color fg: selected ? Theme.accentText
          : kind === "globalprotect" ? Theme.gp
          : kind === "tailscale" ? Theme.ts
+         : kind === "cloudflare" ? Theme.cf
          : kind === "accent" ? Theme.accent : Theme.textSecondary
     Row {
         id: row
@@ -32,8 +34,8 @@ Rectangle {
                  : root.status === "failed" ? Theme.danger : Theme.warning
         }
         Icon {
-            visible: root.kind === "globalprotect" || root.kind === "tailscale"
-            name: root.kind === "tailscale" ? "globe" : "shield"
+            visible: root.kind === "globalprotect" || root.kind === "tailscale" || root.kind === "cloudflare"
+            name: root.kind === "tailscale" ? "globe" : root.kind === "cloudflare" ? "cloud" : "shield"
             size: 12
             color: root.fg
             anchors.verticalCenter: parent.verticalCenter
