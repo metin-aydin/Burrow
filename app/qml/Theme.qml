@@ -1,0 +1,43 @@
+pragma Singleton
+import QtQuick
+
+// Design tokens. Follows the system light/dark setting.
+QtObject {
+    readonly property bool dark: Qt.styleHints.colorScheme === Qt.ColorScheme.Dark
+
+    readonly property color bg:            dark ? "#0F1115" : "#F3F4F7"
+    readonly property color surface:       dark ? "#181B21" : "#FFFFFF"
+    readonly property color surfaceRaised: dark ? "#20242C" : "#FFFFFF"
+    readonly property color surfaceSunken: dark ? "#13161B" : "#ECEEF2"
+    readonly property color field:         dark ? "#1D2128" : "#F6F7F9"
+    readonly property color hover:         dark ? "#262B34" : "#EEF0F4"
+    readonly property color border:        dark ? "#2A2F38" : "#E1E4EA"
+    readonly property color borderStrong:  dark ? "#3A404B" : "#C9CED7"
+    readonly property color text:          dark ? "#ECEEF2" : "#14161B"
+    readonly property color textSecondary: dark ? "#9CA3AF" : "#5D6472"
+    readonly property color textMuted:     dark ? "#6B7280" : "#8C93A0"
+
+    readonly property color accent:        dark ? "#5E6BF0" : "#4257F5"
+    readonly property color accentHover:   dark ? "#7180F5" : "#3446D9"
+    readonly property color accentText:      "#FFFFFF"
+    readonly property color accentSoft:    dark ? "#252B4D" : "#E8EBFF"
+    readonly property color success:       dark ? "#34D399" : "#10A36B"
+    readonly property color successSoft:   dark ? "#173528" : "#DDF5EA"
+    readonly property color danger:        dark ? "#F87171" : "#D93A3A"
+    readonly property color dangerSoft:    dark ? "#3A1D1F" : "#FBE4E4"
+    readonly property color warning:       dark ? "#FBBF24" : "#B7791F"
+
+    readonly property color gp:            dark ? "#F59E7A" : "#C2552B"
+    readonly property color gpSoft:        dark ? "#3A2419" : "#FCEBE2"
+    readonly property color ts:            dark ? "#5EEAD4" : "#0F8A7A"
+    readonly property color tsSoft:        dark ? "#13332F" : "#DDF4F0"
+
+    readonly property int radius: 10
+    readonly property int radiusLarge: 16
+    readonly property int controlHeight: 36
+    readonly property string fontFamily: Qt.application.font.family
+
+    function osColors(os) {
+        return os === "ubuntu" ? ["#E9541F", "#7A1F6F"] : ["#0A6FD1", "#4B2AA8"]
+    }
+}

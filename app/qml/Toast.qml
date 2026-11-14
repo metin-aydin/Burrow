@@ -1,0 +1,24 @@
+import QtQuick
+
+Rectangle {
+    id: root
+    property alias text: label.text
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.bottom: parent.bottom
+    anchors.bottomMargin: shown ? 28 : -height
+    property bool shown: false
+    width: label.implicitWidth + 36
+    height: 40
+    radius: 20
+    color: Theme.dark ? "#F2F3F5" : "#1B1E24"
+    z: 1000
+    Behavior on anchors.bottomMargin { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+    Text {
+        id: label
+        anchors.centerIn: parent
+        color: Theme.dark ? "#14161B" : "#FFFFFF"
+        font.pixelSize: 13
+    }
+    Timer { id: hide; interval: 3200; onTriggered: root.shown = false }
+    function show(msg) { text = msg; shown = true; hide.restart() }
+}

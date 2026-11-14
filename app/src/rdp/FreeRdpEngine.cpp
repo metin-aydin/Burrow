@@ -1,13 +1,13 @@
 #include "rdp/FreeRdpEngine.h"
 
-#ifdef GREMOTE_HAVE_FREERDP
+#ifdef BURROW_HAVE_FREERDP
 #include <freerdp/version.h>
 #include <freerdp/freerdp.h>
 #endif
 
 QString FreeRdpEngine::engineVersion()
 {
-#ifdef GREMOTE_HAVE_FREERDP
+#ifdef BURROW_HAVE_FREERDP
     return QStringLiteral("FreeRDP %1").arg(QString::fromUtf8(freerdp_get_version_string()));
 #else
     return QStringLiteral("FreeRDP yok");
