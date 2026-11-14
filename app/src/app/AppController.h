@@ -7,6 +7,7 @@
 
 #include "app/ListModels.h"
 #include "app/Updater.h"
+#include "rdp/RdpSession.h"
 #include "vault/VaultStore.h"
 
 // The single object QML talks to (exposed as the `App` singleton). Owns the
@@ -52,6 +53,8 @@ public:
     Q_INVOKABLE QString unlock(const QString &password);
     Q_INVOKABLE QString unlockWithTouchId();
     Q_INVOKABLE void lock();
+    // Closes all sessions (saving their previews) and locks the vault. Call before exiting.
+    void shutdown();
     Q_INVOKABLE QString changePassword(const QString &current, const QString &next,
                                        const QString &again);
     Q_INVOKABLE QString setTouchIdEnabled(bool on);
@@ -62,7 +65,12 @@ public:
     Q_INVOKABLE QString saveDevice(const QVariantMap &map);
     Q_INVOKABLE void duplicateDevice(const QString &id);
     Q_INVOKABLE void deleteDevice(const QString &id);
-    Q_INVOKABLE void connectDevice(const QString &id);
+    // Returns "" when a session was started, "credentials" when username/password must be asked
+    // first, or an error message.
+    Q_INVOKABLE QString connectDevice(const QString &id, const QString &username = {},
+                                      const QString &password = {});
+    Q_INVOKABLE bool needsCredentials(const QString &id) const;
+    Q_INVOKABLE void forgetCertificate(const QString &id);
 
     // Stores a preview image for a device (called by the RDP session on close).
     void setPreview(const QString &deviceId, const QImage &image);
@@ -87,6 +95,7 @@ signals:
     void touchIdEnabledChanged();
     void toast(const QString &message);
     void languageChanged();
+    void sessionOpened(RdpSession *session);
 
 private:
     QString finishUnlock(VaultStore::Result r);
@@ -100,6 +109,7 @@ private:
     DeviceFilterModel m_gallery;
     Updater m_updater;
     QString m_demoOpen;
+    QList<RdpSession *> m_sessions;
     QTranslator m_translator;
     QQmlEngine *m_engine = nullptr;
 };

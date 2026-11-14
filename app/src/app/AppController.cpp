@@ -157,8 +157,24 @@ QString AppController::finishUnlock(VaultStore::Result r)
     return {};
 }
 
+void AppController::shutdown()
+{
+    for (RdpSession *s : std::as_const(m_sessions)) {
+        s->close();
+        if (m_store.isOpen())
+            setPreview(s->deviceId(), s->frame());
+    }
+    qDeleteAll(m_sessions);   // joins the worker threads
+    m_sessions.clear();
+    m_store.lock();
+}
+
 void AppController::lock()
 {
+    for (RdpSession *s : std::as_const(m_sessions)) {
+        s->close();
+        setPreview(s->deviceId(), s->frame());
+    }
     m_store.lock();
     m_devices.setPreviewRevisions({});
     reloadModels();
@@ -317,10 +333,76 @@ void AppController::deleteDevice(const QString &id)
         emit toast(err);
 }
 
-void AppController::connectDevice(const QString &id)
+bool AppController::needsCredentials(const QString &id) const
 {
-    Q_UNUSED(id)
-    emit toast(tr("The RDP engine is coming in the next step."));
+    for (const Model::Device &d : m_store.doc().devices)
+        if (d.id == id)
+            return d.username.isEmpty() || !d.savePassword || d.password.isEmpty();
+    return false;
+}
+
+QString AppController::connectDevice(const QString &id, const QString &username, const QString &password)
+{
+    const Model::Device *dev = nullptr;
+    for (const Model::Device &d : m_store.doc().devices)
+        if (d.id == id)
+            dev = &d;
+    if (!dev)
+        return tr("The device no longer exists.");
+    for (RdpSession *s : std::as_const(m_sessions))
+        if (s->deviceId() == id)
+            return tr("%1 is already open.").arg(dev->name);
+    if (!dev->tunnelId.isEmpty())
+        return tr("Tunnels inside Burrow are coming next. For now, use a direct connection.");
+
+    const QString user = username.isEmpty() ? dev->username : username;
+    const QString pass = password.isEmpty() ? (dev->savePassword ? dev->password : QString()) : password;
+    if (user.isEmpty() || pass.isEmpty())
+        return QStringLiteral("credentials");
+
+    RdpSession::Params p;
+    p.deviceId = dev->id;
+    p.title = dev->name;
+    p.host = dev->host;
+    p.port = quint16(dev->port);
+    p.username = user;
+    p.password = pass;
+    p.domain = dev->domain;
+    p.keyMap = dev->keyMap;
+    p.lockOnDisconnect = dev->lockOnDisconnect && dev->os == QLatin1String("ubuntu");
+    p.knownFingerprint = dev->certFingerprint;
+    const QJsonObject layout = dev->layout;
+    if (layout.contains("width"))
+        p.size = QSize(layout.value("width").toInt(1600), layout.value("height").toInt(1000));
+
+    auto *session = new RdpSession(p, this);
+    m_sessions.append(session);
+    connect(session, &RdpSession::certificateTrusted, this, [this](const QString &devId, const QString &fp) {
+        for (Model::Device &d : m_store.doc().devices)
+            if (d.id == devId && d.certFingerprint.isEmpty())
+                d.certFingerprint = fp;
+        persist();
+    });
+    connect(session, &RdpSession::closed, this, [this](RdpSession *s) {
+        const QImage last = s->frame();
+        if (!last.isNull() && m_store.isOpen())
+            setPreview(s->deviceId(), last);
+        if (!s->error().isEmpty())
+            emit toast(s->error());
+        m_sessions.removeOne(s);
+        s->deleteLater();
+    });
+    session->start();
+    emit sessionOpened(session);
+    return {};
+}
+
+void AppController::forgetCertificate(const QString &id)
+{
+    for (Model::Device &d : m_store.doc().devices)
+        if (d.id == id)
+            d.certFingerprint.clear();
+    persist();
 }
 
 void AppController::setPreview(const QString &deviceId, const QImage &image)

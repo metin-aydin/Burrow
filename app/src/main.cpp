@@ -7,6 +7,7 @@
 
 #include "app/AppController.h"
 #include "app/PreviewProvider.h"
+#include "rdp/RdpView.h"
 
 int main(int argc, char *argv[])
 {
@@ -32,6 +33,8 @@ int main(int argc, char *argv[])
     controller.applyLanguage(&engine);
     engine.addImageProvider(QStringLiteral("preview"), new PreviewProvider(controller.store()));
     qmlRegisterSingletonInstance("Burrow.Core", 1, 0, "App", &controller);
+    qmlRegisterType<RdpView>("Burrow.Core", 1, 0, "RdpView");
+    qmlRegisterUncreatableType<RdpSession>("Burrow.Core", 1, 0, "RdpSession", QStringLiteral("Created by App"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app,
                      [] { QCoreApplication::exit(1); }, Qt::QueuedConnection);
     engine.loadFromModule("Burrow", "Main");
@@ -45,16 +48,44 @@ int main(int argc, char *argv[])
                 controller.state() == QLatin1String("setup") ? controller.createVault(pw, pw)
                                                              : controller.unlock(pw);
             });
+        // BURROW_DEMO_CONNECT=host:port:user:password adds a direct test device and connects to it.
+        const QStringList target = qEnvironmentVariable("BURROW_DEMO_CONNECT").split(QLatin1Char(':'));
+        if (target.size() == 4)
+            QObject::connect(&controller, &AppController::stateChanged, &controller, [&controller, target] {
+                if (controller.state() != QLatin1String("unlocked"))
+                    return;
+                QVariantMap d = controller.newDevice();
+                d["name"] = QStringLiteral("Local Test");
+                d["host"] = target.at(0);
+                d["port"] = target.at(1).toInt();
+                d["username"] = target.at(2);
+                d["password"] = target.at(3);
+                d["savePassword"] = true;
+                controller.saveDevice(d);
+                const QString id = controller.store()->doc().devices.constLast().id;
+                QTimer::singleShot(500, &controller, [&controller, id] { controller.connectDevice(id); });
+            });
+        // BURROW_GRAB=<file.png> saves every open window after the delay (main window first, then
+        // sessions as file-1.png, file-2.png ...).
         const QString grab = qEnvironmentVariable("BURROW_GRAB");
         if (!grab.isEmpty())
-            QTimer::singleShot(qEnvironmentVariableIntValue("BURROW_GRAB_DELAY") ?: 2500, &app, [&engine, grab] {
-                if (auto *w = qobject_cast<QQuickWindow *>(engine.rootObjects().value(0)))
-                    w->grabWindow().save(grab);
+            QTimer::singleShot(qEnvironmentVariableIntValue("BURROW_GRAB_DELAY") ?: 2500, &app, [grab] {
+                int n = 0;
+                for (QWindow *w : QGuiApplication::topLevelWindows()) {
+                    auto *qw = qobject_cast<QQuickWindow *>(w);
+                    if (!qw || !qw->isVisible())
+                        continue;
+                    QString file = grab;
+                    if (n > 0)
+                        file.replace(QStringLiteral(".png"), QStringLiteral("-%1.png").arg(n));
+                    qw->grabWindow().save(file);
+                    ++n;
+                }
                 QCoreApplication::quit();
             });
     }
 
     const int rc = app.exec();
-    controller.lock();
+    controller.shutdown();
     return rc;
 }

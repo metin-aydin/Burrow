@@ -3,6 +3,7 @@
 #include <QtTest>
 
 #include "app/Updater.h"
+#include "rdp/KeyMapper.h"
 #include "net/NetCore.h"
 #include "vault/VaultStore.h"
 
@@ -149,6 +150,38 @@ private slots:
         evil.checkNow();
         QTRY_COMPARE(evil.state(), QString("error"));
         qunsetenv("BURROW_UPDATE_URL");
+    }
+
+    void keyMapper()
+    {
+        using E = KeyMapper::Event;
+        const unsigned C = 0x2E, Q = 0x10, Cmd = KeyMapper::LWin, Ctrl = KeyMapper::LCtrl;
+
+        // Shortcuts: Cmd+C -> Ctrl+C
+        KeyMapper k(KeyMapper::Mode::Shortcuts);
+        QVERIFY(k.map(Cmd, true).isEmpty());
+        QCOMPARE(k.map(C, true), (QList<E>{{Ctrl, true}, {C, true}}));
+        QCOMPARE(k.map(C, false), (QList<E>{{C, false}}));
+        QCOMPARE(k.map(Cmd, false), (QList<E>{{Ctrl, false}}));
+        // Cmd + non-shortcut key stays Win+key
+        QVERIFY(k.map(Cmd, true).isEmpty());
+        QCOMPARE(k.map(Q, true), (QList<E>{{Cmd, true}, {Q, true}}));
+        k.map(Q, false);
+        QCOMPARE(k.map(Cmd, false), (QList<E>{{Cmd, false}}));
+        // Cmd tapped alone -> Win tap
+        k.map(Cmd, true);
+        QCOMPARE(k.map(Cmd, false), (QList<E>{{Cmd, true}, {Cmd, false}}));
+        // Losing focus releases a substituted Ctrl
+        k.map(Cmd, true);
+        k.map(C, true);
+        QCOMPARE(k.releaseAll(), (QList<E>{{Ctrl, false}}));
+
+        KeyMapper swap(KeyMapper::Mode::Swap);
+        QCOMPARE(swap.map(Cmd, true), (QList<E>{{Ctrl, true}}));
+        QCOMPARE(swap.map(Ctrl, true), (QList<E>{{Cmd, true}}));
+
+        KeyMapper off(KeyMapper::Mode::Off);
+        QCOMPARE(off.map(Cmd, true), (QList<E>{{Cmd, true}}));
     }
 
 private:

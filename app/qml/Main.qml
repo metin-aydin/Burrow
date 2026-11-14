@@ -26,6 +26,7 @@ ApplicationWindow {
             onEditDevice: (id) => deviceEditor.openFor(id)
             onOpenTunnels: tunnels.open()
             onOpenSettings: settings.open()
+            onConnectDevice: (id) => win.startSession(id, "", "")
             onConfirmDelete: (id, name) => confirm.ask(
                 qsTr("Delete Device"),
                 qsTr("\"%1\" and its saved preview will be deleted. This can't be undone.").arg(name),
@@ -34,6 +35,21 @@ ApplicationWindow {
     }
 
     DeviceEditor { id: deviceEditor }
+    CredentialsDialog {
+        id: credentials
+        onSubmitted: (id, user, pass) => win.startSession(id, user, pass)
+    }
+    Component { id: sessionWindow; SessionWindow {} }
+
+    function startSession(id, user, pass) {
+        const r = App.connectDevice(id, user || "", pass || "")
+        if (r === "credentials") {
+            const d = App.device(id)
+            credentials.ask(id, d.name, d.username)
+        } else if (r) {
+            toast.show(r)
+        }
+    }
     TunnelsDialog { id: tunnels; onConfirm: (t, m, b, f) => confirm.ask(t, m, b, f); onEditTunnel: (id) => tunnelEditor.openFor(id) }
     TunnelEditor { id: tunnelEditor }
     SettingsDialog { id: settings }
@@ -54,6 +70,7 @@ ApplicationWindow {
     Connections {
         target: App
         function onToast(message) { toast.show(message) }
+        function onSessionOpened(session) { sessionWindow.createObject(null, { session: session }) }
         function onStateChanged() {
             if (App.state !== "unlocked") {
                 deviceEditor.close(); tunnels.close(); tunnelEditor.close(); settings.close(); confirm.close()

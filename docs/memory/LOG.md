@@ -4,6 +4,14 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- ✅ **RDP motoru ilk sürüm çalışıyor:** `RdpSession` (FreeRDP 3, işçi iş parçacığı, GFX açık, GDI BGRX32 →
+  QImage), `RdpView` (QQuickPaintedItem; ölçekleme, fare, tekerlek, klavye — Mac sanal tuş kodu → RDP scancode),
+  `KeyMapper` (Cmd→Ctrl kısayol / tam değiş / kapalı; birim testli), `SessionWindow.qml`, `CredentialsDialog.qml`.
+  Sertifika TOFU: ilk bağlantıda parmak izi cihaz kaydına (`certFingerprint`) sabitlenir, değişirse bağlanılmaz.
+  Oturum kapanınca son kare şifreli önizleme olur; Ubuntu + "kapanınca kilitle" ise önce Super+L gönderilir.
+  Yerel `freerdp-shadow-cli` (NLA, rastgele test kullanıcısı) ile uçtan uca doğrulandı: bağlandı, ekran çizildi,
+  önizleme kaydedildi. Hata: macOS'ta pencere kapatmayı reddedince "Çık" iptal oluyordu → düzeltildi.
+  Henüz yok: pano, çoklu monitör, dinamik çözünürlük, uygulama içi tünel (tünelli cihazlar şimdilik bağlanmaz).
 - Güvenlik incelemesi (otomatik, 4 bulgu) düzeltildi: güncelleme dosya adı manifestten yol olarak alınmıyor
   (beklenen `Burrow-<sürüm>-<platform>.zip` olmalı, sürüm X.Y.Z biçiminde); `BURROW_UPDATE_URL` release'te yalnız
   https (testler `BURROW_UPDATER_ALLOW_INSECURE` ile); kurulum 0700 rastgele geçici dizinde, yardımcı betik

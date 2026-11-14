@@ -74,7 +74,8 @@ QJsonObject deviceToJsonImpl(const Device &d)
             {"savePassword", d.savePassword}, {"autoLogin", d.autoLogin},
             {"tunnelId", d.tunnelId}, {"lockOnDisconnect", d.lockOnDisconnect},
             {"onDisconnect", d.onDisconnect}, {"sessionMode", d.sessionMode},
-            {"clipboard", d.clipboard}, {"keyMap", d.keyMap}, {"layout", d.layout}};
+            {"clipboard", d.clipboard}, {"keyMap", d.keyMap}, {"layout", d.layout},
+            {"certFingerprint", d.certFingerprint}};
 }
 
 Device deviceFromJsonImpl(const QJsonObject &o)
@@ -97,6 +98,7 @@ Device deviceFromJsonImpl(const QJsonObject &o)
     d.clipboard = o.value("clipboard").toString(d.clipboard);
     d.keyMap = o.value("keyMap").toString(d.keyMap);
     d.layout = o.value("layout").toObject();
+    d.certFingerprint = o.value("certFingerprint").toString();
     return d;
 }
 

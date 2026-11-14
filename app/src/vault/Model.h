@@ -67,6 +67,7 @@ struct Device
     QString clipboard = QStringLiteral("both");            // both | off | to_remote | to_local
     QString keyMap = QStringLiteral("shortcuts");          // shortcuts | swap | off
     QJsonObject layout;      // last multi-monitor layout (SPEC §5.1)
+    QString certFingerprint; // TOFU pin of the RDP server certificate
 };
 
 struct Settings

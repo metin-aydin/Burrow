@@ -15,6 +15,7 @@ Rectangle {
     signal openTunnels()
     signal openSettings()
     signal confirmDelete(string id, string name)
+    signal connectDevice(string id)
 
     ColumnLayout {
         anchors.fill: parent
@@ -125,7 +126,7 @@ Rectangle {
                     tunnelName: model.tunnelName
                     tunnelType: model.tunnelType
                     preview: model.preview
-                    onConnectRequested: App.connectDevice(model.deviceId)
+                    onConnectRequested: root.connectDevice(model.deviceId)
                     onEditRequested: root.editDevice(model.deviceId)
                     onDuplicateRequested: App.duplicateDevice(model.deviceId)
                     onDeleteRequested: root.confirmDelete(model.deviceId, model.name)
