@@ -268,6 +268,10 @@ func exchangeOrgToken(appURL *url.URL, authDomain, orgToken string) (string, err
 		return "", err
 	}
 	_ = resp.Body.Close()
+	// Only trust an app token set by the application host itself.
+	if resp.Request == nil || resp.Request.URL.Scheme != "https" || !sameHost(resp.Request.URL, appURL.Hostname()) {
+		return "", errors.New("the app token didn't come from the application host")
+	}
 	for _, c := range resp.Cookies() {
 		if c.Name == "CF_Authorization" && time.Now().Before(c.Expires) {
 			return c.Value, nil
