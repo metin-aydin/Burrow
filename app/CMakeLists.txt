@@ -22,6 +22,8 @@ qt_add_executable(burrow
     src/rdp/FreeRdpEngine.h
     src/rdp/KeyMapper.cpp
     src/rdp/KeyMapper.h
+    src/rdp/RdpClipboard.cpp
+    src/rdp/RdpClipboard.h
     src/rdp/RdpSession.cpp
     src/rdp/RdpSession.h
     src/rdp/RdpView.cpp
@@ -93,10 +95,12 @@ find_package(Qt6 6.5 QUIET COMPONENTS Test)
 if(Qt6Test_FOUND)
     qt_add_executable(tst_vault tests/tst_vault.cpp
         src/vault/Model.cpp src/vault/VaultStore.cpp src/net/NetCore.cpp
-        src/app/Updater.cpp src/app/Updater.h src/rdp/KeyMapper.cpp src/rdp/KeyMapper.h)
+        src/app/Updater.cpp src/app/Updater.h src/rdp/KeyMapper.cpp src/rdp/KeyMapper.h
+        src/rdp/RdpClipboard.cpp src/rdp/RdpClipboard.h)
     set_target_properties(tst_vault PROPERTIES MACOSX_BUNDLE OFF)
     target_include_directories(tst_vault PRIVATE src)
-    target_link_libraries(tst_vault PRIVATE Qt6::Core Qt6::Network Qt6::Test netcore::netcore winpr)
+    target_link_libraries(tst_vault PRIVATE Qt6::Gui Qt6::Network Qt6::Test netcore::netcore freerdp freerdp-client winpr)
     target_compile_definitions(tst_vault PRIVATE BURROW_UPDATER_ALLOW_INSECURE=1)
     add_test(NAME tst_vault COMMAND tst_vault)
+    set_tests_properties(tst_vault PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 endif()

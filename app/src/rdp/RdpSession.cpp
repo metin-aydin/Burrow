@@ -4,6 +4,10 @@
 #include <QRect>
 
 #include <freerdp/channels/channels.h>
+#include <freerdp/channels/cliprdr.h>
+#include <freerdp/channels/disp.h>
+#include <freerdp/client/cliprdr.h>
+#include <freerdp/client/disp.h>
 #include <freerdp/client.h>
 #include <freerdp/client/channels.h>
 #include <freerdp/client/cmdline.h>
@@ -46,6 +50,16 @@ BOOL desktopResize(rdpContext *ctx)
     return TRUE;
 }
 
+void onChannelConnected(void *context, const ChannelConnectedEventArgs *e)
+{
+    sessionOf(static_cast<rdpContext *>(context))->onChannelConnected(e->name, e->pInterface);
+}
+
+void onChannelDisconnected(void *context, const ChannelDisconnectedEventArgs *e)
+{
+    sessionOf(static_cast<rdpContext *>(context))->onChannelDisconnected(e->name);
+}
+
 BOOL preConnect(freerdp *instance)
 {
     rdpSettings *s = instance->context->settings;
@@ -53,6 +67,8 @@ BOOL preConnect(freerdp *instance)
     freerdp_settings_set_uint32(s, FreeRDP_OsMinorType, OSMINORTYPE_MACINTOSH);
     PubSub_SubscribeChannelConnected(instance->context->pubSub, freerdp_client_OnChannelConnectedEventHandler);
     PubSub_SubscribeChannelDisconnected(instance->context->pubSub, freerdp_client_OnChannelDisconnectedEventHandler);
+    PubSub_SubscribeChannelConnected(instance->context->pubSub, onChannelConnected);
+    PubSub_SubscribeChannelDisconnected(instance->context->pubSub, onChannelDisconnected);
     return freerdp_client_load_addins(instance->context->channels, s);
 }
 
@@ -70,6 +86,8 @@ void postDisconnect(freerdp *instance)
 {
     PubSub_UnsubscribeChannelConnected(instance->context->pubSub, freerdp_client_OnChannelConnectedEventHandler);
     PubSub_UnsubscribeChannelDisconnected(instance->context->pubSub, freerdp_client_OnChannelDisconnectedEventHandler);
+    PubSub_UnsubscribeChannelConnected(instance->context->pubSub, onChannelConnected);
+    PubSub_UnsubscribeChannelDisconnected(instance->context->pubSub, onChannelDisconnected);
     gdi_free(instance);
 }
 
@@ -120,7 +138,7 @@ QString friendlyError(UINT32 code)
     case FREERDP_ERROR_TLS_CONNECT_FAILED:
         return QCoreApplication::translate("RdpSession", "The secure connection couldn't be established.");
     case FREERDP_ERROR_CONNECT_CANCELLED:
-        return QCoreApplication::translate("RdpSession", "The computer's certificate changed since the last connection, so Burrow didn't connect.");
+        return QCoreApplication::translate("RdpSession", "The computer's certificate doesn't match the one you trusted, so Burrow didn't connect. If the change is expected, use Forget Saved Certificate in the device settings.");
     default:
         return QCoreApplication::translate("RdpSession", "The connection failed (%1).")
             .arg(QString::fromUtf8(freerdp_get_last_error_string(code)));
@@ -134,6 +152,8 @@ RdpSession::RdpSession(Params params, QObject *parent)
     , m_p(std::move(params))
     , m_keys(KeyMapper::modeFromString(m_p.keyMap))
 {
+    m_clip = new RdpClipboard(RdpClipboard::modeFromString(m_p.clipboard),
+                              [this](std::function<void()> f) { post(std::move(f)); }, this);
 }
 
 RdpSession::~RdpSession()
@@ -227,6 +247,12 @@ void RdpSession::run()
     freerdp_settings_set_bool(s, FreeRDP_AutoReconnectionEnabled, TRUE);
     freerdp_settings_set_bool(s, FreeRDP_DesktopResize, TRUE);
     freerdp_settings_set_uint32(s, FreeRDP_KeyboardType, 4);
+    // Resize with the window (display control channel) and keep text crisp on Retina screens.
+    freerdp_settings_set_bool(s, FreeRDP_SupportDisplayControl, TRUE);
+    freerdp_settings_set_bool(s, FreeRDP_DynamicResolutionUpdate, TRUE);
+    freerdp_settings_set_uint32(s, FreeRDP_DesktopScaleFactor, uint32_t(m_p.scale));
+    freerdp_settings_set_uint32(s, FreeRDP_DeviceScaleFactor, m_p.scale >= 200 ? 180 : m_p.scale >= 140 ? 140 : 100);
+    freerdp_settings_set_bool(s, FreeRDP_RedirectClipboard, m_clip->enabled() ? TRUE : FALSE);
     // Only NLA/TLS: legacy "RDP security" has no server authentication, so a man in the middle could
     // bypass the certificate pin. Servers that offer only that are refused.
     freerdp_settings_set_bool(s, FreeRDP_RdpSecurity, FALSE);
@@ -253,6 +279,7 @@ void RdpSession::run()
             break;
         if (WaitForMultipleObjects(n, handles, FALSE, 100) == WAIT_FAILED)
             break;
+        drainTasks();
         if (!freerdp_check_event_handles(ctx)) {
             if (freerdp_get_last_error(ctx) == FREERDP_ERROR_SUCCESS)
                 continue;
@@ -298,22 +325,25 @@ void RdpSession::onPaint(rdpGdi *gdi, int x, int y, int w, int h)
 
 QString RdpSession::pinFor(const QString &fingerprint) const
 {
-    return QStringLiteral("%1:%2|%3").arg(m_p.host).arg(m_p.port).arg(fingerprint.toLower());
+    return QStringLiteral("%1:%2|%3").arg(m_p.host.trimmed().toLower()).arg(m_p.port).arg(fingerprint.trimmed().toLower());
 }
 
 unsigned RdpSession::onVerifyCertificate(const QString &fingerprint)
 {
-    // The pin is bound to host:port; a different address or certificate needs a new confirmation.
     const QString pin = pinFor(fingerprint);
     if (!m_p.knownFingerprint.isEmpty()) {
-        if (m_p.knownFingerprint.compare(pin, Qt::CaseInsensitive) == 0)
+        // Fail closed: once a device has a pin, only that exact certificate is accepted. Replacing it
+        // needs an explicit "Forget Saved Certificate" (or changing the address) in the device editor.
+        const QString known = m_p.knownFingerprint.trimmed().toLower();
+        const bool match = known.contains(QLatin1Char('|'))
+            ? known == pin
+            : known == fingerprint.trimmed().toLower();   // legacy bare fingerprint
+        if (match)
             return 2;
-        if (m_p.knownFingerprint.section(QLatin1Char('|'), 0, 0) == pin.section(QLatin1Char('|'), 0, 0)) {
-            m_certChanged = true;   // same address, different certificate: refuse, don't ask
-            return 0;
-        }
+        m_certChanged = true;
+        return 0;
     }
-    // First connection (or the address changed): ask the user and wait (up to 2 minutes).
+    // No pin yet: ask the user and wait (up to 2 minutes).
     QMutexLocker lock(&m_certLock);
     m_certAnswer = -1;
     QMetaObject::invokeMethod(this, [this, fingerprint] {
@@ -390,4 +420,58 @@ void RdpSession::sendWheel(int delta, bool horizontal, int x, int y)
     else
         flags |= UINT16(step & 0xFF);
     freerdp_input_send_mouse_event(inst->context->input, flags, UINT16(qMax(0, x)), UINT16(qMax(0, y)));
+}
+
+void RdpSession::post(std::function<void()> task)
+{
+    QMutexLocker lock(&m_tasksLock);
+    m_tasks.append(std::move(task));
+}
+
+void RdpSession::drainTasks()
+{
+    QList<std::function<void()>> tasks;
+    {
+        QMutexLocker lock(&m_tasksLock);
+        tasks.swap(m_tasks);
+    }
+    for (auto &t : tasks)
+        t();
+}
+
+void RdpSession::onChannelConnected(const char *name, void *iface)
+{
+    if (strcmp(name, CLIPRDR_SVC_CHANNEL_NAME) == 0 && m_clip->enabled())
+        m_clip->attach(static_cast<CliprdrClientContext *>(iface));
+    else if (strcmp(name, DISP_DVC_CHANNEL_NAME) == 0)
+        m_disp = iface;
+}
+
+void RdpSession::onChannelDisconnected(const char *name)
+{
+    if (strcmp(name, CLIPRDR_SVC_CHANNEL_NAME) == 0)
+        m_clip->detach();
+    else if (strcmp(name, DISP_DVC_CHANNEL_NAME) == 0)
+        m_disp = nullptr;
+}
+
+void RdpSession::requestResize(const QSize &pixels, int scale)
+{
+    // The protocol wants even widths between 200 and 8192 pixels.
+    const int w = qBound(200, pixels.width() & ~1, 8192);
+    const int h = qBound(200, pixels.height(), 8192);
+    post([this, w, h, scale] {
+        auto *disp = static_cast<DispClientContext *>(m_disp);
+        if (!disp || desktopSize() == QSize(w, h))
+            return;
+        DISPLAY_CONTROL_MONITOR_LAYOUT layout{};
+        layout.Flags = DISPLAY_CONTROL_MONITOR_PRIMARY;
+        layout.Width = UINT32(w);
+        layout.Height = UINT32(h);
+        layout.DesktopScaleFactor = UINT32(scale);
+        layout.DeviceScaleFactor = scale >= 200 ? 180 : scale >= 140 ? 140 : 100;
+        layout.PhysicalWidth = UINT32(w * 254 / 960);   // assume 96 dpi at 100 %
+        layout.PhysicalHeight = UINT32(h * 254 / 960);
+        (void)disp->SendMonitorLayout(disp, 1, &layout);
+    });
 }

@@ -6,6 +6,8 @@
 #include <QJsonObject>
 #include <QLinearGradient>
 #include <QCoreApplication>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QLocale>
 #include <QPainter>
 #include <QQmlEngine>
@@ -287,6 +289,9 @@ QString AppController::saveDevice(const QVariantMap &map)
         for (Model::Device &existing : devices)
             if (existing.id == d.id) {
                 d.layout = existing.layout; // not edited in the form
+                // The certificate pin isn't editable; it is dropped only when the address changes.
+                d.certFingerprint = (existing.host.compare(d.host, Qt::CaseInsensitive) == 0 && existing.port == d.port)
+                    ? existing.certFingerprint : QString();
                 existing = d;
                 found = true;
             }
@@ -369,17 +374,20 @@ QString AppController::connectDevice(const QString &id, const QString &username,
     p.password = pass;
     p.domain = dev->domain;
     p.keyMap = dev->keyMap;
+    p.clipboard = dev->clipboard;
+    // Start at the size the session window opens with; the view then follows the window.
+    const QScreen *screen = QGuiApplication::primaryScreen();
+    const qreal dpr = screen ? screen->devicePixelRatio() : 1.0;
+    p.scale = qRound(dpr * 100);
+    p.size = QSize(qRound(1280 * dpr) & ~1, qRound(820 * dpr));
     p.lockOnDisconnect = dev->lockOnDisconnect;   // Win+L on Windows, Super+L on GNOME
     p.knownFingerprint = dev->certFingerprint;
-    const QJsonObject layout = dev->layout;
-    if (layout.contains("width"))
-        p.size = QSize(layout.value("width").toInt(1600), layout.value("height").toInt(1000));
 
     auto *session = new RdpSession(p, this);
     m_sessions.append(session);
     connect(session, &RdpSession::certificateTrusted, this, [this](const QString &devId, const QString &fp) {
         for (Model::Device &d : m_store.doc().devices)
-            if (d.id == devId)
+            if (d.id == devId && d.certFingerprint.isEmpty())   // write-once; replace only via forgetCertificate
                 d.certFingerprint = fp;
         persist();
     });

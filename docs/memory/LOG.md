@@ -4,6 +4,14 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Güvenlik incelemesi (sertifika, 2 bulgu): pin varken eşleşmeyen sertifika artık her durumda reddediliyor (adres/biçim
+  farkıyla yeniden sorma yok), pin tek seferlik yazılıyor; değiştirmek için cihaz düzenleyicide "Kayıtlı Sertifikayı
+  Unut" veya adres/port değişikliği. Eski çıplak parmak izi biçimi de karşılaştırılıyor.
+- **Pano + dinamik çözünürlük:** `RdpClipboard` (cliprdr; metin CF_UNICODETEXT + görsel CF_DIB, iki yönlü, cihaz
+  ayarına göre yön; içerik loglanmaz/diske yazılmaz), uzak kopyalama Mac panosuna anında alınıyor. `disp` kanalıyla
+  pencere boyutu değişince (400 ms sonra) uzak masaüstü yeniden boyutlanıyor; Retina'da %200 ölçek. İşçi iş parçacığına
+  görev kuyruğu (`post`). DIB dönüşümü birim testli. Test sunucusunda kanallar açıkken bağlantı doğrulandı; shadow
+  sunucu pano/yeniden boyutlandırmayı desteklemediği için bu ikisi gerçek Windows/GNOME'da denenmedi.
 - Güvenlik incelemesi (otomatik, RDP, 3 bulgu) düzeltildi: eski "RDP security" katmanı kapatıldı (yalnız NLA/TLS);
   sertifika ilk bağlantıda kullanıcıya parmak iziyle soruluyor ("Trust And Connect"), pin `host:port|sha256`,
   aynı adreste değişen sertifika sormadan reddediliyor; "kapanınca kilitle" Windows'ta da Win+L gönderiyor,

@@ -4,6 +4,8 @@
 
 #include "app/Updater.h"
 #include "rdp/KeyMapper.h"
+#include "rdp/RdpClipboard.h"
+#include <QImage>
 #include "net/NetCore.h"
 #include "vault/VaultStore.h"
 
@@ -184,9 +186,24 @@ private slots:
         QCOMPARE(off.map(Cmd, true), (QList<E>{{Cmd, true}}));
     }
 
+    void clipboardDib()
+    {
+        QImage img(37, 21, QImage::Format_RGB32);   // odd sizes exercise row padding
+        img.fill(QColor(10, 120, 200));
+        img.setPixelColor(3, 4, QColor(250, 20, 30));
+        const QByteArray dib = RdpClipboard::imageToDib(img);
+        QVERIFY(dib.size() > 40);
+        const QImage back = RdpClipboard::dibToImage(dib);
+        QCOMPARE(back.size(), img.size());
+        QCOMPARE(back.pixelColor(3, 4), QColor(250, 20, 30));
+        QCOMPARE(back.pixelColor(0, 0), QColor(10, 120, 200));
+        QVERIFY(RdpClipboard::dibToImage(QByteArray(10, 'x')).isNull());
+        QCOMPARE(RdpClipboard::modeFromString("to_local"), RdpClipboard::Mode::ToLocal);
+    }
+
 private:
     QTemporaryDir m_dir;
 };
 
-QTEST_GUILESS_MAIN(TestVault)
+QTEST_MAIN(TestVault)
 #include "tst_vault.moc"

@@ -108,6 +108,22 @@ BDialog {
         }
     }
 
+    RowLayout {
+        Layout.fillWidth: true
+        visible: root.tab === "general" && !!root.d.certFingerprint
+        Text {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            text: qsTr("Burrow trusts this computer's certificate and refuses to connect if it changes.")
+            color: Theme.textSecondary
+            font.pixelSize: 12
+        }
+        BButton {
+            text: qsTr("Forget Saved Certificate")
+            onClicked: { App.forgetCertificate(root.d.id); root.d = Object.assign({}, root.d, { certFingerprint: "" }) }
+        }
+    }
+
     // --- Session ---------------------------------------------------------------
     ColumnLayout {
         Layout.fillWidth: true

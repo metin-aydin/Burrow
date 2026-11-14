@@ -2,6 +2,7 @@
 
 #include <QPointer>
 #include <QQuickPaintedItem>
+#include <QTimer>
 
 #include "rdp/RdpSession.h"
 
@@ -34,6 +35,7 @@ protected:
     void keyPressEvent(QKeyEvent *e) override;
     void keyReleaseEvent(QKeyEvent *e) override;
     void focusOutEvent(QFocusEvent *e) override;
+    void geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry) override;
 
 private:
     QRectF targetRect() const;
@@ -43,4 +45,5 @@ private:
     QPointer<RdpSession> m_session;
     QImage m_frame;
     QPoint m_wheelAccum;
+    QTimer m_resizeTimer;
 };

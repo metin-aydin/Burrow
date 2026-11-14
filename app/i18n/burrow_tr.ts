@@ -3,147 +3,147 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/AppController.cpp" line="37" />
+        <location filename="../src/app/AppController.cpp" line="39" />
         <source>Burrow %1 is available. Install it from Settings.</source>
         <translation>Burrow %1 yayımlandı. Ayarlar'dan kurabilirsin.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="60" />
+        <location filename="../src/app/AppController.cpp" line="62" />
         <source>Burrow %1 · netcore %2 · %3</source>
         <translation>Burrow %1 · netcore %2 · %3</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="115" />
+        <location filename="../src/app/AppController.cpp" line="117" />
         <source>The password must be at least %1 characters.</source>
         <translation>Şifre en az %1 karakter olmalı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="117" />
+        <location filename="../src/app/AppController.cpp" line="119" />
         <source>The passwords don't match.</source>
         <translation>Şifreler aynı değil.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="124" />
+        <location filename="../src/app/AppController.cpp" line="126" />
         <source>Enter your master password.</source>
         <translation>Ana şifreni gir.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="131" />
+        <location filename="../src/app/AppController.cpp" line="133" />
         <source>Unlock the Burrow vault</source>
         <translation>Burrow kasasının kilidini aç</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="141" />
+        <location filename="../src/app/AppController.cpp" line="143" />
         <source>The Touch ID key is no longer valid; unlock with your master password.</source>
         <translation>Touch ID anahtarı geçersiz; ana şifreyle aç.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="188" />
+        <location filename="../src/app/AppController.cpp" line="190" />
         <source>The new password must be at least %1 characters.</source>
         <translation>Yeni şifre en az %1 karakter olmalı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="190" />
+        <location filename="../src/app/AppController.cpp" line="192" />
         <source>The new passwords don't match.</source>
         <translation>Yeni şifreler aynı değil.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="192" />
+        <location filename="../src/app/AppController.cpp" line="194" />
         <source>The current password is wrong.</source>
         <translation>Mevcut şifre yanlış.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="206" />
+        <location filename="../src/app/AppController.cpp" line="208" />
         <source>Master password changed. Touch ID was turned off: %1</source>
         <translation>Ana şifre değiştirildi. Touch ID kapatıldı: %1</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="210" />
+        <location filename="../src/app/AppController.cpp" line="212" />
         <source>Master password changed.</source>
         <translation>Ana şifre değiştirildi.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="239" />
+        <location filename="../src/app/AppController.cpp" line="241" />
         <source>Couldn't save the change: %1</source>
         <translation>Değişiklik kaydedilemedi: %1</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="276" />
+        <location filename="../src/app/AppController.cpp" line="278" />
         <source>Name and address can't be empty.</source>
         <translation>Ad ve adres boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="309" />
+        <location filename="../src/app/AppController.cpp" line="314" />
         <source>%1 (Copy)</source>
         <translation>%1 (Kopya)</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="351" />
+        <location filename="../src/app/AppController.cpp" line="356" />
         <source>The device no longer exists.</source>
         <translation>Cihaz artık yok.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="354" />
+        <location filename="../src/app/AppController.cpp" line="359" />
         <source>%1 is already open.</source>
         <translation>%1 zaten açık.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="356" />
+        <location filename="../src/app/AppController.cpp" line="361" />
         <source>Tunnels inside Burrow are coming next. For now, use a direct connection.</source>
         <translation>Burrow içindeki tüneller sıradaki adımda geliyor. Şimdilik doğrudan bağlantı kullan.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="441" />
+        <location filename="../src/app/AppController.cpp" line="449" />
         <source>The profile name can't be empty.</source>
         <translation>Profil adı boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="445" />
+        <location filename="../src/app/AppController.cpp" line="453" />
         <source>Server and username can't be empty.</source>
         <translation>Sunucu ve kullanıcı adı boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="448" />
+        <location filename="../src/app/AppController.cpp" line="456" />
         <source>The OTP key is invalid.</source>
         <translation>OTP anahtarı geçersiz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="490" />
+        <location filename="../src/app/AppController.cpp" line="498" />
         <source>Direct (No Tunnel)</source>
         <translation>Doğrudan (Tünelsiz)</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="524" />
+        <location filename="../src/app/AppController.cpp" line="532" />
         <source>Invalid key</source>
         <translation>Geçersiz anahtar</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="582" />
+        <location filename="../src/app/AppController.cpp" line="590" />
         <source>Company VPN</source>
         <translation>Şirket VPN</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="587" />
+        <location filename="../src/app/AppController.cpp" line="595" />
         <source>Home Network</source>
         <translation>Ev Ağı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="593" />
+        <location filename="../src/app/AppController.cpp" line="601" />
         <source>Work PC</source>
         <translation>İş Bilgisayarı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="594" />
+        <location filename="../src/app/AppController.cpp" line="602" />
         <source>Meeting Room</source>
         <translation>Toplantı Odası</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="595" />
+        <location filename="../src/app/AppController.cpp" line="603" />
         <source>Home Desktop</source>
         <translation>Ev Masaüstü</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="596" />
+        <location filename="../src/app/AppController.cpp" line="604" />
         <source>Lab Server</source>
         <translation>Laboratuvar</translation>
     </message>
@@ -274,7 +274,7 @@
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="51" />
-        <location filename="../qml/DeviceEditor.qml" line="119" />
+        <location filename="../qml/DeviceEditor.qml" line="135" />
         <source>Session</source>
         <translation>Oturum</translation>
     </message>
@@ -359,82 +359,92 @@
         <translation>Bağlanınca kayıtlı şifreyle giriş yapılır; giriş ekranı çıkarsa şifre oraya da yazılır.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="120" />
+        <location filename="../qml/DeviceEditor.qml" line="117" />
+        <source>Burrow trusts this computer's certificate and refuses to connect if it changes.</source>
+        <translation>Burrow bu bilgisayarın sertifikasına güveniyor; değişirse bağlanmaz.</translation>
+    </message>
+    <message>
+        <location filename="../qml/DeviceEditor.qml" line="122" />
+        <source>Forget Saved Certificate</source>
+        <translation>Kayıtlı Sertifikayı Unut</translation>
+    </message>
+    <message>
+        <location filename="../qml/DeviceEditor.qml" line="136" />
         <source>Connect to the existing session</source>
         <translation>Mevcut oturuma bağlan</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="121" />
+        <location filename="../qml/DeviceEditor.qml" line="137" />
         <source>Start a new session</source>
         <translation>Yeni oturum aç</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="122" />
+        <location filename="../qml/DeviceEditor.qml" line="138" />
         <source>Ask every time</source>
         <translation>Her bağlantıda sor</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="128" />
+        <location filename="../qml/DeviceEditor.qml" line="144" />
         <source>Lock When Disconnected</source>
         <translation>Bağlantı Kapanınca Kilitle</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="129" />
+        <location filename="../qml/DeviceEditor.qml" line="145" />
         <source>Burrow locks the remote computer (Win+L / Super+L) before closing the connection.</source>
         <translation>Burrow bağlantıyı kapatmadan önce uzak bilgisayarı kilitler (Win+L / Super+L).</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="144" />
+        <location filename="../qml/DeviceEditor.qml" line="160" />
         <source>Clipboard Sharing</source>
         <translation>Pano Paylaşımı</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="145" />
+        <location filename="../qml/DeviceEditor.qml" line="161" />
         <source>Both directions</source>
         <translation>Çift yönlü</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="146" />
+        <location filename="../qml/DeviceEditor.qml" line="162" />
         <source>Only from this computer to remote</source>
         <translation>Sadece bu bilgisayardan uzağa</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="147" />
+        <location filename="../qml/DeviceEditor.qml" line="163" />
         <source>Only from remote to this computer</source>
         <translation>Sadece uzaktan bu bilgisayara</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="148" />
+        <location filename="../qml/DeviceEditor.qml" line="164" />
         <source>Off</source>
         <translation>Kapalı</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="154" />
+        <location filename="../qml/DeviceEditor.qml" line="170" />
         <source>Mac Shortcuts</source>
         <translation>Mac Kısayolları</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="155" />
+        <location filename="../qml/DeviceEditor.qml" line="171" />
         <source>Translate shortcuts (Cmd+C → Ctrl+C)</source>
         <translation>Kısayolları çevir (Cmd+C → Ctrl+C)</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="156" />
+        <location filename="../qml/DeviceEditor.qml" line="172" />
         <source>Swap Cmd ↔ Ctrl completely</source>
         <translation>Cmd ↔ Ctrl tamamen yer değiştir</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="157" />
+        <location filename="../qml/DeviceEditor.qml" line="173" />
         <source>Off (keys as they are)</source>
         <translation>Kapalı (tuşlar olduğu gibi)</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="173" />
+        <location filename="../qml/DeviceEditor.qml" line="189" />
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="174" />
+        <location filename="../qml/DeviceEditor.qml" line="190" />
         <source>Save</source>
         <translation>Kaydet</translation>
     </message>
@@ -595,42 +605,42 @@
 <context>
     <name>RdpSession</name>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="112" />
+        <location filename="../src/rdp/RdpSession.cpp" line="130" />
         <source>The computer rejected the username or password.</source>
         <translation>Bilgisayar kullanıcı adını veya şifreyi kabul etmedi.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="114" />
+        <location filename="../src/rdp/RdpSession.cpp" line="132" />
         <source>The account is locked on the remote computer.</source>
         <translation>Hesap uzak bilgisayarda kilitli.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="116" />
+        <location filename="../src/rdp/RdpSession.cpp" line="134" />
         <source>The computer's address couldn't be found.</source>
         <translation>Bilgisayarın adresi bulunamadı.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="119" />
+        <location filename="../src/rdp/RdpSession.cpp" line="137" />
         <source>Couldn't reach the computer. Check the address and the tunnel.</source>
         <translation>Bilgisayara ulaşılamadı. Adresi ve tüneli kontrol et.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="121" />
+        <location filename="../src/rdp/RdpSession.cpp" line="139" />
         <source>The secure connection couldn't be established.</source>
         <translation>Güvenli bağlantı kurulamadı.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="123" />
-        <source>The computer's certificate changed since the last connection, so Burrow didn't connect.</source>
-        <translation>Bilgisayarın sertifikası son bağlantıdan bu yana değişti, bu yüzden Burrow bağlanmadı.</translation>
+        <location filename="../src/rdp/RdpSession.cpp" line="141" />
+        <source>The computer's certificate doesn't match the one you trusted, so Burrow didn't connect. If the change is expected, use Forget Saved Certificate in the device settings.</source>
+        <translation>Bilgisayarın sertifikası güvendiğin sertifikayla eşleşmiyor, bu yüzden Burrow bağlanmadı. Değişiklik bekleniyorsa cihaz ayarlarında Kayıtlı Sertifikayı Unut'u kullan.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="125" />
+        <location filename="../src/rdp/RdpSession.cpp" line="143" />
         <source>The connection failed (%1).</source>
         <translation>Bağlantı başarısız oldu (%1).</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="203" />
+        <location filename="../src/rdp/RdpSession.cpp" line="223" />
         <source>Couldn't start the RDP engine.</source>
         <translation>RDP motoru başlatılamadı.</translation>
     </message>

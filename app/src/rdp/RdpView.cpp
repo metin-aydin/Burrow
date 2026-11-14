@@ -2,6 +2,7 @@
 
 #include <QKeyEvent>
 #include <QPainter>
+#include <QQuickWindow>
 
 #include <winpr/input.h>
 
@@ -15,6 +16,22 @@ RdpView::RdpView(QQuickItem *parent)
     setActiveFocusOnTab(false);
     setFillColor(Qt::black);
     setOpaquePainting(true);
+    // Follow the window size once it settles (dragging sends many intermediate sizes).
+    m_resizeTimer.setSingleShot(true);
+    m_resizeTimer.setInterval(400);
+    connect(&m_resizeTimer, &QTimer::timeout, this, [this] {
+        if (!m_session || !window() || width() < 50 || height() < 50)
+            return;
+        const qreal dpr = window()->effectiveDevicePixelRatio();
+        m_session->requestResize(QSize(qRound(width() * dpr), qRound(height() * dpr)), qRound(dpr * 100));
+    });
+}
+
+void RdpView::geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry)
+{
+    QQuickPaintedItem::geometryChange(newGeometry, oldGeometry);
+    if (newGeometry.size() != oldGeometry.size())
+        m_resizeTimer.start();
 }
 
 void RdpView::setSession(RdpSession *s)
@@ -32,6 +49,10 @@ void RdpView::setSession(RdpSession *s)
         connect(s, &RdpSession::desktopSizeChanged, this, [this] {
             m_frame = m_session->frame();
             update();
+        });
+        connect(s, &RdpSession::stateChanged, this, [this] {
+            if (m_session && m_session->state() == QLatin1String("connected"))
+                m_resizeTimer.start();   // match the window as soon as the display channel is up
         });
     }
     emit sessionChanged();

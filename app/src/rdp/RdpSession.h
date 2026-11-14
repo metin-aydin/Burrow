@@ -8,6 +8,8 @@
 #include <atomic>
 
 #include "rdp/KeyMapper.h"
+#include "rdp/RdpClipboard.h"
+#include <functional>
 
 struct rdp_freerdp;
 struct rdp_gdi;
@@ -31,6 +33,8 @@ public:
         QString username, password, domain;
         QSize size{1600, 1000};
         QString keyMap = QStringLiteral("shortcuts");
+        QString clipboard = QStringLiteral("both");
+        int scale = 100;                 // desktop scale factor in percent (200 on Retina)
         bool lockOnDisconnect = false;   // send Win/Super+L before closing
         QString knownFingerprint;        // pin "host:port|sha256" confirmed by the user earlier
     };
@@ -58,11 +62,17 @@ public:
     void sendWheel(int delta, bool horizontal, int x, int y);
     void sendKey(unsigned scancode, bool down);   // raw scancode; Mac shortcut mapping applied here
     void releaseKeys();
+    // Asks the server to resize the desktop (pixels, scale %). Debounce in the caller.
+    void requestResize(const QSize &pixels, int scale);
 
     // FreeRDP callbacks (worker thread).
     void onPaint(rdp_gdi *gdi, int x, int y, int w, int h);
     void onResize(rdp_gdi *gdi);
     unsigned onVerifyCertificate(const QString &fingerprint);
+    void onChannelConnected(const char *name, void *iface);
+    void onChannelDisconnected(const char *name);
+    bool clipboardEnabled() const { return m_clip && m_clip->enabled(); }
+    int scale() const { return m_p.scale; }
 
 signals:
     void stateChanged();
@@ -76,6 +86,8 @@ private:
     void run();
     void setState(const QString &state, const QString &error = {});
     void sendScancode(unsigned scancode, bool down);
+    void post(std::function<void()> task);   // run on the worker thread
+    void drainTasks();
     QString pinFor(const QString &fingerprint) const;
 
     Params m_p;
@@ -91,4 +103,8 @@ private:
     QWaitCondition m_certCond;
     int m_certAnswer = -1;
     std::atomic_bool m_certChanged{false};
+    RdpClipboard *m_clip = nullptr;
+    void *m_disp = nullptr;                  // DispClientContext*, worker thread only
+    QMutex m_tasksLock;
+    QList<std::function<void()>> m_tasks;
 };
