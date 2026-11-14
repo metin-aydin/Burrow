@@ -125,6 +125,20 @@ QString AppController::changePassword(const QString &current, const QString &nex
     const VaultStore::Result r = m_store.changePassword(next);
     if (r != VaultStore::Result::Ok)
         return VaultStore::message(r);
+    // The data key was rotated (ADR 0004); refresh the Touch ID copy.
+    if (touchIdEnabled()) {
+        QString err;
+        QByteArray key = m_store.exportKey();
+        const bool ok = Biometric::storeKey(key, &err);
+        wipe(key);
+        if (!ok) {
+            Biometric::removeKey();
+            QSettings().setValue(kTouchIdKey, false);
+            emit touchIdEnabledChanged();
+            emit toast(tr("Ana şifre değiştirildi. Touch ID kapatıldı: %1").arg(err));
+            return {};
+        }
+    }
     emit toast(tr("Ana şifre değiştirildi."));
     return {};
 }

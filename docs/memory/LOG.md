@@ -2,6 +2,13 @@
 
 En yeni kayıt en üstte.
 
+## 2026-11-15
+
+- Güvenlik incelemesi (otomatik): ana şifre değişince `.bak` eski şifreyle açılabiliyor ve DEK aynı kaldığı
+  için güncel kasayı da açıyordu. Düzeltme: şifre değişiminde DEK yenileniyor, belge + blob'lar yeniden
+  şifreleniyor, `.bak` siliniyor, Touch ID kopyası yenileniyor (olmazsa Touch ID kapanıyor). Go + Qt
+  testleri güncellendi/eklendi, ADR 0004 güncellendi.
+
 ## 2026-11-14
 
 - İlk push: `development` dalı `github.com/metin-aydin/Burrow`'a gönderildi (4 commit). `master` henüz yok;

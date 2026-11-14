@@ -151,16 +151,59 @@ func (v *Vault) ChangePassword(newPassword string) error {
 	if v.dek == nil {
 		return ErrClosed
 	}
-	old := v.env
-	if err := v.wrapKey(newPassword, DefaultKDF); err != nil {
-		v.env = old
+	// Rotate the data key as well: the old password (or an old Touch ID copy,
+	// or an old backup file) must not be able to open anything written from now on.
+	blobs := v.readAllBlobs()
+	defer func() {
+		for _, b := range blobs {
+			wipe(b)
+		}
+	}()
+	newDEK := make([]byte, keySize)
+	if _, err := rand.Read(newDEK); err != nil {
 		return err
 	}
-	if err := v.write(v.doc); err != nil {
-		v.env = old
+	oldEnv, oldDEK := v.env, v.dek
+	v.dek = newDEK
+	if err := v.wrapKey(newPassword, DefaultKDF); err != nil {
+		v.env, v.dek = oldEnv, oldDEK
+		wipe(newDEK)
 		return err
+	}
+	if err := v.writeFile(v.doc, false); err != nil {
+		v.env, v.dek = oldEnv, oldDEK
+		wipe(newDEK)
+		return err
+	}
+	wipe(oldDEK)
+	// The previous version is wrapped under the old password; drop it.
+	_ = os.Remove(v.path + ".bak")
+	// Re-encrypt side blobs under the new key. A blob that cannot be rewritten
+	// is removed (previews are regenerated on the next connection).
+	dir := filepath.Dir(v.path)
+	for name, data := range blobs {
+		if err := v.putBlobLocked(name, data); err != nil {
+			_ = os.Remove(filepath.Join(dir, "blobs", name+".bin"))
+		}
+	}
+	tmps, _ := filepath.Glob(filepath.Join(dir, "blobs", "*.tmp"))
+	for _, t := range tmps {
+		_ = os.Remove(t)
 	}
 	return nil
+}
+
+// readAllBlobs decrypts every readable blob with the current key. Caller holds v.mu.
+func (v *Vault) readAllBlobs() map[string][]byte {
+	out := map[string][]byte{}
+	files, _ := filepath.Glob(filepath.Join(filepath.Dir(v.path), "blobs", "*.bin"))
+	for _, f := range files {
+		name := strings.TrimSuffix(filepath.Base(f), ".bin")
+		if b, err := v.blobLocked(name); err == nil {
+			out[name] = b
+		}
+	}
+	return out
 }
 
 // ExportKey returns a copy of the data key, for storage behind Touch ID.
@@ -198,6 +241,10 @@ func (v *Vault) PutBlob(name string, data []byte) error {
 	if v.dek == nil {
 		return ErrClosed
 	}
+	return v.putBlobLocked(name, data)
+}
+
+func (v *Vault) putBlobLocked(name string, data []byte) error {
 	p, err := v.blobPath(name)
 	if err != nil {
 		return err
@@ -224,6 +271,10 @@ func (v *Vault) Blob(name string) ([]byte, error) {
 	if v.dek == nil {
 		return nil, ErrClosed
 	}
+	return v.blobLocked(name)
+}
+
+func (v *Vault) blobLocked(name string) ([]byte, error) {
 	p, err := v.blobPath(name)
 	if err != nil {
 		return nil, err
@@ -286,9 +337,11 @@ func (v *Vault) wrapKey(password string, p KDFParams) error {
 	return nil
 }
 
-// write seals doc into the envelope and atomically replaces the file,
-// keeping the previous version as path+".bak". Caller holds v.mu (or owns v).
-func (v *Vault) write(doc []byte) error {
+// write seals doc and atomically replaces the file, keeping the previous
+// version as path+".bak". Caller holds v.mu (or owns v).
+func (v *Vault) write(doc []byte) error { return v.writeFile(doc, true) }
+
+func (v *Vault) writeFile(doc []byte, backup bool) error {
 	s, err := seal(v.dek, doc, dataAAD(v.env))
 	if err != nil {
 		return err
@@ -322,7 +375,7 @@ func (v *Vault) write(doc []byte) error {
 	if err := tmp.Close(); err != nil {
 		return err
 	}
-	if _, err := os.Stat(v.path); err == nil {
+	if _, err := os.Stat(v.path); err == nil && backup {
 		_ = os.Remove(v.path + ".bak")
 		if err := os.Link(v.path, v.path+".bak"); err != nil {
 			return fmt.Errorf("vault: backup: %w", err)

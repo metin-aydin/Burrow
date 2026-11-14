@@ -80,8 +80,12 @@ func TestChangePasswordAndExportKey(t *testing.T) {
 	if _, err := Open(p, "new"); err != nil {
 		t.Fatal(err)
 	}
-	// The data key survives a password change, so a Touch ID copy stays valid.
-	v3, err := OpenWithKey(p, key)
+	// The data key is rotated: an old exported key (Touch ID copy) no longer works.
+	if _, err := OpenWithKey(p, key); !errors.Is(err, ErrWrongPassword) {
+		t.Fatalf("old data key still opens the vault: %v", err)
+	}
+	newKey, _ := v.ExportKey()
+	v3, err := OpenWithKey(p, newKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -188,5 +192,39 @@ func TestBlobs(t *testing.T) {
 	v.Close()
 	if _, err := v.Blob("dev-2"); !errors.Is(err, ErrClosed) {
 		t.Fatalf("got %v", err)
+	}
+}
+
+func TestChangePasswordRotatesKeyAndDropsBackup(t *testing.T) {
+	p := newPath(t)
+	v, _ := Create(p, "old", []byte("v1"))
+	if err := v.Save([]byte("v2")); err != nil { // creates .bak
+		t.Fatal(err)
+	}
+	if err := v.PutBlob("preview-a", []byte("pixels")); err != nil {
+		t.Fatal(err)
+	}
+	if err := v.ChangePassword("new"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(p + ".bak"); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("backup wrapped under the old password still exists: %v", err)
+	}
+	// Blobs were re-encrypted under the new key.
+	v.Close()
+	v2, err := Open(p, "new")
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := v2.Blob("preview-a")
+	if err != nil || string(b) != "pixels" {
+		t.Fatalf("blob after rotation: %q %v", b, err)
+	}
+	// Next save makes a fresh backup, wrapped under the new password.
+	if err := v2.Save([]byte("v3")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Open(p+".bak", "old"); !errors.Is(err, ErrWrongPassword) {
+		t.Fatalf("old password opens the new backup: %v", err)
 	}
 }

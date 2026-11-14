@@ -72,8 +72,13 @@ private slots:
         QCOMPARE(s.changePassword("new password 123"), VaultStore::Result::Ok);
         s.lock();
         QCOMPARE(s.open("correct horse battery"), VaultStore::Result::WrongPassword);
-        QCOMPARE(s.openWithKey(key), VaultStore::Result::Ok);
+        // Password change rotates the data key, so the old key is useless.
+        QCOMPARE(s.openWithKey(key), VaultStore::Result::WrongPassword);
+        QCOMPARE(s.open("new password 123"), VaultStore::Result::Ok);
         QCOMPARE(s.doc().devices.size(), 1);
+        const QByteArray newKey = s.exportKey();
+        s.lock();
+        QCOMPARE(s.openWithKey(newKey), VaultStore::Result::Ok);
     }
 
     void totpHelpers()
