@@ -170,10 +170,10 @@ func NetcoreStartTunnelForward(tunnelHandle C.int, target *C.char, outAddr **C.c
 		return 0
 	}
 	f := &forward.Forwarder{
-		Dialer:   dialerFunc(t.DialContext),
-		Target:   C.GoString(target),
-		MaxConns: 1,
-		OneShot:  true,
+		Dialer:     dialerFunc(t.DialContext),
+		Target:     C.GoString(target),
+		MaxConns:   1,
+		MaxAccepts: 4, // RDP may reconnect during security negotiation / auto-reconnect
 	}
 	addr, err := f.Start()
 	if err != nil {

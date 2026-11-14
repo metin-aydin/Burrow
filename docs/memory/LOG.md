@@ -4,6 +4,11 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- ✅ **GP girişi uygulama içinde kurumda başarılı** (çift OTP: portal formu → gateway 512 → ikinci form yeni OTP →
+  tünel 172.16.100.x, ESP yok → HTTPS). RDP bağlanmadı; iki neden: (1) openconnect macOS/BSD'de tun paketlerine 4 baytlık
+  AF başlığı ekliyor (yalnız --script-tun'da eklemiyor) → netstack'e `AFPrefix` seçeneği; (2) FreeRDP müzakere sırasında
+  yeniden bağlanıyor, OneShot dinleyici kapanmıştı → tünel yönlendirmesi `MaxAccepts: 4` + kısa yuva beklemesi.
+  Ayrıca "GPST Dead Peer Detection detected dead peer" görüldü (muhtemelen bozuk paketler; yeniden denemede izlenecek).
 - Güvenlik incelemesi (Cloudflare, 1 bulgu): org anahtarı değişiminde yönlendirmeler yalnız https ve yalnız uygulama
   host'u ile Access alanına izinli; org anahtarı yalnız `*.cloudflareaccess.com` alanına gidiyor. Testli.
 - Güvenlik incelemesi (log temizleyici, 3 bulgu): URL'ler `net/url` ile ayrıştırılıp yalnız `scheme://host` bırakılıyor

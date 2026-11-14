@@ -4,6 +4,7 @@ package netstack
 
 import (
 	"context"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -33,14 +34,26 @@ type Stack struct {
 	s      *stack.Stack
 	ep     *channel.Endpoint
 	file   *os.File
-	dns    []netip.Addr
-	cancel context.CancelFunc
+	dns      []netip.Addr
+	afPrefix bool
+	cancel   context.CancelFunc
 	wg     sync.WaitGroup
 }
 
 // New starts the stack on fd (one raw IP packet per datagram), with this side's VPN address and
 // the VPN's DNS servers.
+// Options tune how packets are framed on the socket.
+type Options struct {
+	// AFPrefix: each packet carries a 4-byte address-family header (BSD/macOS tun framing, which
+	// openconnect uses on those systems).
+	AFPrefix bool
+}
+
 func New(fd int, mtu int, local netip.Addr, dns []netip.Addr) (*Stack, error) {
+	return NewWithOptions(fd, mtu, local, dns, Options{})
+}
+
+func NewWithOptions(fd int, mtu int, local netip.Addr, dns []netip.Addr, opt Options) (*Stack, error) {
 	if mtu <= 0 {
 		mtu = 1300
 	}
@@ -71,7 +84,7 @@ func New(fd int, mtu int, local netip.Addr, dns []netip.Addr) (*Stack, error) {
 	if err := syscall.SetNonblock(fd, true); err != nil {
 		return nil, fmt.Errorf("netstack: %v", err)
 	}
-	ns := &Stack{s: s, ep: ep, file: os.NewFile(uintptr(fd), "vpn-packets"), dns: dns}
+	ns := &Stack{s: s, ep: ep, file: os.NewFile(uintptr(fd), "vpn-packets"), dns: dns, afPrefix: opt.AFPrefix}
 	ctx, cancel := context.WithCancel(context.Background())
 	ns.cancel = cancel
 	ns.wg.Add(2)
@@ -92,11 +105,18 @@ func (ns *Stack) inbound(mtu int) {
 		if err != nil {
 			continue
 		}
-		if n == 0 {
+		pktData := buf[:n]
+		if ns.afPrefix {
+			if n <= 4 {
+				continue
+			}
+			pktData = buf[4:n]
+		}
+		if len(pktData) == 0 {
 			continue
 		}
 		var proto tcpip.NetworkProtocolNumber
-		switch buf[0] >> 4 {
+		switch pktData[0] >> 4 {
 		case 4:
 			proto = ipv4.ProtocolNumber
 		case 6:
@@ -105,7 +125,7 @@ func (ns *Stack) inbound(mtu int) {
 			continue
 		}
 		pkt := stack.NewPacketBuffer(stack.PacketBufferOptions{
-			Payload: buffer.MakeWithData(append([]byte(nil), buf[:n]...)),
+			Payload: buffer.MakeWithData(append([]byte(nil), pktData...)),
 		})
 		ns.ep.InjectInbound(proto, pkt)
 		pkt.DecRef()
@@ -121,7 +141,18 @@ func (ns *Stack) outbound(ctx context.Context) {
 			return
 		}
 		view := pkt.ToView()
-		_, err := ns.file.Write(view.AsSlice())
+		data := view.AsSlice()
+		if ns.afPrefix && len(data) > 0 {
+			af := uint32(syscall.AF_INET)
+			if data[0]>>4 == 6 {
+				af = uint32(syscall.AF_INET6)
+			}
+			framed := make([]byte, 4+len(data))
+			binary.BigEndian.PutUint32(framed, af)
+			copy(framed[4:], data)
+			data = framed
+		}
+		_, err := ns.file.Write(data)
 		view.Release()
 		pkt.DecRef()
 		if errors.Is(err, os.ErrClosed) {

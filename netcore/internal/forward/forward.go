@@ -9,6 +9,7 @@ import (
 	"io"
 	"net"
 	"sync"
+	"time"
 )
 
 // Dialer opens a TCP connection to addr through some tunnel.
@@ -34,7 +35,12 @@ type Forwarder struct {
 	// all); see ADR 0001.
 	OneShot bool
 
-	ln     net.Listener
+	// MaxAccepts closes the listener after this many accepted connections (0 = no limit). RDP
+	// clients may reconnect during security negotiation, so tunnel forwards allow a few.
+	MaxAccepts int
+
+	ln       net.Listener
+	accepted int
 	wg     sync.WaitGroup
 	mu     sync.Mutex
 	active int
@@ -80,7 +86,8 @@ func (f *Forwarder) acceptLoop() {
 			_ = c.Close()
 			continue
 		}
-		if f.OneShot {
+		f.accepted++
+		if f.OneShot || (f.MaxAccepts > 0 && f.accepted >= f.MaxAccepts) {
 			_ = f.ln.Close()
 		}
 		f.wg.Add(1)
@@ -92,14 +99,23 @@ func (f *Forwarder) acceptLoop() {
 	}
 }
 
+// acquire takes a connection slot, waiting briefly for one to free up: an RDP client that
+// reconnects closes its previous connection only a moment before opening the next one.
 func (f *Forwarder) acquire() bool {
-	f.mu.Lock()
-	defer f.mu.Unlock()
-	if f.MaxConns > 0 && f.active >= f.MaxConns {
-		return false
+	deadline := time.Now().Add(3 * time.Second)
+	for {
+		f.mu.Lock()
+		if f.MaxConns <= 0 || f.active < f.MaxConns {
+			f.active++
+			f.mu.Unlock()
+			return true
+		}
+		f.mu.Unlock()
+		if time.Now().After(deadline) || f.ctx.Err() != nil {
+			return false
+		}
+		time.Sleep(50 * time.Millisecond)
 	}
-	f.active++
-	return true
 }
 
 func (f *Forwarder) release() {

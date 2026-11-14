@@ -206,7 +206,10 @@ func (t *Tunnel) run() {
 		t.fail("couldn't attach the tunnel")
 		return
 	}
-	st, err := netstack.New(fds[1], int(mtu), local, dns)
+	// openconnect frames tun packets with a 4-byte address family on macOS/BSD (it only skips that
+	// for --script-tun, which the library API doesn't use).
+	st, err := netstack.NewWithOptions(fds[1], int(mtu), local, dns,
+		netstack.Options{AFPrefix: runtime.GOOS == "darwin" || strings.HasSuffix(runtime.GOOS, "bsd")})
 	if err != nil {
 		syscall.Close(fds[1])
 		t.fail(err.Error())

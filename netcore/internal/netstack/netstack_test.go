@@ -15,17 +15,20 @@ import (
 
 // Two stacks wired back to back through a datagram socketpair stand in for "Burrow" and the
 // remote network: a TCP echo round trip proves packets flow both ways.
-func TestDialThroughPacketSocket(t *testing.T) {
+func TestDialThroughPacketSocket(t *testing.T)   { testDial(t, Options{}) }
+func TestDialWithAFPrefixFraming(t *testing.T) { testDial(t, Options{AFPrefix: true}) }
+
+func testDial(t *testing.T, opt Options) {
 	fds, err := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_DGRAM, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
-	client, err := New(fds[0], 1400, netip.MustParseAddr("10.9.0.2"), nil)
+	client, err := NewWithOptions(fds[0], 1400, netip.MustParseAddr("10.9.0.2"), nil, opt)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer client.Close()
-	server, err := New(fds[1], 1400, netip.MustParseAddr("10.9.0.1"), nil)
+	server, err := NewWithOptions(fds[1], 1400, netip.MustParseAddr("10.9.0.1"), nil, opt)
 	if err != nil {
 		t.Fatal(err)
 	}

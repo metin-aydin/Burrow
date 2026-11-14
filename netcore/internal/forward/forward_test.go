@@ -133,3 +133,31 @@ func TestForwarderMaxConns(t *testing.T) {
 		t.Fatal("second conn should be rejected")
 	}
 }
+
+func TestMaxAccepts(t *testing.T) {
+	echo := echoServer(t)
+	f := &Forwarder{Dialer: &net.Dialer{}, Target: echo, MaxConns: 1, MaxAccepts: 2}
+	addr, err := f.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	for i := 0; i < 2; i++ {
+		c, err := net.Dial("tcp", addr)
+		if err != nil {
+			t.Fatalf("connection %d refused: %v", i+1, err)
+		}
+		c.Write([]byte("x"))
+		buf := make([]byte, 1)
+		c.SetReadDeadline(time.Now().Add(2 * time.Second))
+		if _, err := c.Read(buf); err != nil {
+			t.Fatalf("connection %d: %v", i+1, err)
+		}
+		c.Close()
+	}
+	time.Sleep(50 * time.Millisecond)
+	if c, err := net.DialTimeout("tcp", addr, time.Second); err == nil {
+		c.Close()
+		t.Fatal("third connection accepted")
+	}
+}
