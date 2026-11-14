@@ -4,6 +4,11 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Güvenlik incelemesi (otomatik, 4 bulgu) düzeltildi: güncelleme dosya adı manifestten yol olarak alınmıyor
+  (beklenen `Burrow-<sürüm>-<platform>.zip` olmalı, sürüm X.Y.Z biçiminde); `BURROW_UPDATE_URL` release'te yalnız
+  https (testler `BURROW_UPDATER_ALLOW_INSECURE` ile); kurulum 0700 rastgele geçici dizinde, yardımcı betik
+  değiştirmeden hemen önce imza + ekip kimliğini yeniden doğruluyor; release.yml'den `workflow_dispatch`
+  kaldırıldı, işler `master` ile sınırlı, `contents: write` yalnız gereken işlerde.
 - **Impeccable kuruldu (AI slop engeli):** pbakaus/impeccable v4.9.1 skill'i ve 4 alt ajanı proje içine kopyalandı
   (`.claude/`, Codex için `.agents/`), telemetri kapalı (`.impeccable/config.json`), `.gitignore`'a çalışma dosyaları
   eklendi. `CLAUDE.md`'ye QML'e uyarlanmış "AI slop yasak" bölümü yazıldı. Design hook kurulmadı (QML taramıyor).

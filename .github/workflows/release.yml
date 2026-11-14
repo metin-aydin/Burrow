@@ -8,17 +8,19 @@ name: Release
 on:
   push:
     branches: [master]
-  workflow_dispatch:
 
 concurrency:
   group: release
   cancel-in-progress: false
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   prepare:
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -69,6 +71,9 @@ jobs:
 
   build:
     needs: prepare
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
     # Signing secrets live in the "release" environment, which only protected branches can use.
     environment: release
     strategy:
@@ -177,6 +182,9 @@ jobs:
 
   publish:
     needs: [prepare, build]
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -203,6 +211,8 @@ jobs:
   discard:
     needs: [prepare, build, publish]
     if: failure() && needs.prepare.result == 'success'
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Delete draft release

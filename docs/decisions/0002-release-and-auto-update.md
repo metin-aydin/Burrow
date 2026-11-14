@@ -16,7 +16,7 @@
   `!`/`BREAKING CHANGE` → major (0.x'te minor). (JumpDesk her sürümde patch artırır; Burrow CLAUDE.md gereği
   commit türünden hesaplar.)
 
-## `.github/workflows/release.yml` (tetik: `master`'a push)
+## `.github/workflows/release.yml` (tetik: yalnız `master`'a push; elle tetikleme yok, yazma izni yalnız gereken işlerde)
 1. **prepare:** sürümü hesapla; birleşen PR'ın açıklamasını `release-notes.py` ile temizleyip sürüm notu yap
    (boşsa son etiketten bu yana commit başlıkları + "Full changelog" bağlantısı); `vX.Y.Z` taslak sürüm oluştur
    (yarım kalmış eski taslak silinir).
@@ -36,15 +36,16 @@ yazılmaz; kullanıcı kendisi ekler. Eksikse macOS derlemesi hata verip yayın�
 
 ## Uygulama içi güncelleme (`app/src/app/Updater.*`)
 - Manifest: `https://github.com/metin-aydin/Burrow/releases/latest/download/latest.json` (sunucu yok).
-  Test için `BURROW_UPDATE_URL`.
+  `BURROW_UPDATE_URL` yalnız https kabul eder (birim testleri derleme bayrağıyla file:// kullanır). Dosya adı
+  manifestten yol olarak alınmaz; `Burrow-<X.Y.Z>-<platform>.zip` olmak zorundadır.
 - Davranış (JumpDesk ile aynı): açılıştan 15 sn sonra ve 6 saatte bir denetim (yalnız paketli sürüm, ayarlardan
   kapatılabilir); yeni sürümde bildirim + galeri başlığında "Güncelleme X" çipi; **sormadan indirmez**;
   Ayarlar → Güncellemeler'den İndir → Yeniden Başlat Ve Güncelle.
 - Doğrulama: indirilen paketin SHA-256'sı manifestle eşleşmeli; macOS'ta açılan uygulama `codesign --verify
   --deep --strict`'ten geçmeli ve **çalışan uygulamayla aynı Developer ID ekip kimliğini** taşımalı.
   İmzasız (geliştirme) kopya kendini güncellemez.
-- Kurulum: ayrık bir yardımcı betik Burrow kapanınca eski paketi yenisiyle değiştirir (başarısızsa eskisini geri
-  koyar) ve yeniden açar. Aktif RDP oturumu varken kurulum sorulmadan yapılmaz (RDP motoruyla birlikte).
+- Kurulum: paket 0700 izinli, rastgele adlı geçici dizinde açılır; ayrık yardımcı betik Burrow kapanınca imzayı ve
+  ekip kimliğini **yeniden doğrular**, eski paketi yenisiyle değiştirir (başarısızsa eskisini geri koyar) ve yeniden açar. Aktif RDP oturumu varken kurulum sorulmadan yapılmaz (RDP motoruyla birlikte).
 - Ubuntu (AppImage/deb) ve Windows (kurulum) güncellemesi portlarla birlikte eklenecek.
 
 ## Reddedilen: Sparkle 2

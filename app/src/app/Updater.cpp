@@ -14,6 +14,7 @@
 #include <QStandardPaths>
 #include <QSysInfo>
 #include <QTemporaryDir>
+#include <QUrl>
 
 namespace {
 const char kAutoCheckKey[] = "updates/autoCheck";
@@ -48,9 +49,17 @@ Updater::Updater(QObject *parent)
     : QObject(parent)
     , m_net(new QNetworkAccessManager(this))
 {
-    // BURROW_UPDATE_URL points the updater at a test manifest.
-    const QString env = qEnvironmentVariable("BURROW_UPDATE_URL");
-    m_manifestUrl = QUrl(env.isEmpty() ? QString::fromLatin1(kDefaultManifest) : env);
+    // BURROW_UPDATE_URL points the updater at another manifest (staging). Release builds accept only
+    // https; the unit tests are built with BURROW_UPDATER_ALLOW_INSECURE to use file:// fixtures.
+    m_manifestUrl = QUrl(QString::fromLatin1(kDefaultManifest));
+    const QUrl env(qEnvironmentVariable("BURROW_UPDATE_URL"));
+#ifdef BURROW_UPDATER_ALLOW_INSECURE
+    const bool allowed = env.isValid();
+#else
+    const bool allowed = env.isValid() && env.scheme() == QLatin1String("https");
+#endif
+    if (!env.isEmpty() && allowed)
+        m_manifestUrl = env;
 
     connect(&m_timer, &QTimer::timeout, this, [this] {
         m_timer.setInterval(kIntervalMs);
@@ -139,7 +148,8 @@ void Updater::onManifest(QNetworkReply *reply)
     const QJsonObject m = QJsonDocument::fromJson(reply->readAll()).object();
     const QString version = m.value("version").toString();
     const QJsonObject asset = m.value("assets").toObject().value(platformKey()).toObject();
-    if (version.isEmpty()) {
+    static const QRegularExpression versionRe(QStringLiteral("^\\d+\\.\\d+\\.\\d+$"));
+    if (!versionRe.match(version).hasMatch()) {
         setState(QStringLiteral("error"), tr("The update information is invalid."));
         return;
     }
@@ -149,7 +159,14 @@ void Updater::onManifest(QNetworkReply *reply)
     }
     m_latest = version;
     m_notes = m.value("notes").toString();
-    m_assetName = asset.value("name").toString();
+    // The file name is never taken from the manifest as a path: it must be exactly the name the release
+    // workflow produces for this version and platform.
+    const QString expected = QStringLiteral("Burrow-%1-%2.zip").arg(version, platformKey());
+    if (asset.value("name").toString() != expected) {
+        setState(QStringLiteral("error"), tr("The update information is invalid."));
+        return;
+    }
+    m_assetName = expected;
     m_assetSha256 = asset.value("sha256").toString().toLower();
     setState(QStringLiteral("available"));
     emit updateAvailable(version);
@@ -236,32 +253,47 @@ QString Updater::installMac()
     if (currentTeam.isEmpty())
         return tr("This copy of Burrow isn't signed, so updates can't be verified. Download the new version from GitHub.");
 
-    const QString staging = QDir(QFileInfo(m_downloadPath).absolutePath()).filePath(QStringLiteral("staging"));
-    QDir(staging).removeRecursively();
-    QDir().mkpath(staging);
-    if (run(QStringLiteral("/usr/bin/ditto"), {QStringLiteral("-x"), QStringLiteral("-k"), m_downloadPath, staging}).isNull())
+    // Private (0700, random name) staging directory; the helper removes it after the swap.
+    QTemporaryDir stagingDir(QDir::tempPath() + QStringLiteral("/burrow-update-XXXXXX"));
+    if (!stagingDir.isValid())
+        return tr("Couldn't prepare the update.");
+    stagingDir.setAutoRemove(false);
+    const QString staging = stagingDir.path();
+    QFile::setPermissions(staging, QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
+    if (run(QStringLiteral("/usr/bin/ditto"), {QStringLiteral("-x"), QStringLiteral("-k"), m_downloadPath, staging}).isNull()) {
+        QDir(staging).removeRecursively();
         return tr("Couldn't unpack the update.");
+    }
     const QString fresh = QDir(staging).filePath(QStringLiteral("Burrow.app"));
     if (run(QStringLiteral("/usr/bin/codesign"),
             {QStringLiteral("--verify"), QStringLiteral("--deep"), QStringLiteral("--strict"), fresh}).isNull()
-        || teamIdentifier(fresh) != currentTeam)
+        || teamIdentifier(fresh) != currentTeam) {
+        QDir(staging).removeRecursively();
         return tr("The update's signature doesn't match this app; it was not installed.");
+    }
 
-    // A detached helper waits for Burrow to exit, swaps the bundles and relaunches.
+    // A detached helper waits for Burrow to exit, verifies the signature and team again right before
+    // swapping (nothing can change the bundle unnoticed in between), swaps and relaunches.
     const QString script = QDir(staging).filePath(QStringLiteral("install.sh"));
     QFile s(script);
     if (!s.open(QIODevice::WriteOnly))
         return tr("Couldn't prepare the update.");
+    s.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
     s.write(QStringLiteral(
         "#!/bin/sh\n"
+        "# $1 = new bundle, $2 = installed bundle, $3 = expected Developer ID team, $4 = staging dir\n"
         "while kill -0 %1 2>/dev/null; do sleep 0.3; done\n"
-        "old=\"$2.old\"\n"
-        "rm -rf \"$old\"\n"
-        "mv \"$2\" \"$old\" && mv \"$1\" \"$2\" && rm -rf \"$old\" || { [ -d \"$old\" ] && mv \"$old\" \"$2\"; }\n"
+        "team=$(/usr/bin/codesign -dv --verbose=2 \"$1\" 2>&1 | sed -n 's/^TeamIdentifier=//p')\n"
+        "if /usr/bin/codesign --verify --deep --strict \"$1\" && [ \"$team\" = \"$3\" ]; then\n"
+        "  old=\"$2.old\"\n"
+        "  rm -rf \"$old\"\n"
+        "  mv \"$2\" \"$old\" && mv \"$1\" \"$2\" && rm -rf \"$old\" || { [ -d \"$old\" ] && mv \"$old\" \"$2\"; }\n"
+        "fi\n"
+        "rm -rf \"$4\"\n"
         "open \"$2\"\n")
                 .arg(QCoreApplication::applicationPid()).toUtf8());
     s.close();
-    if (!QProcess::startDetached(QStringLiteral("/bin/sh"), {script, fresh, current}))
+    if (!QProcess::startDetached(QStringLiteral("/bin/sh"), {script, fresh, current, currentTeam, staging}))
         return tr("Couldn't start the update.");
     return {};
 }

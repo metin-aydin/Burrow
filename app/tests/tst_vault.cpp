@@ -137,6 +137,17 @@ private slots:
         QTRY_COMPARE(bad.state(), QString("available"));
         bad.download();
         QTRY_COMPARE(bad.state(), QString("error"));
+
+        // A manifest that names an unexpected file (e.g. a path) is refused before anything is downloaded.
+        {
+            QFile m(m_dir.filePath("latest.json"));
+            QVERIFY(m.open(QIODevice::WriteOnly));
+            m.write("{\"version\":\"9.9.9\",\"assets\":{\"" + platform.toUtf8()
+                    + "\":{\"name\":\"../../evil.zip\",\"sha256\":\"" + QByteArray(64, 'a') + "\"}}}");
+        }
+        Updater evil;
+        evil.checkNow();
+        QTRY_COMPARE(evil.state(), QString("error"));
         qunsetenv("BURROW_UPDATE_URL");
     }
 
