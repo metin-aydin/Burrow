@@ -4,6 +4,9 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Impeccable kuruldu (AI slop engeli):** pbakaus/impeccable v4.9.1 skill'i ve 4 alt ajanı proje içine kopyalandı
+  (`.claude/`, Codex için `.agents/`), telemetri kapalı (`.impeccable/config.json`), `.gitignore`'a çalışma dosyaları
+  eklendi. `CLAUDE.md`'ye QML'e uyarlanmış "AI slop yasak" bölümü yazıldı. Design hook kurulmadı (QML taramıyor).
 - **Release + güncelleme JumpDesk/UPaste gibi (ADR 0002 güncellendi):** yeni `release.yml` (prepare/taslak →
   macOS arm64 imza+notarize → `latest.json` + yayımla → hata olursa sil), `release-notes.py` + testi, PR şablonu,
   `entitlements.mac.plist`, CI'a Qt testleri ve çeviri kontrolü. Sparkle bırakıldı; `Updater` (C++): 15 sn/6 saat

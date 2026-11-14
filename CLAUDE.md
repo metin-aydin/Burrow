@@ -51,6 +51,30 @@ type: user | feedback | project | reference
 - Commit mesajları **Conventional Commits** formatında (`feat:`, `fix:`, `feat!:` …); sürüm
   numarası bunlardan otomatik hesaplanır. Ayrıntı: `docs/decisions/0002-release-and-auto-update.md`.
 
+## Arayüz tasarımı — AI slop yasak
+
+- Her arayüz işinde (yeni ekran, düzenleme, ince ayar) **Impeccable** skill'i kullanılır:
+  `.claude/skills/impeccable/` (Codex: `.agents/skills/impeccable/`). UI düzenlemesinden önce
+  `reference/craft-floor.md` okunur; bitince `/impeccable critique` veya `polish` ile kontrol edilir.
+- Burrow bir **Operate** yüzeyi (araç/masaüstü uygulaması): gösteriş değil, okunabilirlik, tutarlılık ve
+  macOS alışkanlıkları önce gelir. Marka kendini detaylarda gösterir (Toprak rengi, bkz. `docs/memory/project-brand.md`).
+- Renk, boşluk, yazı boyutu yalnızca `app/qml/Theme.qml` token'larından gelir; QML içinde sabit renk/px yazılmaz.
+- **Yasak kalıplar** (brief açıkça istemedikçe):
+  - Aynı boy ikon + başlık + metin kartlarıyla ekran kurmak; iç içe kart.
+  - Başlık üstünde küçük etiket (kicker/eyebrow) — mutlak yasak.
+  - Gradyan metin, süs amaçlı cam/blur, sıfır ofsetli renkli parıltı gölge.
+  - Kartlarda/uyarılarda 1px'ten kalın renkli sol/sağ kenar çizgisi.
+  - Büyük rakam + küçük etiket "hero metric" şablonu; içerik yerine sparkline/halka/yuvarlak kutu.
+  - Emoji veya Unicode glif ile ikon; ikonlar tek bir set, tek çizgi kalınlığında.
+  - "Teknik" görünsün diye monospace (yalnızca kod, veri, ölçü için).
+  - Gereksiz modal; kesinti ya da odak koruması gerekmiyorsa satır içi çöz.
+  - Her bölümde aynı giriş animasyonu; hareket tek ve amaçlı olur.
+- **Zorunlu kontroller:** metin kontrastı ≥4.5:1 (büyük metin ≥3:1), renkli zeminde gri ikincil metin yok;
+  hover / disabled / loading / error / empty durumları; klavye odağı; gerçek Türkçe ve İngilizce metinle taşma kontrolü;
+  hatalar sorunu ve çözümü söyler.
+- Impeccable design hook'u kurulmadı: dedektörü yalnızca HTML/CSS/JSX/Vue/Svelte tarar, QML'i taramaz
+  ve her düzenlemede dışarıdan ikili indirir. Kontrol yukarıdaki kurallarla ve elle critique ile yapılır.
+
 ## Genel çalışma kuralları
 
 - İletişim dili: **Türkçe** (kod, tanımlayıcılar ve teknik terimler orijinal halinde).

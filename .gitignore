@@ -24,3 +24,12 @@ compile_commands.json
 *.p8
 *.pem
 .env
+
+# Impeccable runtime state (config.json, design.json, surfaces/, critique/ stay in git)
+/.impeccable/*
+!/.impeccable/config.json
+!/.impeccable/design.json
+!/.impeccable/surfaces/
+!/.impeccable/critique/
+/.claude/skills/impeccable/scripts/bin/
+/.agents/skills/impeccable/scripts/bin/
