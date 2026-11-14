@@ -45,12 +45,12 @@ jobs:
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="$(brew --prefix qt)" \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \
-            -DGREMOTE_VERSION=${{ steps.version.outputs.version }}
+            -DBURROW_VERSION=${{ steps.version.outputs.version }}
           cmake --build build
 
       - name: Bundle dependencies
         run: |
-          "$(brew --prefix qt)/bin/macdeployqt" build/app/gremote.app -always-overwrite
+          "$(brew --prefix qt)/bin/macdeployqt" build/app/Burrow.app -always-overwrite
 
       - name: Import signing certificate
         if: env.HAS_SIGNING == 'true'
@@ -75,15 +75,15 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           codesign --force --deep --options runtime --timestamp \
-            --sign "Developer ID Application" build/app/gremote.app
-          codesign --verify --deep --strict build/app/gremote.app
+            --sign "Developer ID Application" build/app/Burrow.app
+          codesign --verify --deep --strict build/app/Burrow.app
 
       - name: Package
         run: |
           v=${{ steps.version.outputs.version }}
           mkdir -p dist
-          ditto -c -k --keepParent build/app/gremote.app "dist/gremote-$v-mac.zip"
-          hdiutil create -volname gremote -srcfolder build/app/gremote.app -ov -format UDZO "dist/gremote-$v-mac.dmg"
+          ditto -c -k --keepParent build/app/Burrow.app "dist/Burrow-$v-mac.zip"
+          hdiutil create -volname Burrow -srcfolder build/app/Burrow.app -ov -format UDZO "dist/Burrow-$v-mac.dmg"
 
       - name: Notarize
         if: env.HAS_SIGNING == 'true' && env.HAS_NOTARY == 'true'
@@ -94,10 +94,10 @@ jobs:
         run: |
           v=${{ steps.version.outputs.version }}
           echo "$APPLE_NOTARY_KEY" > "$RUNNER_TEMP/notary.p8"
-          xcrun notarytool submit "dist/gremote-$v-mac.dmg" \
+          xcrun notarytool submit "dist/Burrow-$v-mac.dmg" \
             --key "$RUNNER_TEMP/notary.p8" --key-id "$APPLE_NOTARY_KEY_ID" \
             --issuer "$APPLE_NOTARY_ISSUER" --wait
-          xcrun stapler staple "dist/gremote-$v-mac.dmg"
+          xcrun stapler staple "dist/Burrow-$v-mac.dmg"
           rm "$RUNNER_TEMP/notary.p8"
 
       - name: Checksums
@@ -110,4 +110,4 @@ jobs:
           v=${{ steps.version.outputs.version }}
           git tag "v$v"
           git push origin "v$v"
-          gh release create "v$v" dist/* --title "gremote $v" --generate-notes
+          gh release create "v$v" dist/* --title "Burrow $v" --generate-notes

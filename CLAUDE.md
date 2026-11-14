@@ -1,4 +1,4 @@
-# gremote — Proje Kuralları
+# Burrow — Proje Kuralları
 
 > Bu dosya projeyi devralan her yazılımcı ve her AI asistanı (Claude Code, Codex, Cursor vb.) için
 > bağlayıcıdır. İşe başlamadan önce bu dosyayı ve `docs/memory/MEMORY.md` dosyasını oku.

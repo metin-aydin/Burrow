@@ -18,7 +18,7 @@ sekme/pencere çoklu monitör, Mac + Windows + Ubuntu. Bkz. [SPEC](../SPEC.md).
 
 ## Önerilen mimari
 ```
-┌──────────────── gremote uygulaması ────────────────┐
+┌──────────────── Burrow uygulaması ────────────────┐
 │  Arayüz + RDP (Qt 6 / C++ + FreeRDP 3)             │
 │     │  RDP TCP                                      │
 │     ▼                                               │
@@ -28,6 +28,12 @@ sekme/pencere çoklu monitör, Mac + Windows + Ubuntu. Bkz. [SPEC](../SPEC.md).
 │   └─ 127.0.0.1:rastgele port → tünel                │
 └─────────────────────────────────────────────────────┘
 ```
+
+### Güvenlik: loopback port riski
+`127.0.0.1` dinleyicisine bilgisayardaki **herhangi bir yerel süreç** bağlanıp tünel üzerinden iş
+bilgisayarına erişebilir. Geçici önlem: dinleyici ilk bağlantıyı kabul edince kapanır (OneShot) ve tek
+bağlantıya izin verir. **Hedef tasarım:** dinleyici yok — FreeRDP'nin `rdpTransportIo` TCPConnect
+callback'i, netcore'un ürettiği bir socketpair ucunu döndürür. RDP motoru uygulanırken buna geçilecek.
 
 ## Seçenekler
 | | A: Qt 6 + FreeRDP 3 (önerilen) | B: Rust + IronRDP + wgpu |

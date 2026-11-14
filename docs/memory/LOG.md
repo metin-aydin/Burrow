@@ -4,6 +4,65 @@ En yeni kayıt en üstte.
 
 ## 2026-11-14
 
+- Input etiketleri de baş harfleri büyük yapıldı ("Kullanıcı Adı", "Ana Şifre (Tekrar)"); kural kaydı
+  güncellendi. Tam genişlikteki butonlarda metin ortalandı.
+- **Arayüz QML'e taşındı (ADR 0005 KABUL):** kullanıcı B (kart galerisi) tasarımını seçti, kartlarda son ekran
+  görüntüsü önizlemesi istedi. Widgets arayüzü kaldırıldı. C++: `AppController` (QML `App` singleton),
+  `DeviceModel`/`TunnelModel`/`DeviceFilterModel`, `PreviewProvider` (image://preview). Go kasasına şifreli
+  blob API'si (`PutBlob/Blob/DeleteBlob`, ad AAD'de) + test. QML: Theme (açık/koyu), kilit/kurulum ekranı,
+  galeri (arama, tünel filtre çipleri, hover'da oynat ve menü), cihaz/tünel düzenleyici (TOTP canlı kod),
+  ayarlar. Baş harfler büyük kuralı uygulandı. Geliştirici yardımcıları: `--seed-demo` +
+  `BURROW_DEMO_PASSWORD`/`BURROW_DEMO_OPEN`/`BURROW_GRAB` (pencereyi odak çalmadan PNG'ye yakalar).
+  Ekran görüntüleriyle kontrol edildi (koyu tema). Açık tema görsel olarak kontrol edilmedi.
+  Not: QML'de `on` + büyük harfle başlayan özellik adı (ör. `onAccent`) sinyal işleyicisi sanılır.
+- **Proje adı: Burrow** (eski: gremote). Klasör `~/projects/Burrow`, origin `github.com/metin-aydin/Burrow`
+  (kullanıcı GitHub'da açtı, boş). Kod/dokümanda yeniden adlandırma: CMake hedefi `burrow`, `Burrow.app`,
+  bundle id `io.github.metin-aydin.burrow`, Go modülü `burrow/netcore`, `BURROW_*` değişkenleri,
+  `burrow-agent`. Bu günlükteki eski kayıtlar tarihsel olarak "gremote" der. Derleme ve testler geçti.
+- Arayüz "çok basit" bulundu; buton/başlıklarda her kelimenin baş harfi büyük olmalı
+  (feedback-ui-title-case). Modern arayüz için örnek tasarımlar hazırlanıyor.
+- **Kasa + cihaz ekranları** (ADR 0004 KABUL: Go'da Argon2id + XChaCha20-Poly1305 tek dosya, DEK/KEK
+  hiyerarşisi, opsiyonel Touch ID). Go `internal/vault` + testler; C API (`vault_api.go`: kasa + TOTP parse/kod);
+  Qt: `VaultStore`, şema `Model` (cihaz/tünel/ayar), kilit açma/oluşturma, cihaz listesi/düzenleme (genel,
+  oturum, pano/klavye), tünel profilleri (GP + TOTP içe aktarma ve canlı kod, Tailscale), ana şifre
+  değiştirme, Touch ID (Data Protection keychain; imzasız build'de devre dışı mesajı). `tst_vault` (QtTest)
+  ve `go test -race` geçti. Arayüz görsel olarak henüz kullanıcı tarafından denenmedi. QR görselden okuma
+  ve otomatik kilit (süre) sonraki iş. Commit edilmedi.
+- ✅ **Uçtan uca doğrulandı:** sudo'suz GP tüneli üzerinden Windows App ile Ubuntu 24.04'e RDP bağlantısı
+  çalıştı (3. deneme). Önceki siyah ekran / 0x207 Ubuntu tarafında aralıklı (Desktop Sharing durumu);
+  agent ile ele alınacak. Sıradaki iş: kasa + cihaz ekranları.
+- RDP 2. deneme: doğru paylaşım şifresiyle 0x207 (NLA reddi). SSH ile Ubuntu logu alınmak istendi: tünel
+  çalışıyor ama iş bilgisayarında 22 portu kapalı (banner yok). Ubuntu tarafı ancak fiziksel erişimle
+  incelenebilir (openssh-server/gremote-agent kurulumu).
+- Tünelden RDP: Windows App kimlik sordu, bağlandı ama ekran siyah. Tünelden yoklama: sunucu GNOME Remote
+  Desktop (sertifika CN=GNOME), NLA istiyor, TLS 1.3 tamam → tünel uçtan uca çalışıyor; siyah ekran Ubuntu
+  tarafında (kullanıcının baştaki "bazen ekran siyah" şikâyetiyle aynı). Olası nedenler: oturum kilitli /
+  ekran güç tasarrufunda (ADR 0003'teki agent'ın çözeceği durum). Sunucu logu (journalctl) henüz görülmedi.
+- ✅ **GP userspace tüneli sudo'suz kuruldu** (openconnect `--script-tun` + ocproxy, SHA512 TOTP, çift OTP
+  otomatik). Gateway ilk reddi beklenen adım olarak geçti, 2. girişte HTTP 200. ESP (UDP) başarısız →
+  HTTPS tüneline düştü (çalışıyor). HIP raporu istenmiyor. RDP doğrulaması kullanıcıda.
+- Betik "yalnızca istemde gönder" değişikliğiyle takıldı: openconnect stdout'u pipe'ta tamponlu, ilk istem
+  görünmeden stdin'de bekliyor. İlk kimlik bilgisi yine baştan gönderiliyor (masaüstü betiğiyle aynı).
+- SHA512 ile test: portal girişi başarılı, gateway ilk denemede `auth-failed` → betik durdu. Analiz:
+  bu red çift OTP akışının beklenen adımı (openconnect kullanılmış OTP'yi gateway'e tekrar yolluyor).
+  Betik düzeltildi: portal reddinde dur, gateway'de 1 red beklenen, 2. redde dur; kimlik bilgisi yalnızca
+  istem gelince gönderiliyor. project-gp-auth-flow güncellendi.
+- Hesap açıldı (masaüstü betiği bağlandı) ama test betiği yine `auth-failed` aldı. Muhtemel neden: kullanıcı
+  geçmişteki `--otp-digest` içermeyen komutu çalıştırdı → varsayılan SHA1. Düzeltme: `--otp-digest`
+  artık zorunlu (varsayılan yok), ağa çıkmadan kodu gösteren `--show-otp` eklendi (önce telefonla karşılaştır).
+- **Olay:** GP test betiği SHA1 TOTP ile 6 başarısız giriş yaptı → kullanıcının VPN hesabı kilitlendi.
+  Kurumun TOTP'si SHA512. Betik ilk `auth-failed`'da duracak ve `--otp-digest` alacak şekilde düzeltildi.
+  Ders: feedback-auth-retry-safety. GP testleri hesap açılana kadar durduruldu.
+- Güvenlik incelemesi: loopback dinleyicisine başka yerel süreçler bağlanabilir. Forwarder'a OneShot
+  eklendi (ilk bağlantıdan sonra dinleyici kapanır), test eklendi. Kalıcı çözüm (socketpair +
+  rdpTransportIo) ADR 0001'e yazıldı. Commit edilmedi.
+- GP testi için ocproxy kuruldu. Test 1 DNS hatası verdi (split-DNS). Kullanıcının mevcut VPN betiği
+  incelendi: openconnect kurumda zaten çalışıyor; authgroup ve genel DNS ile çözme gerekiyor
+  (bkz. project-gp-auth-flow). `tools/gp-userspace-test.py` yazıldı (Keychain + TOTP, sudo'suz
+  ocproxy tüneli). SPEC GP alanları güncellendi.
+- Kullanıcının Mac'indeki (repo dışı) split-DNS düzeni düzeltildi: kurum domaini için `/etc/resolver`
+  dosyası artık kalıcı değil; kullanıcının split-dns vpnc betiği bağlanınca yazıyor, kopunca siliyor,
+  reset betiği de siliyor (yedekler `.bak`). Mevcut dosyayı kullanıcı `sudo rm` ile silecek.
 - **Proje iskeleti kuruldu** (git: `development` branch, henüz commit yok):
   - `netcore/` (Go): loopback forwarder (`internal/forward`), TOTP + otpauth/migration parse
     (`internal/totp`), C API (`netcore.go`, c-archive). `go test -race` geçti (RFC 6238 vektörleri dahil).

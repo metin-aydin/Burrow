@@ -20,7 +20,7 @@
 1. Sonraki sürümü hesapla, `vX.Y.Z` tag'ini oluştur.
 2. macOS build (universal: arm64 + x86_64): Qt 6 + FreeRDP 3 + Go netcore.
 3. **Kod imzalama** (Developer ID Application) → **notarization** (`notarytool`) → `stapler staple`.
-4. Paketler: `gremote-X.Y.Z-mac.dmg` (ilk kurulum) + `gremote-X.Y.Z-mac.zip` (güncelleme için).
+4. Paketler: `Burrow-X.Y.Z-mac.dmg` (ilk kurulum) + `Burrow-X.Y.Z-mac.zip` (güncelleme için).
 5. Güncelleme paketini **Sparkle EdDSA** anahtarıyla imzala, `appcast.xml` üret.
 6. GitHub Release oluştur: notlar + dmg + zip + `appcast.xml` + SHA256 toplamları.
 - Ayrıca `development`'a her push/PR'da: build + test (`ci.yml`), release yok.
@@ -31,7 +31,7 @@ anahtarı), `APPLE_NOTARY_KEY_ID`, `APPLE_NOTARY_ISSUER`, `SPARKLE_ED_PRIVATE_KE
 
 ## Uygulama içi otomatik güncelleme
 - **macOS: Sparkle 2** (macOS'ta standart, MIT). Feed adresi:
-  `https://github.com/<owner>/gremote/releases/latest/download/appcast.xml`
+  `https://github.com/metin-aydin/Burrow/releases/latest/download/appcast.xml`
   → sunucu gerekmez, her şey GitHub Releases'ten gelir.
 - Doğrulama iki katmanlı: Sparkle EdDSA imzası + Apple kod imzası. İkisi tutmazsa güncelleme kurulmaz.
 - Davranış: açılışta ve 24 saatte bir kontrol; yeni sürüm bildirimi, "Şimdi kur / Sonra / Bu sürümü
