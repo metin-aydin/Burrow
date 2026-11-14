@@ -2,6 +2,7 @@
 #include <QTemporaryDir>
 #include <QtTest>
 
+#include "app/AppController.h"
 #include "app/Updater.h"
 #include "rdp/KeyMapper.h"
 #include "rdp/RdpClipboard.h"
@@ -209,6 +210,17 @@ private slots:
         bad = dib.left(60);                                                                    // truncated pixels
         QVERIFY(RdpClipboard::dibToImage(bad).isNull());
         QCOMPARE(RdpClipboard::modeFromString("to_local"), RdpClipboard::Mode::ToLocal);
+    }
+
+    void qrFromImage()
+    {
+        // Fixture: a QR code (with margin and an odd width) holding a demo otpauth link (RFC example key).
+        const QImage img(QStringLiteral(BURROW_TEST_DATA "/qr-fixture.png"));
+        QVERIFY(!img.isNull());
+        AppController app;
+        const QString text = app.decodeQrImage(QVariant::fromValue(img));
+        QVERIFY(text.startsWith("otpauth://totp/Example:demo"));
+        QVERIFY(app.decodeQrImage(QVariant::fromValue(QImage(50, 50, QImage::Format_RGB32))).isEmpty());
     }
 
 private:

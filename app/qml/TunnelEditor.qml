@@ -2,6 +2,7 @@ import QtQuick
 import Burrow.Core
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
+import QtQuick.Dialogs
 import "Steps.js" as Steps
 
 // Add / edit a tunnel profile (SPEC §3).
@@ -52,13 +53,48 @@ BDialog {
         uri.text = ""; accounts = []
     }
 
+    function importText(text) {
+        uri.text = text
+        importUri()
+    }
     function importUri() {
+        if (uri.text.trim() === "") {
+            // Nothing pasted yet: use an authenticator link from the clipboard, or explain what to paste.
+            const clip = App.clipboardText()
+            if (clip.indexOf("otpauth") === 0) {
+                uri.text = clip
+            } else {
+                uri.field.forceActiveFocus()
+                otpHint.visible = true
+                return
+            }
+        }
+        otpHint.visible = false
         const list = App.parseTotp(uri.text)
         if (list.length === 0) { error = qsTr("This is not a valid otpauth link."); return }
         error = ""
         if (list.length === 1) applyAccount(list[0])
         else accounts = list
     }
+
+    // --- QR import ------------------------------------------------------------------
+    function useQr(text) {
+        if (!text) { error = qsTr("No QR code was found in the image."); return }
+        importText(text)
+    }
+    Menu {
+        id: qrMenu
+        MenuItem { text: qsTr("From Image File…"); onTriggered: qrFile.open() }
+        MenuItem { text: qsTr("From Clipboard Image"); onTriggered: root.useQr(App.decodeQrClipboard()) }
+        MenuItem { text: qsTr("Scan With Camera…"); onTriggered: qrScan.open() }
+    }
+    FileDialog {
+        id: qrFile
+        title: qsTr("Choose A QR Code Image")
+        nameFilters: [qsTr("Images (*.png *.jpg *.jpeg *.gif *.bmp *.webp *.heic)")]
+        onAccepted: root.useQr(App.decodeQrFile(selectedFile))
+    }
+    QrScanDialog { id: qrScan; onFound: (text) => root.importText(text) }
 
     // --- Connection test -------------------------------------------------------------
     property string testId: ""
@@ -183,6 +219,32 @@ BDialog {
                     spacing: 8
                     BField { id: uri; Layout.fillWidth: true; label: qsTr("Authenticator Link"); placeholder: qsTr("otpauth://… or otpauth-migration://…"); onAccepted: root.importUri() }
                     BButton { Layout.alignment: Qt.AlignBottom; text: qsTr("Import"); onClicked: root.importUri() }
+                    BButton {
+                        id: qrButton
+                        Layout.alignment: Qt.AlignBottom
+                        iconName: "qr"
+                        ToolTip.visible: hovered
+                        ToolTip.text: qsTr("Read A QR Code")
+                        onClicked: qrMenu.popup(qrButton, 0, qrButton.height + 4)
+                    }
+                }
+                // Shown when Import is pressed with nothing to import.
+                Rectangle {
+                    id: otpHint
+                    visible: false
+                    Layout.fillWidth: true
+                    implicitHeight: hintText.implicitHeight + 20
+                    radius: Theme.radius
+                    color: Theme.accentSoft
+                    Text {
+                        id: hintText
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        wrapMode: Text.WordWrap
+                        color: Theme.text
+                        font.pixelSize: 12
+                        text: qsTr("In your authenticator app, export or share the account, then paste the otpauth link above. No link? Use the QR button to read the code from a screenshot, the clipboard or the camera.")
+                    }
                 }
                 // Several accounts in a migration QR: pick one.
                 Flow {

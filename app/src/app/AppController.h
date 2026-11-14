@@ -100,6 +100,11 @@ public:
     // --- TOTP --------------------------------------------------------------
     Q_INVOKABLE QVariantList parseTotp(const QString &uri) const;
     Q_INVOKABLE QVariantMap totpCode(const QVariantMap &totp) const;   // {code, remaining}
+    // QR codes (authenticator exports): return the decoded text or "".
+    Q_INVOKABLE QString decodeQrImage(const QVariant &image) const;   // QImage (e.g. a camera frame grab)
+    Q_INVOKABLE QString decodeQrFile(const QUrl &file) const;
+    Q_INVOKABLE QString decodeQrClipboard() const;
+    Q_INVOKABLE QString clipboardText() const;
 
     // Development helper: adds sample devices with generated previews.
     void seedDemo();

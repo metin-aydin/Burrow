@@ -7,16 +7,18 @@ import "C"
 
 import (
 	"context"
-	"io"
-	"os"
 	"encoding/json"
+	"io"
 	"net"
+	"os"
 	"strings"
 	"time"
+	"unsafe"
 
 	"burrow/netcore/internal/cf"
 	"burrow/netcore/internal/forward"
 	"burrow/netcore/internal/gp"
+	"burrow/netcore/internal/qr"
 	"burrow/netcore/internal/totp"
 	"burrow/netcore/internal/ts"
 	"burrow/netcore/internal/tunnel"
@@ -172,9 +174,9 @@ func NetcoreStartTunnelForward(tunnelHandle C.int, target *C.char, outAddr **C.c
 		return 0
 	}
 	f := &forward.Forwarder{
-		Dialer:     dialerFunc(t.DialContext),
-		Target:     C.GoString(target),
-		MaxConns:   1,
+		Dialer:   dialerFunc(t.DialContext),
+		Target:   C.GoString(target),
+		MaxConns: 1,
 		// FreeRDP may reconnect during security negotiation, so a few accepts are allowed — but only
 		// until the session is up (the app calls NetcoreForwardSeal) and never longer than a minute.
 		MaxAccepts:   4,
@@ -260,4 +262,23 @@ func closeWrite(c net.Conn) {
 	if cw, ok := c.(interface{ CloseWrite() error }); ok {
 		_ = cw.CloseWrite()
 	}
+}
+
+// NetcoreDecodeQR decodes a QR code from a w×h 8-bit grayscale buffer and returns its text (free with
+// NetcoreFreeSecret: authenticator QR codes contain secrets), or NULL.
+//
+//export NetcoreDecodeQR
+func NetcoreDecodeQR(gray *C.uchar, w, h C.int) *C.char {
+	if gray == nil || w <= 0 || h <= 0 || w > 8192 || h > 8192 {
+		return nil
+	}
+	pix := C.GoBytes(unsafe.Pointer(gray), w*h)
+	text, err := qr.DecodeGray(pix, int(w), int(h))
+	for i := range pix {
+		pix[i] = 0
+	}
+	if err != nil {
+		return nil
+	}
+	return C.CString(text)
 }

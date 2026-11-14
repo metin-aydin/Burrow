@@ -1,4 +1,4 @@
-find_package(Qt6 6.5 REQUIRED COMPONENTS Gui Network Quick QuickControls2 Svg LinguistTools)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Gui Network Quick QuickControls2 Svg Multimedia LinguistTools)
 find_package(FreeRDP 3 REQUIRED)
 find_package(FreeRDP-Client 3 REQUIRED)
 find_package(WinPR 3 REQUIRED)
@@ -66,7 +66,7 @@ endif()
 
 target_include_directories(burrow PRIVATE src)
 target_compile_definitions(burrow PRIVATE BURROW_VERSION="${PROJECT_VERSION}")
-target_link_libraries(burrow PRIVATE Qt6::Gui Qt6::Network Qt6::Quick Qt6::QuickControls2 Qt6::Svg netcore::netcore)
+target_link_libraries(burrow PRIVATE Qt6::Gui Qt6::Network Qt6::Quick Qt6::QuickControls2 Qt6::Svg Qt6::Multimedia netcore::netcore)
 
 message(STATUS "FreeRDP found: ${FreeRDP_VERSION}")
 target_link_libraries(burrow PRIVATE freerdp freerdp-client winpr)
@@ -81,6 +81,7 @@ elseif(WIN32)
 endif()
 
 set_target_properties(burrow PROPERTIES
+    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/resources/Info.plist.in
     MACOSX_BUNDLE_ICON_FILE Burrow.icns
     OUTPUT_NAME "Burrow"
     MACOSX_BUNDLE ON
@@ -98,10 +99,20 @@ if(Qt6Test_FOUND)
     qt_add_executable(tst_vault tests/tst_vault.cpp
         src/vault/Model.cpp src/vault/VaultStore.cpp src/net/NetCore.cpp
         src/app/Updater.cpp src/app/Updater.h src/rdp/KeyMapper.cpp src/rdp/KeyMapper.h
-        src/rdp/RdpClipboard.cpp src/rdp/RdpClipboard.h)
+        src/rdp/RdpClipboard.cpp src/rdp/RdpClipboard.h
+        src/app/AppController.cpp src/app/AppController.h src/app/ListModels.cpp src/app/ListModels.h
+        src/app/PreviewProvider.cpp src/app/PreviewProvider.h src/app/TunnelManager.cpp src/app/TunnelManager.h
+        src/rdp/RdpSession.cpp src/rdp/RdpSession.h src/rdp/FreeRdpEngine.cpp src/rdp/FreeRdpEngine.h src/rdp/RdpEngine.h
+        $<IF:$<BOOL:${APPLE}>,src/platform/Biometric_mac.mm,src/platform/Biometric_stub.cpp>)
+    target_compile_definitions(tst_vault PRIVATE BURROW_TEST_DATA="${CMAKE_CURRENT_SOURCE_DIR}/tests"
+                                                 BURROW_VERSION="${PROJECT_VERSION}")
     set_target_properties(tst_vault PROPERTIES MACOSX_BUNDLE OFF)
     target_include_directories(tst_vault PRIVATE src)
-    target_link_libraries(tst_vault PRIVATE Qt6::Gui Qt6::Network Qt6::Test netcore::netcore freerdp freerdp-client winpr)
+    target_link_libraries(tst_vault PRIVATE Qt6::Gui Qt6::Network Qt6::Quick Qt6::Test netcore::netcore freerdp freerdp-client winpr)
+    if(APPLE)
+        set_source_files_properties(src/platform/Biometric_mac.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc")
+        target_link_libraries(tst_vault PRIVATE "-framework Foundation" "-framework LocalAuthentication" "-framework Security")
+    endif()
     target_compile_definitions(tst_vault PRIVATE BURROW_UPDATER_ALLOW_INSECURE=1)
     add_test(NAME tst_vault COMMAND tst_vault)
     set_tests_properties(tst_vault PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

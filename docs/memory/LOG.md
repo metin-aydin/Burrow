@@ -4,6 +4,10 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- OTP içe aktarma: boş alanda "İçe Aktar" panodaki otpauth bağlantısını kullanıyor, yoksa ne yapıştırılacağını
+  anlatan ipucu gösteriyor; QR butonu: görsel dosyası, panodaki görsel, kamera (QtMultimedia, `NSCameraUsageDescription`,
+  özel Info.plist). Çözücü: gozxing (Apache-2.0) `netcore/internal/qr` + `NetcoreDecodeQR`; görüntüler yalnız bellekte.
+  Qt testi gerçek QR görseliyle (tests/qr-fixture.png, RFC örnek anahtarı) geçti.
 - Arayüz: eşit genişlikte segment/sekmeler, diyalog altında boşluk, yeni yay animasyonlu yükleme simgesi (`Spinner`),
   çarkın yanında kilit butonu, kartta oynat katmanı kaldırıldı ve menü açıkken kart büyük kalıyor.
 - Tünel yaşam döngüsü: tünel yalnız bağlanırken açılıyor, son oturum kapandıktan 20 sn sonra kapanıyor; aynı tüneli

@@ -1,6 +1,8 @@
 #include "app/AppController.h"
 
 #include <QBuffer>
+#include <QClipboard>
+#include <QUrl>
 #include <QDir>
 #include <QFileInfo>
 #include <QJsonObject>
@@ -15,6 +17,8 @@
 #include <QTimer>
 
 #include "app/PreviewProvider.h"
+
+#include <libnetcore.h>
 #include "net/NetCore.h"
 #include "platform/Biometric.h"
 #include "rdp/FreeRdpEngine.h"
@@ -707,6 +711,49 @@ QVariantMap AppController::totpCode(const QVariantMap &m) const
     if (code.isEmpty())
         return {{"error", tr("Invalid key")}};
     return {{"code", code}, {"remaining", left}};
+}
+
+// --- QR ----------------------------------------------------------------------
+
+namespace {
+QString decodeQr(QImage img)
+{
+    if (img.isNull())
+        return {};
+    if (img.width() > 2000 || img.height() > 2000)
+        img = img.scaled(2000, 2000, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    img = img.convertToFormat(QImage::Format_Grayscale8);
+    QByteArray pix(img.width() * img.height(), '\0');
+    for (int y = 0; y < img.height(); ++y)
+        memcpy(pix.data() + y * img.width(), img.constScanLine(y), size_t(img.width()));
+    char *raw = NetcoreDecodeQR(reinterpret_cast<unsigned char *>(pix.data()), img.width(), img.height());
+    std::fill(pix.begin(), pix.end(), '\0');
+    if (!raw)
+        return {};
+    const QString text = QString::fromUtf8(raw);
+    NetcoreFreeSecret(raw);
+    return text;
+}
+} // namespace
+
+QString AppController::decodeQrImage(const QVariant &image) const
+{
+    return decodeQr(qvariant_cast<QImage>(image));
+}
+
+QString AppController::decodeQrFile(const QUrl &file) const
+{
+    return decodeQr(QImage(file.toLocalFile()));
+}
+
+QString AppController::decodeQrClipboard() const
+{
+    return decodeQr(QGuiApplication::clipboard()->image());
+}
+
+QString AppController::clipboardText() const
+{
+    return QGuiApplication::clipboard()->text().trimmed();
 }
 
 // --- Demo --------------------------------------------------------------------

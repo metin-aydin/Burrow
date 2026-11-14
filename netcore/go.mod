@@ -3,6 +3,10 @@ module burrow/netcore
 go 1.27.4
 
 require (
+	github.com/cloudflare/cloudflared v0.0.0-20261112112111-b0297f0b24c6
+	github.com/coder/websocket v1.8.15
+	github.com/makiuchi-d/gozxing v0.1.1
+	github.com/rs/zerolog v1.35.1
 	golang.org/x/crypto v0.59.0
 	gvisor.dev/gvisor v0.0.0-20260915211658-a6f909f08a72
 	tailscale.com v1.104.7
@@ -12,8 +16,6 @@ require (
 	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/akutz/memconn v0.1.0 // indirect
 	github.com/alexbrainman/sspi v0.0.0-20250919150558-7d374ff0d59e // indirect
-	github.com/cloudflare/cloudflared v0.0.0-20261112112111-b0297f0b24c6 // indirect
-	github.com/coder/websocket v1.8.15 // indirect
 	github.com/coreos/go-oidc/v3 v3.17.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/creachadair/msync v0.10.1 // indirect
@@ -43,7 +45,6 @@ require (
 	github.com/pires/go-proxyproto v0.15.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
-	github.com/rs/zerolog v1.35.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/safchain/ethtool v0.7.0 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.3 // indirect
@@ -68,6 +69,7 @@ require (
 	golang.org/x/term v0.48.0 // indirect
 	golang.org/x/text v0.44.0 // indirect
 	golang.org/x/time v0.16.0 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	golang.zx2c4.com/wintun v0.0.0-20230126152724-0fa3db229ce2 // indirect
 	golang.zx2c4.com/wireguard/windows v1.0.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
