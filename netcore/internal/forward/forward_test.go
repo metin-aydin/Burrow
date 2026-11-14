@@ -78,6 +78,31 @@ func TestForwarderOnlyLoopback(t *testing.T) {
 	}
 }
 
+func TestForwarderOneShot(t *testing.T) {
+	target := echoServer(t)
+	f := &Forwarder{Dialer: &net.Dialer{}, Target: target, OneShot: true}
+	addr, err := f.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	c1, err := net.Dial("tcp", addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c1.Close()
+	c1.Write([]byte("x"))
+	c1.SetReadDeadline(time.Now().Add(2 * time.Second))
+	if _, err := c1.Read(make([]byte, 1)); err != nil {
+		t.Fatalf("first conn should work: %v", err)
+	}
+	if c2, err := net.DialTimeout("tcp", addr, time.Second); err == nil {
+		c2.Close()
+		t.Fatal("listener should be closed after the first connection")
+	}
+}
+
 func TestForwarderMaxConns(t *testing.T) {
 	target := echoServer(t)
 	f := &Forwarder{Dialer: &net.Dialer{}, Target: target, MaxConns: 1}

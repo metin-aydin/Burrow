@@ -18,8 +18,8 @@ import (
 	"time"
 	"unsafe"
 
-	"gremote/netcore/internal/forward"
-	"gremote/netcore/internal/totp"
+	"burrow/netcore/internal/forward"
+	"burrow/netcore/internal/totp"
 )
 
 const version = "0.0.1-dev"
@@ -48,6 +48,7 @@ func NetcoreStartDirectForward(target *C.char, outAddr **C.char) C.int {
 		Dialer:   &net.Dialer{Timeout: 15 * time.Second},
 		Target:   C.GoString(target),
 		MaxConns: 1,
+		OneShot:  true,
 	}
 	addr, err := f.Start()
 	if err != nil {

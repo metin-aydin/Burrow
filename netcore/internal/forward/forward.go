@@ -26,6 +26,14 @@ type Forwarder struct {
 	// A single RDP session normally needs exactly one.
 	MaxConns int
 
+	// OneShot closes the listener after the first accepted connection, so no
+	// other local process can use the port for the rest of the session.
+	// Security note: a loopback listener is reachable by any local process
+	// until it is closed. The long-term design hands FreeRDP one end of a
+	// socketpair via its rdpTransportIo TCPConnect callback (no listener at
+	// all); see ADR 0001.
+	OneShot bool
+
 	ln     net.Listener
 	wg     sync.WaitGroup
 	mu     sync.Mutex
@@ -71,6 +79,9 @@ func (f *Forwarder) acceptLoop() {
 		if !f.acquire() {
 			_ = c.Close()
 			continue
+		}
+		if f.OneShot {
+			_ = f.ln.Close()
 		}
 		f.wg.Add(1)
 		go func() {
