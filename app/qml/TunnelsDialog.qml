@@ -42,6 +42,27 @@ BDialog {
                         elide: Text.ElideRight; Layout.fillWidth: true
                     }
                 }
+                readonly property var st: App.tunnelStates[model.tunnelId] || {}
+                Text {
+                    text: {
+                        switch (parent.st.state) {
+                        case "connected": return qsTr("Connected")
+                        case "starting": return qsTr("Connecting…")
+                        case "needs_login": return qsTr("Sign-In Needed")
+                        case "needs_otp": return qsTr("Code Needed")
+                        case "failed": return qsTr("Failed")
+                        }
+                        return ""
+                    }
+                    color: parent.st.state === "connected" ? Theme.success
+                         : parent.st.state === "failed" ? Theme.danger : Theme.textSecondary
+                    font.pixelSize: 12
+                }
+                BButton {
+                    text: parent.st.state && parent.st.state !== "failed" ? qsTr("Disconnect") : qsTr("Connect")
+                    onClicked: parent.st.state && parent.st.state !== "failed" ? App.disconnectTunnel(model.tunnelId)
+                                                                                : App.connectTunnel(model.tunnelId)
+                }
                 BButton { variant: "ghost"; iconName: "edit"; onClicked: root.editTunnel(model.tunnelId) }
                 BButton {
                     variant: "ghost"; iconName: "trash"

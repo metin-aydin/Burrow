@@ -30,6 +30,9 @@ Bulunan ayrıntılar (2026-11-14):
 
 Doğrulandı (2026-11-14): sudo'suz userspace tünel çalışıyor; sunucu HIP raporu istemiyor; ESP (UDP)
 probe'ları başarısız → HTTPS (TLS) tüneli kullanılıyor; oturum süresi ~30 gün, idle/rekey 180 dk.
+Uygulama içi GP (2026-11-15, `netcore/internal/gp`): libopenconnect form geri çağrısıyla aynı kurallar —
+portal + gateway olmak üzere en fazla 2 şifre formu, ikincisinde yeni TOTP, üçüncüde iptal. Kurumda henüz
+denenmedi; ilk deneme kullanıcıyla birlikte, tek seferlik yapılmalı.
 Test durumu: userspace (ocproxy) + RDP testi `tools/gp-userspace-test.py` ile yapılacak.
 `--usergroup=gateway` ile tek OTP denemesi de aynı betikle (`--gateway-only`).
 

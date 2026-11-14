@@ -1,4 +1,5 @@
 import QtQuick
+import Burrow.Core
 import QtQuick.Controls.Basic
 import QtQuick.Effects
 import QtQuick.Layouts
@@ -12,6 +13,7 @@ Item {
     property string os
     property string tunnelName
     property string tunnelType
+    property string tunnelId
     property string preview
     signal connectRequested()
     signal editRequested()
@@ -182,6 +184,7 @@ Item {
                         Chip {
                             text: root.tunnelName !== "" ? root.tunnelName : qsTr("Direct")
                             kind: root.tunnelType
+                            status: root.tunnelId ? ((App.tunnelStates[root.tunnelId] || {}).state || "") : ""
                         }
                         Text {
                             Layout.fillWidth: true

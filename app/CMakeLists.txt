@@ -13,6 +13,8 @@ qt_add_executable(burrow
     src/app/ListModels.h
     src/app/PreviewProvider.cpp
     src/app/PreviewProvider.h
+    src/app/TunnelManager.cpp
+    src/app/TunnelManager.h
     src/app/Updater.cpp
     src/app/Updater.h
     src/net/NetCore.cpp

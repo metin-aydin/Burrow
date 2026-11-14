@@ -325,7 +325,9 @@ void RdpSession::onPaint(rdpGdi *gdi, int x, int y, int w, int h)
 
 QString RdpSession::pinFor(const QString &fingerprint) const
 {
-    return QStringLiteral("%1:%2|%3").arg(m_p.host.trimmed().toLower()).arg(m_p.port).arg(fingerprint.trimmed().toLower());
+    const QString host = m_p.pinHost.isEmpty() ? m_p.host : m_p.pinHost;
+    const quint16 port = m_p.pinPort ? m_p.pinPort : m_p.port;
+    return QStringLiteral("%1:%2|%3").arg(host.trimmed().toLower()).arg(port).arg(fingerprint.trimmed().toLower());
 }
 
 unsigned RdpSession::onVerifyCertificate(const QString &fingerprint)
@@ -347,7 +349,8 @@ unsigned RdpSession::onVerifyCertificate(const QString &fingerprint)
     QMutexLocker lock(&m_certLock);
     m_certAnswer = -1;
     QMetaObject::invokeMethod(this, [this, fingerprint] {
-        emit certificatePrompt(QStringLiteral("%1:%2").arg(m_p.host).arg(m_p.port), fingerprint);
+        emit certificatePrompt(QStringLiteral("%1:%2").arg(m_p.pinHost.isEmpty() ? m_p.host : m_p.pinHost)
+                                   .arg(m_p.pinPort ? m_p.pinPort : m_p.port), fingerprint);
     }, Qt::QueuedConnection);
     m_certCond.wait(&m_certLock, QDeadlineTimer(120000));
     if (m_certAnswer != 1 || m_stop)

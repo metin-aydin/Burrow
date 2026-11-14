@@ -41,11 +41,26 @@ ApplicationWindow {
     }
     Component { id: sessionWindow; SessionWindow {} }
 
+    PromptDialog { id: prompt }
+    TailscaleLoginDialog { id: tsLogin }
+
+    function askTunnelPassword(tunnelId, name, retryDevice, user, pass) {
+        prompt.ask(qsTr("Sign In To %1").arg(name), qsTr("Enter your VPN password. It is kept in memory until Burrow locks."),
+                   qsTr("VPN Password"), true, function(pw) {
+            const err = App.setTunnelPassword(tunnelId, pw)
+            if (err) { toast.show(err); return }
+            if (retryDevice) win.startSession(retryDevice, user, pass)
+        })
+    }
+
     function startSession(id, user, pass) {
         const r = App.connectDevice(id, user || "", pass || "")
         if (r === "credentials") {
             const d = App.device(id)
             credentials.ask(id, d.name, d.username)
+        } else if (r.indexOf("tunnel_password:") === 0) {
+            const tid = r.substring("tunnel_password:".length)
+            askTunnelPassword(tid, App.tunnelName(tid), id, user, pass)
         } else if (r) {
             toast.show(r)
         }
@@ -71,9 +86,15 @@ ApplicationWindow {
         target: App
         function onToast(message) { toast.show(message) }
         function onSessionOpened(session) { sessionWindow.createObject(null, { session: session }) }
+        function onTunnelLoginRequired(tunnelId, name, url) { tsLogin.show(name, url) }
+        function onTunnelPasswordRequired(tunnelId, name) { win.askTunnelPassword(tunnelId, name, "", "", "") }
+        function onTunnelOtpRequired(tunnelId, name, label) {
+            prompt.ask(qsTr("One-Time Code For %1").arg(name), label || qsTr("Enter the code from your authenticator app."),
+                       qsTr("Code"), false, function(code) { App.submitTunnelOtp(tunnelId, code) })
+        }
         function onStateChanged() {
             if (App.state !== "unlocked") {
-                deviceEditor.close(); tunnels.close(); tunnelEditor.close(); settings.close(); confirm.close()
+                deviceEditor.close(); tunnels.close(); tunnelEditor.close(); prompt.close(); tsLogin.close(); settings.close(); confirm.close()
             }
         }
     }

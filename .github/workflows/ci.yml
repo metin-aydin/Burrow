@@ -17,6 +17,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: netcore/go.mod
+      - name: Install libopenconnect
+        run: sudo apt-get update && sudo apt-get install -y libopenconnect-dev pkg-config
       - name: Vet
         working-directory: netcore
         run: go vet ./...
@@ -33,7 +35,7 @@ jobs:
         with:
           go-version-file: netcore/go.mod
       - name: Install dependencies
-        run: brew install cmake ninja qt freerdp
+        run: brew install cmake ninja qt freerdp openconnect
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$(brew --prefix freerdp)"
       - name: Build

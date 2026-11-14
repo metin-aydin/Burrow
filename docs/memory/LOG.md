@@ -4,6 +4,14 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Uygulama içi tüneller:** netcore'a `tunnel` (ortak arabirim), `netstack` (gVisor, socketpair üzerinde; iki yığınlı
+  64 KB TCP testi geçti — macOS datagram soket arabelleği büyütülmeli, yoksa patlamada paket kaybı/kilitlenme),
+  `ts` (tsnet, durum kasada şifreli, log yükleme kapalı), `gp` (libopenconnect cgo, çift OTP, tekrar yok, public
+  DNS yedeği). C API: `NetcoreTunnelStart*`, `Status`, `SubmitOTP`, `Stop`, `NetcoreStartTunnelForward`.
+  Uygulama: `TunnelManager`, tünelli cihaza bağlanınca tünel açılır ve bağlanınca oturum başlar; VPN şifresi
+  kayıtlı değilse sorulur (yalnız bellekte), manuel OTP sorulur, Tailscale giriş bağlantısı gösterilir; tünel
+  durum noktaları (çip), Tünel Profilleri'nde Bağlan/Bağlantıyı Kes. Tailscale giriş adımına kadar canlı doğrulandı.
+  GP kurumda denenmedi. CI'a libopenconnect kurulumu eklendi.
 - Güvenlik incelemesi (pano, 3 bulgu) düzeltildi: uzaktan gelen pano verisi 32 MB ile sınırlı ve uzunluk `int`'e
   kesilmiyor; DIB başlığı 64 bit aritmetikle doğrulanıyor (başlık boyutu, bit derinliği, yalnız BI_RGB/BI_BITFIELDS,
   renk sayısı, piksel verisinin sınırlar içinde olması); kanal kopunca geri çağrılar temizleniyor ve her geçişte

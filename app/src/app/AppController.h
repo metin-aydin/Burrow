@@ -6,6 +6,7 @@
 #include <QVariantMap>
 
 #include "app/ListModels.h"
+#include "app/TunnelManager.h"
 #include "app/Updater.h"
 #include "rdp/RdpSession.h"
 #include "vault/VaultStore.h"
@@ -24,6 +25,7 @@ class AppController : public QObject
     Q_PROPERTY(TunnelModel *tunnels READ tunnels CONSTANT)
     Q_PROPERTY(DeviceFilterModel *gallery READ gallery CONSTANT)
     Q_PROPERTY(Updater *updater READ updater CONSTANT)
+    Q_PROPERTY(QVariantMap tunnelStates READ tunnelStates NOTIFY tunnelStatesChanged)
     Q_PROPERTY(bool touchIdAvailable READ touchIdAvailable CONSTANT)
     Q_PROPERTY(bool touchIdEnabled READ touchIdEnabled NOTIFY touchIdEnabledChanged)
     Q_PROPERTY(QString versionInfo READ versionInfo CONSTANT)
@@ -37,6 +39,7 @@ public:
     TunnelModel *tunnels() { return &m_tunnels; }
     DeviceFilterModel *gallery() { return &m_gallery; }
     Updater *updater() { return &m_updater; }
+    QVariantMap tunnelStates() const { return m_tunnelMgr.states(); }
     bool touchIdAvailable() const;
     bool touchIdEnabled() const;
     QString versionInfo() const;
@@ -70,6 +73,12 @@ public:
     Q_INVOKABLE QString connectDevice(const QString &id, const QString &username = {},
                                       const QString &password = {});
     Q_INVOKABLE bool needsCredentials(const QString &id) const;
+    // Tunnels
+    Q_INVOKABLE QString setTunnelPassword(const QString &tunnelId, const QString &password);
+    Q_INVOKABLE void submitTunnelOtp(const QString &tunnelId, const QString &code);
+    Q_INVOKABLE void connectTunnel(const QString &tunnelId);
+    Q_INVOKABLE void disconnectTunnel(const QString &tunnelId);
+    Q_INVOKABLE QString tunnelName(const QString &tunnelId) const;
     Q_INVOKABLE void forgetCertificate(const QString &id);
 
     // Stores a preview image for a device (called by the RDP session on close).
@@ -96,18 +105,28 @@ signals:
     void toast(const QString &message);
     void languageChanged();
     void sessionOpened(RdpSession *session);
+    void tunnelStatesChanged();
+    void tunnelLoginRequired(const QString &tunnelId, const QString &name, const QString &url);
+    void tunnelOtpRequired(const QString &tunnelId, const QString &name, const QString &prompt);
+    void tunnelPasswordRequired(const QString &tunnelId, const QString &name);
 
 private:
     QString finishUnlock(VaultStore::Result r);
     QString persist();
     void reloadModels();
     QString blobPath(const QString &name) const;
+    QString startSession(const Model::Device &dev, const QString &user, const QString &pass,
+                         const QString &tunnelId);
+    void onTunnelState(const QString &tunnelId, const QString &state, const QString &error);
+    struct Pending { QString deviceId, username, password, tunnelId; };
 
     VaultStore m_store;
     DeviceModel m_devices;
     TunnelModel m_tunnels;
     DeviceFilterModel m_gallery;
     Updater m_updater;
+    TunnelManager m_tunnelMgr{&m_store};
+    QList<Pending> m_pending;
     QString m_demoOpen;
     QList<RdpSession *> m_sessions;
     QTranslator m_translator;

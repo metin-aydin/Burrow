@@ -20,6 +20,7 @@ public:
     QString path() const { return m_path; }
     bool exists() const;
     bool isOpen() const { return m_handle > 0; }
+    int handle() const { return m_handle; }   // for netcore APIs that keep state in the vault
 
     Result create(const QString &password);
     Result open(const QString &password);

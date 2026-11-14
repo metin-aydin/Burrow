@@ -48,6 +48,18 @@ int main(int argc, char *argv[])
                 controller.state() == QLatin1String("setup") ? controller.createVault(pw, pw)
                                                              : controller.unlock(pw);
             });
+        // BURROW_DEMO_TUNNEL=<profile name> starts that tunnel after unlocking.
+        const QString demoTunnel = qEnvironmentVariable("BURROW_DEMO_TUNNEL");
+        if (!demoTunnel.isEmpty())
+            QObject::connect(&controller, &AppController::stateChanged, &controller, [&controller, demoTunnel] {
+                if (controller.state() != QLatin1String("unlocked"))
+                    return;
+                QTimer::singleShot(800, &controller, [&controller, demoTunnel] {
+                    for (const Model::Tunnel &t : controller.store()->doc().tunnels)
+                        if (t.name == demoTunnel)
+                            controller.connectTunnel(t.id);
+                });
+            });
         // BURROW_DEMO_CONNECT=host:port:user:password adds a direct test device and connects to it.
         const QStringList target = qEnvironmentVariable("BURROW_DEMO_CONNECT").split(QLatin1Char(':'));
         if (target.size() == 4)

@@ -3,147 +3,162 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/AppController.cpp" line="39" />
+        <location filename="../src/app/AppController.cpp" line="47" />
         <source>Burrow %1 is available. Install it from Settings.</source>
         <translation>Burrow %1 yayımlandı. Ayarlar'dan kurabilirsin.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="62" />
+        <location filename="../src/app/AppController.cpp" line="70" />
         <source>Burrow %1 · netcore %2 · %3</source>
         <translation>Burrow %1 · netcore %2 · %3</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="117" />
+        <location filename="../src/app/AppController.cpp" line="125" />
         <source>The password must be at least %1 characters.</source>
         <translation>Şifre en az %1 karakter olmalı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="119" />
+        <location filename="../src/app/AppController.cpp" line="127" />
         <source>The passwords don't match.</source>
         <translation>Şifreler aynı değil.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="126" />
+        <location filename="../src/app/AppController.cpp" line="134" />
         <source>Enter your master password.</source>
         <translation>Ana şifreni gir.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="133" />
+        <location filename="../src/app/AppController.cpp" line="141" />
         <source>Unlock the Burrow vault</source>
         <translation>Burrow kasasının kilidini aç</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="143" />
+        <location filename="../src/app/AppController.cpp" line="151" />
         <source>The Touch ID key is no longer valid; unlock with your master password.</source>
         <translation>Touch ID anahtarı geçersiz; ana şifreyle aç.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="190" />
+        <location filename="../src/app/AppController.cpp" line="201" />
         <source>The new password must be at least %1 characters.</source>
         <translation>Yeni şifre en az %1 karakter olmalı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="192" />
+        <location filename="../src/app/AppController.cpp" line="203" />
         <source>The new passwords don't match.</source>
         <translation>Yeni şifreler aynı değil.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="194" />
+        <location filename="../src/app/AppController.cpp" line="205" />
         <source>The current password is wrong.</source>
         <translation>Mevcut şifre yanlış.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="208" />
+        <location filename="../src/app/AppController.cpp" line="219" />
         <source>Master password changed. Touch ID was turned off: %1</source>
         <translation>Ana şifre değiştirildi. Touch ID kapatıldı: %1</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="212" />
+        <location filename="../src/app/AppController.cpp" line="223" />
         <source>Master password changed.</source>
         <translation>Ana şifre değiştirildi.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="241" />
+        <location filename="../src/app/AppController.cpp" line="252" />
         <source>Couldn't save the change: %1</source>
         <translation>Değişiklik kaydedilemedi: %1</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="278" />
+        <location filename="../src/app/AppController.cpp" line="289" />
         <source>Name and address can't be empty.</source>
         <translation>Ad ve adres boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="314" />
+        <location filename="../src/app/AppController.cpp" line="325" />
         <source>%1 (Copy)</source>
         <translation>%1 (Kopya)</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="356" />
+        <location filename="../src/app/AppController.cpp" line="367" />
         <source>The device no longer exists.</source>
         <translation>Cihaz artık yok.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="359" />
+        <location filename="../src/app/AppController.cpp" line="370" />
         <source>%1 is already open.</source>
         <translation>%1 zaten açık.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="361" />
-        <source>Tunnels inside Burrow are coming next. For now, use a direct connection.</source>
-        <translation>Burrow içindeki tüneller sıradaki adımda geliyor. Şimdilik doğrudan bağlantı kullan.</translation>
+        <location filename="../src/app/AppController.cpp" line="392" />
+        <source>Connecting %1 through %2…</source>
+        <translation>%1, %2 üzerinden bağlanıyor…</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="449" />
+        <location filename="../src/app/AppController.cpp" line="400" />
+        <source>The tunnel profile no longer exists.</source>
+        <translation>Tünel profili artık yok.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/AppController.cpp" line="458" />
+        <source>%1: %2</source>
+        <translation>%1: %2</translation>
+    </message>
+    <message>
+        <location filename="../src/app/AppController.cpp" line="477" />
+        <source>Couldn't open a connection through the tunnel.</source>
+        <translation>Tünel üzerinden bağlantı açılamadı.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/AppController.cpp" line="558" />
         <source>The profile name can't be empty.</source>
         <translation>Profil adı boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="453" />
+        <location filename="../src/app/AppController.cpp" line="562" />
         <source>Server and username can't be empty.</source>
         <translation>Sunucu ve kullanıcı adı boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="456" />
+        <location filename="../src/app/AppController.cpp" line="565" />
         <source>The OTP key is invalid.</source>
         <translation>OTP anahtarı geçersiz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="498" />
+        <location filename="../src/app/AppController.cpp" line="607" />
         <source>Direct (No Tunnel)</source>
         <translation>Doğrudan (Tünelsiz)</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="532" />
+        <location filename="../src/app/AppController.cpp" line="641" />
         <source>Invalid key</source>
         <translation>Geçersiz anahtar</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="590" />
+        <location filename="../src/app/AppController.cpp" line="699" />
         <source>Company VPN</source>
         <translation>Şirket VPN</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="595" />
+        <location filename="../src/app/AppController.cpp" line="704" />
         <source>Home Network</source>
         <translation>Ev Ağı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="601" />
+        <location filename="../src/app/AppController.cpp" line="710" />
         <source>Work PC</source>
         <translation>İş Bilgisayarı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="602" />
+        <location filename="../src/app/AppController.cpp" line="711" />
         <source>Meeting Room</source>
         <translation>Toplantı Odası</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="603" />
+        <location filename="../src/app/AppController.cpp" line="712" />
         <source>Home Desktop</source>
         <translation>Ev Masaüstü</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="604" />
+        <location filename="../src/app/AppController.cpp" line="713" />
         <source>Lab Server</source>
         <translation>Laboratuvar</translation>
     </message>
@@ -189,7 +204,7 @@
     <message>
         <location filename="../qml/CredentialsDialog.qml" line="14" />
         <source>Sign In To %1</source>
-        <translation>%1 Bilgisayarına Giriş</translation>
+        <translation>%1 Girişi</translation>
     </message>
     <message>
         <location filename="../qml/CredentialsDialog.qml" line="15" />
@@ -220,32 +235,32 @@
 <context>
     <name>DeviceCard</name>
     <message>
-        <location filename="../qml/DeviceCard.qml" line="74" />
+        <location filename="../qml/DeviceCard.qml" line="76" />
         <source>Preview After First Connection</source>
         <translation>Önizleme İlk Bağlantıdan Sonra</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceCard.qml" line="183" />
+        <location filename="../qml/DeviceCard.qml" line="185" />
         <source>Direct</source>
         <translation>Doğrudan</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceCard.qml" line="197" />
+        <location filename="../qml/DeviceCard.qml" line="200" />
         <source>Connect</source>
         <translation>Bağlan</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceCard.qml" line="226" />
+        <location filename="../qml/DeviceCard.qml" line="229" />
         <source>Edit</source>
         <translation>Düzenle</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceCard.qml" line="227" />
+        <location filename="../qml/DeviceCard.qml" line="230" />
         <source>Duplicate</source>
         <translation>Kopyala</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceCard.qml" line="228" />
+        <location filename="../qml/DeviceCard.qml" line="231" />
         <source>Delete</source>
         <translation>Sil</translation>
     </message>
@@ -491,7 +506,7 @@
     </message>
     <message>
         <location filename="../qml/GalleryView.qml" line="73" />
-        <location filename="../qml/GalleryView.qml" line="180" />
+        <location filename="../qml/GalleryView.qml" line="182" />
         <source>New Device</source>
         <translation>Yeni Cihaz</translation>
     </message>
@@ -501,27 +516,27 @@
         <translation>Tümü</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="94" />
+        <location filename="../qml/GalleryView.qml" line="95" />
         <source>Direct</source>
         <translation>Doğrudan</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="144" />
+        <location filename="../qml/GalleryView.qml" line="146" />
         <source>No matching devices.</source>
         <translation>Eşleşen cihaz yok.</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="166" />
+        <location filename="../qml/GalleryView.qml" line="168" />
         <source>Add Your First Computer</source>
         <translation>İlk Bilgisayarını Ekle</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="174" />
+        <location filename="../qml/GalleryView.qml" line="176" />
         <source>Add the computer you want to reach. If you connect through a VPN or Tailscale, create a tunnel profile first.</source>
         <translation>Bağlanmak istediğin bilgisayarı ekle. VPN veya Tailscale üzerinden bağlanacaksan önce bir tünel profili oluştur.</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="179" />
+        <location filename="../qml/GalleryView.qml" line="181" />
         <source>Add Tunnel Profile</source>
         <translation>Tünel Profili Ekle</translation>
     </message>
@@ -600,6 +615,49 @@
         <location filename="../qml/Main.qml" line="33" />
         <source>Delete</source>
         <translation>Sil</translation>
+    </message>
+    <message>
+        <location filename="../qml/Main.qml" line="48" />
+        <source>Sign In To %1</source>
+        <translation>%1 Girişi</translation>
+    </message>
+    <message>
+        <location filename="../qml/Main.qml" line="48" />
+        <source>Enter your VPN password. It is kept in memory until Burrow locks.</source>
+        <translation>VPN şifreni gir. Burrow kilitlenene kadar yalnızca bellekte tutulur.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Main.qml" line="49" />
+        <source>VPN Password</source>
+        <translation>VPN Şifresi</translation>
+    </message>
+    <message>
+        <location filename="../qml/Main.qml" line="92" />
+        <source>One-Time Code For %1</source>
+        <translation>%1 İçin Tek Kullanımlık Kod</translation>
+    </message>
+    <message>
+        <location filename="../qml/Main.qml" line="92" />
+        <source>Enter the code from your authenticator app.</source>
+        <translation>Authenticator uygulamasındaki kodu gir.</translation>
+    </message>
+    <message>
+        <location filename="../qml/Main.qml" line="93" />
+        <source>Code</source>
+        <translation>Kod</translation>
+    </message>
+</context>
+<context>
+    <name>PromptDialog</name>
+    <message>
+        <location filename="../qml/PromptDialog.qml" line="34" />
+        <source>Cancel</source>
+        <translation>İptal</translation>
+    </message>
+    <message>
+        <location filename="../qml/PromptDialog.qml" line="35" />
+        <source>Continue</source>
+        <translation>Devam Et</translation>
     </message>
 </context>
 <context>
@@ -817,6 +875,29 @@
     </message>
 </context>
 <context>
+    <name>TailscaleLoginDialog</name>
+    <message>
+        <location filename="../qml/TailscaleLoginDialog.qml" line="9" />
+        <source>Sign In To Tailscale</source>
+        <translation>Tailscale'e Giriş Yap</translation>
+    </message>
+    <message>
+        <location filename="../qml/TailscaleLoginDialog.qml" line="13" />
+        <source>%1 needs to join your tailnet. Sign in once in your browser; Burrow keeps the node key in its encrypted vault.</source>
+        <translation>%1 tailnet'ine katılmalı. Tarayıcında bir kez giriş yap; Burrow düğüm anahtarını şifreli kasasında saklar.</translation>
+    </message>
+    <message>
+        <location filename="../qml/TailscaleLoginDialog.qml" line="26" />
+        <source>Later</source>
+        <translation>Sonra</translation>
+    </message>
+    <message>
+        <location filename="../qml/TailscaleLoginDialog.qml" line="27" />
+        <source>Open Sign-In Page</source>
+        <translation>Giriş Sayfasını Aç</translation>
+    </message>
+</context>
+<context>
     <name>TunnelEditor</name>
     <message>
         <location filename="../qml/TunnelEditor.qml" line="17" />
@@ -1010,6 +1091,19 @@
     </message>
 </context>
 <context>
+    <name>TunnelManager</name>
+    <message>
+        <location filename="../src/app/TunnelManager.cpp" line="59" />
+        <source>Couldn't start Tailscale.</source>
+        <translation>Tailscale başlatılamadı.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/TunnelManager.cpp" line="65" />
+        <source>Enter the VPN password.</source>
+        <translation>VPN şifresini gir.</translation>
+    </message>
+</context>
+<context>
     <name>TunnelsDialog</name>
     <message>
         <location filename="../qml/TunnelsDialog.qml" line="10" />
@@ -1027,37 +1121,72 @@
         <translation>%1 cihaz</translation>
     </message>
     <message>
+        <location filename="../qml/TunnelsDialog.qml" line="49" />
+        <source>Connected</source>
+        <translation>Bağlı</translation>
+    </message>
+    <message>
         <location filename="../qml/TunnelsDialog.qml" line="50" />
+        <source>Connecting…</source>
+        <translation>Bağlanıyor…</translation>
+    </message>
+    <message>
+        <location filename="../qml/TunnelsDialog.qml" line="51" />
+        <source>Sign-In Needed</source>
+        <translation>Giriş Gerekli</translation>
+    </message>
+    <message>
+        <location filename="../qml/TunnelsDialog.qml" line="52" />
+        <source>Code Needed</source>
+        <translation>Kod Gerekli</translation>
+    </message>
+    <message>
+        <location filename="../qml/TunnelsDialog.qml" line="53" />
+        <source>Failed</source>
+        <translation>Başarısız</translation>
+    </message>
+    <message>
+        <location filename="../qml/TunnelsDialog.qml" line="62" />
+        <source>Disconnect</source>
+        <translation>Bağlantıyı Kes</translation>
+    </message>
+    <message>
+        <location filename="../qml/TunnelsDialog.qml" line="62" />
+        <source>Connect</source>
+        <translation>Bağlan</translation>
+    </message>
+    <message>
+        <location filename="../qml/TunnelsDialog.qml" line="71" />
         <source>Delete Profile</source>
         <translation>Profili Sil</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelsDialog.qml" line="51" />
+        <location filename="../qml/TunnelsDialog.qml" line="72" />
         <source>"%1" is used by %2 devices; if deleted, they switch to a direct connection.</source>
         <translation>"%1" profilini %2 cihaz kullanıyor; silinirse bu cihazlar doğrudan bağlantıya geçer.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelsDialog.qml" line="52" />
+        <location filename="../qml/TunnelsDialog.qml" line="73" />
         <source>The profile "%1" will be deleted.</source>
         <translation>"%1" profili silinecek.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelsDialog.qml" line="53" />
+        <location filename="../qml/TunnelsDialog.qml" line="74" />
         <source>Delete</source>
         <translation>Sil</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelsDialog.qml" line="62" />
+        <location filename="../qml/TunnelsDialog.qml" line="83" />
         <source>No profiles yet. Add one for your GlobalProtect VPN or Tailscale network.</source>
         <translation>Henüz profil yok. GlobalProtect VPN'in veya Tailscale ağın için bir profil ekle.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelsDialog.qml" line="69" />
+        <location filename="../qml/TunnelsDialog.qml" line="90" />
         <source>New Profile</source>
         <translation>Yeni Profil</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelsDialog.qml" line="71" />
+        <location filename="../qml/TunnelsDialog.qml" line="92" />
         <source>Done</source>
         <translation>Bitti</translation>
     </message>

@@ -89,7 +89,7 @@ jobs:
         with:
           go-version-file: netcore/go.mod
       - name: Install dependencies
-        run: brew install cmake ninja qt freerdp
+        run: brew install cmake ninja qt freerdp openconnect
       # The macOS build must be signed with Developer ID and notarized; without the secrets the release stops
       # (an unsigned app is blocked by Gatekeeper and cannot update itself). Same secret names as JumpDesk.
       - name: Check signing secrets

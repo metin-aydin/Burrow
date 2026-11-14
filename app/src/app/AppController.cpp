@@ -35,6 +35,14 @@ AppController::AppController(QObject *parent)
     , m_tunnels(&m_store)
 {
     m_gallery.setSourceModel(&m_devices);
+    connect(&m_tunnelMgr, &TunnelManager::statesChanged, this, &AppController::tunnelStatesChanged);
+    connect(&m_tunnelMgr, &TunnelManager::stateChanged, this, &AppController::onTunnelState);
+    connect(&m_tunnelMgr, &TunnelManager::loginRequired, this, [this](const QString &id, const QString &url) {
+        emit tunnelLoginRequired(id, tunnelName(id), url);
+    });
+    connect(&m_tunnelMgr, &TunnelManager::otpRequired, this, [this](const QString &id, const QString &prompt) {
+        emit tunnelOtpRequired(id, tunnelName(id), prompt);
+    });
     connect(&m_updater, &Updater::updateAvailable, this, [this](const QString &v) {
         emit toast(tr("Burrow %1 is available. Install it from Settings.").arg(v));
     });
@@ -161,6 +169,7 @@ QString AppController::finishUnlock(VaultStore::Result r)
 
 void AppController::shutdown()
 {
+    m_tunnelMgr.stopAll();
     for (RdpSession *s : std::as_const(m_sessions)) {
         s->close();
         if (m_store.isOpen())
@@ -173,6 +182,8 @@ void AppController::shutdown()
 
 void AppController::lock()
 {
+    m_tunnelMgr.stopAll();
+    m_pending.clear();
     for (RdpSession *s : std::as_const(m_sessions)) {
         s->close();
         setPreview(s->deviceId(), s->frame());
@@ -357,31 +368,128 @@ QString AppController::connectDevice(const QString &id, const QString &username,
     for (RdpSession *s : std::as_const(m_sessions))
         if (s->deviceId() == id)
             return tr("%1 is already open.").arg(dev->name);
-    if (!dev->tunnelId.isEmpty())
-        return tr("Tunnels inside Burrow are coming next. For now, use a direct connection.");
 
     const QString user = username.isEmpty() ? dev->username : username;
     const QString pass = password.isEmpty() ? (dev->savePassword ? dev->password : QString()) : password;
     if (user.isEmpty() || pass.isEmpty())
         return QStringLiteral("credentials");
 
+    if (dev->tunnelId.isEmpty())
+        return startSession(*dev, user, pass, QString());
+
+    const Model::Tunnel *t = m_store.doc().tunnel(dev->tunnelId);
+    if (!t)
+        return startSession(*dev, user, pass, QString());
+    if (m_tunnelMgr.needsPassword(*t))
+        return QStringLiteral("tunnel_password:") + t->id;
+    const QString err = m_tunnelMgr.ensure(*t);
+    if (!err.isEmpty())
+        return err;
+    if (m_tunnelMgr.isConnected(t->id))
+        return startSession(*dev, user, pass, t->id);
+    // Connect as soon as the tunnel is up (see onTunnelState).
+    m_pending.append({dev->id, user, pass, t->id});
+    emit toast(tr("Connecting %1 through %2…").arg(dev->name, t->name));
+    return {};
+}
+
+QString AppController::setTunnelPassword(const QString &tunnelId, const QString &password)
+{
+    const Model::Tunnel *t = m_store.doc().tunnel(tunnelId);
+    if (!t)
+        return tr("The tunnel profile no longer exists.");
+    return m_tunnelMgr.ensure(*t, password);
+}
+
+void AppController::submitTunnelOtp(const QString &tunnelId, const QString &code)
+{
+    m_tunnelMgr.submitOtp(tunnelId, code);
+}
+
+void AppController::connectTunnel(const QString &tunnelId)
+{
+    const Model::Tunnel *t = m_store.doc().tunnel(tunnelId);
+    if (!t)
+        return;
+    if (m_tunnelMgr.needsPassword(*t)) {
+        emit tunnelPasswordRequired(tunnelId, t->name);
+        return;
+    }
+    const QString err = m_tunnelMgr.ensure(*t);
+    if (!err.isEmpty())
+        emit toast(err);
+}
+
+void AppController::disconnectTunnel(const QString &tunnelId)
+{
+    m_tunnelMgr.stop(tunnelId);
+}
+
+QString AppController::tunnelName(const QString &tunnelId) const
+{
+    const Model::Tunnel *t = m_store.doc().tunnel(tunnelId);
+    return t ? t->name : QString();
+}
+
+void AppController::onTunnelState(const QString &tunnelId, const QString &state, const QString &error)
+{
+    if (state == QLatin1String("connected")) {
+        const auto pending = m_pending;
+        m_pending.clear();
+        for (const Pending &p : pending) {
+            if (p.tunnelId != tunnelId) {
+                m_pending.append(p);
+                continue;
+            }
+            for (const Model::Device &d : m_store.doc().devices)
+                if (d.id == p.deviceId) {
+                    const QString err = startSession(d, p.username, p.password, tunnelId);
+                    if (!err.isEmpty())
+                        emit toast(err);
+                }
+        }
+    } else if (state == QLatin1String("failed") || state == QLatin1String("stopped")) {
+        for (int i = m_pending.size() - 1; i >= 0; --i)
+            if (m_pending.at(i).tunnelId == tunnelId) {
+                m_pending[i].password.fill(QChar(0));
+                m_pending.removeAt(i);
+            }
+        if (!error.isEmpty())
+            emit toast(tr("%1: %2").arg(tunnelName(tunnelId), error));
+    }
+}
+
+QString AppController::startSession(const Model::Device &dev, const QString &user, const QString &pass,
+                                    const QString &tunnelId)
+{
     RdpSession::Params p;
-    p.deviceId = dev->id;
-    p.title = dev->name;
-    p.host = dev->host;
-    p.port = quint16(dev->port);
+    p.deviceId = dev.id;
+    p.title = dev.name;
+    p.host = dev.host;
+    p.port = quint16(dev.port);
+    p.pinHost = dev.host;
+    p.pinPort = quint16(dev.port);
+    int forward = 0;
+    if (!tunnelId.isEmpty()) {
+        const QString target = QStringLiteral("%1:%2").arg(dev.host).arg(dev.port);
+        const QString local = m_tunnelMgr.openForward(tunnelId, target, &forward);
+        if (local.isEmpty())
+            return tr("Couldn't open a connection through the tunnel.");
+        p.host = local.section(QLatin1Char(':'), 0, 0);
+        p.port = quint16(local.section(QLatin1Char(':'), 1, 1).toUInt());
+    }
     p.username = user;
     p.password = pass;
-    p.domain = dev->domain;
-    p.keyMap = dev->keyMap;
-    p.clipboard = dev->clipboard;
+    p.domain = dev.domain;
+    p.keyMap = dev.keyMap;
+    p.clipboard = dev.clipboard;
     // Start at the size the session window opens with; the view then follows the window.
     const QScreen *screen = QGuiApplication::primaryScreen();
     const qreal dpr = screen ? screen->devicePixelRatio() : 1.0;
     p.scale = qRound(dpr * 100);
     p.size = QSize(qRound(1280 * dpr) & ~1, qRound(820 * dpr));
-    p.lockOnDisconnect = dev->lockOnDisconnect;   // Win+L on Windows, Super+L on GNOME
-    p.knownFingerprint = dev->certFingerprint;
+    p.lockOnDisconnect = dev.lockOnDisconnect;   // Win+L on Windows, Super+L on GNOME
+    p.knownFingerprint = dev.certFingerprint;
 
     auto *session = new RdpSession(p, this);
     m_sessions.append(session);
@@ -391,7 +499,8 @@ QString AppController::connectDevice(const QString &id, const QString &username,
                 d.certFingerprint = fp;
         persist();
     });
-    connect(session, &RdpSession::closed, this, [this](RdpSession *s) {
+    connect(session, &RdpSession::closed, this, [this, forward](RdpSession *s) {
+        TunnelManager::closeForward(forward);
         const QImage last = s->frame();
         if (!last.isNull() && m_store.isOpen())
             setPreview(s->deviceId(), last);

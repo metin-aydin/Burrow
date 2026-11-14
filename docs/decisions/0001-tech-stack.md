@@ -63,3 +63,20 @@ ikinci motor olarak eklemek.
    bildirimleri eklenir.
 4. **Platform sırası: önce macOS**, sonra Ubuntu, en son Windows (libopenconnect tun-win32 yaması gerekir).
    macOS'ta H.264 için sistemin VideoToolbox decoder'ı kullanılır (FFmpeg/codec lisansı derdi yok).
+
+
+## Uygulama içi tüneller — uygulama (2026-11-15)
+
+- `netcore/internal/tunnel`: ortak arabirim (`DialContext`, `Status`, `Close`); RDP oturumu tünelin içinden
+  tek kullanımlık loopback yönlendirmesiyle (`NetcoreStartTunnelForward`) bağlanır. Sertifika pini her zaman
+  cihazın gerçek `host:port`'una bağlıdır.
+- **Tailscale** (`internal/ts`): `tsnet`; düğüm durumu/anahtarı `ipn.StateStore` üzerinden kasada şifreli blob
+  (`tailscale-<profil-id>`). Tailscale log yüklemesi kapalı (`TS_NO_LOGS_NO_SUPPORT`). Giriş: durum `needs_login`
+  → uygulama giriş bağlantısını gösterir, kullanıcı tarayıcıda onaylar. Canlı doğrulandı (giriş adımına kadar).
+- **GlobalProtect** (`internal/gp`): libopenconnect süreç içinde (cgo), paketler `SOCK_DGRAM` socketpair üzerinden
+  gVisor ağ yığınına (`internal/netstack`) gider — tun, root, sistem rotası yok. Form geri çağrısı kullanıcı adı,
+  şifre(+OTP) ve authgroup'u doldurur; ikinci şifre formu (portal→gateway) sonraki TOTP penceresini bekler;
+  üçüncü form = giriş reddedildi → iptal (tekrar yok). Sunucu adı sistem DNS'iyle çözülemezse 1.1.1.1/8.8.8.8
+  (split-DNS tuzağı). Sunucu sertifikası sistem güven deposuyla doğrulanır; geçmezse reddedilir.
+  Kurum sunucusunda henüz denenmedi (hesap kilidi riski nedeniyle kullanıcıyla birlikte denenecek).
+- Bağımlılıklar: `tailscale.com` (BSD-3), `gvisor.dev/gvisor` (Apache-2.0), libopenconnect (LGPL-2.1, dinamik).

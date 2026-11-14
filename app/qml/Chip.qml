@@ -6,6 +6,7 @@ Rectangle {
     property string text
     property string kind: "neutral"
     property bool selected: false
+    property string status: ""   // tunnel state: connected | starting | needs_login | needs_otp | failed
     signal clicked()
     implicitHeight: 24
     implicitWidth: row.implicitWidth + 18
@@ -23,6 +24,13 @@ Rectangle {
         id: row
         anchors.centerIn: parent
         spacing: 5
+        Rectangle {
+            visible: root.status !== ""
+            width: 7; height: 7; radius: 3.5
+            anchors.verticalCenter: parent.verticalCenter
+            color: root.status === "connected" ? Theme.success
+                 : root.status === "failed" ? Theme.danger : Theme.warning
+        }
         Icon {
             visible: root.kind === "globalprotect" || root.kind === "tailscale"
             name: root.kind === "tailscale" ? "globe" : "shield"

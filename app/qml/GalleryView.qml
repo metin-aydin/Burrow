@@ -87,6 +87,7 @@ Rectangle {
                 Chip {
                     text: model.name
                     kind: model.type
+                    status: (App.tunnelStates[model.tunnelId] || {}).state || ""
                     selected: root.filterTunnel === model.tunnelId
                     onClicked: root.filterTunnel = model.tunnelId
                 }
@@ -125,6 +126,7 @@ Rectangle {
                     os: model.os
                     tunnelName: model.tunnelName
                     tunnelType: model.tunnelType
+                    tunnelId: model.tunnelId
                     preview: model.preview
                     onConnectRequested: root.connectDevice(model.deviceId)
                     onEditRequested: root.editDevice(model.deviceId)

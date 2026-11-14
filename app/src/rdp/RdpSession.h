@@ -37,6 +37,8 @@ public:
         int scale = 100;                 // desktop scale factor in percent (200 on Retina)
         bool lockOnDisconnect = false;   // send Win/Super+L before closing
         QString knownFingerprint;        // pin "host:port|sha256" confirmed by the user earlier
+        QString pinHost;                 // the device address the pin belongs to (host may be a tunnel forward)
+        quint16 pinPort = 0;
     };
 
     explicit RdpSession(Params params, QObject *parent = nullptr);
