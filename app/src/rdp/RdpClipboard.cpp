@@ -13,35 +13,48 @@
 
 namespace {
 
-RdpClipboard *self(CliprdrClientContext *ctx) { return static_cast<RdpClipboard *>(ctx->custom); }
+// Largest clipboard payload accepted from the remote side.
+constexpr quint32 kMaxClipboardBytes = 32u * 1024 * 1024;
+
+RdpClipboard *self(CliprdrClientContext *ctx) { return ctx ? static_cast<RdpClipboard *>(ctx->custom) : nullptr; }
 
 UINT monitorReady(CliprdrClientContext *ctx, const CLIPRDR_MONITOR_READY *)
 {
-    return self(ctx)->onMonitorReady();
+    auto *c = self(ctx);
+    return c ? c->onMonitorReady() : CHANNEL_RC_OK;
 }
 
 UINT serverCapabilities(CliprdrClientContext *, const CLIPRDR_CAPABILITIES *) { return CHANNEL_RC_OK; }
 
 UINT serverFormatList(CliprdrClientContext *ctx, const CLIPRDR_FORMAT_LIST *list)
 {
+    auto *c = self(ctx);
+    if (!c || !list)
+        return CHANNEL_RC_OK;
     QList<unsigned> formats;
-    for (UINT32 i = 0; i < list->numFormats; ++i)
+    for (UINT32 i = 0; i < list->numFormats && list->formats && i < 512; ++i)
         formats.append(list->formats[i].formatId);
-    return self(ctx)->onServerFormatList(formats);
+    return c->onServerFormatList(formats);
 }
 
 UINT serverFormatListResponse(CliprdrClientContext *, const CLIPRDR_FORMAT_LIST_RESPONSE *) { return CHANNEL_RC_OK; }
 
 UINT serverFormatDataRequest(CliprdrClientContext *ctx, const CLIPRDR_FORMAT_DATA_REQUEST *req)
 {
-    return self(ctx)->onServerFormatDataRequest(req->requestedFormatId);
+    auto *c = self(ctx);
+    return c && req ? c->onServerFormatDataRequest(req->requestedFormatId) : CHANNEL_RC_OK;
 }
 
 UINT serverFormatDataResponse(CliprdrClientContext *ctx, const CLIPRDR_FORMAT_DATA_RESPONSE *resp)
 {
-    const bool ok = (resp->common.msgFlags & CB_RESPONSE_OK) && resp->requestedFormatData;
-    return self(ctx)->onServerFormatDataResponse(
-        ok, ok ? QByteArray(reinterpret_cast<const char *>(resp->requestedFormatData), int(resp->common.dataLen))
+    auto *c = self(ctx);
+    if (!c || !resp)
+        return CHANNEL_RC_OK;
+    const quint32 len = resp->common.dataLen;
+    const bool ok = (resp->common.msgFlags & CB_RESPONSE_OK) && resp->requestedFormatData
+        && len <= kMaxClipboardBytes;
+    return c->onServerFormatDataResponse(
+        ok, ok ? QByteArray(reinterpret_cast<const char *>(resp->requestedFormatData), qsizetype(len))
                : QByteArray());
 }
 
@@ -90,8 +103,15 @@ void RdpClipboard::attach(CliprdrClientContext *ctx)
 
 void RdpClipboard::detach()
 {
-    if (m_ctx)
+    if (m_ctx) {
+        m_ctx->MonitorReady = nullptr;
+        m_ctx->ServerCapabilities = nullptr;
+        m_ctx->ServerFormatList = nullptr;
+        m_ctx->ServerFormatListResponse = nullptr;
+        m_ctx->ServerFormatDataRequest = nullptr;
+        m_ctx->ServerFormatDataResponse = nullptr;
         m_ctx->custom = nullptr;
+    }
     m_ctx = nullptr;
     m_ready = false;
 }
@@ -242,23 +262,39 @@ QByteArray RdpClipboard::imageToDib(const QImage &image)
 
 QImage RdpClipboard::dibToImage(const QByteArray &dib)
 {
-    if (dib.size() < 40)
+    // Remote input: validate the header with 64-bit arithmetic before building a BMP around it.
+    if (dib.size() < 40 || quint64(dib.size()) > kMaxClipboardBytes)
         return {};
     const auto *p = reinterpret_cast<const uchar *>(dib.constData());
     const quint32 headerSize = qFromLittleEndian<quint32>(p);
+    const qint32 width = qFromLittleEndian<qint32>(p + 4);
+    const qint32 height = qFromLittleEndian<qint32>(p + 8);
     const quint16 bitCount = qFromLittleEndian<quint16>(p + 14);
     const quint32 compression = qFromLittleEndian<quint32>(p + 16);
     quint32 colors = qFromLittleEndian<quint32>(p + 32);
+    if (headerSize < 40 || headerSize > quint32(dib.size()))
+        return {};
+    if (bitCount != 1 && bitCount != 4 && bitCount != 8 && bitCount != 16 && bitCount != 24 && bitCount != 32)
+        return {};
+    if (compression != 0 /* BI_RGB */ && compression != 3 /* BI_BITFIELDS */)
+        return {};   // no RLE/JPEG/PNG paths from remote data
+    if (width <= 0 || width > 16384 || height == 0 || height < -16384 || height > 16384)
+        return {};
+    if (colors > 256)
+        return {};
     if (colors == 0 && bitCount <= 8)
         colors = 1u << bitCount;
-    quint32 offset = 14 + headerSize + colors * 4;
-    if (compression == 3 /* BI_BITFIELDS */ && headerSize == 40)
-        offset += 12;
+    const qint64 offset = qint64(14) + headerSize + qint64(colors) * 4
+                        + ((compression == 3 && headerSize == 40) ? 12 : 0);
+    const qint64 rowBytes = ((qint64(width) * bitCount + 31) / 32) * 4;
+    const qint64 pixels = rowBytes * qAbs(qint64(height));
+    if (offset < 54 || offset + pixels > qint64(14) + dib.size())
+        return {};
     QByteArray bmp(14, '\0');
     bmp[0] = 'B';
     bmp[1] = 'M';
     qToLittleEndian<quint32>(quint32(14 + dib.size()), reinterpret_cast<uchar *>(bmp.data()) + 2);
-    qToLittleEndian<quint32>(offset, reinterpret_cast<uchar *>(bmp.data()) + 10);
+    qToLittleEndian<quint32>(quint32(offset), reinterpret_cast<uchar *>(bmp.data()) + 10);
     bmp += dib;
     return QImage::fromData(bmp, "BMP");
 }

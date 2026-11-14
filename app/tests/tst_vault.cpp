@@ -6,6 +6,7 @@
 #include "rdp/KeyMapper.h"
 #include "rdp/RdpClipboard.h"
 #include <QImage>
+#include <QtEndian>
 #include "net/NetCore.h"
 #include "vault/VaultStore.h"
 
@@ -198,6 +199,15 @@ private slots:
         QCOMPARE(back.pixelColor(3, 4), QColor(250, 20, 30));
         QCOMPARE(back.pixelColor(0, 0), QColor(10, 120, 200));
         QVERIFY(RdpClipboard::dibToImage(QByteArray(10, 'x')).isNull());
+        // Hostile headers are rejected instead of being handed to the decoder.
+        QByteArray bad = dib;
+        qToLittleEndian<quint32>(0xFFFFFFF0u, reinterpret_cast<uchar *>(bad.data()) + 32);   // huge colour count
+        QVERIFY(RdpClipboard::dibToImage(bad).isNull());
+        bad = dib;
+        qToLittleEndian<quint32>(1u, reinterpret_cast<uchar *>(bad.data()) + 16);            // BI_RLE8
+        QVERIFY(RdpClipboard::dibToImage(bad).isNull());
+        bad = dib.left(60);                                                                    // truncated pixels
+        QVERIFY(RdpClipboard::dibToImage(bad).isNull());
         QCOMPARE(RdpClipboard::modeFromString("to_local"), RdpClipboard::Mode::ToLocal);
     }
 

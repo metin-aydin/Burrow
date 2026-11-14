@@ -4,6 +4,10 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Güvenlik incelemesi (pano, 3 bulgu) düzeltildi: uzaktan gelen pano verisi 32 MB ile sınırlı ve uzunluk `int`'e
+  kesilmiyor; DIB başlığı 64 bit aritmetikle doğrulanıyor (başlık boyutu, bit derinliği, yalnız BI_RGB/BI_BITFIELDS,
+  renk sayısı, piksel verisinin sınırlar içinde olması); kanal kopunca geri çağrılar temizleniyor ve her geçişte
+  boş işaretçi kontrolü var. Kötü niyetli başlık testleri eklendi.
 - Güvenlik incelemesi (sertifika, 2 bulgu): pin varken eşleşmeyen sertifika artık her durumda reddediliyor (adres/biçim
   farkıyla yeniden sorma yok), pin tek seferlik yazılıyor; değiştirmek için cihaz düzenleyicide "Kayıtlı Sertifikayı
   Unut" veya adres/port değişikliği. Eski çıplak parmak izi biçimi de karşılaştırılıyor.
