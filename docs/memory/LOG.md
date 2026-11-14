@@ -4,6 +4,8 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Logo (UPaste/JumpDesk tarzı, kullanıcı rengi seçti: Toprak) + ikon setleri (`tools/render-icons.sh`), uygulama
+  teması bu renge göre güncellendi; macOS paketine `.icns`, Windows için `.rc/.ico` eklendi.
 - **Çoklu dil (ADR 0006):** kaynak metinler İngilizceye çevrildi, Türkçe katalog (`app/i18n/burrow_tr.ts`, 173
   metin) eklendi; ilk açılışta sistem diline göre seçiliyor, Ayarlar → Dil ile değişiyor (canlı). CI çeviri
   kontrolü betiği eklendi. İki dilde ekran görüntüsüyle kontrol edildi.

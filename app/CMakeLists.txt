@@ -31,7 +31,7 @@ qt_add_qml_module(burrow
     URI Burrow
     VERSION 1.0
     QML_FILES ${BURROW_QML}
-    RESOURCES ${BURROW_ICONS}
+    RESOURCES ${BURROW_ICONS} resources/icons/256x256.png
     NO_RESOURCE_TARGET_PATH
 )
 
@@ -63,7 +63,16 @@ else()
     message(WARNING "FreeRDP 3 not found - building without RDP engine")
 endif()
 
+if(APPLE)
+    set(BURROW_ICNS ${CMAKE_CURRENT_SOURCE_DIR}/resources/Burrow.icns)
+    target_sources(burrow PRIVATE ${BURROW_ICNS})
+    set_source_files_properties(${BURROW_ICNS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+elseif(WIN32)
+    target_sources(burrow PRIVATE resources/burrow.rc)
+endif()
+
 set_target_properties(burrow PROPERTIES
+    MACOSX_BUNDLE_ICON_FILE Burrow.icns
     OUTPUT_NAME "Burrow"
     MACOSX_BUNDLE ON
     MACOSX_BUNDLE_BUNDLE_NAME "Burrow"

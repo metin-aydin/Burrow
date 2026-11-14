@@ -60,15 +60,11 @@ Rectangle {
             anchors.margins: 32
             spacing: 16
 
-            Rectangle {
+            Image {
                 Layout.alignment: Qt.AlignHCenter
-                width: 64; height: 64; radius: 18
-                gradient: Gradient {
-                    orientation: Gradient.Vertical
-                    GradientStop { position: 0; color: Theme.accent }
-                    GradientStop { position: 1; color: Qt.darker(Theme.accent, 1.5) }
-                }
-                Icon { anchors.centerIn: parent; name: "tunnel"; size: 32; color: "white" }
+                Layout.preferredWidth: 72; Layout.preferredHeight: 72
+                source: "../resources/icons/256x256.png"
+                sourceSize: Qt.size(144, 144)
             }
             Text {
                 Layout.alignment: Qt.AlignHCenter

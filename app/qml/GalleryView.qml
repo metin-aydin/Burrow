@@ -27,13 +27,10 @@ Rectangle {
             Layout.rightMargin: 28
             Layout.topMargin: 22
             spacing: 12
-            Rectangle {
-                width: 34; height: 34; radius: 10
-                gradient: Gradient {
-                    GradientStop { position: 0; color: Theme.accent }
-                    GradientStop { position: 1; color: Qt.darker(Theme.accent, 1.5) }
-                }
-                Icon { anchors.centerIn: parent; name: "tunnel"; size: 18; color: "white" }
+            Image {
+                Layout.preferredWidth: 42; Layout.preferredHeight: 42
+                source: "../resources/icons/256x256.png"
+                sourceSize: Qt.size(84, 84)
             }
             ColumnLayout {
                 spacing: 0

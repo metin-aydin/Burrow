@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Burrow"));
     QGuiApplication::setOrganizationDomain(QStringLiteral("metin-aydin.github.io"));
     QGuiApplication::setApplicationVersion(QStringLiteral(BURROW_VERSION));
+    QGuiApplication::setWindowIcon(QIcon(QStringLiteral(":/resources/icons/256x256.png")));
     QQuickStyle::setStyle(QStringLiteral("Basic"));
 
     AppController controller;
