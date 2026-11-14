@@ -2,6 +2,7 @@
 
 #include <QImage>
 #include <QMutex>
+#include <QWaitCondition>
 #include <QObject>
 #include <QThread>
 #include <atomic>
@@ -30,8 +31,8 @@ public:
         QString username, password, domain;
         QSize size{1600, 1000};
         QString keyMap = QStringLiteral("shortcuts");
-        bool lockOnDisconnect = false;   // send Super+L before closing (Ubuntu shared session)
-        QString knownFingerprint;        // TOFU: certificate seen on the first connection
+        bool lockOnDisconnect = false;   // send Win/Super+L before closing
+        QString knownFingerprint;        // pin "host:port|sha256" confirmed by the user earlier
     };
 
     explicit RdpSession(Params params, QObject *parent = nullptr);
@@ -45,6 +46,8 @@ public:
 
     void start();
     Q_INVOKABLE void close();
+    // Answer to certificatePrompt (GUI thread).
+    Q_INVOKABLE void answerCertificate(bool trust);
 
     // Thread-safe copy of the current desktop picture.
     QImage frame() const;
@@ -65,13 +68,15 @@ signals:
     void stateChanged();
     void desktopSizeChanged();
     void frameUpdated(const QRect &rect);
-    void certificateTrusted(const QString &deviceId, const QString &fingerprint);
+    void certificatePrompt(const QString &address, const QString &fingerprint);
+    void certificateTrusted(const QString &deviceId, const QString &pin);
     void closed(RdpSession *session);
 
 private:
     void run();
     void setState(const QString &state, const QString &error = {});
     void sendScancode(unsigned scancode, bool down);
+    QString pinFor(const QString &fingerprint) const;
 
     Params m_p;
     QThread m_thread;
@@ -82,4 +87,8 @@ private:
     mutable QMutex m_frameLock;
     QImage m_frame;
     KeyMapper m_keys;
+    QMutex m_certLock;
+    QWaitCondition m_certCond;
+    int m_certAnswer = -1;
+    std::atomic_bool m_certChanged{false};
 };

@@ -4,6 +4,10 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Güvenlik incelemesi (otomatik, RDP, 3 bulgu) düzeltildi: eski "RDP security" katmanı kapatıldı (yalnız NLA/TLS);
+  sertifika ilk bağlantıda kullanıcıya parmak iziyle soruluyor ("Trust And Connect"), pin `host:port|sha256`,
+  aynı adreste değişen sertifika sormadan reddediliyor; "kapanınca kilitle" Windows'ta da Win+L gönderiyor,
+  henüz olmayan "oturumu kapat" seçeneği arayüzden kaldırıldı. Test sunucusunda diyalog ve bağlantı doğrulandı.
 - ✅ **RDP motoru ilk sürüm çalışıyor:** `RdpSession` (FreeRDP 3, işçi iş parçacığı, GFX açık, GDI BGRX32 →
   QImage), `RdpView` (QQuickPaintedItem; ölçekleme, fare, tekerlek, klavye — Mac sanal tuş kodu → RDP scancode),
   `KeyMapper` (Cmd→Ctrl kısayol / tam değiş / kapalı; birim testli), `SessionWindow.qml`, `CredentialsDialog.qml`.

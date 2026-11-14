@@ -64,6 +64,11 @@ int main(int argc, char *argv[])
                 controller.saveDevice(d);
                 const QString id = controller.store()->doc().devices.constLast().id;
                 QTimer::singleShot(500, &controller, [&controller, id] { controller.connectDevice(id); });
+                // BURROW_DEMO_TRUST=1 answers the certificate prompt automatically (test server only).
+                if (qEnvironmentVariableIntValue("BURROW_DEMO_TRUST"))
+                    QObject::connect(&controller, &AppController::sessionOpened, &controller, [](RdpSession *s) {
+                        QObject::connect(s, &RdpSession::certificatePrompt, s, [s] { s->answerCertificate(true); });
+                    });
             });
         // BURROW_GRAB=<file.png> saves every open window after the delay (main window first, then
         // sessions as file-1.png, file-2.png ...).

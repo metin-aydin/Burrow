@@ -168,7 +168,7 @@ void RdpSession::close()
     if (m_state == QLatin1String("closed"))
         return;
     if (m_p.lockOnDisconnect && m_state == QLatin1String("connected")) {
-        // Super+L locks GNOME before the shared session is released.
+        // Win/Super+L locks Windows and GNOME before the session is released.
         releaseKeys();
         sendScancode(KeyMapper::LWin, true);
         sendScancode(0x26, true);
@@ -177,6 +177,7 @@ void RdpSession::close()
         QThread::msleep(300);
     }
     m_stop = true;
+    answerCertificate(false);   // unblock a pending certificate prompt
 }
 
 void RdpSession::setState(const QString &state, const QString &error)
@@ -226,10 +227,19 @@ void RdpSession::run()
     freerdp_settings_set_bool(s, FreeRDP_AutoReconnectionEnabled, TRUE);
     freerdp_settings_set_bool(s, FreeRDP_DesktopResize, TRUE);
     freerdp_settings_set_uint32(s, FreeRDP_KeyboardType, 4);
+    // Only NLA/TLS: legacy "RDP security" has no server authentication, so a man in the middle could
+    // bypass the certificate pin. Servers that offer only that are refused.
+    freerdp_settings_set_bool(s, FreeRDP_RdpSecurity, FALSE);
+    freerdp_settings_set_bool(s, FreeRDP_UseRdpSecurityLayer, FALSE);
+    freerdp_settings_set_bool(s, FreeRDP_NlaSecurity, TRUE);
+    freerdp_settings_set_bool(s, FreeRDP_TlsSecurity, TRUE);
+    freerdp_settings_set_bool(s, FreeRDP_NegotiateSecurityLayer, TRUE);
 
     if (!freerdp_connect(instance)) {
         const UINT32 code = freerdp_get_last_error(ctx);
-        setState(QStringLiteral("closed"), friendlyError(code));
+        setState(QStringLiteral("closed"),
+                 m_certChanged ? friendlyError(FREERDP_ERROR_CONNECT_CANCELLED)
+                 : m_stop ? QString() : friendlyError(code));
         freerdp_client_context_free(ctx);
         return;
     }
@@ -286,14 +296,41 @@ void RdpSession::onPaint(rdpGdi *gdi, int x, int y, int w, int h)
     emit frameUpdated(r);
 }
 
+QString RdpSession::pinFor(const QString &fingerprint) const
+{
+    return QStringLiteral("%1:%2|%3").arg(m_p.host).arg(m_p.port).arg(fingerprint.toLower());
+}
+
 unsigned RdpSession::onVerifyCertificate(const QString &fingerprint)
 {
-    // Trust on first use, pinned per device in the vault. A changed certificate is refused.
-    if (m_p.knownFingerprint.isEmpty()) {
-        emit certificateTrusted(m_p.deviceId, fingerprint);
-        return 2; // accept for this session; Burrow stores the pin itself
+    // The pin is bound to host:port; a different address or certificate needs a new confirmation.
+    const QString pin = pinFor(fingerprint);
+    if (!m_p.knownFingerprint.isEmpty()) {
+        if (m_p.knownFingerprint.compare(pin, Qt::CaseInsensitive) == 0)
+            return 2;
+        if (m_p.knownFingerprint.section(QLatin1Char('|'), 0, 0) == pin.section(QLatin1Char('|'), 0, 0)) {
+            m_certChanged = true;   // same address, different certificate: refuse, don't ask
+            return 0;
+        }
     }
-    return fingerprint.compare(m_p.knownFingerprint, Qt::CaseInsensitive) == 0 ? 2 : 0;
+    // First connection (or the address changed): ask the user and wait (up to 2 minutes).
+    QMutexLocker lock(&m_certLock);
+    m_certAnswer = -1;
+    QMetaObject::invokeMethod(this, [this, fingerprint] {
+        emit certificatePrompt(QStringLiteral("%1:%2").arg(m_p.host).arg(m_p.port), fingerprint);
+    }, Qt::QueuedConnection);
+    m_certCond.wait(&m_certLock, QDeadlineTimer(120000));
+    if (m_certAnswer != 1 || m_stop)
+        return 0;
+    emit certificateTrusted(m_p.deviceId, pin);
+    return 2; // accept for this session; Burrow keeps the pin itself
+}
+
+void RdpSession::answerCertificate(bool trust)
+{
+    QMutexLocker lock(&m_certLock);
+    m_certAnswer = trust ? 1 : 0;
+    m_certCond.wakeAll();
 }
 
 void RdpSession::sendScancode(unsigned scancode, bool down)

@@ -380,76 +380,61 @@
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="129" />
-        <source>The remote screen stays locked when you close the window or the connection drops.</source>
-        <translation>Pencereyi kapattığında veya bağlantı koptuğunda uzak bilgisayarın ekranı kilitli kalır.</translation>
+        <source>Burrow locks the remote computer (Win+L / Super+L) before closing the connection.</source>
+        <translation>Burrow bağlantıyı kapatmadan önce uzak bilgisayarı kilitler (Win+L / Super+L).</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="135" />
-        <source>When Disconnected</source>
-        <translation>Bağlantı Kapanınca</translation>
-    </message>
-    <message>
-        <location filename="../qml/DeviceEditor.qml" line="136" />
-        <source>Keep the session (locked)</source>
-        <translation>Oturumu açık bırak (kilitli)</translation>
-    </message>
-    <message>
-        <location filename="../qml/DeviceEditor.qml" line="137" />
-        <source>Sign out</source>
-        <translation>Oturumu kapat (sign out)</translation>
-    </message>
-    <message>
-        <location filename="../qml/DeviceEditor.qml" line="150" />
+        <location filename="../qml/DeviceEditor.qml" line="144" />
         <source>Clipboard Sharing</source>
         <translation>Pano Paylaşımı</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="151" />
+        <location filename="../qml/DeviceEditor.qml" line="145" />
         <source>Both directions</source>
         <translation>Çift yönlü</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="152" />
+        <location filename="../qml/DeviceEditor.qml" line="146" />
         <source>Only from this computer to remote</source>
         <translation>Sadece bu bilgisayardan uzağa</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="153" />
+        <location filename="../qml/DeviceEditor.qml" line="147" />
         <source>Only from remote to this computer</source>
         <translation>Sadece uzaktan bu bilgisayara</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="154" />
+        <location filename="../qml/DeviceEditor.qml" line="148" />
         <source>Off</source>
         <translation>Kapalı</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="160" />
+        <location filename="../qml/DeviceEditor.qml" line="154" />
         <source>Mac Shortcuts</source>
         <translation>Mac Kısayolları</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="161" />
+        <location filename="../qml/DeviceEditor.qml" line="155" />
         <source>Translate shortcuts (Cmd+C → Ctrl+C)</source>
         <translation>Kısayolları çevir (Cmd+C → Ctrl+C)</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="162" />
+        <location filename="../qml/DeviceEditor.qml" line="156" />
         <source>Swap Cmd ↔ Ctrl completely</source>
         <translation>Cmd ↔ Ctrl tamamen yer değiştir</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="163" />
+        <location filename="../qml/DeviceEditor.qml" line="157" />
         <source>Off (keys as they are)</source>
         <translation>Kapalı (tuşlar olduğu gibi)</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="179" />
+        <location filename="../qml/DeviceEditor.qml" line="173" />
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="180" />
+        <location filename="../qml/DeviceEditor.qml" line="174" />
         <source>Save</source>
         <translation>Kaydet</translation>
     </message>
@@ -645,7 +630,7 @@
         <translation>Bağlantı başarısız oldu (%1).</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="202" />
+        <location filename="../src/rdp/RdpSession.cpp" line="203" />
         <source>Couldn't start the RDP engine.</source>
         <translation>RDP motoru başlatılamadı.</translation>
     </message>
@@ -653,9 +638,29 @@
 <context>
     <name>SessionWindow</name>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="39" />
+        <location filename="../qml/SessionWindow.qml" line="40" />
         <source>Connecting to %1…</source>
         <translation>%1 bilgisayarına bağlanılıyor…</translation>
+    </message>
+    <message>
+        <location filename="../qml/SessionWindow.qml" line="51" />
+        <source>Trust This Computer?</source>
+        <translation>Bu Bilgisayara Güveniyor Musun?</translation>
+    </message>
+    <message>
+        <location filename="../qml/SessionWindow.qml" line="54" />
+        <source>This is the first connection to %1. Check that the fingerprint matches the computer's certificate, then trust it. Burrow refuses to connect if it changes later.</source>
+        <translation>%1 adresine ilk kez bağlanılıyor. Parmak izinin bilgisayarın sertifikasıyla eşleştiğini kontrol et, sonra güven. Sertifika sonradan değişirse Burrow bağlanmaz.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SessionWindow.qml" line="65" />
+        <source>Don't Connect</source>
+        <translation>Bağlanma</translation>
+    </message>
+    <message>
+        <location filename="../qml/SessionWindow.qml" line="66" />
+        <source>Trust And Connect</source>
+        <translation>Güven Ve Bağlan</translation>
     </message>
 </context>
 <context>

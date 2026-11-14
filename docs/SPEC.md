@@ -60,6 +60,8 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
 - Cihaz kaydı: ad, host/IP, port (varsayılan 3389), kullanıcı adı, şifre (opsiyonel sakla),
   domain, hangi tünel profiliyle bağlanılacağı (GP / Tailscale / doğrudan).
 - Lokalde, şifreli kasada saklanır.
+- RDP sunucu sertifikası ilk bağlantıda kullanıcıya parmak iziyle gösterilir; onaylanırsa `host:port`a bağlı
+  olarak sabitlenir, sonradan değişirse bağlanılmaz. Yalnız NLA/TLS güvenlik katmanları kullanılır.
 - Liste, arama, düzenle, sil, kopyala.
 - Cihaz türü: Windows / Ubuntu (oturum ve kilit davranışı buna göre değişir).
 
@@ -70,11 +72,10 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
   şifre oraya da otomatik yazılır (ayar açıksa).
 - **Bağlantı kapanınca kilitle:** pencere kapatıldığında/bağlantı kesildiğinde uzak bilgisayarın
   ekranı kilitli kalır. Davranış:
-  - Windows: RDP bağlantısı kesilince oturum zaten kilitli kalır; ek işlem gerekmez, uygulama
-    bunu doğrular ve kullanıcıya gösterir.
-  - Ubuntu (mevcut oturumu paylaşma modu): oturum açık kalabildiği için uygulama, bağlantıyı
-    kesmeden hemen önce uzak tarafa kilit kısayolunu (Super+L) gönderir.
-- **Bağlantı kapanınca:** "Oturumu açık bırak (kilitli)" veya "Oturumu kapat (sign out)".
+  - Uygulama bağlantıyı kesmeden hemen önce uzak tarafa kilit kısayolunu gönderir (Windows: Win+L,
+    Ubuntu/GNOME: Super+L; aynı tuş kodları). Ubuntu'da ileride burrow-agent ile `loginctl lock-session`.
+- **Bağlantı kapanınca:** "Oturumu açık bırak (kilitli)" (şu an tek seçenek) veya "Oturumu kapat (sign out)"
+  — oturumu kapatma henüz yok, arayüzde gizli (2026-11-15).
 - **Oturum seçimi:** "Mevcut oturuma bağlan" / "Yeni oturum aç" / "Her bağlantıda sor"
   (ayrıntı §5.2).
 

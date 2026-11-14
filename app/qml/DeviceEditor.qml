@@ -22,7 +22,7 @@ BDialog {
         userField.text = d.username || ""; domainField.text = d.domain || ""
         savePw.checked = !!d.savePassword; pwField.text = d.password || ""; autoLogin.checked = !!d.autoLogin
         sessionCombo.value = d.sessionMode || "existing"; lockSw.checked = d.lockOnDisconnect !== false
-        onDisc.value = d.onDisconnect || "keep_locked"; clipCombo.value = d.clipboard || "both"
+        onDisc.value = "keep_locked"; clipCombo.value = d.clipboard || "both"
         keyCombo.value = d.keyMap || "shortcuts"
         error = ""
         tab = "general"
@@ -126,17 +126,11 @@ BDialog {
             id: lockSw
             Layout.fillWidth: true
             title: qsTr("Lock When Disconnected")
-            description: qsTr("The remote screen stays locked when you close the window or the connection drops.")
+            description: qsTr("Burrow locks the remote computer (Win+L / Super+L) before closing the connection.")
             checked: root.d.lockOnDisconnect !== false
         }
-        BCombo {
-            id: onDisc
-            Layout.fillWidth: true
-            label: qsTr("When Disconnected")
-            options: [{ text: qsTr("Keep the session (locked)"), value: "keep_locked" },
-                      { text: qsTr("Sign out"), value: "sign_out" }]
-            value: root.d.onDisconnect || "keep_locked"
-        }
+        // "Sign out on disconnect" comes later; until then the session is always kept (locked).
+        QtObject { id: onDisc; property string value: "keep_locked" }
     }
 
     // --- Clipboard & keyboard -------------------------------------------------

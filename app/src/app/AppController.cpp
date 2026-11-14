@@ -369,7 +369,7 @@ QString AppController::connectDevice(const QString &id, const QString &username,
     p.password = pass;
     p.domain = dev->domain;
     p.keyMap = dev->keyMap;
-    p.lockOnDisconnect = dev->lockOnDisconnect && dev->os == QLatin1String("ubuntu");
+    p.lockOnDisconnect = dev->lockOnDisconnect;   // Win+L on Windows, Super+L on GNOME
     p.knownFingerprint = dev->certFingerprint;
     const QJsonObject layout = dev->layout;
     if (layout.contains("width"))
@@ -379,7 +379,7 @@ QString AppController::connectDevice(const QString &id, const QString &username,
     m_sessions.append(session);
     connect(session, &RdpSession::certificateTrusted, this, [this](const QString &devId, const QString &fp) {
         for (Model::Device &d : m_store.doc().devices)
-            if (d.id == devId && d.certFingerprint.isEmpty())
+            if (d.id == devId)
                 d.certFingerprint = fp;
         persist();
     });
