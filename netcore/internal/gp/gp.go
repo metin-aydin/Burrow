@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net"
 	"net/netip"
+	"net/url"
 	"os"
 	"regexp"
 	"runtime"
@@ -75,23 +76,35 @@ var initSSL sync.Once
 var debug = os.Getenv("BURROW_DEBUG_GP") != ""
 
 var (
-	urlRe     = regexp.MustCompile(`(?i)\b([a-z][a-z0-9+.-]*://)([^/\s@]+@)?([^\s?#]+)(\?[^\s#]*)?(#\S*)?`)
 	secretRe  = regexp.MustCompile(`(?i)(cookie|token|secret|passw|assertion|samlresponse|otp|auth=|prelogin-cookie|portal-userauthcookie|session)`)
+	entropyRe = regexp.MustCompile(`[A-Za-z0-9+/=_%-]{24,}`)
 )
 
-// redactSecrets removes anything that might carry a credential from an openconnect message.
-func redactSecrets(s string) string {
+// redactSecrets returns a log-safe version of an openconnect message and whether the line was
+// withheld. It is an allowlist for URLs (only scheme://host survives) plus a denylist for lines that
+// mention credentials, and it masks long token-like runs anywhere.
+func redactSecrets(s string) (string, bool) {
 	if secretRe.MatchString(s) {
-		return "[line omitted: may contain credentials]"
+		return "[line omitted: may contain credentials]", true
 	}
-	return urlRe.ReplaceAllStringFunc(s, func(u string) string {
-		m := urlRe.FindStringSubmatch(u)
-		out := m[1] + m[3]
-		if m[4] != "" {
-			out += "?[redacted]"
+	fields := strings.Fields(s)
+	for i, f := range fields {
+		if strings.Contains(f, "://") {
+			u, err := url.Parse(strings.Trim(f, "\"'<>(),;"))
+			if err != nil || u.Host == "" || strings.Contains(u.Host, "@") {
+				fields[i] = "[redacted-url]"
+				continue
+			}
+			out := u.Scheme + "://" + u.Hostname()
+			if u.Path != "" || u.RawQuery != "" || u.Fragment != "" {
+				out += "/[redacted]"
+			}
+			fields[i] = out
+			continue
 		}
-		return out
-	})
+		fields[i] = entropyRe.ReplaceAllString(f, "[redacted]")
+	}
+	return strings.Join(fields, " "), false
 }
 
 func debugf(format string, args ...any) {
@@ -295,8 +308,9 @@ func (t *Tunnel) authForm(form *C.struct_oc_auth_form) C.int {
 		for opt := form.opts; opt != nil; opt = C.burrow_oc_opt_next(opt) {
 			fields = append(fields, fmt.Sprintf("%s(type %d)", C.GoString(opt.name), int(opt._type)))
 		}
-		debugf("auth form: message=%q error=%q fields=%v", redactSecrets(C.GoString(form.message)),
-			redactSecrets(C.GoString(form.error)), fields)
+		msg, _ := redactSecrets(C.GoString(form.message))
+		errText, _ := redactSecrets(C.GoString(form.error))
+		debugf("auth form: message=%q error=%q fields=%v", msg, errText, fields)
 	}
 	if hasPassword {
 		t.mu.Lock()
@@ -451,15 +465,19 @@ func goGPProgress(h C.uintptr_t, level C.int, msg *C.char) {
 	if t == nil {
 		return
 	}
-	s := redactSecrets(strings.TrimSpace(C.GoString(msg)))
+	s, withheld := redactSecrets(strings.TrimSpace(C.GoString(msg)))
 	if s == "" {
 		return
 	}
 	if level <= C.PRG_INFO {
 		debugf("%s", s)
 	}
-	if level == C.PRG_ERR && !strings.HasPrefix(s, "[line omitted") {
-		t.setError(s)
+	if level == C.PRG_ERR {
+		if withheld {
+			t.setError("The VPN reported an error (details withheld).")
+		} else {
+			t.setError(s)
+		}
 	}
 }
 
