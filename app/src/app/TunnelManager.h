@@ -28,6 +28,7 @@ public:
     QVariantMap status(const QString &tunnelId) const;   // {state, error, authUrl, address, prompt}
     QVariantMap states() const { return m_states; }
     bool isConnected(const QString &tunnelId) const;
+    int handle(const QString &tunnelId) const { return m_handles.value(tunnelId); }
 
     // Opens a one-shot forward to `target` through the tunnel; returns "127.0.0.1:port" or "".
     QString openForward(const QString &tunnelId, const QString &target, int *forwardHandle);

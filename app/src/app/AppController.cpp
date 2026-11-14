@@ -474,14 +474,11 @@ QString AppController::startSession(const Model::Device &dev, const QString &use
     p.port = quint16(dev.port);
     p.pinHost = dev.host;
     p.pinPort = quint16(dev.port);
-    int forward = 0;
     if (!tunnelId.isEmpty()) {
-        const QString target = QStringLiteral("%1:%2").arg(dev.host).arg(dev.port);
-        const QString local = m_tunnelMgr.openForward(tunnelId, target, &forward);
-        if (local.isEmpty())
+        // The connection is carried through the tunnel over a socketpair (no local listening port).
+        p.tunnelHandle = m_tunnelMgr.handle(tunnelId);
+        if (p.tunnelHandle <= 0)
             return tr("Couldn't open a connection through the tunnel.");
-        p.host = local.section(QLatin1Char(':'), 0, 0);
-        p.port = quint16(local.section(QLatin1Char(':'), 1, 1).toUInt());
     }
     p.username = user;
     p.password = pass;
@@ -504,12 +501,7 @@ QString AppController::startSession(const Model::Device &dev, const QString &use
                 d.certFingerprint = fp;
         persist();
     });
-    connect(session, &RdpSession::stateChanged, this, [session, forward] {
-        if (session->state() == QLatin1String("connected"))
-            TunnelManager::sealForward(forward);
-    });
-    connect(session, &RdpSession::closed, this, [this, forward](RdpSession *s) {
-        TunnelManager::closeForward(forward);
+    connect(session, &RdpSession::closed, this, [this](RdpSession *s) {
         const QImage last = s->frame();
         if (!last.isNull() && m_store.isOpen())
             setPreview(s->deviceId(), last);

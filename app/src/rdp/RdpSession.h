@@ -39,6 +39,7 @@ public:
         QString knownFingerprint;        // pin "host:port|sha256" confirmed by the user earlier
         QString pinHost;                 // the device address the pin belongs to (host may be a tunnel forward)
         quint16 pinPort = 0;
+        int tunnelHandle = 0;            // netcore tunnel to carry the connection (0 = direct)
     };
 
     explicit RdpSession(Params params, QObject *parent = nullptr);
@@ -73,6 +74,7 @@ public:
     unsigned onVerifyCertificate(const QString &fingerprint);
     void onChannelConnected(const char *name, void *iface);
     void onChannelDisconnected(const char *name);
+    int connectSocket(const char *hostname, int port);   // TCPConnect replacement (worker thread)
     bool clipboardEnabled() const { return m_clip && m_clip->enabled(); }
     int scale() const { return m_p.scale; }
 

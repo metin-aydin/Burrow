@@ -80,3 +80,8 @@ ikinci motor olarak eklemek.
   (split-DNS tuzağı). Sunucu sertifikası sistem güven deposuyla doğrulanır; geçmezse reddedilir.
   Kurum sunucusunda henüz denenmedi (hesap kilidi riski nedeniyle kullanıcıyla birlikte denenecek).
 - Bağımlılıklar: `tailscale.com` (BSD-3), `gvisor.dev/gvisor` (Apache-2.0), libopenconnect (LGPL-2.1, dinamik).
+
+- **Bağlantı taşıma (2026-11-15, uygulandı):** FreeRDP'nin `TCPConnect` geri çağrısı değiştirildi: her bağlantı için
+  bir `socketpair` açılır, bir ucu FreeRDP'ye verilir, diğer ucu `NetcoreConnectFD` ile tünelin (veya doğrudan) hedefe
+  taşınır. Hiç loopback dinleyici açılmaz; FreeRDP'nin müzakere sırasındaki yeniden bağlanmaları da her seferinde yeni
+  çiftle çalışır. Eski loopback yönlendirici (`internal/forward`) yalnız yedek olarak durur.

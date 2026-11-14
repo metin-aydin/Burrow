@@ -4,6 +4,9 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Dinleyicisiz bağlantı (ADR 0001 hedef tasarımı uygulandı):** FreeRDP `TCPConnect` → `socketpair` + `NetcoreConnectFD`
+  (tünel ya da doğrudan); yerel port yok, yeniden bağlanma sorunsuz. Yönlendiricinin kabul döngüsü artık yuva beklerken
+  takılmıyor. Yerel test sunucusunda doğrulandı (oturum + önizleme).
 - Güvenlik incelemesi (yönlendirici): çoklu kabul yalnız bağlantı kurulurken — RDP oturumu `connected` olunca
   `NetcoreForwardSeal` dinleyiciyi kapatıyor, ayrıca en geç 60 sn'de kendiliğinden kapanıyor (`AcceptWindow`). Testli.
 - ✅ **GP girişi uygulama içinde kurumda başarılı** (çift OTP: portal formu → gateway 512 → ikinci form yeni OTP →

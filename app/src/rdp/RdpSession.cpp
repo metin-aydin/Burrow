@@ -16,7 +16,13 @@
 #include <freerdp/gdi/gdi.h>
 #include <freerdp/input.h>
 #include <freerdp/settings.h>
+#include <freerdp/transport_io.h>
 #include <winpr/synch.h>
+
+#include <sys/socket.h>
+#include <unistd.h>
+
+#include <libnetcore.h>
 
 namespace {
 
@@ -60,8 +66,20 @@ void onChannelDisconnected(void *context, const ChannelDisconnectedEventArgs *e)
     sessionOf(static_cast<rdpContext *>(context))->onChannelDisconnected(e->name);
 }
 
+// Every TCP connection FreeRDP makes goes through netcore over a socketpair: no listening port.
+int tcpConnect(rdpContext *context, rdpSettings *, const char *hostname, int port, DWORD)
+{
+    return sessionOf(context)->connectSocket(hostname, port);
+}
+
 BOOL preConnect(freerdp *instance)
 {
+    if (const rdpTransportIo *io = freerdp_get_io_callbacks(instance->context)) {
+        rdpTransportIo custom = *io;
+        custom.TCPConnect = tcpConnect;
+        if (!freerdp_set_io_callbacks(instance->context, &custom))
+            return FALSE;
+    }
     rdpSettings *s = instance->context->settings;
     freerdp_settings_set_uint32(s, FreeRDP_OsMajorType, OSMAJORTYPE_MACINTOSH);
     freerdp_settings_set_uint32(s, FreeRDP_OsMinorType, OSMINORTYPE_MACINTOSH);
@@ -477,4 +495,20 @@ void RdpSession::requestResize(const QSize &pixels, int scale)
         layout.PhysicalHeight = UINT32(h * 254 / 960);
         (void)disp->SendMonitorLayout(disp, 1, &layout);
     });
+}
+
+int RdpSession::connectSocket(const char *hostname, int port)
+{
+    int fds[2];
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) != 0)
+        return -1;
+    // Always the device's real address: the tunnel (or direct dialer) resolves and reaches it.
+    const QString host = m_p.pinHost.isEmpty() ? QString::fromUtf8(hostname) : m_p.pinHost;
+    const int p = m_p.pinPort ? m_p.pinPort : port;
+    QByteArray target = QStringLiteral("%1:%2").arg(host).arg(p).toUtf8();
+    if (NetcoreConnectFD(m_p.tunnelHandle, target.data(), fds[1]) != 0) {
+        ::close(fds[0]);
+        return -1;
+    }
+    return fds[0];
 }

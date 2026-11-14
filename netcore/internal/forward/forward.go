@@ -96,17 +96,18 @@ func (f *Forwarder) acceptLoop() {
 		if err != nil {
 			return
 		}
-		if !f.acquire() {
-			_ = c.Close()
-			continue
-		}
 		f.accepted++
 		if f.OneShot || (f.MaxAccepts > 0 && f.accepted >= f.MaxAccepts) {
 			_ = f.ln.Close()
 		}
+		// Wait for a slot in the connection's own goroutine so the accept loop never stalls.
 		f.wg.Add(1)
 		go func() {
 			defer f.wg.Done()
+			if !f.acquire() {
+				_ = c.Close()
+				return
+			}
 			defer f.release()
 			f.handle(c)
 		}()

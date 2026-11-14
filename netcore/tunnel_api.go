@@ -7,6 +7,8 @@ import "C"
 
 import (
 	"context"
+	"io"
+	"os"
 	"encoding/json"
 	"net"
 	"strings"
@@ -209,5 +211,53 @@ func NetcoreForwardSeal(handle C.int) {
 	mu.Unlock()
 	if f != nil {
 		f.Seal()
+	}
+}
+
+// NetcoreConnectFD carries the connected stream socket `fd` (one end of a socketpair the RDP engine
+// owns the other end of) to `target`, through tunnel `tunnelHandle` or directly when it is 0. No
+// listening port is opened at all (ADR 0001). Takes ownership of fd. Returns 0, or -1 on error.
+//
+//export NetcoreConnectFD
+func NetcoreConnectFD(tunnelHandle C.int, target *C.char, fd C.int) C.int {
+	var dial func(ctx context.Context, network, address string) (net.Conn, error)
+	if tunnelHandle > 0 {
+		t := lookupTunnel(tunnelHandle)
+		if t == nil {
+			_ = os.NewFile(uintptr(fd), "rdp").Close()
+			return -1
+		}
+		dial = t.DialContext
+	} else {
+		dial = (&net.Dialer{}).DialContext
+	}
+	file := os.NewFile(uintptr(fd), "rdp")
+	local, err := net.FileConn(file) // dups the descriptor
+	file.Close()
+	if err != nil {
+		return -1
+	}
+	addr := C.GoString(target)
+	go func() {
+		defer local.Close()
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		remote, err := dial(ctx, "tcp", addr)
+		cancel()
+		if err != nil {
+			return
+		}
+		defer remote.Close()
+		done := make(chan struct{}, 2)
+		go func() { io.Copy(remote, local); closeWrite(remote); done <- struct{}{} }()
+		go func() { io.Copy(local, remote); closeWrite(local); done <- struct{}{} }()
+		<-done
+		<-done
+	}()
+	return 0
+}
+
+func closeWrite(c net.Conn) {
+	if cw, ok := c.(interface{ CloseWrite() error }); ok {
+		_ = cw.CloseWrite()
 	}
 }
