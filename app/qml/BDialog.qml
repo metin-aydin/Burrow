@@ -60,9 +60,11 @@ Popup {
         ScrollView {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.preferredHeight: content.implicitHeight + 16
+            // 8 px above the content and 24 px below it, so the last field never touches the footer.
+            Layout.preferredHeight: content.implicitHeight + 32
             Layout.minimumHeight: 60
             contentWidth: availableWidth
+            contentHeight: content.implicitHeight + 32
             clip: true
             ColumnLayout {
                 id: content

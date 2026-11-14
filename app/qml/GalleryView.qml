@@ -69,6 +69,7 @@ Rectangle {
                 }
             }
             BButton { iconName: "tunnel"; text: qsTr("Tunnel Profiles"); onClicked: root.openTunnels() }
+            BButton { iconName: "lock"; variant: "ghost"; onClicked: App.lock(); ToolTip.visible: hovered; ToolTip.text: qsTr("Lock") }
             BButton { iconName: "settings"; variant: "ghost"; onClicked: root.openSettings(); ToolTip.visible: hovered; ToolTip.text: qsTr("Settings") }
             BButton { iconName: "plus"; variant: "primary"; text: qsTr("New Device"); onClicked: root.newDevice() }
         }

@@ -4,6 +4,15 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- ✅✅ **Uçtan uca hedefe ulaşıldı:** Burrow kendi içinde GlobalProtect tüneli açıp (sudo/sistem VPN'i yok, çift OTP otomatik)
+  iş bilgisayarına (Ubuntu 24.04, GNOME Remote Desktop) kendi RDP penceresinde bağlandı. Önceki NLA hatası yanlış
+  girilen paylaşım bilgilerindendi.
+- Kullanıcının yeni istek listesi (2026-11-15): diyaloglarda alt boşluk (tüm ekranlar), VPN yalnız bağlanırken açık / son
+  oturumla kapansın / aynı tüneli kullanan cihazlar paylaşsın (VPN'de tek oturum), tünel düzenleyicide bağlantı testi ve
+  adım adım animasyonlu ilerleme (OTP bekleme süresi dahil; cihaz bağlanırken de), OTP içe aktarmada yönlendirme + QR
+  (kamera/resim), Tailscale/Cloudflare hesabına bağlanarak otomatik kurulum, modern yükleme simgesi, kartta oynat butonu
+  olmasın ve menü açıkken büyütme kalsın, çarkın yanında kilit butonu, tüm sistemlerde tray menüsü (cihazlar, tek tıkla
+  bağlan), cihaz düzenleyicide eşit genişlikte sekmeler.
 - **Dinleyicisiz bağlantı (ADR 0001 hedef tasarımı uygulandı):** FreeRDP `TCPConnect` → `socketpair` + `NetcoreConnectFD`
   (tünel ya da doğrudan); yerel port yok, yeniden bağlanma sorunsuz. Yönlendiricinin kabul döngüsü artık yuva beklerken
   takılmıyor. Yerel test sunucusunda doğrulandı (oturum + önizleme).

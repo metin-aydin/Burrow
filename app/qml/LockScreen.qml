@@ -123,7 +123,7 @@ Rectangle {
                 text: qsTr("Unlock With Touch ID")
                 onClicked: { const e = App.unlockWithTouchId(); if (e) root.error = e }
             }
-            BusyIndicator { id: busy; running: false; visible: false }
+            QtObject { id: busy; property bool running: false }
         }
     }
 }

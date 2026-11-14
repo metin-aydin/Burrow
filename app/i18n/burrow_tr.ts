@@ -108,62 +108,62 @@
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="482" />
+        <location filename="../src/app/AppController.cpp" line="481" />
         <source>Couldn't open a connection through the tunnel.</source>
         <translation>Tünel üzerinden bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="563" />
+        <location filename="../src/app/AppController.cpp" line="559" />
         <source>The profile name can't be empty.</source>
         <translation>Profil adı boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="567" />
+        <location filename="../src/app/AppController.cpp" line="563" />
         <source>Server and username can't be empty.</source>
         <translation>Sunucu ve kullanıcı adı boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="570" />
+        <location filename="../src/app/AppController.cpp" line="566" />
         <source>The OTP key is invalid.</source>
         <translation>OTP anahtarı geçersiz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="612" />
+        <location filename="../src/app/AppController.cpp" line="608" />
         <source>Direct (No Tunnel)</source>
         <translation>Doğrudan (Tünelsiz)</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="646" />
+        <location filename="../src/app/AppController.cpp" line="642" />
         <source>Invalid key</source>
         <translation>Geçersiz anahtar</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="704" />
+        <location filename="../src/app/AppController.cpp" line="700" />
         <source>Company VPN</source>
         <translation>Şirket VPN</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="709" />
+        <location filename="../src/app/AppController.cpp" line="705" />
         <source>Home Network</source>
         <translation>Ev Ağı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="715" />
+        <location filename="../src/app/AppController.cpp" line="711" />
         <source>Work PC</source>
         <translation>İş Bilgisayarı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="716" />
+        <location filename="../src/app/AppController.cpp" line="712" />
         <source>Meeting Room</source>
         <translation>Toplantı Odası</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="717" />
+        <location filename="../src/app/AppController.cpp" line="713" />
         <source>Home Desktop</source>
         <translation>Ev Masaüstü</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="718" />
+        <location filename="../src/app/AppController.cpp" line="714" />
         <source>Lab Server</source>
         <translation>Laboratuvar</translation>
     </message>
@@ -240,32 +240,32 @@
 <context>
     <name>DeviceCard</name>
     <message>
-        <location filename="../qml/DeviceCard.qml" line="76" />
+        <location filename="../qml/DeviceCard.qml" line="77" />
         <source>Preview After First Connection</source>
         <translation>Önizleme İlk Bağlantıdan Sonra</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceCard.qml" line="185" />
+        <location filename="../qml/DeviceCard.qml" line="163" />
         <source>Direct</source>
         <translation>Doğrudan</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceCard.qml" line="200" />
+        <location filename="../qml/DeviceCard.qml" line="178" />
         <source>Connect</source>
         <translation>Bağlan</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceCard.qml" line="229" />
+        <location filename="../qml/DeviceCard.qml" line="207" />
         <source>Edit</source>
         <translation>Düzenle</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceCard.qml" line="230" />
+        <location filename="../qml/DeviceCard.qml" line="208" />
         <source>Duplicate</source>
         <translation>Kopyala</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceCard.qml" line="231" />
+        <location filename="../qml/DeviceCard.qml" line="209" />
         <source>Delete</source>
         <translation>Sil</translation>
     </message>
@@ -506,42 +506,47 @@
     </message>
     <message>
         <location filename="../qml/GalleryView.qml" line="72" />
+        <source>Lock</source>
+        <translation>Kilitle</translation>
+    </message>
+    <message>
+        <location filename="../qml/GalleryView.qml" line="73" />
         <source>Settings</source>
         <translation>Ayarlar</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="73" />
-        <location filename="../qml/GalleryView.qml" line="182" />
+        <location filename="../qml/GalleryView.qml" line="74" />
+        <location filename="../qml/GalleryView.qml" line="183" />
         <source>New Device</source>
         <translation>Yeni Cihaz</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="84" />
+        <location filename="../qml/GalleryView.qml" line="85" />
         <source>All</source>
         <translation>Tümü</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="95" />
+        <location filename="../qml/GalleryView.qml" line="96" />
         <source>Direct</source>
         <translation>Doğrudan</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="146" />
+        <location filename="../qml/GalleryView.qml" line="147" />
         <source>No matching devices.</source>
         <translation>Eşleşen cihaz yok.</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="168" />
+        <location filename="../qml/GalleryView.qml" line="169" />
         <source>Add Your First Computer</source>
         <translation>İlk Bilgisayarını Ekle</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="176" />
+        <location filename="../qml/GalleryView.qml" line="177" />
         <source>Add the computer you want to reach. If you connect through a VPN or Tailscale, create a tunnel profile first.</source>
         <translation>Bağlanmak istediğin bilgisayarı ekle. VPN veya Tailscale üzerinden bağlanacaksan önce bir tünel profili oluştur.</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="181" />
+        <location filename="../qml/GalleryView.qml" line="182" />
         <source>Add Tunnel Profile</source>
         <translation>Tünel Profili Ekle</translation>
     </message>
@@ -668,42 +673,42 @@
 <context>
     <name>RdpSession</name>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="130" />
+        <location filename="../src/rdp/RdpSession.cpp" line="148" />
         <source>The computer rejected the username or password.</source>
         <translation>Bilgisayar kullanıcı adını veya şifreyi kabul etmedi.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="132" />
+        <location filename="../src/rdp/RdpSession.cpp" line="150" />
         <source>The account is locked on the remote computer.</source>
         <translation>Hesap uzak bilgisayarda kilitli.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="134" />
+        <location filename="../src/rdp/RdpSession.cpp" line="152" />
         <source>The computer's address couldn't be found.</source>
         <translation>Bilgisayarın adresi bulunamadı.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="137" />
+        <location filename="../src/rdp/RdpSession.cpp" line="155" />
         <source>Couldn't reach the computer. Check the address and the tunnel.</source>
         <translation>Bilgisayara ulaşılamadı. Adresi ve tüneli kontrol et.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="139" />
+        <location filename="../src/rdp/RdpSession.cpp" line="157" />
         <source>The secure connection couldn't be established.</source>
         <translation>Güvenli bağlantı kurulamadı.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="141" />
+        <location filename="../src/rdp/RdpSession.cpp" line="159" />
         <source>The computer's certificate doesn't match the one you trusted, so Burrow didn't connect. If the change is expected, use Forget Saved Certificate in the device settings.</source>
         <translation>Bilgisayarın sertifikası güvendiğin sertifikayla eşleşmiyor, bu yüzden Burrow bağlanmadı. Değişiklik bekleniyorsa cihaz ayarlarında Kayıtlı Sertifikayı Unut'u kullan.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="143" />
+        <location filename="../src/rdp/RdpSession.cpp" line="161" />
         <source>The connection failed (%1).</source>
         <translation>Bağlantı başarısız oldu (%1).</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="223" />
+        <location filename="../src/rdp/RdpSession.cpp" line="241" />
         <source>Couldn't start the RDP engine.</source>
         <translation>RDP motoru başlatılamadı.</translation>
     </message>

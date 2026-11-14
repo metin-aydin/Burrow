@@ -34,7 +34,7 @@ Window {
         Column {
             anchors.centerIn: parent
             spacing: 14
-            BusyIndicator { anchors.horizontalCenter: parent.horizontalCenter; running: parent.visible }
+            Spinner { anchors.horizontalCenter: parent.horizontalCenter; size: 44; running: parent.visible }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: qsTr("Connecting to %1…").arg(win.session ? win.session.title : "")

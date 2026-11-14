@@ -20,7 +20,8 @@ Item {
     signal duplicateRequested()
     signal deleteRequested()
 
-    readonly property bool hovered: hover.hovered
+    // The menu belongs to the card: keep the hover look while it is open.
+    readonly property bool hovered: hover.hovered || menu.visible
 
     HoverHandler { id: hover }
 
@@ -90,13 +91,6 @@ Item {
                         opacity: status === Image.Ready ? 1 : 0
                         Behavior on opacity { NumberAnimation { duration: 200 } }
                     }
-                    // Darken on hover so the play button stands out.
-                    Rectangle {
-                        anchors.fill: parent
-                        color: "black"
-                        opacity: root.hovered ? 0.28 : 0
-                        Behavior on opacity { NumberAnimation { duration: 150 } }
-                    }
                 }
                 Rectangle {
                     id: mask
@@ -141,22 +135,6 @@ Item {
                     onClicked: menu.popup(menuBtn, 0, menuBtn.height + 4)
                 }
 
-                // Play button
-                Rectangle {
-                    anchors.centerIn: parent
-                    width: 52; height: 52; radius: 26
-                    color: Theme.accent
-                    opacity: root.hovered ? 1 : 0
-                    scale: root.hovered ? 1 : 0.8
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
-                    Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
-                    Icon { anchors.centerIn: parent; anchors.horizontalCenterOffset: 2; name: "play"; size: 22; color: "white" }
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.connectRequested()
-                    }
-                }
                 TapHandler { onDoubleTapped: root.connectRequested() }
             }
 
