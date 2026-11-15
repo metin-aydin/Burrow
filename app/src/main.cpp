@@ -112,6 +112,8 @@ int main(int argc, char *argv[])
                 d["username"] = target.at(2);
                 d["password"] = target.at(3);
                 d["savePassword"] = true;
+                // BURROW_DEMO_DISPLAYS=all spans every display (multi-monitor test).
+                d["displays"] = qEnvironmentVariable("BURROW_DEMO_DISPLAYS", QStringLiteral("window"));
                 controller.saveDevice(d);
                 const QString id = controller.store()->doc().devices.constLast().id;
                 QTimer::singleShot(500, &controller, [&controller, id] { controller.connectDevice(id); });

@@ -4,6 +4,9 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Çoklu monitör düzeltmesi: FreeRDP 3 düzende ana ekranın 0,0 olmasını ister; ana ekran ortada/sağdayken bağlantı
+  ön kontrolde reddediliyordu. Düzen artık ana ekrana göre gönderiliyor (görüntü yine sol üstten başlar).
+  `BURROW_DEMO_DISPLAYS=all` demo kancası eklendi.
 - Cihaz düzenleyici her açılışta General sekmesiyle açılır (tıklama Segmented bağlamasını bozuyordu; değer elle sıfırlanıyor).
 - Oturum penceresi birleşti: Bağlan'a basınca cihaz penceresi hemen açılır; tünel ve RDP aşamaları tek listede
   gösterilir (ConnectProgress kaldırıldı). Bağlanamazsa pencere hatayı ve Tekrar Dene'yi gösterir. Aşama işaretleri

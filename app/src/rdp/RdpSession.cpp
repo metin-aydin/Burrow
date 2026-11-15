@@ -296,6 +296,9 @@ void RdpSession::run()
         freerdp_settings_set_bool(s, FreeRDP_SupportMonitorLayoutPdu, TRUE);
         freerdp_settings_set_bool(s, FreeRDP_HasMonitorAttributes, TRUE);
         freerdp_settings_set_bool(s, FreeRDP_DynamicResolutionUpdate, FALSE);
+        // The layout is sent relative to the primary display (FreeRDP requires it at 0,0; others may be
+        // negative); the desktop picture itself starts at the displays' top-left corner.
+        const QPoint origin = m_p.monitors.first().rect.topLeft();
         if (freerdp_settings_set_pointer_len(s, FreeRDP_MonitorDefArray, nullptr, count)) {
             for (UINT32 i = 0; i < count; ++i) {
                 auto *mon = static_cast<rdpMonitor *>(
@@ -304,8 +307,8 @@ void RdpSession::run()
                     continue;
                 const QRect r = m_p.monitors.at(int(i)).rect;
                 *mon = {};
-                mon->x = r.x();
-                mon->y = r.y();
+                mon->x = r.x() - origin.x();
+                mon->y = r.y() - origin.y();
                 mon->width = r.width();
                 mon->height = r.height();
                 mon->is_primary = i == 0 ? TRUE : FALSE;
