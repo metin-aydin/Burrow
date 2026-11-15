@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Demo verisi (`--seed-demo`) artık çizim değil gerçek ekran görüntüleri kullanıyor: Wikimedia Commons'tan GPL
+  lisanslı Ubuntu 24.04 görselleri (App Center, Dosyalar, masaüstü) `docs/assets/demo/` altında, kaynak/lisans
+  `ATTRIBUTION.md`'de; uygulamaya gömülmüyor, kaynak ağacından okunuyor (`BURROW_DEMO_ASSETS`). Windows için özgür
+  lisanslı yüksek çözünürlüklü görsel yok (Wikipedia'dakiler düşük çözünürlük + adil kullanım; Microsoft izni kırpmaya
+  izin vermiyor), demo Windows cihazı önizlemesiz durumu gösteriyor. "Home Desktop" artık Ubuntu.
+
 - Cihaz kartı önizlemesi pencere boyutlanırken yanıp sönüyordu: görsel `sourceSize`'ı kart boyutuna bağlıydı, her
   adımda yeniden yükleniyor ve arada "Preview After First Connection" görünüyordu. Artık sabit boyutta (1280 px)
   çözülüyor, yüklenirken eskisi kalıyor (`retainWhileLoading`), yer tutucu yalnız görsel yoksa çıkıyor.

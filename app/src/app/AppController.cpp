@@ -998,52 +998,6 @@ QString AppController::clipboardText() const
 
 // --- Demo --------------------------------------------------------------------
 
-namespace {
-// Paints a desktop-like picture so the gallery can be previewed before the
-// RDP engine exists.
-QImage demoDesktop(const QColor &a, const QColor &b, bool ubuntu)
-{
-    QImage img(1280, 800, QImage::Format_RGB32);
-    QPainter p(&img);
-    p.setRenderHint(QPainter::Antialiasing);
-    QLinearGradient g(0, 0, 1280, 800);
-    g.setColorAt(0, a);
-    g.setColorAt(1, b);
-    p.fillRect(img.rect(), g);
-    if (ubuntu) {
-        p.fillRect(0, 0, 1280, 28, QColor(20, 20, 20));
-        p.fillRect(0, 28, 64, 772, QColor(30, 30, 30, 220));
-        for (int i = 0; i < 6; ++i) {
-            p.setBrush(QColor::fromHsv((i * 50) % 360, 160, 220));
-            p.setPen(Qt::NoPen);
-            p.drawRoundedRect(12, 48 + i * 60, 40, 40, 10, 10);
-        }
-    } else {
-        p.fillRect(0, 752, 1280, 48, QColor(32, 32, 40, 235));
-        for (int i = 0; i < 7; ++i) {
-            p.setBrush(QColor::fromHsv((200 + i * 30) % 360, 120, 230));
-            p.setPen(Qt::NoPen);
-            p.drawRoundedRect(470 + i * 48, 760, 32, 32, 6, 6);
-        }
-    }
-    // A couple of "windows".
-    p.setPen(Qt::NoPen);
-    p.setBrush(QColor(250, 250, 252));
-    p.drawRoundedRect(180, 110, 620, 420, 12, 12);
-    p.setBrush(QColor(235, 236, 240));
-    p.drawRoundedRect(180, 110, 620, 36, 12, 12);
-    p.setBrush(QColor(40, 42, 54));
-    p.drawRoundedRect(640, 300, 520, 340, 12, 12);
-    p.setBrush(QColor(90, 200, 120));
-    for (int i = 0; i < 8; ++i)
-        p.drawRect(670, 340 + i * 30, 120 + (i * 53) % 260, 10);
-    p.setBrush(QColor(200, 205, 215));
-    for (int i = 0; i < 9; ++i)
-        p.drawRect(210, 170 + i * 36, 300 + (i * 71) % 240, 12);
-    return img;
-}
-} // namespace
-
 void AppController::seedDemo()
 {
     if (!m_store.isOpen() || !m_store.doc().devices.isEmpty())
@@ -1059,13 +1013,16 @@ void AppController::seedDemo()
     ts.type = Model::Tunnel::Type::Tailscale;
     m_store.doc().tunnels = {vpn, ts};
 
-    struct Sample { const char *name, *host, *os; QString tunnel; QColor a, b; };
+    // Real, freely licensed screenshots (docs/assets/demo, see ATTRIBUTION.md there); the Windows device
+    // shows the state before a first connection.
+    struct Sample { const char *name, *host, *os; QString tunnel; const char *shot; };
     const Sample samples[] = {
-        {QT_TR_NOOP("Work PC"), "10.0.7.155", "ubuntu", vpn.id, QColor(233, 84, 32), QColor(119, 33, 111)},
-        {QT_TR_NOOP("Meeting Room"), "10.0.9.20", "windows", vpn.id, QColor(0, 120, 212), QColor(80, 40, 160)},
-        {QT_TR_NOOP("Home Desktop"), "home-pc", "windows", ts.id, QColor(20, 140, 120), QColor(10, 60, 90)},
-        {QT_TR_NOOP("Lab Server"), "10.0.3.8", "ubuntu", vpn.id, {}, {}},
+        {QT_TR_NOOP("Work PC"), "10.0.7.155", "ubuntu", vpn.id, "ubuntu-app-center.png"},
+        {QT_TR_NOOP("Meeting Room"), "10.0.9.20", "windows", vpn.id, nullptr},
+        {QT_TR_NOOP("Home Desktop"), "home-pc", "ubuntu", ts.id, "ubuntu-files.png"},
+        {QT_TR_NOOP("Lab Server"), "10.0.3.8", "ubuntu", vpn.id, "ubuntu-desktop.png"},
     };
+    const QString shots = QString::fromUtf8(BURROW_DEMO_ASSETS);
     for (const Sample &s : samples) {
         Model::Device d;
         d.id = Model::newId();
@@ -1074,8 +1031,9 @@ void AppController::seedDemo()
         d.os = QString::fromUtf8(s.os);
         d.tunnelId = s.tunnel;
         m_store.doc().devices.append(d);
-        if (s.a.isValid())
-            setPreview(d.id, demoDesktop(s.a, s.b, d.os == QLatin1String("ubuntu")));
+        const QImage shot = s.shot ? QImage(shots + QLatin1Char('/') + QLatin1String(s.shot)) : QImage();
+        if (!shot.isNull())
+            setPreview(d.id, shot);
     }
     persist();
     reloadModels();

@@ -68,7 +68,9 @@ else()
 endif()
 
 target_include_directories(burrow PRIVATE src)
-target_compile_definitions(burrow PRIVATE BURROW_VERSION="${PROJECT_VERSION}")
+target_compile_definitions(burrow PRIVATE BURROW_VERSION="${PROJECT_VERSION}"
+    # --seed-demo previews, read from the source tree (development only, not bundled).
+    BURROW_DEMO_ASSETS="${CMAKE_SOURCE_DIR}/docs/assets/demo")
 target_link_libraries(burrow PRIVATE Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Concurrent Qt6::Quick Qt6::QuickControls2 Qt6::Svg Qt6::Multimedia netcore::netcore)
 
 message(STATUS "FreeRDP found: ${FreeRDP_VERSION}")
@@ -107,6 +109,7 @@ if(Qt6Test_FOUND)
         src/app/PreviewProvider.cpp src/app/PreviewProvider.h src/app/TunnelManager.cpp src/app/TunnelManager.h
         src/rdp/RdpSession.cpp src/rdp/RdpSession.h src/rdp/FreeRdpEngine.cpp src/rdp/FreeRdpEngine.h src/rdp/RdpEngine.h
         $<IF:$<BOOL:${APPLE}>,src/platform/Biometric_mac.mm,src/platform/Biometric_stub.cpp>)
+    target_compile_definitions(tst_vault PRIVATE BURROW_DEMO_ASSETS="${CMAKE_SOURCE_DIR}/docs/assets/demo")
     target_compile_definitions(tst_vault PRIVATE BURROW_TEST_DATA="${CMAKE_CURRENT_SOURCE_DIR}/tests"
                                                  BURROW_VERSION="${PROJECT_VERSION}")
     set_target_properties(tst_vault PROPERTIES MACOSX_BUNDLE OFF)
