@@ -12,6 +12,9 @@ BDialog {
     property var t: ({})
     property string error
     property var accounts: []
+    property bool showAdvanced: false
+    // Asks Main to open the device import for a saved profile (Tailscale / Cloudflare sign-in).
+    signal importRequested(string id)
 
     function openFor(id) {
         t = id ? App.tunnel(id) : App.newTunnel()
@@ -31,6 +34,7 @@ BDialog {
         uri.text = ""
         tsControl.text = ts.controlUrl || ""; tsHost.text = ts.hostname || "burrow"
         cfBastion.text = (t.cloudflare || {}).bastion || ""
+        showAdvanced = !!ts.controlUrl || !!(t.cloudflare || {}).bastion
         error = ""
         open()
         nameField.field.forceActiveFocus()
@@ -40,6 +44,7 @@ BDialog {
 
     // Development: show every section for screenshots.
     function demoExpand() { otpOn.checked = true; otpSource.value = "totp" }
+    function demoTailscale() { typeSeg.value = "tailscale" }
     function demoCloudflare() { typeSeg.value = "cloudflare"; nameField.text = qsTr("Home Lab") }
 
     function currentTotp() {
@@ -155,8 +160,17 @@ BDialog {
             cloudflare: { bastion: cfBastion.text.trim() }
         })
         const err = App.saveTunnel(m)
-        if (err) { error = err; return }
+        if (err) { error = err; return false }
         close()
+        return true
+    }
+    // Tailscale / Cloudflare: save (with a default name if none was typed), then sign in and pick
+    // devices to add.
+    function saveAndImport() {
+        if (nameField.text.trim() === "")
+            nameField.text = typeSeg.value === "tailscale" ? "Tailscale" : "Cloudflare"
+        const id = t.id
+        if (save()) importRequested(id)
     }
 
     Timer {
@@ -172,7 +186,8 @@ BDialog {
 
     RowLayout {
         spacing: 12
-        BField { id: nameField; Layout.fillWidth: true; Layout.preferredWidth: 300; label: qsTr("Profile Name"); placeholder: qsTr("Work VPN") }
+        BField { id: nameField; Layout.fillWidth: true; Layout.preferredWidth: 300; label: qsTr("Profile Name")
+                 placeholder: typeSeg.value === "tailscale" ? "Tailscale" : typeSeg.value === "cloudflare" ? "Cloudflare" : qsTr("Work VPN") }
         ColumnLayout {
             spacing: 6
             Text { text: qsTr("Type"); color: Theme.textSecondary; font.pixelSize: 12; font.weight: Font.Medium }
@@ -301,8 +316,16 @@ BDialog {
         Layout.fillWidth: true
         visible: typeSeg.value === "tailscale"
         spacing: 14
-        BField { id: tsControl; Layout.fillWidth: true; label: qsTr("Control Server"); placeholder: qsTr("Tailscale if empty (enter a URL for Headscale)") }
-        BField { id: tsHost; Layout.fillWidth: true; label: qsTr("Node Name"); hint: qsTr("The Tailscale sign-in page opens on first connection.") }
+        Text {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            color: Theme.textSecondary
+            font.pixelSize: 12
+            text: qsTr("Nothing to fill in: Sign In With Tailscale opens the Tailscale sign-in page in your browser, then lists the machines in your tailnet so you can add them.")
+        }
+        AdvancedToggle {}
+        BField { id: tsControl; visible: root.showAdvanced; Layout.fillWidth: true; label: qsTr("Control Server"); placeholder: qsTr("Tailscale if empty (enter a URL for Headscale)") }
+        BField { id: tsHost; visible: root.showAdvanced; Layout.fillWidth: true; label: qsTr("Node Name"); hint: qsTr("How this Mac appears in your tailnet.") }
     }
 
     // --- Cloudflare ----------------------------------------------------------------
@@ -317,8 +340,10 @@ BDialog {
             font.pixelSize: 12
             text: qsTr("Publish the computer's RDP port with cloudflared and protect it with a Cloudflare Access application (free Zero Trust plan). Each device's address is then its Access hostname, e.g. rdp.example.com. You sign in once in the browser; the token is kept in the encrypted vault.")
         }
+        AdvancedToggle {}
         BField {
             id: cfBastion
+            visible: root.showAdvanced
             Layout.fillWidth: true
             label: qsTr("Bastion Hostname")
             placeholder: qsTr("Optional, e.g. bastion.example.com")
@@ -356,7 +381,8 @@ BDialog {
                 }
                 BButton {
                     text: root.testing ? qsTr("Stop") : qsTr("Run Test")
-                    variant: root.testing ? "secondary" : "primary"
+                    // Tailscale/Cloudflare sign in with the footer button; the test is secondary there.
+                    variant: root.testing || root.linkable ? "secondary" : "primary"
                     onClicked: root.testing ? root.stopTest() : root.startTest()
                 }
             }
@@ -400,9 +426,59 @@ BDialog {
         wrapMode: Text.WordWrap
     }
 
+    // "Advanced Settings" disclosure for rarely needed fields (Headscale, node name, Cloudflare bastion).
+    component AdvancedToggle: Item {
+        implicitWidth: advRow.implicitWidth
+        implicitHeight: advRow.implicitHeight
+        activeFocusOnTab: true
+        Keys.onSpacePressed: root.showAdvanced = !root.showAdvanced
+        Keys.onReturnPressed: root.showAdvanced = !root.showAdvanced
+        Rectangle {
+            anchors { fill: parent; margins: -3 }
+            radius: 4
+            color: "transparent"
+            border.color: Theme.accent
+            border.width: 2
+            visible: parent.activeFocus
+        }
+        Row {
+            id: advRow
+            spacing: 4
+            Icon {
+                anchors.verticalCenter: parent.verticalCenter
+                name: "chevron"
+                size: 13
+                rotation: root.showAdvanced ? 90 : 0
+                Behavior on rotation { NumberAnimation { duration: 120 } }
+                color: advLabel.color
+            }
+            Text {
+                id: advLabel
+                text: qsTr("Advanced Settings")
+                color: advMouse.containsMouse ? Theme.text : Theme.textSecondary
+                font.pixelSize: 12
+                font.weight: Font.Medium
+            }
+        }
+        MouseArea {
+            id: advMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.showAdvanced = !root.showAdvanced
+        }
+    }
+
+    readonly property bool linkable: typeSeg.value === "tailscale" || typeSeg.value === "cloudflare"
     footer: [
         Item { Layout.fillWidth: true },
         BButton { text: qsTr("Cancel"); onClicked: root.close() },
-        BButton { variant: "primary"; text: qsTr("Save"); onClicked: root.save() }
+        BButton { variant: root.linkable ? "secondary" : "primary"; text: qsTr("Save"); onClicked: root.save() },
+        BButton {
+            visible: root.linkable
+            variant: "primary"
+            text: typeSeg.value === "tailscale" ? qsTr("Sign In With Tailscale") : qsTr("Save And Add Devices")
+            onClicked: root.saveAndImport()
+        }
     ]
 }

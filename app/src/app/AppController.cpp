@@ -5,6 +5,8 @@
 #include <QtConcurrent/QtConcurrentRun>
 #include <QFutureWatcher>
 #include <QClipboard>
+#include <QRegularExpression>
+#include <QSysInfo>
 #include <QUrl>
 #include <QDir>
 #include <QFileInfo>
@@ -520,6 +522,28 @@ QVariantList AppController::tunnelPeers(const QString &tunnelId) const
     return out;
 }
 
+QString AppController::cloudflareTokenUrl() const
+{
+    // Cloudflare's token page with "Access: Apps and Policies — Read" already chosen; the user only
+    // confirms and copies the token.
+    const QByteArray perms = QUrl::toPercentEncoding(QStringLiteral(R"([{"key":"access","type":"read"}])"));
+    return QStringLiteral("https://dash.cloudflare.com/profile/api-tokens?permissionGroupKeys=%1&accountId=*&zoneId=all&name=Burrow")
+        .arg(QString::fromLatin1(perms));
+}
+
+bool AppController::listCloudflareAppsFromClipboard()
+{
+    QClipboard *cb = QGuiApplication::clipboard();
+    const QString text = cb ? cb->text().trimmed() : QString();
+    // API tokens are 40 URL-safe characters; anything else on the clipboard is left alone.
+    static const QRegularExpression tokenRe(QStringLiteral("^[A-Za-z0-9_-]{30,80}$"));
+    if (!tokenRe.match(text).hasMatch())
+        return false;
+    listCloudflareApps(text);
+    cb->clear();   // the token is used once and not kept anywhere
+    return true;
+}
+
 void AppController::listCloudflareApps(const QString &apiToken)
 {
     auto *watcher = new QFutureWatcher<QVariantMap>(this);
@@ -775,7 +799,13 @@ void AppController::setPreview(const QString &deviceId, const QImage &image)
 QVariantMap AppController::newTunnel() const
 {
     Model::Tunnel t;
-    t.tsHostname = QStringLiteral("burrow");
+    // An id up front, so "Sign In With Tailscale" can save and go on with the same profile.
+    t.id = Model::newId();
+    // This Mac's node in the tailnet: "burrow-<computer name>", in the characters Tailscale allows.
+    QString host = QSysInfo::machineHostName().section(QLatin1Char('.'), 0, 0).toLower();
+    host.replace(QRegularExpression(QStringLiteral("[^a-z0-9-]+")), QStringLiteral("-"));
+    host = host.left(40).remove(QRegularExpression(QStringLiteral("^-+|-+$")));
+    t.tsHostname = host.isEmpty() ? QStringLiteral("burrow") : QStringLiteral("burrow-") + host;
     return Model::toJson(t).toVariantMap();
 }
 

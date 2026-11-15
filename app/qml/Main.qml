@@ -105,7 +105,7 @@ ApplicationWindow {
     }
     TunnelsDialog { id: tunnels; onConfirm: (t, m, b, f) => confirm.ask(t, m, b, f); onEditTunnel: (id) => tunnelEditor.openFor(id); onImportDevices: (id) => importDevices.show(id) }
     ImportDevicesDialog { id: importDevices; toastTarget: toast }
-    TunnelEditor { id: tunnelEditor }
+    TunnelEditor { id: tunnelEditor; onImportRequested: (id) => importDevices.show(id) }
     SettingsDialog { id: settings }
     ConfirmDialog { id: confirm }
     Toast { id: toast }
@@ -126,6 +126,7 @@ ApplicationWindow {
                 }
             }
             else if (App.demoOpen === "tunnel-cf") { tunnelEditor.openFor(""); tunnelEditor.demoCloudflare() }
+            else if (App.demoOpen === "tunnel-ts") { tunnelEditor.openFor(""); tunnelEditor.demoTailscale() }
             else if (App.demoOpen === "tunnel-otp-small") { win.height = 560; tunnelEditor.openFor(""); tunnelEditor.demoExpand() }
         }
     }

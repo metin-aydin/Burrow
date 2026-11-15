@@ -4,168 +4,168 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/AppController.cpp" line="69"/>
+        <location filename="../src/app/AppController.cpp" line="71"/>
         <source>Burrow %1 is available. Install it from Settings.</source>
         <translation>Burrow %1 yayımlandı. Ayarlar&apos;dan kurabilirsin.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="92"/>
+        <location filename="../src/app/AppController.cpp" line="94"/>
         <source>Burrow %1 · netcore %2 · %3</source>
         <translation>Burrow %1 · netcore %2 · %3</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="167"/>
+        <location filename="../src/app/AppController.cpp" line="169"/>
         <source>The password must be at least %1 characters.</source>
         <translation>Şifre en az %1 karakter olmalı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="169"/>
+        <location filename="../src/app/AppController.cpp" line="171"/>
         <source>The passwords don&apos;t match.</source>
         <translation>Şifreler aynı değil.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="176"/>
+        <location filename="../src/app/AppController.cpp" line="178"/>
         <source>Enter your master password.</source>
         <translation>Ana şifreni gir.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="183"/>
+        <location filename="../src/app/AppController.cpp" line="185"/>
         <source>Unlock the Burrow vault</source>
         <translation>Burrow kasasının kilidini aç</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="193"/>
+        <location filename="../src/app/AppController.cpp" line="195"/>
         <source>The Touch ID key is no longer valid; unlock with your master password.</source>
         <translation>Touch ID anahtarı geçersiz; ana şifreyle aç.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="244"/>
+        <location filename="../src/app/AppController.cpp" line="246"/>
         <source>The new password must be at least %1 characters.</source>
         <translation>Yeni şifre en az %1 karakter olmalı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="246"/>
+        <location filename="../src/app/AppController.cpp" line="248"/>
         <source>The new passwords don&apos;t match.</source>
         <translation>Yeni şifreler aynı değil.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="248"/>
+        <location filename="../src/app/AppController.cpp" line="250"/>
         <source>The current password is wrong.</source>
         <translation>Mevcut şifre yanlış.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="262"/>
+        <location filename="../src/app/AppController.cpp" line="264"/>
         <source>Master password changed. Touch ID was turned off: %1</source>
         <translation>Ana şifre değiştirildi. Touch ID kapatıldı: %1</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="266"/>
+        <location filename="../src/app/AppController.cpp" line="268"/>
         <source>Master password changed.</source>
         <translation>Ana şifre değiştirildi.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="295"/>
+        <location filename="../src/app/AppController.cpp" line="297"/>
         <source>Couldn&apos;t save the change: %1</source>
         <translation>Değişiklik kaydedilemedi: %1</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="332"/>
+        <location filename="../src/app/AppController.cpp" line="334"/>
         <source>Name and address can&apos;t be empty.</source>
         <translation>Ad ve adres boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="368"/>
+        <location filename="../src/app/AppController.cpp" line="370"/>
         <source>%1 (Copy)</source>
         <translation>%1 (Kopya)</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="410"/>
+        <location filename="../src/app/AppController.cpp" line="412"/>
         <source>The device no longer exists.</source>
         <translation>Cihaz artık yok.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="413"/>
+        <location filename="../src/app/AppController.cpp" line="415"/>
         <source>%1 is already open.</source>
         <translation>%1 zaten açık.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="448"/>
+        <location filename="../src/app/AppController.cpp" line="450"/>
         <source>The tunnel profile no longer exists.</source>
         <translation>Tünel profili artık yok.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="595"/>
+        <location filename="../src/app/AppController.cpp" line="619"/>
         <source>Sign in to Cloudflare Access in the browser window that opened.</source>
         <translation>Açılan tarayıcı penceresinde Cloudflare Access&apos;e giriş yap.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="621"/>
+        <location filename="../src/app/AppController.cpp" line="645"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="683"/>
+        <location filename="../src/app/AppController.cpp" line="707"/>
         <source>Couldn&apos;t open a connection through the tunnel.</source>
         <translation>Tünel üzerinden bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="793"/>
+        <location filename="../src/app/AppController.cpp" line="823"/>
         <source>The profile name can&apos;t be empty.</source>
         <translation>Profil adı boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="482"/>
-        <location filename="../src/app/AppController.cpp" line="797"/>
+        <location filename="../src/app/AppController.cpp" line="484"/>
+        <location filename="../src/app/AppController.cpp" line="827"/>
         <source>Server and username can&apos;t be empty.</source>
         <translation>Sunucu ve kullanıcı adı boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="484"/>
+        <location filename="../src/app/AppController.cpp" line="486"/>
         <source>Enter a device hostname to test with.</source>
         <translation>Test için bir cihaz host adı gir.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="800"/>
+        <location filename="../src/app/AppController.cpp" line="830"/>
         <source>The OTP key is invalid.</source>
         <translation>OTP anahtarı geçersiz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="842"/>
+        <location filename="../src/app/AppController.cpp" line="872"/>
         <source>Direct (No Tunnel)</source>
         <translation>Doğrudan (Tünelsiz)</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="876"/>
+        <location filename="../src/app/AppController.cpp" line="906"/>
         <source>Invalid key</source>
         <translation>Geçersiz anahtar</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="977"/>
+        <location filename="../src/app/AppController.cpp" line="1007"/>
         <source>Company VPN</source>
         <translation>Şirket VPN</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="982"/>
+        <location filename="../src/app/AppController.cpp" line="1012"/>
         <source>Home Network</source>
         <translation>Ev Ağı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="988"/>
+        <location filename="../src/app/AppController.cpp" line="1018"/>
         <source>Work PC</source>
         <translation>İş Bilgisayarı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="989"/>
+        <location filename="../src/app/AppController.cpp" line="1019"/>
         <source>Meeting Room</source>
         <translation>Toplantı Odası</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="990"/>
+        <location filename="../src/app/AppController.cpp" line="1020"/>
         <source>Home Desktop</source>
         <translation>Ev Masaüstü</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="991"/>
+        <location filename="../src/app/AppController.cpp" line="1021"/>
         <source>Lab Server</source>
         <translation>Laboratuvar</translation>
     </message>
@@ -520,73 +520,75 @@
 <context>
     <name>GalleryView</name>
     <message>
-        <location filename="../qml/GalleryView.qml" line="36"/>
+        <location filename="../qml/GalleryView.qml" line="39"/>
+        <location filename="../qml/GalleryView.qml" line="50"/>
         <source>1 device</source>
         <translation>1 cihaz</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="36"/>
+        <location filename="../qml/GalleryView.qml" line="39"/>
+        <location filename="../qml/GalleryView.qml" line="50"/>
         <source>%1 devices</source>
         <translation>%1 cihaz</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="44"/>
+        <location filename="../qml/GalleryView.qml" line="58"/>
         <source>Update %1</source>
         <translation>Güncelleme %1</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="59"/>
+        <location filename="../qml/GalleryView.qml" line="73"/>
         <source>Search devices</source>
         <translation>Cihaz ara</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="67"/>
+        <location filename="../qml/GalleryView.qml" line="81"/>
         <source>Tunnel Profiles</source>
         <translation>Tünel Profilleri</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="68"/>
+        <location filename="../qml/GalleryView.qml" line="82"/>
         <source>Lock</source>
         <translation>Kilitle</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="69"/>
+        <location filename="../qml/GalleryView.qml" line="83"/>
         <source>Settings</source>
         <translation>Ayarlar</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="70"/>
-        <location filename="../qml/GalleryView.qml" line="179"/>
+        <location filename="../qml/GalleryView.qml" line="84"/>
+        <location filename="../qml/GalleryView.qml" line="194"/>
         <source>New Device</source>
         <translation>Yeni Cihaz</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="81"/>
+        <location filename="../qml/GalleryView.qml" line="95"/>
         <source>All</source>
         <translation>Tümü</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="92"/>
+        <location filename="../qml/GalleryView.qml" line="106"/>
         <source>Direct</source>
         <translation>Doğrudan</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="143"/>
+        <location filename="../qml/GalleryView.qml" line="158"/>
         <source>No matching devices.</source>
         <translation>Eşleşen cihaz yok.</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="165"/>
+        <location filename="../qml/GalleryView.qml" line="180"/>
         <source>Add Your First Computer</source>
         <translation>İlk Bilgisayarını Ekle</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="173"/>
+        <location filename="../qml/GalleryView.qml" line="188"/>
         <source>Add the computer you want to reach. If you connect through a VPN or Tailscale, create a tunnel profile first.</source>
         <translation>Bağlanmak istediğin bilgisayarı ekle. VPN veya Tailscale üzerinden bağlanacaksan önce bir tünel profili oluştur.</translation>
     </message>
     <message>
-        <location filename="../qml/GalleryView.qml" line="178"/>
+        <location filename="../qml/GalleryView.qml" line="193"/>
         <source>Add Tunnel Profile</source>
         <translation>Tünel Profili Ekle</translation>
     </message>
@@ -604,11 +606,6 @@
         <translation>Tailnet&apos;indeki makineler. Burrow&apos;a eklemek istediklerini seç.</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="27"/>
-        <source>Access applications in your Cloudflare account. Use an API token with Access: Apps and Policies Read; it is used once and not stored.</source>
-        <translation>Cloudflare hesabındaki Access uygulamaları. &quot;Access: Apps and Policies Read&quot; izni olan bir API anahtarı kullan; anahtar yalnızca bir kez kullanılır ve saklanmaz.</translation>
-    </message>
-    <message>
         <location filename="../qml/ImportDevicesDialog.qml" line="46"/>
         <source>No other machines found in the tailnet.</source>
         <translation>Tailnet&apos;te başka makine bulunamadı.</translation>
@@ -624,42 +621,62 @@
         <translation>Access uygulaması bulunamadı.</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="65"/>
-        <source>API Token</source>
-        <translation>API Anahtarı</translation>
+        <location filename="../qml/ImportDevicesDialog.qml" line="27"/>
+        <source>Access applications in your Cloudflare account. Cloudflare lets apps read them only with an API token: create one with the button below (the right permission is already chosen), copy it, and come back. Burrow uses it once and doesn&apos;t keep it.</source>
+        <translation>Cloudflare hesabındaki Access uygulamaları. Cloudflare bunların okunmasına yalnızca API token ile izin veriyor: aşağıdaki butonla bir token oluştur (gerekli izin zaten seçili), kopyala ve geri dön. Burrow onu bir kez kullanır ve saklamaz.</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="69"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="67"/>
+        <source>No API token on the clipboard. Copy the token Cloudflare shows after you create it.</source>
+        <translation>Panoda API token yok. Token&apos;ı oluşturduktan sonra Cloudflare&apos;in gösterdiği değeri kopyala.</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImportDevicesDialog.qml" line="79"/>
+        <source>Create Token In Cloudflare</source>
+        <translation>Cloudflare&apos;de Token Oluştur</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImportDevicesDialog.qml" line="82"/>
+        <source>Paste Token</source>
+        <translation>Token&apos;ı Yapıştır</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImportDevicesDialog.qml" line="88"/>
+        <source>Or Enter The Token</source>
+        <translation>Ya Da Token&apos;ı Gir</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImportDevicesDialog.qml" line="93"/>
         <source>List Applications</source>
         <translation>Uygulamaları Listele</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="79"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="103"/>
         <source>Sign in to Tailscale in your browser…</source>
         <translation>Tarayıcında Tailscale&apos;e giriş yap…</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="80"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="104"/>
         <source>Loading…</source>
         <translation>Yükleniyor…</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="127"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="151"/>
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="131"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="155"/>
         <source>Add Selected</source>
         <translation>Seçilenleri Ekle</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="135"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="159"/>
         <source>1 device added.</source>
         <translation>1 cihaz eklendi.</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="135"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="159"/>
         <source>%1 devices added.</source>
         <translation>%1 cihaz eklendi.</translation>
     </message>
@@ -725,47 +742,47 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../qml/Main.qml" line="31"/>
+        <location filename="../qml/Main.qml" line="50"/>
         <source>Delete Device</source>
         <translation>Cihazı Sil</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="32"/>
+        <location filename="../qml/Main.qml" line="51"/>
         <source>&quot;%1&quot; and its saved preview will be deleted. This can&apos;t be undone.</source>
         <translation>&quot;%1&quot; ve kayıtlı önizlemesi silinecek. Bu işlem geri alınamaz.</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="33"/>
+        <location filename="../qml/Main.qml" line="52"/>
         <source>Delete</source>
         <translation>Sil</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="63"/>
+        <location filename="../qml/Main.qml" line="82"/>
         <source>Sign In To %1</source>
         <translation>%1 Girişi</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="63"/>
+        <location filename="../qml/Main.qml" line="82"/>
         <source>Enter your VPN password. It is kept in memory until Burrow locks.</source>
         <translation>VPN şifreni gir. Burrow kilitlenene kadar yalnızca bellekte tutulur.</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="64"/>
+        <location filename="../qml/Main.qml" line="83"/>
         <source>VPN Password</source>
         <translation>VPN Şifresi</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="131"/>
+        <location filename="../qml/Main.qml" line="151"/>
         <source>One-Time Code For %1</source>
         <translation>%1 İçin Tek Kullanımlık Kod</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="131"/>
+        <location filename="../qml/Main.qml" line="151"/>
         <source>Enter the code from your authenticator app.</source>
         <translation>Authenticator uygulamasındaki kodu gir.</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="132"/>
+        <location filename="../qml/Main.qml" line="152"/>
         <source>Code</source>
         <translation>Kod</translation>
     </message>
@@ -852,7 +869,7 @@
 <context>
     <name>SessionWindow</name>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="178"/>
+        <location filename="../qml/SessionWindow.qml" line="204"/>
         <source>The connection failed.</source>
         <translation>Bağlantı kurulamadı.</translation>
     </message>
@@ -863,77 +880,77 @@
         <translation>Ekran %1</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="332"/>
+        <location filename="../qml/SessionWindow.qml" line="358"/>
         <source>Drag a tab out of the window to show it on another display</source>
         <translation>Başka bir ekranda göstermek için sekmeyi pencerenin dışına sürükle</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="382"/>
+        <location filename="../qml/SessionWindow.qml" line="408"/>
         <source>Rename</source>
         <translation>Yeniden Adlandır</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="393"/>
+        <location filename="../qml/SessionWindow.qml" line="419"/>
         <source>Open On %1</source>
         <translation>%1 Üzerinde Aç</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="433"/>
+        <location filename="../qml/SessionWindow.qml" line="459"/>
         <source>Couldn&apos;t Connect To %1</source>
         <translation>%1 Cihazına Bağlanılamadı</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="433"/>
+        <location filename="../qml/SessionWindow.qml" line="459"/>
         <source>Connecting %1</source>
         <translation>%1 Bağlanıyor</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="443"/>
+        <location filename="../qml/SessionWindow.qml" line="469"/>
         <source>Through %1</source>
         <translation>%1 üzerinden</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="455"/>
+        <location filename="../qml/SessionWindow.qml" line="481"/>
         <source>Confirm the certificate to continue.</source>
         <translation>Devam etmek için sertifikayı onayla.</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="456"/>
+        <location filename="../qml/SessionWindow.qml" line="482"/>
         <source>Finish signing in in your browser.</source>
         <translation>Girişi tarayıcında tamamla.</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="472"/>
+        <location filename="../qml/SessionWindow.qml" line="498"/>
         <source>Close</source>
         <translation>Kapat</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="472"/>
+        <location filename="../qml/SessionWindow.qml" line="498"/>
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="478"/>
+        <location filename="../qml/SessionWindow.qml" line="504"/>
         <source>Try Again</source>
         <translation>Tekrar Dene</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="490"/>
+        <location filename="../qml/SessionWindow.qml" line="516"/>
         <source>Trust This Computer?</source>
         <translation>Bu Bilgisayara Güveniyor Musun?</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="493"/>
+        <location filename="../qml/SessionWindow.qml" line="519"/>
         <source>This is the first connection to %1. Check that the fingerprint matches the computer&apos;s certificate, then trust it. Burrow refuses to connect if it changes later.</source>
         <translation>%1 adresine ilk kez bağlanılıyor. Parmak izinin bilgisayarın sertifikasıyla eşleştiğini kontrol et, sonra güven. Sertifika sonradan değişirse Burrow bağlanmaz.</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="504"/>
+        <location filename="../qml/SessionWindow.qml" line="530"/>
         <source>Don&apos;t Connect</source>
         <translation>Bağlanma</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="505"/>
+        <location filename="../qml/SessionWindow.qml" line="531"/>
         <source>Trust And Connect</source>
         <translation>Güven Ve Bağlan</translation>
     </message>
@@ -1238,307 +1255,327 @@
 <context>
     <name>TunnelEditor</name>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="19"/>
+        <location filename="../qml/TunnelEditor.qml" line="22"/>
         <source>Edit Tunnel Profile</source>
         <translation>Tünel Profilini Düzenle</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="19"/>
+        <location filename="../qml/TunnelEditor.qml" line="22"/>
         <source>New Tunnel Profile</source>
         <translation>Yeni Tünel Profili</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="20"/>
+        <location filename="../qml/TunnelEditor.qml" line="23"/>
         <source>The profile name appears on cards and filters.</source>
         <translation>Profil adı kartlarda ve filtrelerde görünür.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="43"/>
+        <location filename="../qml/TunnelEditor.qml" line="48"/>
         <source>Home Lab</source>
         <translation>Ev Laboratuvarı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="74"/>
+        <location filename="../qml/TunnelEditor.qml" line="79"/>
         <source>This is not a valid otpauth link.</source>
         <translation>Bu metin geçerli bir otpauth bağlantısı değil.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="82"/>
+        <location filename="../qml/TunnelEditor.qml" line="87"/>
         <source>No QR code was found in the image.</source>
         <translation>Görselde QR kod bulunamadı.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="87"/>
+        <location filename="../qml/TunnelEditor.qml" line="92"/>
         <source>From Image File…</source>
         <translation>Görsel Dosyasından…</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="88"/>
+        <location filename="../qml/TunnelEditor.qml" line="93"/>
         <source>From Clipboard Image</source>
         <translation>Panodaki Görselden</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="89"/>
+        <location filename="../qml/TunnelEditor.qml" line="94"/>
         <source>Scan With Camera…</source>
         <translation>Kamerayla Tara…</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="93"/>
+        <location filename="../qml/TunnelEditor.qml" line="98"/>
         <source>Choose A QR Code Image</source>
         <translation>QR Kod Görseli Seç</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="94"/>
+        <location filename="../qml/TunnelEditor.qml" line="99"/>
         <source>Images (*.png *.jpg *.jpeg *.gif *.bmp *.webp *.heic)</source>
         <translation>Görseller (*.png *.jpg *.jpeg *.gif *.bmp *.webp *.heic)</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="175"/>
+        <location filename="../qml/TunnelEditor.qml" line="189"/>
         <source>Profile Name</source>
         <translation>Profil Adı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="175"/>
+        <location filename="../qml/TunnelEditor.qml" line="190"/>
         <source>Work VPN</source>
         <translation>İş VPN</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="178"/>
+        <location filename="../qml/TunnelEditor.qml" line="193"/>
         <source>Type</source>
         <translation>Tür</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="194"/>
+        <location filename="../qml/TunnelEditor.qml" line="209"/>
         <source>Server</source>
         <translation>Sunucu</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="195"/>
+        <location filename="../qml/TunnelEditor.qml" line="210"/>
         <source>Gateway / Group</source>
         <translation>Gateway / Grup</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="195"/>
+        <location filename="../qml/TunnelEditor.qml" line="210"/>
         <source>Optional</source>
         <translation>Opsiyonel</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="197"/>
+        <location filename="../qml/TunnelEditor.qml" line="212"/>
         <source>Username</source>
         <translation>Kullanıcı Adı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="198"/>
+        <location filename="../qml/TunnelEditor.qml" line="213"/>
         <source>Save Password In Vault</source>
         <translation>Şifreyi Kasada Sakla</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="198"/>
+        <location filename="../qml/TunnelEditor.qml" line="213"/>
         <source>If not saved, it&apos;s asked on every connection.</source>
         <translation>Saklanmazsa her bağlantıda sorulur.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="199"/>
+        <location filename="../qml/TunnelEditor.qml" line="214"/>
         <source>Password</source>
         <translation>Şifre</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="201"/>
+        <location filename="../qml/TunnelEditor.qml" line="216"/>
         <source>One-Time Password (OTP)</source>
         <translation>Tek Kullanımlık Şifre (OTP)</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="202"/>
+        <location filename="../qml/TunnelEditor.qml" line="217"/>
         <source>Use OTP</source>
         <translation>OTP Kullan</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="202"/>
+        <location filename="../qml/TunnelEditor.qml" line="217"/>
         <source>An authenticator code is required in addition to the password.</source>
         <translation>Girişte şifreye ek olarak authenticator kodu istenir.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="209"/>
+        <location filename="../qml/TunnelEditor.qml" line="224"/>
         <source>OTP Type</source>
         <translation>OTP Tipi</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="210"/>
+        <location filename="../qml/TunnelEditor.qml" line="225"/>
         <source>Append to password</source>
         <translation>Şifrenin sonuna ekle</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="210"/>
+        <location filename="../qml/TunnelEditor.qml" line="225"/>
         <source>Separate prompt (challenge)</source>
         <translation>Ayrı soru (challenge)</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="211"/>
+        <location filename="../qml/TunnelEditor.qml" line="226"/>
         <source>OTP Source</source>
         <translation>OTP Kaynağı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="212"/>
+        <location filename="../qml/TunnelEditor.qml" line="227"/>
         <source>Automatic (authenticator key)</source>
         <translation>Otomatik (authenticator anahtarı)</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="212"/>
+        <location filename="../qml/TunnelEditor.qml" line="227"/>
         <source>Enter manually each time</source>
         <translation>Her bağlantıda elle gir</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="220"/>
+        <location filename="../qml/TunnelEditor.qml" line="235"/>
         <source>Authenticator Link</source>
         <translation>Authenticator Bağlantısı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="220"/>
+        <location filename="../qml/TunnelEditor.qml" line="235"/>
         <source>otpauth://… or otpauth-migration://…</source>
         <translation>otpauth://… veya otpauth-migration://…</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="221"/>
+        <location filename="../qml/TunnelEditor.qml" line="236"/>
         <source>Import</source>
         <translation>İçe Aktar</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="227"/>
+        <location filename="../qml/TunnelEditor.qml" line="242"/>
         <source>Read A QR Code</source>
         <translation>QR Kodu Oku</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="246"/>
+        <location filename="../qml/TunnelEditor.qml" line="261"/>
         <source>In your authenticator app, export or share the account, then paste the otpauth link above. No link? Use the QR button to read the code from a screenshot, the clipboard or the camera.</source>
         <translation>Authenticator uygulamanda hesabı dışa aktar veya paylaş, sonra otpauth bağlantısını yukarıya yapıştır. Bağlantın yok mu? QR butonuyla kodu bir ekran görüntüsünden, panodan veya kameradan okut.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="261"/>
+        <location filename="../qml/TunnelEditor.qml" line="276"/>
         <source>Key</source>
         <translation>Anahtar</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="261"/>
+        <location filename="../qml/TunnelEditor.qml" line="276"/>
         <source>Base32</source>
         <translation>Base32</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="262"/>
+        <location filename="../qml/TunnelEditor.qml" line="277"/>
         <source>Algorithm</source>
         <translation>Algoritma</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="264"/>
+        <location filename="../qml/TunnelEditor.qml" line="279"/>
         <source>Digits</source>
         <translation>Hane</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="266"/>
+        <location filename="../qml/TunnelEditor.qml" line="281"/>
         <source>Period (Sec)</source>
         <translation>Süre (Sn)</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="279"/>
+        <location filename="../qml/TunnelEditor.qml" line="294"/>
         <source>Current Code</source>
         <translation>Şu Anki Kod</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="290"/>
+        <location filename="../qml/TunnelEditor.qml" line="305"/>
         <source>Should match the code on your phone</source>
         <translation>Telefondaki kodla aynı olmalı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="304"/>
+        <location filename="../qml/TunnelEditor.qml" line="324"/>
+        <source>Nothing to fill in: Sign In With Tailscale opens the Tailscale sign-in page in your browser, then lists the machines in your tailnet so you can add them.</source>
+        <translation>Doldurulacak bir şey yok: Tailscale ile Giriş Yap, tarayıcında Tailscale giriş sayfasını açar, ardından tailnet&apos;teki makineleri listeler; istediklerini eklersin.</translation>
+    </message>
+    <message>
+        <location filename="../qml/TunnelEditor.qml" line="327"/>
         <source>Control Server</source>
         <translation>Control Server</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="304"/>
+        <location filename="../qml/TunnelEditor.qml" line="327"/>
         <source>Tailscale if empty (enter a URL for Headscale)</source>
         <translation>Boş bırakılırsa Tailscale (Headscale için URL gir)</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="305"/>
+        <location filename="../qml/TunnelEditor.qml" line="328"/>
         <source>Node Name</source>
         <translation>Düğüm Adı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="305"/>
-        <source>The Tailscale sign-in page opens on first connection.</source>
-        <translation>İlk bağlantıda Tailscale giriş sayfası açılır.</translation>
+        <location filename="../qml/TunnelEditor.qml" line="328"/>
+        <source>How this Mac appears in your tailnet.</source>
+        <translation>Bu Mac&apos;in tailnet&apos;te görünen adı.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="318"/>
+        <location filename="../qml/TunnelEditor.qml" line="480"/>
+        <source>Sign In With Tailscale</source>
+        <translation>Tailscale İle Giriş Yap</translation>
+    </message>
+    <message>
+        <location filename="../qml/TunnelEditor.qml" line="480"/>
+        <source>Save And Add Devices</source>
+        <translation>Kaydet Ve Cihaz Ekle</translation>
+    </message>
+    <message>
+        <location filename="../qml/TunnelEditor.qml" line="341"/>
         <source>Publish the computer&apos;s RDP port with cloudflared and protect it with a Cloudflare Access application (free Zero Trust plan). Each device&apos;s address is then its Access hostname, e.g. rdp.example.com. You sign in once in the browser; the token is kept in the encrypted vault.</source>
         <translation>Bilgisayarın RDP portunu cloudflared ile yayınla ve bir Cloudflare Access uygulamasıyla koru (ücretsiz Zero Trust planı). Cihazın adresi Access host adı olur, ör. rdp.example.com. Tarayıcıda bir kez giriş yaparsın; erişim anahtarı şifreli kasada tutulur.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="323"/>
+        <location filename="../qml/TunnelEditor.qml" line="348"/>
         <source>Bastion Hostname</source>
         <translation>Bastion Host Adı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="324"/>
+        <location filename="../qml/TunnelEditor.qml" line="349"/>
         <source>Optional, e.g. bastion.example.com</source>
         <translation>Opsiyonel, ör. bastion.example.com</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="325"/>
+        <location filename="../qml/TunnelEditor.qml" line="350"/>
         <source>With a bastion, devices use their internal address and Burrow reaches them through this one Access application.</source>
         <translation>Bastion kullanılırsa cihazlar iç ağ adresini kullanır ve Burrow onlara bu tek Access uygulaması üzerinden ulaşır.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="346"/>
+        <location filename="../qml/TunnelEditor.qml" line="371"/>
         <source>Test Connection</source>
         <translation>Bağlantıyı Test Et</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="353"/>
+        <location filename="../qml/TunnelEditor.qml" line="378"/>
         <source>Signs in once and closes the tunnel again. A rejected login is never retried.</source>
         <translation>Bir kez giriş yapar ve tüneli yeniden kapatır. Reddedilen giriş asla tekrar denenmez.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="354"/>
+        <location filename="../qml/TunnelEditor.qml" line="379"/>
         <source>Checks that the tunnel can be opened with these settings.</source>
         <translation>Tünelin bu ayarlarla açılabildiğini denetler.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="358"/>
+        <location filename="../qml/TunnelEditor.qml" line="383"/>
         <source>Stop</source>
         <translation>Durdur</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="358"/>
+        <location filename="../qml/TunnelEditor.qml" line="383"/>
         <source>Run Test</source>
         <translation>Testi Başlat</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="367"/>
+        <location filename="../qml/TunnelEditor.qml" line="393"/>
         <source>Device Hostname</source>
         <translation>Cihaz Host Adı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="378"/>
+        <location filename="../qml/TunnelEditor.qml" line="404"/>
         <source>Finish signing in in your browser.</source>
         <translation>Girişi tarayıcında tamamla.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="388"/>
+        <location filename="../qml/TunnelEditor.qml" line="414"/>
         <source>Connection works. The test tunnel was closed.</source>
         <translation>Bağlantı çalışıyor. Test tüneli kapatıldı.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="389"/>
+        <location filename="../qml/TunnelEditor.qml" line="415"/>
         <source>The connection failed.</source>
         <translation>Bağlantı başarısız oldu.</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="405"/>
+        <location filename="../qml/TunnelEditor.qml" line="457"/>
+        <source>Advanced Settings</source>
+        <translation>Gelişmiş Ayarlar</translation>
+    </message>
+    <message>
+        <location filename="../qml/TunnelEditor.qml" line="475"/>
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="406"/>
+        <location filename="../qml/TunnelEditor.qml" line="476"/>
         <source>Save</source>
         <translation>Kaydet</translation>
     </message>

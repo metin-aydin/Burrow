@@ -96,6 +96,10 @@ public:
     Q_INVOKABLE void openTunnelForImport(const QString &tunnelId);
     Q_INVOKABLE QVariantList tunnelPeers(const QString &tunnelId) const;
     Q_INVOKABLE void listCloudflareApps(const QString &apiToken);
+    // Link to Cloudflare's token page with the needed permission preselected.
+    Q_INVOKABLE QString cloudflareTokenUrl() const;
+    // Lists apps with a token found on the clipboard (then clears it); false if none is there.
+    Q_INVOKABLE bool listCloudflareAppsFromClipboard();
     Q_INVOKABLE int importDevices(const QString &tunnelId, const QVariantList &items);
     Q_INVOKABLE QVariantMap deviceTunnel(const QString &deviceId) const;   // {id, name, type} or {}
     Q_INVOKABLE void forgetCertificate(const QString &id);

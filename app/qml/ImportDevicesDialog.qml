@@ -24,7 +24,7 @@ BDialog {
         title = qsTr("Import Devices")
         subtitle = type === "tailscale"
                    ? qsTr("Machines in your tailnet. Pick the ones to add to Burrow.")
-                   : qsTr("Access applications in your Cloudflare account. Use an API token with Access: Apps and Policies Read; it is used once and not stored.")
+                   : qsTr("Access applications in your Cloudflare account. Cloudflare lets apps read them only with an API token: create one with the button below (the right permission is already chosen), copy it, and come back. Burrow uses it once and doesn't keep it.")
         open()
         if (type === "tailscale") {
             loading = true
@@ -59,15 +59,39 @@ BDialog {
         }
     }
 
+    // Cloudflare: open the prefilled token page, then take the copied token from the clipboard
+    // (automatically when Burrow comes back to the front, or with Paste Token).
+    function tryClipboard(manual) {
+        if (root.type !== "cloudflare" || root.loading || root.items.length > 0) return
+        if (App.listCloudflareAppsFromClipboard()) { root.error = ""; root.loading = true }
+        else if (manual) root.error = qsTr("No API token on the clipboard. Copy the token Cloudflare shows after you create it.")
+    }
+    Connections {
+        target: Qt.application
+        function onStateChanged() { if (root.visible && Qt.application.state === Qt.ApplicationActive) root.tryClipboard(false) }
+    }
     RowLayout {
-        visible: root.type === "cloudflare"
+        visible: root.type === "cloudflare" && root.items.length === 0
         spacing: 8
-        BField { id: tokenField; Layout.fillWidth: true; label: qsTr("API Token"); password: true; onAccepted: listBtn.clicked() }
+        BButton {
+            variant: "primary"
+            iconName: "cloud"
+            text: qsTr("Create Token In Cloudflare")
+            onClicked: Qt.openUrlExternally(App.cloudflareTokenUrl())
+        }
+        BButton { iconName: "copy"; text: qsTr("Paste Token"); onClicked: root.tryClipboard(true) }
+        Item { Layout.fillWidth: true }
+    }
+    RowLayout {
+        visible: root.type === "cloudflare" && root.items.length === 0
+        spacing: 8
+        BField { id: tokenField; Layout.fillWidth: true; label: qsTr("Or Enter The Token"); password: true; onAccepted: listBtn.clicked() }
         BButton {
             id: listBtn
             Layout.alignment: Qt.AlignBottom
+            enabled: tokenField.text.trim() !== ""
             text: qsTr("List Applications")
-            onClicked: { root.error = ""; root.loading = true; App.listCloudflareApps(tokenField.text); tokenField.text = "" }
+            onClicked: { root.error = ""; root.loading = true; App.listCloudflareApps(tokenField.text.trim()); tokenField.text = "" }
         }
     }
 

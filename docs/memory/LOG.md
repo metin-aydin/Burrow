@@ -4,6 +4,11 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Tailscale/Cloudflare bağlama sadeleşti: yeni profil kimliği baştan üretilir, Tailscale node adı otomatik
+  (`burrow-<bilgisayar adı>`), Control Server/Node Name ve Cloudflare bastion "Gelişmiş Ayarlar"da. Tailscale'de
+  "Tailscale İle Giriş Yap" kaydedip cihaz içe aktarmayı açar (tarayıcı girişi → tailnet makineleri). Cloudflare'de
+  "Kaydet Ve Cihaz Ekle" → "Cloudflare'de Token Oluştur" izni önceden seçili token sayfasını açar; kopyalanan token
+  Burrow öne gelince (veya "Token'ı Yapıştır") panodan alınır, bir kez kullanılır, pano temizlenir (ADR 0007).
 - Monitör boyutları canlı: her uzak monitör onu gösteren pencerenin boyutunu alır (disp kanalı, tüm düzen yan yana,
   250 ms birleştirme). Tam ekranda çentik/oran farkından kalan siyah boşluklar ve farklı boyutlu ekranda dar görüntü
   bunun içindi. Ana oturum penceresinin ekranı ve tam ekran durumu `layout.main` olarak kaydedilir; bağlantı
