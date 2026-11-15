@@ -1,4 +1,4 @@
-find_package(Qt6 6.5 REQUIRED COMPONENTS Gui Widgets Network Concurrent Quick QuickControls2 Svg Multimedia LinguistTools)
+find_package(Qt6 6.10 REQUIRED COMPONENTS Gui Widgets Network Concurrent Quick QuickControls2 Svg Multimedia LinguistTools)
 # 3.33 is the release tested with its codecs on (H.264, progressive); older ones lack its codec fixes.
 find_package(FreeRDP 3.33 REQUIRED)
 find_package(FreeRDP-Client 3.33 REQUIRED)
@@ -59,7 +59,6 @@ qt_add_qml_module(burrow
     VERSION 1.0
     QML_FILES ${BURROW_QML}
     RESOURCES ${BURROW_ICONS} resources/icons/256x256.png
-    NO_RESOURCE_TARGET_PATH
 )
 
 # Translations: English is the source language; Turkish ships as a compiled catalog.

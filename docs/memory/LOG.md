@@ -4,6 +4,18 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Ubuntu AppImage + Linux CI:** `tools/linux-deps.sh` (Ubuntu 24.04: apt paketleri, aqtinstall ile Qt 6.10.1,
+  kaynaktan FreeRDP 3.33.1 — X11/SDL/sunucu/FFmpeg kapalı), `tools/package-appimage.sh` (linuxdeploy +
+  linuxdeploy-plugin-qt, sabitlenmiş sürümler; Qt, QML, FreeRDP, openconnect içeride; GStreamer sistemden),
+  `app/resources/linux/burrow.desktop`. CI'a `linux` işi (önbellekli bağımlılık, derleme, test, AppImage),
+  `release.yml`'e `linux` işi (AppImage'ı release'e yükler; Linux'ta uygulama içi güncelleme henüz yok).
+  Bulunan ve düzeltilen: kod Qt 6.10 API'si kullanıyordu (`beginFilterChange`) → minimum Qt 6.10;
+  `AppController.cpp`'de eksik `QJsonDocument` include'u; QML modülü `NO_RESOURCE_TARGET_PATH` ile gömülü
+  olduğu için uygulama arayüzü yalnızca build klasörünün yanında bulabiliyordu (paketli uygulamada "Module Burrow
+  contains no type named Main") → modül standart `:/qt/qml/Burrow/` yoluna alındı, üç ikon yolu güncellendi.
+  Doğrulama: Ubuntu 24.04 aarch64 konteynerinde derleme + testler geçti; AppImage (≈96 MB) Qt/FreeRDP kurulu
+  olmayan temiz Ubuntu 24.04'te Xvfb altında açıldı, galeri ekranı doğru. CI'daki x86_64 koşusu henüz görülmedi.
+  Linux masaüstü gereksinimi: `libopengl0` (masaüstü kurulumlarında var).
 - **CodeQL uyarısı #1 düzeltildi** (`go/incorrect-integer-conversion`, yüksek): `netstack.DialContext` portu
   `Atoi` + `uint16()` ile çeviriyordu, 70000 → 4464'e sarıyordu. `ParseUint(…, 16)` ile sınırlandı, test eklendi.
   Dependabot uyarıları repoda kapalı (API 403); secret scanning listesi `gh` belirtecinin kapsamı yetmediği için okunamadı.

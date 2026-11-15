@@ -62,6 +62,35 @@ jobs:
           python3 .github/scripts/i18n-check.py app/i18n/*.ts
           git diff --exit-code -- app/i18n || (echo "::error::Run the Burrow_lupdate target and commit app/i18n"; exit 1)
 
+  linux:
+    name: Linux build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: netcore/go.mod
+      # Qt 6.10+ and FreeRDP 3.33+ aren't in Ubuntu 24.04; tools/linux-deps.sh builds them once per change.
+      - name: Cache Qt and FreeRDP
+        id: deps
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/burrow-deps
+          key: linux-deps-${{ runner.arch }}-${{ hashFiles('tools/linux-deps.sh') }}
+      - name: Install dependencies
+        run: tools/linux-deps.sh /home/runner/burrow-deps
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="/home/runner/burrow-deps/qt;/home/runner/burrow-deps/freerdp"
+      - name: Build
+        run: cmake --build build
+      - name: Tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+          LD_LIBRARY_PATH: /home/runner/burrow-deps/freerdp/lib
+        run: cd build && ctest --output-on-failure
+      - name: AppImage
+        run: tools/package-appimage.sh build 0.0.0-ci /home/runner/burrow-deps
+
   scripts:
     name: Release scripts
     runs-on: ubuntu-latest

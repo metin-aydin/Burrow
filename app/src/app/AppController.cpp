@@ -1,5 +1,6 @@
 #include "app/AppController.h"
 
+#include <QJsonDocument>
 #include <QBuffer>
 #include <QJsonArray>
 #include <QtConcurrent/QtConcurrentRun>

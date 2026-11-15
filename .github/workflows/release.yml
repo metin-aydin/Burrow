@@ -79,7 +79,7 @@ jobs:
     strategy:
       matrix:
         include:
-          # Apple Silicon. Intel, Ubuntu (AppImage, deb) and Windows (installer) join the matrix as those ports land.
+          # Apple Silicon. Intel and Windows (installer) join as those ports land; Linux has its own job below.
           - os: macos-15
             platform: mac-arm64
     runs-on: ${{ matrix.os }}
@@ -180,8 +180,40 @@ jobs:
           name: fragment-${{ matrix.platform }}
           path: fragment-${{ matrix.platform }}.json
 
+  # Linux: an AppImage that carries Qt, FreeRDP and openconnect (Ubuntu 24.04 baseline, so it runs on
+  # 24.04 and newer). No update manifest entry yet: in-app updates on Linux follow later.
+  linux:
+    needs: prepare
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: netcore/go.mod
+      - name: Install dependencies
+        run: tools/linux-deps.sh /opt/burrow-deps
+      - name: Build
+        env:
+          QT_QPA_PLATFORM: offscreen
+          LD_LIBRARY_PATH: /opt/burrow-deps/freerdp/lib
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="/opt/burrow-deps/qt;/opt/burrow-deps/freerdp" \
+            -DBURROW_VERSION=${{ needs.prepare.outputs.version }}
+          cmake --build build
+          (cd build && ctest --output-on-failure)
+      - name: Package
+        run: tools/package-appimage.sh build ${{ needs.prepare.outputs.version }} /opt/burrow-deps
+      - name: Upload
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "v${{ needs.prepare.outputs.version }}" dist/*.AppImage --clobber
+
   publish:
-    needs: [prepare, build]
+    needs: [prepare, build, linux]
     if: github.ref == 'refs/heads/master'
     permissions:
       contents: write

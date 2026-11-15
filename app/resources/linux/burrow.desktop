@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Burrow
+GenericName=Remote Desktop
+GenericName[tr]=Uzak Masaüstü
+Comment=Remote desktop with the VPN or Tailscale tunnel inside the app
+Comment[tr]=VPN veya Tailscale tünelini uygulamanın içinde açan uzak masaüstü
+Exec=burrow
+Icon=burrow
+Terminal=false
+Categories=Network;RemoteAccess;
+Keywords=RDP;VNC;remote;desktop;VPN;Tailscale;
+StartupWMClass=burrow

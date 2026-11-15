@@ -13,10 +13,10 @@ Tray::Tray(AppController *app, QObject *parent)
 {
     // A monochrome template icon on macOS (adapts to light/dark menu bars), the color logo elsewhere.
 #ifdef Q_OS_MACOS
-    QIcon icon(QStringLiteral(":/qml/icons/tunnel.svg"));
+    QIcon icon(QStringLiteral(":/qt/qml/Burrow/qml/icons/tunnel.svg"));
     icon.setIsMask(true);
 #else
-    QIcon icon(QStringLiteral(":/resources/icons/256x256.png"));
+    QIcon icon(QStringLiteral(":/qt/qml/Burrow/resources/icons/256x256.png"));
 #endif
     m_icon.setIcon(icon);
     m_icon.setToolTip(QStringLiteral("Burrow"));

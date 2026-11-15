@@ -22,3 +22,12 @@ cmake --build build
 - Homebrew FreeRDP dylib'leri macOS 27.2 için derlenmiş → lokal linkte uyarı verir, zararsız.
   Dağıtım CI'da yapılır.
 - openconnect 9.12 bu Mac'te zaten kurulu (`/opt/homebrew/opt/openconnect`), GP ön testi için hazır.
+
+## Linux (Docker ile, bu Mac'te)
+
+- Ubuntu 24.04 konteynerinde `sh tools/linux-deps.sh /opt/burrow-deps` (Qt 6.10.1 + FreeRDP 3.33.1 kurar),
+  Go'yu go.dev'den kur, sonra `-DCMAKE_PREFIX_PATH="/opt/burrow-deps/qt;/opt/burrow-deps/freerdp"` ile derle;
+  `tools/package-appimage.sh <build> <sürüm> /opt/burrow-deps` AppImage üretir.
+- Docker belleği sınırlı: derlemede `-j2` kullan, yoksa `cc1plus` öldürülür.
+- Konteynerde FUSE yok: AppImage'ı `--appimage-extract-and-run` ile çalıştır; ekran için `Xvfb :99` + `xwd`.
+- `QT_QPA_PLATFORM=offscreen` macOS'ta bu uygulamayı çökertiyor (139); Linux'ta sorunsuz.
