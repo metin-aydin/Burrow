@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Gerçek ölçüm (kullanıcı yine Burrow'un çalıştığı Mac'e bağlandı → görüntü kendini besleyen döngü, en kötü
+  durum): 30–88 Mbit/s, 5 sn'de 250–400 Mpx, güncelleme başına 32–78 ms; okuma iş parçacığı dolu, arayüz kopyası
+  önemsiz. ZRLE çözücü satır bazlı yeniden yazıldı (ham karo satır satır, tek renk/RLE `fill_n`, çıktı kalıcı
+  tampona tek seferde açılıyor); hız satırı artık işlemci süresini ve doluluk yüzdesini ayrı gösteriyor
+  ("cpu", "busy"). Gerçek bir başka Mac'te tekrar ölçülecek; yetmezse Adaptive (0x3f3).
+
 - Mac oturumu: kapanırken Control+Command+Q ile kilitleme ("Bağlantı Kesilince Kilitle", Mac'te de Session
   sekmesinde); Apple imleç şekilleri (0x450 önbelleği: BGRA + ayrı alfa düzlemi, seçim/kayıt) yerel imlece
   uygulanıyor; VNC 5 sn'de bir hız satırı loglar (güncelleme, MB, Mbit/s, Mpx, çözme ve kopya süresi).

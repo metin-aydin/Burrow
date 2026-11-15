@@ -137,6 +137,7 @@ private:
     quint64 m_statBytes = 0, m_statPixels = 0;
     int m_statUpdates = 0;
     qint64 m_statDecodeNs = 0;
+    qint64 m_statCpuNs = 0;          // inflate + decode only, without waiting for bytes
     mutable std::atomic<qint64> m_statCopyNs{0};
     mutable std::atomic<int> m_statCopies{0};
     void logStats();        // last text exchanged, to avoid echoing it back

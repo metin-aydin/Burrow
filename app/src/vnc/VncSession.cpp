@@ -1044,66 +1044,76 @@ bool VncSession::readZrle(int x, int y, int w, int h)
     QByteArray in(int(len), '\0');
     if (!readExact(in.data(), len))
         return false;
+    QElapsedTimer cpu;   // from here on it's work on this machine, not waiting for the network
+    cpu.start();
     if (!m_zrle) {
         m_zrle = new z_stream{};
         if (inflateInit(m_zrle) != Z_OK)
             return false;
     }
-    // Inflate everything this rectangle carries (the stream continues across rectangles).
-    m_zbuf.resize(0);
+    // Inflate everything this rectangle carries straight into a buffer kept between rectangles (the
+    // stream continues across them). At most 3 bytes a pixel and a byte or so per tile.
+    const qsizetype cap = qsizetype(w) * h * 3 + (qsizetype(w) / 64 + 1) * (qsizetype(h) / 64 + 1) * 64 + 4096;
+    if (m_zbuf.size() < cap)
+        m_zbuf.resize(cap);
     m_zrle->next_in = reinterpret_cast<Bytef *>(in.data());
     m_zrle->avail_in = uInt(in.size());
-    const qsizetype cap = qsizetype(w) * h * 4 + 4096 + (w / 64 + 1) * (h / 64 + 1) * 64;
-    char chunk[65536];
-    while (m_zrle->avail_in > 0) {
-        m_zrle->next_out = reinterpret_cast<Bytef *>(chunk);
-        m_zrle->avail_out = sizeof chunk;
-        const int r = inflate(m_zrle, Z_SYNC_FLUSH);
-        if (r != Z_OK && r != Z_BUF_ERROR)
-            return false;
-        m_zbuf.append(chunk, qsizetype(sizeof chunk - m_zrle->avail_out));
-        if (m_zbuf.size() > cap)
-            return false;
-        if (r == Z_BUF_ERROR && m_zrle->avail_out != 0)
-            break;
-    }
+    m_zrle->next_out = reinterpret_cast<Bytef *>(m_zbuf.data());
+    m_zrle->avail_out = uInt(cap);
+    const int r = inflate(m_zrle, Z_SYNC_FLUSH);
+    if ((r != Z_OK && r != Z_BUF_ERROR) || m_zrle->avail_in != 0)
+        return false;   // corrupt, or more than a rectangle this size can hold
+    const qsizetype produced = cap - qsizetype(m_zrle->avail_out);
 
     const auto *p = reinterpret_cast<const uchar *>(m_zbuf.constData());
-    const auto *end = p + m_zbuf.size();
+    const auto *end = p + produced;
+    auto pix = [](const uchar *c) { return 0xff000000u | (quint32(c[2]) << 16) | (quint32(c[1]) << 8) | c[0]; };
     auto cpixel = [&](quint32 &out) {
         if (end - p < 3)
             return false;
-        out = 0xff000000u | (quint32(p[2]) << 16) | (quint32(p[1]) << 8) | p[0];
+        out = pix(p);
         p += 3;
         return true;
     };
+    auto runLength = [&](int &run) {   // 1 + the sum of bytes up to and including the first below 255
+        run = 1;
+        for (;;) {
+            if (p >= end)
+                return false;
+            const quint8 b = *p++;
+            run += b;
+            if (b != 255)
+                return true;
+        }
+    };
     QMutexLocker lock(&m_frameLock);
+    const qsizetype stride = m_frame.bytesPerLine() / 4;
+    auto *base = reinterpret_cast<quint32 *>(m_frame.bits());
     for (int ty = 0; ty < h; ty += 64) {
         const int th = qMin(64, h - ty);
         for (int tx = 0; tx < w; tx += 64) {
             const int tw = qMin(64, w - tx);
+            quint32 *tile = base + qsizetype(y + ty) * stride + (x + tx);
             if (p >= end)
                 return false;
             const quint8 sub = *p++;
             const bool rle = sub & 0x80;
             const int palSize = sub & 0x7f;
             quint32 pal[128];
-            auto put = [&](int i, quint32 c) {
-                reinterpret_cast<quint32 *>(m_frame.scanLine(y + ty + i / tw))[x + tx + i % tw] = c;
-            };
-            if (!rle && palSize == 0) {            // raw
-                for (int i = 0; i < tw * th; ++i) {
-                    quint32 c;
-                    if (!cpixel(c))
-                        return false;
-                    put(i, c);
+            if (!rle && palSize == 0) {            // raw: a row at a time
+                if (end - p < qsizetype(tw) * th * 3)
+                    return false;
+                for (int row = 0; row < th; ++row) {
+                    quint32 *dst = tile + row * stride;
+                    for (int col = 0; col < tw; ++col, p += 3)
+                        dst[col] = pix(p);
                 }
             } else if (!rle && palSize == 1) {     // solid
                 quint32 c;
                 if (!cpixel(c))
                     return false;
-                for (int i = 0; i < tw * th; ++i)
-                    put(i, c);
+                for (int row = 0; row < th; ++row)
+                    std::fill_n(tile + row * stride, tw, c);
             } else if (!rle) {                     // packed palette
                 if (palSize > 16)
                     return false;
@@ -1113,6 +1123,7 @@ bool VncSession::readZrle(int x, int y, int w, int h)
                 const int bits = palSize <= 2 ? 1 : palSize <= 4 ? 2 : 4;
                 const int mask = (1 << bits) - 1;
                 for (int row = 0; row < th; ++row) {
+                    quint32 *dst = tile + row * stride;
                     int avail = 0;   // unread bits in `byte`; every row starts on a new byte
                     quint8 byte = 0;
                     for (int col = 0; col < tw; ++col) {
@@ -1126,60 +1137,53 @@ bool VncSession::readZrle(int x, int y, int w, int h)
                         const int idx = (byte >> avail) & mask;
                         if (idx >= palSize)
                             return false;
-                        put(row * tw + col, pal[idx]);
+                        dst[col] = pal[idx];
                     }
                 }
-            } else if (palSize == 0) {             // plain RLE
-                int i = 0;
-                while (i < tw * th) {
+            } else if (palSize == 0 || palSize >= 2) {   // plain RLE, or palette RLE
+                if (palSize > 0)
+                    for (int k = 0; k < palSize; ++k)
+                        if (!cpixel(pal[k]))
+                            return false;
+                int row = 0, col = 0;
+                const int total = tw * th;
+                int done = 0;
+                while (done < total) {
                     quint32 c;
-                    if (!cpixel(c))
-                        return false;
                     int run = 1;
-                    for (;;) {
+                    if (palSize == 0) {
+                        if (!cpixel(c) || !runLength(run))
+                            return false;
+                    } else {
                         if (p >= end)
                             return false;
-                        const quint8 b = *p++;
-                        run += b;
-                        if (b != 255)
-                            break;
+                        const quint8 idx = *p++;
+                        if ((idx & 0x80) && !runLength(run))
+                            return false;
+                        if ((idx & 0x7f) >= palSize)
+                            return false;
+                        c = pal[idx & 0x7f];
                     }
-                    if (i + run > tw * th)
+                    if (done + run > total)
                         return false;
-                    for (int k = 0; k < run; ++k)
-                        put(i++, c);
-                }
-            } else if (palSize >= 2) {             // palette RLE
-                for (int k = 0; k < palSize; ++k)
-                    if (!cpixel(pal[k]))
-                        return false;
-                int i = 0;
-                while (i < tw * th) {
-                    if (p >= end)
-                        return false;
-                    quint8 idx = *p++;
-                    int run = 1;
-                    if (idx & 0x80) {
-                        idx &= 0x7f;
-                        for (;;) {
-                            if (p >= end)
-                                return false;
-                            const quint8 b = *p++;
-                            run += b;
-                            if (b != 255)
-                                break;
+                    done += run;
+                    while (run > 0) {   // fill along rows
+                        const int n = qMin(run, tw - col);
+                        std::fill_n(tile + row * stride + col, n, c);
+                        run -= n;
+                        col += n;
+                        if (col == tw) {
+                            col = 0;
+                            ++row;
                         }
                     }
-                    if (idx >= palSize || i + run > tw * th)
-                        return false;
-                    for (int k = 0; k < run; ++k)
-                        put(i++, pal[idx]);
                 }
             } else {
                 return false;                      // 129 is unused
             }
         }
     }
+    m_statCpuNs += cpu.nsecsElapsed();
     return true;
 }
 
@@ -1197,12 +1201,16 @@ void VncSession::logStats()
     const double s = ms / 1000.0;
     const int copies = m_statCopies.exchange(0);
     const qint64 copyNs = m_statCopyNs.exchange(0);
-    qInfo("vnc: %.0f s: %d updates, %.1f MB in (%.1f Mbit/s), %.1f Mpx, decode %.1f ms/update, %d copies %.1f ms each",
+    // "busy" is the share of the time spent decoding on this machine; the rest of "decode" is waiting
+    // for the network.
+    qInfo("vnc: %.0f s: %d updates, %.1f MB in (%.1f Mbit/s), %.1f Mpx, decode %.1f ms/update (cpu %.1f ms, busy %.0f%%), %d copies %.1f ms each",
           s, m_statUpdates, m_statBytes / 1e6, m_statBytes * 8 / 1e6 / s, m_statPixels / 1e6,
-          m_statUpdates ? m_statDecodeNs / 1e6 / m_statUpdates : 0.0, copies, copies ? copyNs / 1e6 / copies : 0.0);
+          m_statUpdates ? m_statDecodeNs / 1e6 / m_statUpdates : 0.0, m_statUpdates ? m_statCpuNs / 1e6 / m_statUpdates : 0.0,
+          m_statCpuNs / 1e7 / s, copies, copies ? copyNs / 1e6 / copies : 0.0);
     m_statBytes = m_statPixels = 0;
     m_statUpdates = 0;
     m_statDecodeNs = 0;
+    m_statCpuNs = 0;
     m_statClock.restart();
 }
 
