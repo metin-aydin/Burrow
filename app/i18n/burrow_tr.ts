@@ -4,169 +4,169 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/AppController.cpp" line="72"/>
+        <location filename="../src/app/AppController.cpp" line="73"/>
         <source>Burrow %1 is available. Install it from Settings.</source>
         <translation>Burrow %1 yayımlandı. Ayarlar&apos;dan kurabilirsin.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="95"/>
+        <location filename="../src/app/AppController.cpp" line="96"/>
         <source>Burrow %1 · netcore %2 · %3</source>
         <translation>Burrow %1 · netcore %2 · %3</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="200"/>
+        <location filename="../src/app/AppController.cpp" line="201"/>
         <source>The password must be at least %1 characters.</source>
         <translation>Şifre en az %1 karakter olmalı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="202"/>
+        <location filename="../src/app/AppController.cpp" line="203"/>
         <source>The passwords don&apos;t match.</source>
         <translation>Şifreler aynı değil.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="209"/>
+        <location filename="../src/app/AppController.cpp" line="210"/>
         <source>Enter your master password.</source>
         <translation>Ana şifreni gir.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="216"/>
+        <location filename="../src/app/AppController.cpp" line="217"/>
         <source>Unlock the Burrow vault</source>
         <translation>Burrow kasasının kilidini aç</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="226"/>
+        <location filename="../src/app/AppController.cpp" line="227"/>
         <source>The Touch ID key is no longer valid; unlock with your master password.</source>
         <translation>Touch ID anahtarı geçersiz; ana şifreyle aç.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="277"/>
+        <location filename="../src/app/AppController.cpp" line="278"/>
         <source>The new password must be at least %1 characters.</source>
         <translation>Yeni şifre en az %1 karakter olmalı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="279"/>
+        <location filename="../src/app/AppController.cpp" line="280"/>
         <source>The new passwords don&apos;t match.</source>
         <translation>Yeni şifreler aynı değil.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="281"/>
+        <location filename="../src/app/AppController.cpp" line="282"/>
         <source>The current password is wrong.</source>
         <translation>Mevcut şifre yanlış.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="295"/>
+        <location filename="../src/app/AppController.cpp" line="296"/>
         <source>Master password changed. Touch ID was turned off: %1</source>
         <translation>Ana şifre değiştirildi. Touch ID kapatıldı: %1</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="299"/>
+        <location filename="../src/app/AppController.cpp" line="300"/>
         <source>Master password changed.</source>
         <translation>Ana şifre değiştirildi.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="328"/>
+        <location filename="../src/app/AppController.cpp" line="329"/>
         <source>Couldn&apos;t save the change: %1</source>
         <translation>Değişiklik kaydedilemedi: %1</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="365"/>
+        <location filename="../src/app/AppController.cpp" line="366"/>
         <source>Name and address can&apos;t be empty.</source>
         <translation>Ad ve adres boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="401"/>
+        <location filename="../src/app/AppController.cpp" line="402"/>
         <source>%1 (Copy)</source>
         <translation>%1 (Kopya)</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="443"/>
+        <location filename="../src/app/AppController.cpp" line="444"/>
         <source>The device no longer exists.</source>
         <translation>Cihaz artık yok.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="446"/>
+        <location filename="../src/app/AppController.cpp" line="447"/>
         <source>%1 is already open.</source>
         <translation>%1 zaten açık.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="481"/>
+        <location filename="../src/app/AppController.cpp" line="482"/>
         <source>The tunnel profile no longer exists.</source>
         <translation>Tünel profili artık yok.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="664"/>
+        <location filename="../src/app/AppController.cpp" line="665"/>
         <source>Sign in to Cloudflare Access in the browser window that opened.</source>
         <translation>Açılan tarayıcı penceresinde Cloudflare Access&apos;e giriş yap.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="690"/>
+        <location filename="../src/app/AppController.cpp" line="691"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="754"/>
-        <location filename="../src/app/AppController.cpp" line="769"/>
+        <location filename="../src/app/AppController.cpp" line="755"/>
+        <location filename="../src/app/AppController.cpp" line="770"/>
         <source>Couldn&apos;t open a connection through the tunnel.</source>
         <translation>Tünel üzerinden bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="904"/>
+        <location filename="../src/app/AppController.cpp" line="905"/>
         <source>The profile name can&apos;t be empty.</source>
         <translation>Profil adı boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="515"/>
-        <location filename="../src/app/AppController.cpp" line="908"/>
+        <location filename="../src/app/AppController.cpp" line="516"/>
+        <location filename="../src/app/AppController.cpp" line="909"/>
         <source>Server and username can&apos;t be empty.</source>
         <translation>Sunucu ve kullanıcı adı boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="517"/>
+        <location filename="../src/app/AppController.cpp" line="518"/>
         <source>Enter a device hostname to test with.</source>
         <translation>Test için bir cihaz host adı gir.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="911"/>
+        <location filename="../src/app/AppController.cpp" line="912"/>
         <source>The OTP key is invalid.</source>
         <translation>OTP anahtarı geçersiz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="953"/>
+        <location filename="../src/app/AppController.cpp" line="954"/>
         <source>Direct (No Tunnel)</source>
         <translation>Doğrudan (Tünelsiz)</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="987"/>
+        <location filename="../src/app/AppController.cpp" line="988"/>
         <source>Invalid key</source>
         <translation>Geçersiz anahtar</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1042"/>
+        <location filename="../src/app/AppController.cpp" line="1043"/>
         <source>Company VPN</source>
         <translation>Şirket VPN</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1047"/>
+        <location filename="../src/app/AppController.cpp" line="1048"/>
         <source>Home Network</source>
         <translation>Ev Ağı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1055"/>
+        <location filename="../src/app/AppController.cpp" line="1056"/>
         <source>Work PC</source>
         <translation>İş Bilgisayarı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1056"/>
+        <location filename="../src/app/AppController.cpp" line="1057"/>
         <source>Meeting Room</source>
         <translation>Toplantı Odası</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1057"/>
+        <location filename="../src/app/AppController.cpp" line="1058"/>
         <source>Home Desktop</source>
         <translation>Ev Masaüstü</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1058"/>
+        <location filename="../src/app/AppController.cpp" line="1059"/>
         <source>Lab Server</source>
         <translation>Laboratuvar</translation>
     </message>
