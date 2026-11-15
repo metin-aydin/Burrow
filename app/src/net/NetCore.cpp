@@ -1,5 +1,9 @@
 #include "net/NetCore.h"
 
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+
 #include <libnetcore.h>
 
 namespace NetCore {
@@ -18,6 +22,44 @@ QString takeString(char *p)
 QString version()
 {
     return takeString(NetcoreVersion());
+}
+
+QList<Model::Totp> parseTotp(const QString &uri)
+{
+    QByteArray u = uri.trimmed().toUtf8();
+    char *raw = NetcoreTOTPParse(u.data());
+    QByteArray json(raw ? raw : "");
+    NetcoreFreeSecret(raw);
+    QList<Model::Totp> out;
+    for (const QJsonValue &v : QJsonDocument::fromJson(json).array()) {
+        const QJsonObject o = v.toObject();
+        Model::Totp t;
+        t.secret = o.value("secret").toString();
+        t.algorithm = o.value("algorithm").toString(QStringLiteral("SHA1"));
+        t.digits = o.value("digits").toInt(6);
+        t.period = o.value("period").toInt(30);
+        t.issuer = o.value("issuer").toString();
+        t.account = o.value("account").toString();
+        out.append(t);
+    }
+    std::fill(json.begin(), json.end(), '\0');
+    return out;
+}
+
+QString totpCode(const Model::Totp &t, int *remaining)
+{
+    QByteArray secret = t.secret.toUtf8();
+    QByteArray alg = t.algorithm.toUtf8();
+    int left = 0;
+    char *raw = NetcoreTOTPCode(secret.data(), alg.data(), t.digits, t.period, &left);
+    std::fill(secret.begin(), secret.end(), '\0');
+    if (remaining)
+        *remaining = left;
+    if (!raw)
+        return {};
+    QString code = QString::fromUtf8(raw);
+    NetcoreFreeSecret(raw);
+    return code;
 }
 
 Forward::~Forward()

@@ -32,9 +32,15 @@ add_library(netcore STATIC IMPORTED GLOBAL)
 set_target_properties(netcore PROPERTIES IMPORTED_LOCATION ${NETCORE_LIB})
 add_dependencies(netcore netcore_build)
 target_include_directories(netcore INTERFACE ${NETCORE_OUT_DIR})
+# GlobalProtect uses libopenconnect (LGPL, linked dynamically and bundled with the app).
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(OPENCONNECT REQUIRED IMPORTED_TARGET openconnect)
+target_link_libraries(netcore INTERFACE PkgConfig::OPENCONNECT)
+
 if(APPLE)
     target_link_libraries(netcore INTERFACE
-        "-framework CoreFoundation" "-framework Security" resolv)
+        "-framework CoreFoundation" "-framework Security" "-framework SystemConfiguration"
+        "-framework IOKit" resolv)
 elseif(UNIX)
     target_link_libraries(netcore INTERFACE pthread dl resolv)
 endif()

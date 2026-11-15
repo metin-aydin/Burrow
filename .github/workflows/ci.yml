@@ -2,9 +2,8 @@ name: CI
 
 on:
   push:
-    branches: [development]
-  pull_request:
     branches: [development, master]
+  pull_request:
 
 permissions:
   contents: read
@@ -14,10 +13,12 @@ jobs:
     name: Go netcore tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: netcore/go.mod
+      - name: Install libopenconnect
+        run: sudo apt-get update && sudo apt-get install -y libopenconnect-dev pkg-config
       - name: Vet
         working-directory: netcore
         run: go vet ./...
@@ -25,17 +26,82 @@ jobs:
         working-directory: netcore
         run: go test -race ./...
 
+  vulncheck:
+    name: Known Go vulnerabilities
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: netcore/go.mod
+      - name: Install libopenconnect
+        run: sudo apt-get update && sudo apt-get install -y libopenconnect-dev pkg-config
+      - name: govulncheck
+        working-directory: netcore
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...   # pinned; bump deliberately (v1.1.4 panics on Go 1.27 syntax)
+
   macos:
     name: macOS build
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: netcore/go.mod
       - name: Install dependencies
-        run: brew install cmake ninja qt freerdp
+        run: brew install cmake ninja qt freerdp openconnect
       - name: Configure
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$(brew --prefix qt)"
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$(brew --prefix freerdp)"
       - name: Build
         run: cmake --build build
+      - name: Tests
+        run: cd build && ctest --output-on-failure
+      - name: Translations
+        run: |
+          cmake --build build --target Burrow_lupdate
+          python3 .github/scripts/i18n-check.py app/i18n/*.ts
+          git diff --exit-code -- app/i18n || (echo "::error::Run the Burrow_lupdate target and commit app/i18n"; exit 1)
+
+  linux:
+    name: Linux build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: netcore/go.mod
+      # Qt 6.10+ and FreeRDP 3.33+ aren't in Ubuntu 24.04; tools/linux-deps.sh builds them once per change.
+      # Only pushes to our own branches write the cache; pull requests may read it but never fill it,
+      # so a pull request can't plant binaries that later runs would execute.
+      - name: Restore Qt and FreeRDP
+        id: deps
+        uses: actions/cache/restore@v4
+        with:
+          path: /home/runner/burrow-deps
+          key: linux-deps-${{ runner.arch }}-${{ hashFiles('tools/linux-deps.sh') }}
+      - name: Install dependencies
+        run: tools/linux-deps.sh /home/runner/burrow-deps
+      - name: Save Qt and FreeRDP
+        if: github.event_name == 'push' && steps.deps.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /home/runner/burrow-deps
+          key: linux-deps-${{ runner.arch }}-${{ hashFiles('tools/linux-deps.sh') }}
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="/home/runner/burrow-deps/qt;/home/runner/burrow-deps/freerdp"
+      - name: Build
+        run: cmake --build build
+      - name: Tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+          LD_LIBRARY_PATH: /home/runner/burrow-deps/freerdp/lib
+        run: cd build && ctest --output-on-failure
+      - name: AppImage
+        run: tools/package-appimage.sh build 0.0.0-ci /home/runner/burrow-deps
+
+  scripts:
+    name: Release scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: python3 .github/scripts/release-notes-test.py

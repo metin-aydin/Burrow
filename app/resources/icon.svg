@@ -1,0 +1,33 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tileFill" x1="0" y1="96" x2="0" y2="928" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C99A5B"/>
+      <stop offset="0.55" stop-color="#BF8C4B"/>
+      <stop offset="1" stop-color="#B37D3D"/>
+    </linearGradient>
+    <linearGradient id="gloss" x1="0" y1="96" x2="0" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="bandFill" x1="0" y1="634" x2="0" y2="878" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F1F1F4"/>
+    </linearGradient>
+    <clipPath id="tileClip"><rect x="96" y="96" width="832" height="832" rx="208"/></clipPath>
+    <filter id="tileShadow" x="-20%" y="-20%" width="140%" height="145%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#4d3210" flood-opacity="0.22"/>
+      <feDropShadow dx="0" dy="16" stdDeviation="22" flood-color="#4d3210" flood-opacity="0.28"/>
+    </filter>
+    <filter id="raised" x="-20%" y="-20%" width="140%" height="150%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#6e4718" flood-opacity="0.38"/>
+    </filter>
+  </defs>
+  <rect x="96" y="96" width="832" height="832" rx="208" fill="url(#tileFill)" filter="url(#tileShadow)"/>
+  <rect x="96" y="96" width="832" height="424" fill="url(#gloss)" clip-path="url(#tileClip)"/>
+  <path d="M174 634H850Q878 634 878 662V720Q878 878 720 878H304Q146 878 146 720V662Q146 634 174 634Z" fill="url(#bandFill)" filter="url(#raised)"/>
+  <!-- Burrow mark: two nested tunnel arches -->
+  <g filter="url(#raised)" stroke="#FFFFFF" stroke-width="76" stroke-linecap="round" fill="none">
+    <path d="M282 556V452A230 230 0 0 1 742 452V556"/>
+    <path d="M428 556V474A84 84 0 0 1 596 474V556"/>
+  </g>
+</svg>

@@ -1,6 +1,6 @@
 ---
 name: project-goal
-description: gremote'un amacı ve kullanıcının motivasyonu
+description: Burrow'un amacı ve kullanıcının motivasyonu
 type: project
 ---
 

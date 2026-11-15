@@ -9,8 +9,8 @@ GNOME kullanıcı başına tek grafik oturuma izin verdiği için uzaktan bağla
 Kullanıcı Ubuntu'ya yardımcı servis kurulabileceğini onayladı (sudo var).
 
 ## Karar
-1. **Ana mod — Mevcut oturum:** GNOME Desktop Sharing (tüm sürümler) + **gremote-agent**.
-2. **gremote-agent** (Ubuntu'da systemd user servisi, Go):
+1. **Ana mod — Mevcut oturum:** GNOME Desktop Sharing (tüm sürümler) + **burrow-agent**.
+2. **burrow-agent** (Ubuntu'da systemd user servisi, Go):
    - İstemci bağlanmadan önce oturum kilidini açar (`loginctl unlock-session`).
    - Bağlantı bitince/kopunca oturumu kilitler (`loginctl lock-session`) — kopmayı agent kendisi
      algılar (istemci heartbeat'i kesilirse).
@@ -18,7 +18,7 @@ Kullanıcı Ubuntu'ya yardımcı servis kurulabileceğini onayladı (sudo var).
    - Sadece tünel arayüzünden erişilebilir; karşılıklı kimlik doğrulama (cihaz eşleştirmede üretilen
      anahtar çifti). Her komut imzalı, tekrar saldırısına karşı nonce/zaman damgası.
 3. **Opsiyonel — Ayrı kalıcı oturum:** GNOME 47+ → Remote Login; 22.04/24.04 → xrdp + ayrı kullanıcı.
-4. **Kurulum betiği** (`gremote-agent install`): sürümü algılar; Desktop Sharing'i açar, portları ve
+4. **Kurulum betiği** (`burrow-agent install`): sürümü algılar; Desktop Sharing'i açar, portları ve
    güvenlik duvarını ayarlar, agent'ı kurar, eşleştirme kodu üretir.
 
 ## Doğrulanacaklar (prototipte)

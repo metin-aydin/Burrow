@@ -1,0 +1,47 @@
+# Static analysis of the Go network core and of the workflows themselves, on every push and weekly.
+# Pull requests are scanned before merging; GitHub gives pull requests from forks a read-only token, so
+# security-events: write never reaches untrusted code (never use pull_request_target here).
+name: CodeQL
+
+on:
+  push:
+    branches: [development, master]
+  pull_request:
+    branches: [development, master]
+  schedule:
+    - cron: "17 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [go, actions]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        if: matrix.language == 'go'
+        with:
+          go-version-file: netcore/go.mod
+      - name: Install libopenconnect
+        if: matrix.language == 'go'
+        run: sudo apt-get update && sudo apt-get install -y libopenconnect-dev pkg-config
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.language == 'go' && 'manual' || 'none' }}
+      - name: Build
+        if: matrix.language == 'go'
+        working-directory: netcore
+        run: go build ./...
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:${{ matrix.language }}

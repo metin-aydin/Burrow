@@ -78,6 +78,31 @@ func TestForwarderOnlyLoopback(t *testing.T) {
 	}
 }
 
+func TestForwarderOneShot(t *testing.T) {
+	target := echoServer(t)
+	f := &Forwarder{Dialer: &net.Dialer{}, Target: target, OneShot: true}
+	addr, err := f.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	c1, err := net.Dial("tcp", addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c1.Close()
+	c1.Write([]byte("x"))
+	c1.SetReadDeadline(time.Now().Add(2 * time.Second))
+	if _, err := c1.Read(make([]byte, 1)); err != nil {
+		t.Fatalf("first conn should work: %v", err)
+	}
+	if c2, err := net.DialTimeout("tcp", addr, time.Second); err == nil {
+		c2.Close()
+		t.Fatal("listener should be closed after the first connection")
+	}
+}
+
 func TestForwarderMaxConns(t *testing.T) {
 	target := echoServer(t)
 	f := &Forwarder{Dialer: &net.Dialer{}, Target: target, MaxConns: 1}
@@ -106,5 +131,77 @@ func TestForwarderMaxConns(t *testing.T) {
 	c2.SetReadDeadline(time.Now().Add(2 * time.Second))
 	if _, err := c2.Read(make([]byte, 1)); err == nil {
 		t.Fatal("second conn should be rejected")
+	}
+}
+
+func TestMaxAccepts(t *testing.T) {
+	echo := echoServer(t)
+	f := &Forwarder{Dialer: &net.Dialer{}, Target: echo, MaxConns: 1, MaxAccepts: 2}
+	addr, err := f.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	for i := 0; i < 2; i++ {
+		c, err := net.Dial("tcp", addr)
+		if err != nil {
+			t.Fatalf("connection %d refused: %v", i+1, err)
+		}
+		c.Write([]byte("x"))
+		buf := make([]byte, 1)
+		c.SetReadDeadline(time.Now().Add(2 * time.Second))
+		if _, err := c.Read(buf); err != nil {
+			t.Fatalf("connection %d: %v", i+1, err)
+		}
+		c.Close()
+	}
+	time.Sleep(50 * time.Millisecond)
+	if c, err := net.DialTimeout("tcp", addr, time.Second); err == nil {
+		c.Close()
+		t.Fatal("third connection accepted")
+	}
+}
+
+func TestSealAndAcceptWindow(t *testing.T) {
+	echo := echoServer(t)
+	f := &Forwarder{Dialer: &net.Dialer{}, Target: echo, MaxConns: 1, MaxAccepts: 4, AcceptWindow: 200 * time.Millisecond}
+	addr, err := f.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	time.Sleep(400 * time.Millisecond)
+	if c, err := net.DialTimeout("tcp", addr, time.Second); err == nil {
+		c.Close()
+		t.Fatal("connection accepted after the accept window")
+	}
+
+	g := &Forwarder{Dialer: &net.Dialer{}, Target: echo, MaxConns: 1, MaxAccepts: 4}
+	addr2, _ := g.Start()
+	defer g.Close()
+	c, err := net.Dial("tcp", addr2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Close()
+	// Dial returns once the kernel has queued the connection, which can be before the forwarder
+	// accepts it; a round trip proves it was accepted, as it always is by the time Burrow seals
+	// (the RDP session is already up).
+	c.Write([]byte("x"))
+	buf := make([]byte, 1)
+	c.SetReadDeadline(time.Now().Add(2 * time.Second))
+	if _, err := c.Read(buf); err != nil {
+		t.Fatal(err)
+	}
+	g.Seal()
+	time.Sleep(50 * time.Millisecond)
+	if c2, err := net.DialTimeout("tcp", addr2, time.Second); err == nil {
+		c2.Close()
+		t.Fatal("connection accepted after Seal")
+	}
+	c.Write([]byte("y")) // the established connection still works
+	c.SetReadDeadline(time.Now().Add(2 * time.Second))
+	if _, err := c.Read(buf); err != nil {
+		t.Fatalf("established connection broken by Seal: %v", err)
 	}
 }

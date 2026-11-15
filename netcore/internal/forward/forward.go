@@ -9,6 +9,7 @@ import (
 	"io"
 	"net"
 	"sync"
+	"time"
 )
 
 // Dialer opens a TCP connection to addr through some tunnel.
@@ -26,7 +27,24 @@ type Forwarder struct {
 	// A single RDP session normally needs exactly one.
 	MaxConns int
 
-	ln     net.Listener
+	// OneShot closes the listener after the first accepted connection, so no
+	// other local process can use the port for the rest of the session.
+	// Security note: a loopback listener is reachable by any local process
+	// until it is closed. The long-term design hands FreeRDP one end of a
+	// socketpair via its rdpTransportIo TCPConnect callback (no listener at
+	// all); see ADR 0001.
+	OneShot bool
+
+	// MaxAccepts closes the listener after this many accepted connections (0 = no limit). RDP
+	// clients may reconnect during security negotiation, so tunnel forwards allow a few.
+	MaxAccepts int
+
+	// AcceptWindow closes the listener this long after Start even if MaxAccepts wasn't reached
+	// (0 = no limit). Call Seal as soon as the client is connected to close it earlier.
+	AcceptWindow time.Duration
+
+	ln       net.Listener
+	accepted int
 	wg     sync.WaitGroup
 	mu     sync.Mutex
 	active int
@@ -47,7 +65,17 @@ func (f *Forwarder) Start() (string, error) {
 	f.ctx, f.cancel = context.WithCancel(context.Background())
 	f.wg.Add(1)
 	go f.acceptLoop()
+	if f.AcceptWindow > 0 {
+		time.AfterFunc(f.AcceptWindow, f.Seal)
+	}
 	return ln.Addr().String(), nil
+}
+
+// Seal stops accepting new connections; established ones keep running.
+func (f *Forwarder) Seal() {
+	if f.ln != nil {
+		_ = f.ln.Close()
+	}
 }
 
 // Close stops listening and tears down all active connections.
@@ -68,27 +96,41 @@ func (f *Forwarder) acceptLoop() {
 		if err != nil {
 			return
 		}
-		if !f.acquire() {
-			_ = c.Close()
-			continue
+		f.accepted++
+		if f.OneShot || (f.MaxAccepts > 0 && f.accepted >= f.MaxAccepts) {
+			_ = f.ln.Close()
 		}
+		// Wait for a slot in the connection's own goroutine so the accept loop never stalls.
 		f.wg.Add(1)
 		go func() {
 			defer f.wg.Done()
+			if !f.acquire() {
+				_ = c.Close()
+				return
+			}
 			defer f.release()
 			f.handle(c)
 		}()
 	}
 }
 
+// acquire takes a connection slot, waiting briefly for one to free up: an RDP client that
+// reconnects closes its previous connection only a moment before opening the next one.
 func (f *Forwarder) acquire() bool {
-	f.mu.Lock()
-	defer f.mu.Unlock()
-	if f.MaxConns > 0 && f.active >= f.MaxConns {
-		return false
+	deadline := time.Now().Add(3 * time.Second)
+	for {
+		f.mu.Lock()
+		if f.MaxConns <= 0 || f.active < f.MaxConns {
+			f.active++
+			f.mu.Unlock()
+			return true
+		}
+		f.mu.Unlock()
+		if time.Now().After(deadline) || f.ctx.Err() != nil {
+			return false
+		}
+		time.Sleep(50 * time.Millisecond)
 	}
-	f.active++
-	return true
 }
 
 func (f *Forwarder) release() {

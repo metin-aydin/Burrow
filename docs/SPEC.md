@@ -1,4 +1,4 @@
-# gremote — Gereksinimler (taslak v0.2)
+# Burrow — Gereksinimler (taslak v0.2)
 
 Mac, Windows ve Ubuntu'da çalışan; kendi içinde GlobalProtect veya Tailscale tüneli açıp
 kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
@@ -7,7 +7,7 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
 
 - **Ek kurulum yok:** openconnect (libopenconnect + TLS/XML bağımlılıkları), FreeRDP, Qt ve Go netcore
   uygulama paketinin içinde gelir. Kullanıcı sadece uygulamayı kurar. (Tek istisna: Ubuntu'daki uzak
-  bilgisayara kurulan gremote-agent — ADR 0003.)
+  bilgisayara kurulan burrow-agent — ADR 0003.)
 - VPN / Tailscale **sistem genelinde açılmaz**. Tünel uygulamanın içinde (userspace) çalışır,
   sadece uygulamanın RDP trafiği tünelden geçer.
 - Tüm veriler **lokalde, şifreli** saklanır. Bulut/sunucu yok.
@@ -17,13 +17,15 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
 - İlk açılışta ana şifre (master password) belirlenir.
 - Her açılışta ana şifre sorulur. Şifre olmadan cihaz listesi, kayıtlı şifreler ve
   bağlantılar erişilemez.
-- Veri kasası ana şifreden türetilen anahtarla şifrelenir (Argon2id + AES-256-GCM / SQLCipher).
+- Veri kasası ana şifreden türetilen anahtarla şifrelenir (Argon2id + XChaCha20-Poly1305, ADR 0004); isteğe bağlı Touch ID ile açma.
 - Ana şifre unutulursa veri kurtarılamaz (bilinçli tercih).
 
 ## 3. Tünel profilleri
 
 ### 3.1 GlobalProtect
-- Alanlar: GP host, kullanıcı adı, şifre.
+- Alanlar: GP host, kullanıcı adı, şifre, gateway/auth grubu (opsiyonel, ör. `--authgroup`).
+- VPN sunucu adı sistem DNS'iyle çözülemezse (split-DNS: kurum domaini iç DNS'e yönlendirilmiş
+  olabilir) genel DNS / DNS-over-HTTPS ile çözülür.
 - "Şifreyi sakla" seçeneği (kasada şifreli).
 - "OTP kullan" checkbox'ı + OTP tipi:
   - **Şifrenin sonuna ekle** (mevcut kurum akışı: şifre+OTP)
@@ -53,11 +55,20 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
 - İlk girişte Tailscale login linki uygulama içinden açılır; düğüm durumu kasada saklanır.
 - (İsteğe bağlı) Headscale / özel control server URL'si.
 
+### 3.3 Cloudflare Tunnel (ADR 0007)
+- Hedef bilgisayarda `cloudflared` RDP portunu bir Cloudflare Access uygulaması olarak yayınlar (ücretsiz Zero Trust
+  planı yeterli; Cloudflare'de bir alan adı gerekir).
+- Cihazın adresi Access host adıdır (ör. `rdp.example.com`); opsiyonel bastion ile iç ağ adresleri de kullanılabilir.
+- İlk bağlantıda tarayıcıda Access girişi; erişim anahtarları kasada şifreli. Trafik WebSocket üzerinden, yalnız
+  uygulamanın içinde (WARP gibi sistem geneli istemci kullanılmaz).
+
 ## 4. Cihazlar
 
 - Cihaz kaydı: ad, host/IP, port (varsayılan 3389), kullanıcı adı, şifre (opsiyonel sakla),
   domain, hangi tünel profiliyle bağlanılacağı (GP / Tailscale / doğrudan).
 - Lokalde, şifreli kasada saklanır.
+- RDP sunucu sertifikası ilk bağlantıda kullanıcıya parmak iziyle gösterilir; onaylanırsa `host:port`a bağlı
+  olarak sabitlenir, sonradan değişirse bağlanılmaz. Yalnız NLA/TLS güvenlik katmanları kullanılır.
 - Liste, arama, düzenle, sil, kopyala.
 - Cihaz türü: Windows / Ubuntu (oturum ve kilit davranışı buna göre değişir).
 
@@ -68,11 +79,10 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
   şifre oraya da otomatik yazılır (ayar açıksa).
 - **Bağlantı kapanınca kilitle:** pencere kapatıldığında/bağlantı kesildiğinde uzak bilgisayarın
   ekranı kilitli kalır. Davranış:
-  - Windows: RDP bağlantısı kesilince oturum zaten kilitli kalır; ek işlem gerekmez, uygulama
-    bunu doğrular ve kullanıcıya gösterir.
-  - Ubuntu (mevcut oturumu paylaşma modu): oturum açık kalabildiği için uygulama, bağlantıyı
-    kesmeden hemen önce uzak tarafa kilit kısayolunu (Super+L) gönderir.
-- **Bağlantı kapanınca:** "Oturumu açık bırak (kilitli)" veya "Oturumu kapat (sign out)".
+  - Uygulama bağlantıyı kesmeden hemen önce uzak tarafa kilit kısayolunu gönderir (Windows: Win+L,
+    Ubuntu/GNOME: Super+L; aynı tuş kodları). Ubuntu'da ileride burrow-agent ile `loginctl lock-session`.
+- **Bağlantı kapanınca:** "Oturumu açık bırak (kilitli)" (şu an tek seçenek) veya "Oturumu kapat (sign out)"
+  — oturumu kapatma henüz yok, arayüzde gizli (2026-11-15).
 - **Oturum seçimi:** "Mevcut oturuma bağlan" / "Yeni oturum aç" / "Her bağlantıda sor"
   (ayrıntı §5.2).
 
@@ -85,10 +95,13 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
 ### 5.0 Pano (kopyala/yapıştır) — çift yönlü
 - Kendi bilgisayarında kopyalanan uzak bilgisayara, uzakta kopyalanan kendi bilgisayarına
   yapıştırılabilir (RDP clipboard kanalı, FreeRDP `cliprdr`).
-- İçerik türleri: düz metin, zengin metin/HTML, görsel (ekran görüntüsü vb.); dosya kopyalama
-  sonraki faz.
+- İçerik türleri: düz metin, zengin metin/HTML, görsel (ekran görüntüsü vb.) ve dosya/klasör — RDP'de iki yönde,
+  istemci hangi işletim sisteminde çalışırsa çalışsın (Windows, Linux, macOS). Uzaktan gelen dosyalar bir seferde
+  en fazla 2 GB; bir kopyada en fazla 10.000 öğe. macOS hedefleri (VNC) yalnızca düz metin taşır: standart RFB'de
+  dosya aktarımı yok.
 - Cihaz ayarı: pano paylaşımı açık / kapalı / sadece yerelden uzağa / sadece uzaktan yerele.
-- Pano içeriği loglanmaz, diske yazılmaz.
+- Pano içeriği loglanmaz, diske yazılmaz. İstisna: uzaktan kopyalanan dosyalar yapıştırılabilmek için oturuma ait
+  özel önbellek klasörüne iner ve oturum kapanınca silinir.
 
 ### 5.0.1 Klavye kısayol eşleme (Mac)
 - Mac'te Cmd+C/V/X/Z/A/S/F… gibi kısayollar uzak bilgisayara Ctrl+C/V/X/Z/A/S/F… olarak gönderilir;
@@ -126,7 +139,7 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
 - **Tüm Ubuntu sürümleriyle uyumlu olmalı** (kullanıcı yükseltme yapamıyor; 2026-11-14).
 - Tasarım (KABUL EDİLDİ, ADR 0003; teknik doğrulama prototipte):
   - **Mevcut oturum (tüm sürümler, ana mod):** GNOME Desktop Sharing + Ubuntu'da küçük bir
-    **gremote-agent** (systemd user servisi):
+    **burrow-agent** (systemd user servisi):
     - Bağlanmadan önce oturumun kilidini açar (`loginctl unlock-session`) → kilitli ekran sorunu çözülür.
     - Bağlantı bitince (normal kapanış veya kopma) oturumu kilitler (`loginctl lock-session`).
     - Bağlıyken ofisteki monitörü kapatmayı dener (Mutter PowerSaveMode) — çalışıp çalışmadığı
@@ -159,5 +172,5 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
 - **Qt 6 (C++)**: arayüz + çoklu native pencere + monitör yönetimi
 - **FreeRDP 3**: RDP motoru (multimon, GFX/H.264; macOS'ta VideoToolbox)
 - **Go netcore** (c-shared): tsnet (Tailscale) + libopenconnect (GlobalProtect) + gVisor netstack
-- **SQLCipher**: şifreli lokal kasa
+- **Kasa**: Go netcore içinde şifreli dosya (ADR 0004)
 - Açık kaynak. Platform sırası: macOS → Ubuntu → Windows.
