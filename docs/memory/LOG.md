@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Windows 0.2.0 kurulunca açılmıyordu → düzeltildi.** CI'daki duman testi yalnız `offscreen` ile açıyordu; gerçek
+  Windows eklentisiyle açılınca `module "QtQuick.Controls.Basic" is not installed`. Sebep: windeployqt QML'i `qml\`'e
+  koyuyor, MSYS2 Qt'si `share\qt6\qml`'de arıyor. Paket artık `qt.conf` (Prefix=., Plugins=., QmlImports=qml) taşıyor;
+  duman testi uygulamayı iki kez (offscreen + gerçek eklenti) açıyor. Konsolsuz Windows'ta günlük
+  `%LOCALAPPDATA%\Burrow\burrow.log`'a yazılıyor (`app/src/app/LogFile.*`). Release'e girmesi için 0.2.1 gerekiyor.
+
 - **macOS: başlık ve Dock düzeltmesi** (kullanıcı 0.2.0'da gördü). Pencere kapatılıp tepsiden açılınca Qt NSWindow'u
   yeniden yaratıyor; yeni pencerede `titleVisibility`/boş toolbar ayarı olmadığı için sistem başlığı "Burrow" header'ın
   üstüne biniyor, trafik ışıkları kayıyordu. Kapat → "Open Burrow" döngüsüyle (System Events) yeniden üretildi; ayarlar
