@@ -29,8 +29,6 @@ class AppController : public QObject
     Q_PROPERTY(DeviceFilterModel *gallery READ gallery CONSTANT)
     Q_PROPERTY(Updater *updater READ updater CONSTANT)
     Q_PROPERTY(QVariantMap tunnelStates READ tunnelStates NOTIFY tunnelStatesChanged)
-    Q_PROPERTY(bool touchIdAvailable READ touchIdAvailable CONSTANT)
-    Q_PROPERTY(bool touchIdEnabled READ touchIdEnabled NOTIFY touchIdEnabledChanged)
     Q_PROPERTY(QString versionInfo READ versionInfo CONSTANT)
     Q_PROPERTY(int autoLockMinutes READ autoLockMinutes WRITE setAutoLockMinutes NOTIFY autoLockChanged)
     Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)   // system | en | tr
@@ -45,8 +43,6 @@ public:
     DeviceFilterModel *gallery() { return &m_gallery; }
     Updater *updater() { return &m_updater; }
     QVariantMap tunnelStates() const { return m_tunnelMgr.states(); }
-    bool touchIdAvailable() const;
-    bool touchIdEnabled() const;
     QString versionInfo() const;
     VaultStore *store() { return &m_store; }
 
@@ -67,13 +63,11 @@ public:
     // --- Vault -------------------------------------------------------------
     Q_INVOKABLE QString createVault(const QString &password, const QString &confirm);
     Q_INVOKABLE QString unlock(const QString &password);
-    Q_INVOKABLE QString unlockWithTouchId();
     Q_INVOKABLE void lock();
     // Closes all sessions (saving their previews) and locks the vault. Call before exiting.
     void shutdown();
     Q_INVOKABLE QString changePassword(const QString &current, const QString &next,
                                        const QString &again);
-    Q_INVOKABLE QString setTouchIdEnabled(bool on);
 
     // --- Devices -----------------------------------------------------------
     Q_INVOKABLE QVariantMap newDevice() const;
@@ -143,7 +137,6 @@ public:
 
 signals:
     void stateChanged();
-    void touchIdEnabledChanged();
     void toast(const QString &message);
     void languageChanged();
     void themeChanged();

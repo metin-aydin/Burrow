@@ -28,7 +28,7 @@ CI'da doğrulandı. Linux AppImage release'te var ama `latest.json`'da yok (Linu
 `cmake --build build --target Burrow_lupdate` çalıştırıp `app/i18n`'i commit et.
 
 Henüz yapılmayan:
-Intel/Ubuntu/Windows paketleri; Touch ID için provisioning profile (release'te Touch ID şimdilik çalışmaz).
+Intel/Ubuntu/Windows paketleri.
 
 **Nasıl uygulanır:** Yeni CI işi eklenince dal korumasındaki zorunlu kontrol listesini de güncelle.
 Bkz. [[feedback-github-via-mcp]], [[project-github-meta]].

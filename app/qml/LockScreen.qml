@@ -42,8 +42,6 @@ Rectangle {
 
     Component.onCompleted: {
         pw.field.forceActiveFocus()
-        if (!setup && App.touchIdEnabled && App.touchIdAvailable)
-            Qt.callLater(function() { const e = App.unlockWithTouchId(); if (e) root.error = e })
     }
 
     Rectangle {
@@ -114,14 +112,6 @@ Rectangle {
                 text: busy.running ? qsTr("Deriving Key…")
                     : root.setup ? qsTr("Create Vault") : qsTr("Unlock")
                 onClicked: root.submit()
-            }
-            BButton {
-                visible: !root.setup && App.touchIdEnabled && App.touchIdAvailable
-                Layout.fillWidth: true
-                variant: "ghost"
-                iconName: "fingerprint"
-                text: qsTr("Unlock With Touch ID")
-                onClicked: { const e = App.unlockWithTouchId(); if (e) root.error = e }
             }
             QtObject { id: busy; property bool running: false }
         }

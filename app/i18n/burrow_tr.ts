@@ -4,169 +4,154 @@
 <context>
     <name>AppController</name>
     <message>
-        <location filename="../src/app/AppController.cpp" line="73"/>
+        <location filename="../src/app/AppController.cpp" line="71"/>
         <source>Burrow %1 is available. Install it from Settings.</source>
         <translation>Burrow %1 yayımlandı. Ayarlar&apos;dan kurabilirsin.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="96"/>
+        <location filename="../src/app/AppController.cpp" line="84"/>
         <source>Burrow %1 · netcore %2 · %3</source>
         <translation>Burrow %1 · netcore %2 · %3</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="201"/>
+        <location filename="../src/app/AppController.cpp" line="189"/>
         <source>The password must be at least %1 characters.</source>
         <translation>Şifre en az %1 karakter olmalı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="203"/>
+        <location filename="../src/app/AppController.cpp" line="191"/>
         <source>The passwords don&apos;t match.</source>
         <translation>Şifreler aynı değil.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="210"/>
+        <location filename="../src/app/AppController.cpp" line="198"/>
         <source>Enter your master password.</source>
         <translation>Ana şifreni gir.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="217"/>
-        <source>Unlock the Burrow vault</source>
-        <translation>Burrow kasasının kilidini aç</translation>
-    </message>
-    <message>
-        <location filename="../src/app/AppController.cpp" line="227"/>
-        <source>The Touch ID key is no longer valid; unlock with your master password.</source>
-        <translation>Touch ID anahtarı geçersiz; ana şifreyle aç.</translation>
-    </message>
-    <message>
-        <location filename="../src/app/AppController.cpp" line="278"/>
+        <location filename="../src/app/AppController.cpp" line="248"/>
         <source>The new password must be at least %1 characters.</source>
         <translation>Yeni şifre en az %1 karakter olmalı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="280"/>
+        <location filename="../src/app/AppController.cpp" line="250"/>
         <source>The new passwords don&apos;t match.</source>
         <translation>Yeni şifreler aynı değil.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="282"/>
+        <location filename="../src/app/AppController.cpp" line="252"/>
         <source>The current password is wrong.</source>
         <translation>Mevcut şifre yanlış.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="296"/>
-        <source>Master password changed. Touch ID was turned off: %1</source>
-        <translation>Ana şifre değiştirildi. Touch ID kapatıldı: %1</translation>
-    </message>
-    <message>
-        <location filename="../src/app/AppController.cpp" line="300"/>
+        <location filename="../src/app/AppController.cpp" line="256"/>
         <source>Master password changed.</source>
         <translation>Ana şifre değiştirildi.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="329"/>
+        <location filename="../src/app/AppController.cpp" line="264"/>
         <source>Couldn&apos;t save the change: %1</source>
         <translation>Değişiklik kaydedilemedi: %1</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="366"/>
+        <location filename="../src/app/AppController.cpp" line="301"/>
         <source>Name and address can&apos;t be empty.</source>
         <translation>Ad ve adres boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="402"/>
+        <location filename="../src/app/AppController.cpp" line="337"/>
         <source>%1 (Copy)</source>
         <translation>%1 (Kopya)</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="444"/>
+        <location filename="../src/app/AppController.cpp" line="379"/>
         <source>The device no longer exists.</source>
         <translation>Cihaz artık yok.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="447"/>
+        <location filename="../src/app/AppController.cpp" line="382"/>
         <source>%1 is already open.</source>
         <translation>%1 zaten açık.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="482"/>
+        <location filename="../src/app/AppController.cpp" line="417"/>
         <source>The tunnel profile no longer exists.</source>
         <translation>Tünel profili artık yok.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="665"/>
+        <location filename="../src/app/AppController.cpp" line="600"/>
         <source>Sign in to Cloudflare Access in the browser window that opened.</source>
         <translation>Açılan tarayıcı penceresinde Cloudflare Access&apos;e giriş yap.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="691"/>
+        <location filename="../src/app/AppController.cpp" line="626"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="755"/>
-        <location filename="../src/app/AppController.cpp" line="770"/>
+        <location filename="../src/app/AppController.cpp" line="690"/>
+        <location filename="../src/app/AppController.cpp" line="705"/>
         <source>Couldn&apos;t open a connection through the tunnel.</source>
         <translation>Tünel üzerinden bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="905"/>
+        <location filename="../src/app/AppController.cpp" line="840"/>
         <source>The profile name can&apos;t be empty.</source>
         <translation>Profil adı boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="516"/>
-        <location filename="../src/app/AppController.cpp" line="909"/>
+        <location filename="../src/app/AppController.cpp" line="451"/>
+        <location filename="../src/app/AppController.cpp" line="844"/>
         <source>Server and username can&apos;t be empty.</source>
         <translation>Sunucu ve kullanıcı adı boş olamaz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="518"/>
+        <location filename="../src/app/AppController.cpp" line="453"/>
         <source>Enter a device hostname to test with.</source>
         <translation>Test için bir cihaz host adı gir.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="912"/>
+        <location filename="../src/app/AppController.cpp" line="847"/>
         <source>The OTP key is invalid.</source>
         <translation>OTP anahtarı geçersiz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="954"/>
+        <location filename="../src/app/AppController.cpp" line="889"/>
         <source>Direct (No Tunnel)</source>
         <translation>Doğrudan (Tünelsiz)</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="988"/>
+        <location filename="../src/app/AppController.cpp" line="923"/>
         <source>Invalid key</source>
         <translation>Geçersiz anahtar</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1043"/>
+        <location filename="../src/app/AppController.cpp" line="978"/>
         <source>Company VPN</source>
         <translation>Şirket VPN</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1048"/>
+        <location filename="../src/app/AppController.cpp" line="983"/>
         <source>Home Network</source>
         <translation>Ev Ağı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1056"/>
+        <location filename="../src/app/AppController.cpp" line="991"/>
         <source>Work PC</source>
         <translation>İş Bilgisayarı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1057"/>
+        <location filename="../src/app/AppController.cpp" line="992"/>
         <source>Meeting Room</source>
         <translation>Toplantı Odası</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1058"/>
+        <location filename="../src/app/AppController.cpp" line="993"/>
         <source>Home Desktop</source>
         <translation>Ev Masaüstü</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1059"/>
+        <location filename="../src/app/AppController.cpp" line="994"/>
         <source>Lab Server</source>
         <translation>Laboratuvar</translation>
     </message>
@@ -182,34 +167,6 @@
         <location filename="../qml/BField.qml" line="54"/>
         <source>Show Password</source>
         <translation>Şifreyi Göster</translation>
-    </message>
-</context>
-<context>
-    <name>Biometric</name>
-    <message>
-        <location filename="../src/platform/Biometric_mac.mm" line="27"/>
-        <source>Touch ID isn&apos;t available in this build (requires a signed release).</source>
-        <translation>Touch ID bu build&apos;de kullanılamıyor (imzalı sürüm gerekir).</translation>
-    </message>
-    <message>
-        <location filename="../src/platform/Biometric_mac.mm" line="29"/>
-        <source>Touch ID was not confirmed.</source>
-        <translation>Touch ID doğrulaması yapılmadı.</translation>
-    </message>
-    <message>
-        <location filename="../src/platform/Biometric_mac.mm" line="31"/>
-        <source>No key is saved for Touch ID; unlock with your master password.</source>
-        <translation>Touch ID için kayıtlı anahtar yok; ana şifreyle aç.</translation>
-    </message>
-    <message>
-        <location filename="../src/platform/Biometric_mac.mm" line="36"/>
-        <source>Keychain error: %1</source>
-        <translation>Keychain hatası: %1</translation>
-    </message>
-    <message>
-        <location filename="../src/platform/Biometric_mac.mm" line="61"/>
-        <source>Couldn&apos;t create the access control.</source>
-        <translation>Erişim kontrolü oluşturulamadı.</translation>
     </message>
 </context>
 <context>
@@ -802,59 +759,54 @@
 <context>
     <name>LockScreen</name>
     <message>
-        <location filename="../qml/LockScreen.qml" line="71"/>
+        <location filename="../qml/LockScreen.qml" line="69"/>
         <source>Welcome To Burrow</source>
         <translation>Burrow&apos;a Hoş Geldin</translation>
     </message>
     <message>
-        <location filename="../qml/LockScreen.qml" line="71"/>
+        <location filename="../qml/LockScreen.qml" line="69"/>
         <source>Burrow Is Locked</source>
         <translation>Burrow Kilitli</translation>
     </message>
     <message>
-        <location filename="../qml/LockScreen.qml" line="83"/>
+        <location filename="../qml/LockScreen.qml" line="81"/>
         <source>Your devices, passwords and OTP keys are encrypted with this master password and stored only on this computer. If you forget it, the data cannot be recovered.</source>
         <translation>Cihazların, şifrelerin ve OTP anahtarların bu ana şifreyle şifrelenip yalnızca bu bilgisayarda saklanır. Şifreyi unutursan veriler kurtarılamaz.</translation>
     </message>
     <message>
-        <location filename="../qml/LockScreen.qml" line="84"/>
+        <location filename="../qml/LockScreen.qml" line="82"/>
         <source>Enter your master password to continue.</source>
         <translation>Devam etmek için ana şifreni gir.</translation>
     </message>
     <message>
-        <location filename="../qml/LockScreen.qml" line="89"/>
+        <location filename="../qml/LockScreen.qml" line="87"/>
         <source>Master Password</source>
         <translation>Ana Şifre</translation>
     </message>
     <message>
-        <location filename="../qml/LockScreen.qml" line="97"/>
+        <location filename="../qml/LockScreen.qml" line="95"/>
         <source>Master Password (Again)</source>
         <translation>Ana Şifre (Tekrar)</translation>
     </message>
     <message>
-        <location filename="../qml/LockScreen.qml" line="99"/>
+        <location filename="../qml/LockScreen.qml" line="97"/>
         <source>At least 8 characters.</source>
         <translation>En az 8 karakter.</translation>
     </message>
     <message>
-        <location filename="../qml/LockScreen.qml" line="114"/>
+        <location filename="../qml/LockScreen.qml" line="112"/>
         <source>Deriving Key…</source>
         <translation>Anahtar Türetiliyor…</translation>
     </message>
     <message>
-        <location filename="../qml/LockScreen.qml" line="115"/>
+        <location filename="../qml/LockScreen.qml" line="113"/>
         <source>Create Vault</source>
         <translation>Kasayı Oluştur</translation>
     </message>
     <message>
-        <location filename="../qml/LockScreen.qml" line="115"/>
+        <location filename="../qml/LockScreen.qml" line="113"/>
         <source>Unlock</source>
         <translation>Kilidi Aç</translation>
-    </message>
-    <message>
-        <location filename="../qml/LockScreen.qml" line="123"/>
-        <source>Unlock With Touch ID</source>
-        <translation>Touch ID İle Aç</translation>
     </message>
 </context>
 <context>
@@ -1132,192 +1084,177 @@
         <translation>Ayarlar</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="15"/>
+        <location filename="../qml/SettingsDialog.qml" line="14"/>
         <source>Language</source>
         <translation>Dil</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="18"/>
+        <location filename="../qml/SettingsDialog.qml" line="17"/>
         <source>System Language</source>
         <translation>Sistem Dili</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="25"/>
+        <location filename="../qml/SettingsDialog.qml" line="24"/>
         <source>Appearance</source>
         <translation>Görünüm</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="30"/>
+        <location filename="../qml/SettingsDialog.qml" line="29"/>
         <source>Match System</source>
         <translation>Sistemle Aynı</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="31"/>
+        <location filename="../qml/SettingsDialog.qml" line="30"/>
         <source>Light</source>
         <translation>Açık</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="32"/>
+        <location filename="../qml/SettingsDialog.qml" line="31"/>
         <source>Dark</source>
         <translation>Koyu</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="37"/>
+        <location filename="../qml/SettingsDialog.qml" line="36"/>
         <source>Security</source>
         <translation>Güvenlik</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="44"/>
-        <source>Unlock With Touch ID</source>
-        <translation>Touch ID İle Aç</translation>
-    </message>
-    <message>
-        <location filename="../qml/SettingsDialog.qml" line="45"/>
-        <source>Unlock the vault with your fingerprint instead of the master password. The master password always keeps working.</source>
-        <translation>Kasa, ana şifre yerine parmak iziyle açılabilir. Ana şifre her zaman geçerli kalır.</translation>
-    </message>
-    <message>
-        <location filename="../qml/SettingsDialog.qml" line="46"/>
-        <source>This Mac has no Touch ID.</source>
-        <translation>Bu Mac&apos;te Touch ID yok.</translation>
-    </message>
-    <message>
-        <location filename="../qml/SettingsDialog.qml" line="54"/>
+        <location filename="../qml/SettingsDialog.qml" line="39"/>
         <source>Auto-Lock</source>
         <translation>Otomatik Kilit</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="55"/>
+        <location filename="../qml/SettingsDialog.qml" line="40"/>
         <source>After 5 minutes of inactivity</source>
         <translation>5 dakika işlem yapılmazsa</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="56"/>
+        <location filename="../qml/SettingsDialog.qml" line="41"/>
         <source>After 15 minutes of inactivity</source>
         <translation>15 dakika işlem yapılmazsa</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="57"/>
+        <location filename="../qml/SettingsDialog.qml" line="42"/>
         <source>After 30 minutes of inactivity</source>
         <translation>30 dakika işlem yapılmazsa</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="58"/>
+        <location filename="../qml/SettingsDialog.qml" line="43"/>
         <source>After 1 hour of inactivity</source>
         <translation>1 saat işlem yapılmazsa</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="59"/>
+        <location filename="../qml/SettingsDialog.qml" line="44"/>
         <source>Never</source>
         <translation>Hiçbir Zaman</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="68"/>
+        <location filename="../qml/SettingsDialog.qml" line="53"/>
         <source>Burrow keeps running in the menu bar when you close its window; it locks itself after this much inactivity, but never while a remote desktop is open.</source>
         <translation>Pencereyi kapattığında Burrow menü çubuğunda çalışmaya devam eder; bu süre boyunca işlem yapılmazsa kendini kilitler, ancak açık bir uzak masaüstü varken asla kilitlenmez.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="71"/>
+        <location filename="../qml/SettingsDialog.qml" line="56"/>
         <source>Change Master Password</source>
         <translation>Ana Şifreyi Değiştir</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="72"/>
+        <location filename="../qml/SettingsDialog.qml" line="57"/>
         <source>Current Password</source>
         <translation>Mevcut Şifre</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="75"/>
+        <location filename="../qml/SettingsDialog.qml" line="60"/>
         <source>New Password</source>
         <translation>Yeni Şifre</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="76"/>
+        <location filename="../qml/SettingsDialog.qml" line="61"/>
         <source>New Password (Again)</source>
         <translation>Yeni Şifre (Tekrar)</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="81"/>
+        <location filename="../qml/SettingsDialog.qml" line="66"/>
         <source>Change Password</source>
         <translation>Şifreyi Değiştir</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="89"/>
+        <location filename="../qml/SettingsDialog.qml" line="74"/>
         <source>Updates</source>
         <translation>Güncellemeler</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="93"/>
+        <location filename="../qml/SettingsDialog.qml" line="78"/>
         <source>Check For Updates Automatically</source>
         <translation>Güncellemeleri Otomatik Denetle</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="94"/>
+        <location filename="../qml/SettingsDialog.qml" line="79"/>
         <source>Checks GitHub every 6 hours. Nothing is downloaded without asking.</source>
         <translation>6 saatte bir GitHub&apos;ı denetler. Sormadan hiçbir şey indirilmez.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="95"/>
+        <location filename="../qml/SettingsDialog.qml" line="80"/>
         <source>The portable version doesn&apos;t update itself. Download new versions from GitHub, or use the installer.</source>
         <translation>Taşınabilir sürüm kendini güncellemez. Yeni sürümleri GitHub&apos;dan indirin veya kurulum sürümünü kullanın.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="96"/>
+        <location filename="../qml/SettingsDialog.qml" line="81"/>
         <source>Automatic updates aren&apos;t available on this platform yet.</source>
         <translation>Bu platformda otomatik güncelleme henüz yok.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="111"/>
+        <location filename="../qml/SettingsDialog.qml" line="96"/>
         <source>Checking for updates…</source>
         <translation>Güncellemeler denetleniyor…</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="112"/>
+        <location filename="../qml/SettingsDialog.qml" line="97"/>
         <source>Burrow is up to date.</source>
         <translation>Burrow güncel.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="113"/>
+        <location filename="../qml/SettingsDialog.qml" line="98"/>
         <source>Burrow %1 is available.</source>
         <translation>Burrow %1 yayımlandı.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="114"/>
+        <location filename="../qml/SettingsDialog.qml" line="99"/>
         <source>Downloading %1… %2%</source>
         <translation>%1 indiriliyor… %%2</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="115"/>
+        <location filename="../qml/SettingsDialog.qml" line="100"/>
         <source>Burrow %1 is ready to install. Burrow restarts to finish.</source>
         <translation>Burrow %1 kurulmaya hazır. Bitirmek için Burrow yeniden başlar.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="116"/>
+        <location filename="../qml/SettingsDialog.qml" line="101"/>
         <source>Installing…</source>
         <translation>Kuruluyor…</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="124"/>
+        <location filename="../qml/SettingsDialog.qml" line="109"/>
         <source>Check Now</source>
         <translation>Şimdi Denetle</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="130"/>
+        <location filename="../qml/SettingsDialog.qml" line="115"/>
         <source>Download Update</source>
         <translation>Güncellemeyi İndir</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="136"/>
+        <location filename="../qml/SettingsDialog.qml" line="121"/>
         <source>Restart And Update</source>
         <translation>Yeniden Başlat Ve Güncelle</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="141"/>
+        <location filename="../qml/SettingsDialog.qml" line="126"/>
         <source>About</source>
         <translation>Hakkında</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="146"/>
+        <location filename="../qml/SettingsDialog.qml" line="131"/>
         <source>Done</source>
         <translation>Bitti</translation>
     </message>
@@ -1977,27 +1914,27 @@
 <context>
     <name>VaultStore</name>
     <message>
-        <location filename="../src/vault/VaultStore.cpp" line="176"/>
+        <location filename="../src/vault/VaultStore.cpp" line="155"/>
         <source>Wrong master password.</source>
         <translation>Ana şifre yanlış.</translation>
     </message>
     <message>
-        <location filename="../src/vault/VaultStore.cpp" line="178"/>
+        <location filename="../src/vault/VaultStore.cpp" line="157"/>
         <source>The vault file is damaged or from an unsupported version. There may be a .bak backup next to it.</source>
         <translation>Kasa dosyası bozuk veya desteklenmeyen bir sürüm. Yanında .bak yedeği olabilir.</translation>
     </message>
     <message>
-        <location filename="../src/vault/VaultStore.cpp" line="182"/>
+        <location filename="../src/vault/VaultStore.cpp" line="161"/>
         <source>The vault opened, but this version can&apos;t read its contents. Update the app.</source>
         <translation>Kasa açıldı ama içeriği bu sürümde okunamıyor (uygulamayı güncelle).</translation>
     </message>
     <message>
-        <location filename="../src/vault/VaultStore.cpp" line="180"/>
+        <location filename="../src/vault/VaultStore.cpp" line="159"/>
         <source>A vault already exists.</source>
         <translation>Kasa zaten var.</translation>
     </message>
     <message>
-        <location filename="../src/vault/VaultStore.cpp" line="186"/>
+        <location filename="../src/vault/VaultStore.cpp" line="165"/>
         <source>Couldn&apos;t read or write the vault file.</source>
         <translation>Kasa dosyası okunamadı/yazılamadı.</translation>
     </message>

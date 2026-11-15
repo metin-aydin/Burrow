@@ -55,7 +55,7 @@ remote desktop app. Burrow opens the tunnel itself, only for its own connections
 | **Tunnel profiles** with their type, server and how many devices use them. | **Tailscale**: nothing to fill in; sign in, then import machines from your tailnet. |
 
 **Security.** Computers, passwords, OTP keys and screen previews live in a local vault encrypted with your master
-password (Argon2id and XChaCha20-Poly1305); on macOS it can be unlocked with Touch ID. Nothing is sent to a cloud
+password (Argon2id and XChaCha20-Poly1305). Nothing is sent to a cloud
 service and there is no account. RDP servers are pinned on first use and Burrow refuses to connect if the certificate
 changes. Secrets are never written to logs. To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
@@ -73,7 +73,7 @@ changes. Secrets are never written to logs. To report a vulnerability, see [SECU
 - **Sessions**: automatic sign-in and an option to lock the remote computer when you disconnect.
 - **Clipboard and keyboard**: two-way clipboard over RDP (text, rich text, images and files); Mac shortcuts translated
   (Cmd+C → Ctrl+C) or swapped.
-- **Encrypted local vault** with a master password, Touch ID on macOS and auto-lock after inactivity; Burrow keeps
+- **Encrypted local vault** with a master password and auto-lock after inactivity; Burrow keeps
   running in the menu bar or system tray when its window is closed.
 - **In-app updates** from GitHub Releases, verified by SHA-256 and the Developer ID team before they are installed.
 - English and Turkish interface, light and dark themes, VoiceOver labels and keyboard navigation.
@@ -83,11 +83,11 @@ changes. Secrets are never written to logs. To report a vulnerability, see [SECU
 | | |
 | --- | --- |
 | ![The lock screen](docs/images/lock-screen.png) | ![The gallery in the dark theme](docs/images/gallery-dark.png) |
-| **Lock screen**: the vault opens with your master password or Touch ID. | **Gallery** in the dark theme, with each computer's tunnel and address. |
+| **Lock screen**: the vault opens with your master password. | **Gallery** in the dark theme, with each computer's tunnel and address. |
 | ![Adding a Mac over Screen Sharing](docs/images/device-editor.png) | ![A GlobalProtect profile with automatic codes](docs/images/tunnel-editor.png) |
 | **New device**: Windows, Ubuntu or a Mac, with its address, tunnel and user. | **GlobalProtect** with one-time codes from your authenticator. |
 | ![Settings](docs/images/settings.png) | ![The tunnel profiles list](docs/images/tunnel-profiles.png) |
-| **Settings**: language, appearance, Touch ID, auto-lock, master password and updates. | **Tunnel profiles**, tested and used by your devices. |
+| **Settings**: language, appearance, auto-lock, master password and updates. | **Tunnel profiles**, tested and used by your devices. |
 
 Screenshots are taken from the built app with sample data by `tools/readme-shots.sh`.
 
@@ -111,8 +111,7 @@ chmod +x Burrow-*-linux-x64.AppImage
 ./Burrow-*-linux-x64.AppImage
 ```
 
-If it does not start, install FUSE 2 (`sudo apt install libfuse2t64`). The Linux build does not update itself yet
-and has no Touch ID; the vault opens with your master password. A Windows build comes later (the GlobalProtect
+If it does not start, install FUSE 2 (`sudo apt install libfuse2t64`). The Linux build does not update itself yet. A Windows build comes later (the GlobalProtect
 tunnel needs extra work there).
 
 To reach a Mac, turn on **System Settings → General → Sharing → Screen Sharing** on it. To reach Ubuntu, turn on

@@ -50,7 +50,6 @@ qt_add_executable(burrow
     src/vault/Model.h
     src/vault/VaultStore.cpp
     src/vault/VaultStore.h
-    src/platform/Biometric.h
 )
 
 file(GLOB BURROW_QML RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS qml/*.qml qml/*.js)
@@ -71,13 +70,11 @@ qt_add_translations(burrow
 
 if(APPLE)
     enable_language(OBJCXX)
-    target_sources(burrow PRIVATE src/platform/Biometric_mac.mm src/platform/WindowChrome_mac.mm)
-    set_source_files_properties(src/platform/Biometric_mac.mm src/platform/WindowChrome_mac.mm
-                                PROPERTIES COMPILE_FLAGS "-fobjc-arc")
-    target_link_libraries(burrow PRIVATE "-framework Foundation" "-framework LocalAuthentication"
-                                          "-framework Security" "-framework AppKit")
+    target_sources(burrow PRIVATE src/platform/WindowChrome_mac.mm)
+    set_source_files_properties(src/platform/WindowChrome_mac.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc")
+    target_link_libraries(burrow PRIVATE "-framework AppKit")
 else()
-    target_sources(burrow PRIVATE src/platform/Biometric_stub.cpp src/platform/WindowChrome_stub.cpp)
+    target_sources(burrow PRIVATE src/platform/WindowChrome_stub.cpp)
 endif()
 if(WIN32)
     target_sources(burrow PRIVATE src/app/Updater_win.cpp)
@@ -134,18 +131,13 @@ if(Qt6Test_FOUND)
         src/rdp/RdpClipboard.cpp src/rdp/RdpClipboard.h
         src/app/AppController.cpp src/app/AppController.h src/app/ListModels.cpp src/app/ListModels.h
         src/app/PreviewProvider.cpp src/app/PreviewProvider.h src/app/TunnelManager.cpp src/app/TunnelManager.h
-        src/rdp/RdpSession.cpp src/rdp/RdpSession.h src/rdp/RemoteSession.h src/net/LocalSocket.cpp src/net/LocalSocket.h src/vnc/VncSession.cpp src/vnc/VncSession.h src/vnc/AppleAdaptive.cpp src/vnc/AppleAdaptive.h src/rdp/FreeRdpEngine.cpp src/rdp/FreeRdpEngine.h src/rdp/RdpEngine.h
-        $<IF:$<BOOL:${APPLE}>,src/platform/Biometric_mac.mm,src/platform/Biometric_stub.cpp>)
+        src/rdp/RdpSession.cpp src/rdp/RdpSession.h src/rdp/RemoteSession.h src/net/LocalSocket.cpp src/net/LocalSocket.h src/vnc/VncSession.cpp src/vnc/VncSession.h src/vnc/AppleAdaptive.cpp src/vnc/AppleAdaptive.h src/rdp/FreeRdpEngine.cpp src/rdp/FreeRdpEngine.h src/rdp/RdpEngine.h)
     target_compile_definitions(tst_vault PRIVATE BURROW_DEMO_ASSETS="${CMAKE_SOURCE_DIR}/docs/assets/demo")
     target_compile_definitions(tst_vault PRIVATE BURROW_TEST_DATA="${CMAKE_CURRENT_SOURCE_DIR}/tests"
                                                  BURROW_VERSION="${PROJECT_VERSION}")
     set_target_properties(tst_vault PROPERTIES MACOSX_BUNDLE OFF)
     target_include_directories(tst_vault PRIVATE src)
     target_link_libraries(tst_vault PRIVATE Qt6::Gui Qt6::Network Qt6::Concurrent Qt6::Quick Qt6::Test netcore::netcore freerdp freerdp-client winpr OpenSSL::Crypto ZLIB::ZLIB)
-    if(APPLE)
-        set_source_files_properties(src/platform/Biometric_mac.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc")
-        target_link_libraries(tst_vault PRIVATE "-framework Foundation" "-framework LocalAuthentication" "-framework Security")
-    endif()
     if(WIN32)
         target_sources(tst_vault PRIVATE src/app/Updater_win.cpp)
         target_link_libraries(tst_vault PRIVATE ws2_32 wintrust crypt32)

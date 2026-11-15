@@ -78,7 +78,6 @@ struct Device
 
 struct Settings
 {
-    bool touchId = false;
     int autoLockMinutes = 15; // lock after this much inactivity (no open session); 0 = never
 };
 

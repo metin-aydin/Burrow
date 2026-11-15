@@ -69,35 +69,31 @@ func TestCreateRefusesExisting(t *testing.T) {
 	}
 }
 
-func TestChangePasswordAndExportKey(t *testing.T) {
+func TestChangePasswordRotatesKey(t *testing.T) {
 	p := newPath(t)
 	v, _ := Create(p, "old", []byte("secret doc"))
-	key, _ := v.ExportKey()
+	oldDEK := append([]byte(nil), v.dek...)
 	if err := v.ChangePassword("new"); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := Open(p, "old"); !errors.Is(err, ErrWrongPassword) {
 		t.Fatalf("old password still works: %v", err)
 	}
-	if _, err := Open(p, "new"); err != nil {
-		t.Fatal(err)
-	}
-	// The data key is rotated: an old exported key (Touch ID copy) no longer works.
-	if _, err := OpenWithKey(p, key); !errors.Is(err, ErrWrongPassword) {
-		t.Fatalf("old data key still opens the vault: %v", err)
-	}
-	newKey, _ := v.ExportKey()
-	v3, err := OpenWithKey(p, newKey)
+	v2, err := Open(p, "new")
 	if err != nil {
 		t.Fatal(err)
 	}
-	doc, _ := v3.Document()
+	doc, _ := v2.Document()
 	if string(doc) != "secret doc" {
 		t.Fatalf("doc = %s", doc)
 	}
-	bad := make([]byte, len(key))
-	if _, err := OpenWithKey(p, bad); !errors.Is(err, ErrWrongPassword) {
-		t.Fatalf("got %v", err)
+	// The data key is rotated: the old key cannot decrypt what is written now.
+	if bytes.Equal(oldDEK, v2.dek) {
+		t.Fatal("data key was not rotated")
+	}
+	env, _ := readEnvelope(p)
+	if _, err := open(oldDEK, env.Data, dataAAD(env)); err == nil {
+		t.Fatal("old data key still decrypts the vault")
 	}
 }
 

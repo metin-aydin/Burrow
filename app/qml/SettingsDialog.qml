@@ -8,9 +8,8 @@ BDialog {
     dialogWidth: 520
     title: qsTr("Settings")
     property string pwError
-    property string touchError
 
-    onOpened: { cur.text = ""; next.text = ""; again.text = ""; pwError = ""; touchError = ""; touch.checked = App.touchIdEnabled }
+    onOpened: { cur.text = ""; next.text = ""; again.text = ""; pwError = "" }
 
     SectionTitle { text: qsTr("Language"); first: true }
     BCombo {
@@ -35,20 +34,6 @@ BDialog {
     }
 
     SectionTitle { text: qsTr("Security") }
-    BSwitch {
-        id: touch
-        // Touch ID exists only on Macs; elsewhere the vault opens with the master password (ADR 0010).
-        visible: Qt.platform.os === "osx"
-        Layout.fillWidth: true
-        enabled: App.touchIdAvailable
-        title: qsTr("Unlock With Touch ID")
-        description: App.touchIdAvailable ? qsTr("Unlock the vault with your fingerprint instead of the master password. The master password always keeps working.")
-                                          : qsTr("This Mac has no Touch ID.")
-        checked: App.touchIdEnabled
-        onToggled: { root.touchError = App.setTouchIdEnabled(checked); checked = App.touchIdEnabled }
-    }
-    Text { visible: root.touchError !== ""; text: root.touchError; color: Theme.danger; font.pixelSize: Theme.fontLabel; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-
     BCombo {
         Layout.fillWidth: true
         label: qsTr("Auto-Lock")

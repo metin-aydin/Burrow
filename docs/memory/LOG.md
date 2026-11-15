@@ -4,6 +4,14 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Touch ID kaldırıldı** (kullanıcı kararı, ADR 0004 güncellendi). Kod vardı ama Data Protection keychain
+  provisioning profile istediği için release'te hiç çalışmıyordu; seçenekler sunulunca kullanıcı "parmak izini kaldır"
+  dedi. Silinenler: `app/src/platform/Biometric*`, `fingerprint.svg`, `AppController` Touch ID API'si, kilit ekranı
+  butonu ve ayar anahtarı, `VaultStore::openWithKey/exportKey`, C API `NetcoreVaultOpenWithKey/ExportKey`, Go
+  `OpenWithKey/ExportKey`, `LocalAuthentication`/`Security` framework bağlantıları, 12 çeviri. DEK dönüşümü testi
+  Go'da doğrudan anahtar karşılaştırmasıyla yeniden yazıldı. `go test ./internal/vault`, `tst_vault` geçti; kilit ve
+  ayar ekranı geçici kasayla görüntülenip kontrol edildi. README ekran görüntüleri (`lock-screen.png`,
+  `settings.png`) hâlâ Touch ID gösteriyor; `tools/readme-shots.sh` ile yeniden alınmalı.
 - **README ve repo açıklaması Ubuntu AppImage'a göre güncellendi:** platform tablosu, kurulum (chmod + FUSE 2 notu),
   güncellemelerin yalnız macOS'ta olduğu; açıklama "macOS and Ubuntu now, Windows next".
 - **İlk release yayımlandı: v0.1.0** (PR #2, merge `218e0bb`). Varlıklar: mac-arm64 dmg + zip, linux-x64 AppImage +

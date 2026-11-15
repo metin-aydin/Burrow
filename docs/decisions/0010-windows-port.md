@@ -15,7 +15,7 @@ Burrow macOS ve Ubuntu'da çıktı (v0.1.0). Windows'ta değişmesi gerekenler:
   üzerinde overlapped `ReadFile`/`WriteFile` yapar (TAP sürücüsü yolu). Unix'teki `socketpair` yok.
 - **RDP/VNC soket çifti:** `RdpSession`/`VncSession` netcore'a `socketpair(AF_UNIX)` ile bağlanıyor; Windows'ta
   yok. Go tarafı `net.FileConn` kullanıyor; Windows'ta desteklenmiyor.
-- macOS'a özel: `SO_NOSIGPIPE` (Windows'ta SIGPIPE yok), Touch ID (stub), `Updater` içindeki `codesign`/`ditto`.
+- macOS'a özel: `SO_NOSIGPIPE` (Windows'ta SIGPIPE yok), `Updater` içindeki `codesign`/`ditto`.
 - Kasa ve dosya yolları `QStandardPaths` ile zaten taşınabilir (`%APPDATA%\Burrow`). `0600` izni Windows'ta
   yalnız salt-okunur bitine dokunur; dosya kullanıcı profilindedir, varsayılan ACL yalnız kullanıcıya açıktır.
 

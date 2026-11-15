@@ -27,14 +27,12 @@
 
 #include <libnetcore.h>
 #include "net/NetCore.h"
-#include "platform/Biometric.h"
 #include "rdp/FreeRdpEngine.h"
 
 namespace {
 constexpr int kMinPasswordLength = 8;
 // A closed session keeps its tunnel this long, so reconnecting or opening another device is quick.
 constexpr int kTunnelIdleMs = 20 * 1000;
-const char kTouchIdKey[] = "security/touchIdEnabled";
 
 void wipe(QByteArray &b)
 {
@@ -79,16 +77,6 @@ QString AppController::state() const
     if (m_store.isOpen())
         return QStringLiteral("unlocked");
     return m_store.exists() ? QStringLiteral("locked") : QStringLiteral("setup");
-}
-
-bool AppController::touchIdAvailable() const
-{
-    return Biometric::isAvailable();
-}
-
-bool AppController::touchIdEnabled() const
-{
-    return QSettings().value(kTouchIdKey, false).toBool();
 }
 
 QString AppController::versionInfo() const
@@ -211,24 +199,6 @@ QString AppController::unlock(const QString &password)
     return finishUnlock(m_store.open(password));
 }
 
-QString AppController::unlockWithTouchId()
-{
-    QString err;
-    QByteArray key = Biometric::loadKey(tr("Unlock the Burrow vault"), &err);
-    if (key.isEmpty())
-        return err;
-    const VaultStore::Result r = m_store.openWithKey(key);
-    wipe(key);
-    if (r != VaultStore::Result::Ok) {
-        // A stale key (e.g. the vault was re-created) is useless.
-        Biometric::removeKey();
-        QSettings().setValue(kTouchIdKey, false);
-        emit touchIdEnabledChanged();
-        return tr("The Touch ID key is no longer valid; unlock with your master password.");
-    }
-    return finishUnlock(r);
-}
-
 QString AppController::finishUnlock(VaultStore::Result r)
 {
     if (r != VaultStore::Result::Ok)
@@ -283,42 +253,7 @@ QString AppController::changePassword(const QString &current, const QString &nex
     const VaultStore::Result r = m_store.changePassword(next);
     if (r != VaultStore::Result::Ok)
         return VaultStore::message(r);
-    // The data key was rotated (ADR 0004); refresh the Touch ID copy.
-    if (touchIdEnabled()) {
-        QString err;
-        QByteArray key = m_store.exportKey();
-        const bool ok = Biometric::storeKey(key, &err);
-        wipe(key);
-        if (!ok) {
-            Biometric::removeKey();
-            QSettings().setValue(kTouchIdKey, false);
-            emit touchIdEnabledChanged();
-            emit toast(tr("Master password changed. Touch ID was turned off: %1").arg(err));
-            return {};
-        }
-    }
     emit toast(tr("Master password changed."));
-    return {};
-}
-
-QString AppController::setTouchIdEnabled(bool on)
-{
-    if (!on) {
-        Biometric::removeKey();
-        QSettings().setValue(kTouchIdKey, false);
-        emit touchIdEnabledChanged();
-        return {};
-    }
-    QString err;
-    QByteArray key = m_store.exportKey();
-    const bool ok = Biometric::storeKey(key, &err);
-    wipe(key);
-    if (!ok) {
-        emit touchIdEnabledChanged(); // let the switch snap back
-        return err;
-    }
-    QSettings().setValue(kTouchIdKey, true);
-    emit touchIdEnabledChanged();
     return {};
 }
 

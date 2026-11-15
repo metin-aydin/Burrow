@@ -1,6 +1,6 @@
-# ADR 0004 — Şifreli kasa (vault) ve Touch ID
+# ADR 0004 — Şifreli kasa (vault)
 
-- **Durum:** KABUL EDİLDİ (2026-11-14)
+- **Durum:** KABUL EDİLDİ (2026-11-14); Touch ID bölümü 2026-11-15'te kaldırıldı (aşağıya bakın)
 - **Karar verenler:** kullanıcı + AI asistan
 
 ## Bağlam
@@ -21,10 +21,9 @@ bir kasada saklanmalı. Ana şifre unutulursa veri kurtarılamaz. Kayıt sayıs�
 - **Anahtar hiyerarşisi:**
   - Rastgele 32 baytlık veri anahtarı (DEK) içeriği şifreler.
   - Ana şifreden Argon2id ile türetilen anahtar (KEK) DEK'i sarar (wrap).
-  - Touch ID, DEK'in bir kopyasını Keychain'de saklar.
   - **Şifre değiştirmede DEK de yenilenir** (2026-11-15, güvenlik incelemesi): belge ve tüm blob'lar yeni
-    DEK ile yeniden şifrelenir, eski şifreyle sarılı `.bak` silinir, Touch ID kopyası yenilenir. Böylece
-    sızmış eski şifre, eski yedek dosya veya eski Touch ID kopyası güncel kasayı açamaz.
+    DEK ile yeniden şifrelenir, eski şifreyle sarılı `.bak` silinir. Böylece
+    sızmış eski şifre veya eski yedek dosya güncel kasayı açamaz.
 - **Argon2id parametreleri** (dosyada saklanır, ileride artırılabilir): t=3, m=64 MiB, p=4, 16 bayt salt.
 - **Şifreleme:** XChaCha20-Poly1305 (24 bayt rastgele nonce). AAD, format sürümünü ve KDF
   parametrelerini bağlar (parametre değiştirme saldırısına karşı).
@@ -35,15 +34,19 @@ bir kasada saklanmalı. Ana şifre unutulursa veri kurtarılamaz. Kayıt sayıs�
 - **Hata ayrımı:** yanlış şifre / bozuk dosya / G/Ç hatası ayrı kodlarla döner; yanlış şifrede
   kullanıcıya anlaşılır mesaj, otomatik tekrar yok.
 
-## Touch ID (opsiyonel, ayarlardan)
+## Touch ID — kaldırıldı (2026-11-15)
 
-- Açılınca DEK, macOS Keychain'de (Data Protection keychain) `kSecAccessControlBiometryCurrentSet`
-  erişim kontrolüyle saklanır: okumak için Touch ID gerekir, parmak izi seti değişirse kayıt geçersiz olur.
-- Ana şifre her zaman geçerlidir; Touch ID başarısızsa ana şifre sorulur. Şifre değişince Touch ID kopyası
-  yeni DEK ile güncellenir; güncellenemezse Touch ID kapatılır.
-- Data Protection keychain imzalı build ve `keychain-access-groups` entitlement'ı gerektirir; imzasız
-  geliştirme build'inde Touch ID seçeneği devre dışı görünür.
-- Windows (Windows Hello) / Ubuntu karşılıkları sonraki fazda.
+İlk tasarımda DEK'in bir kopyası Data Protection keychain'de `kSecAccessControlBiometryCurrentSet` ile
+saklanıyordu. Bu keychain `keychain-access-groups` entitlement'ı, Developer ID dağıtımında da provisioning
+profile ister; profil olmadığı için release'te Touch ID hiç çalışmadı. Seçenekler (profil eklemek, login
+keychain + LAContext ile daha zayıf bir yol, hibrit) kullanıcıya soruldu; kullanıcı **Touch ID'yi kaldırmayı**
+seçti.
+
+- Qt tarafı (`platform/Biometric*`, kilit ekranı butonu, ayar anahtarı), C API'deki
+  `NetcoreVaultOpenWithKey` / `NetcoreVaultExportKey` ve Go'daki `OpenWithKey` / `ExportKey` silindi:
+  DEK artık süreç dışına hiçbir yoldan aktarılamaz, kasa yalnız ana şifreyle açılır.
+- Kasa belgesindeki eski `settings.touchId` alanı okunurken yok sayılır, yeniden yazılmaz.
+- İleride biyometrik açma geri gelirse provisioning profile'lı yol (Secure Enclave ACL) tercih edilir.
 
 ## Sonuçlar
 
