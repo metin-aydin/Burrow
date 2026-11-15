@@ -54,8 +54,9 @@ BDialog {
     Segmented {
         id: tabSeg
         Layout.fillWidth: true
-        // The Session settings are all RDP ones; a Mac has none of them.
+        // A Mac has only the lock setting of the Session tab; the rest are RDP ones.
         options: root.isMac ? [{ text: qsTr("General"), value: "general" },
+                               { text: qsTr("Session"), value: "session" },
                                { text: qsTr("Clipboard"), value: "input" }]
                             : [{ text: qsTr("General"), value: "general" },
                                { text: qsTr("Session"), value: "session" },
@@ -84,7 +85,6 @@ BDialog {
                     onValueChanged: {
                         if (value === "macos" && portField.text === "3389") portField.text = "5900"
                         else if (value !== "macos" && portField.text === "5900") portField.text = "3389"
-                        if (value === "macos" && root.tab === "session") { root.tab = "general"; tabSeg.value = "general" }
                     }
                 }
             }
@@ -156,6 +156,7 @@ BDialog {
         spacing: 14
         BCombo {
             id: sessionCombo
+            visible: !root.isMac
             Layout.fillWidth: true
             label: qsTr("Session")
             options: [{ text: qsTr("Connect to the existing session"), value: "existing" },
@@ -167,11 +168,13 @@ BDialog {
             id: lockSw
             Layout.fillWidth: true
             title: qsTr("Lock When Disconnected")
-            description: qsTr("Burrow locks the remote computer (Win+L / Super+L) before closing the connection.")
+            description: root.isMac ? qsTr("Burrow locks the Mac (Control+Command+Q) before closing the connection.")
+                                    : qsTr("Burrow locks the remote computer (Win+L / Super+L) before closing the connection.")
             checked: root.d.lockOnDisconnect !== false
         }
         BCombo {
             id: displaysCombo
+            visible: !root.isMac
             Layout.fillWidth: true
             label: qsTr("Displays")
             options: [{ text: qsTr("One monitor"), value: "window" },
@@ -180,7 +183,7 @@ BDialog {
         }
         Text {
             Layout.fillWidth: true
-            visible: displaysCombo.value === "all"
+            visible: displaysCombo.value === "all" && !root.isMac
             wrapMode: Text.WordWrap
             color: Theme.textSecondary
             font.pixelSize: 12
@@ -188,6 +191,7 @@ BDialog {
         }
         BSwitch {
             id: retinaSw
+            visible: !root.isMac
             Layout.fillWidth: true
             title: qsTr("Retina Resolution")
             description: qsTr("Sharper, but text looks smaller if the remote computer doesn't scale its display.")

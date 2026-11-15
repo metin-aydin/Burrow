@@ -151,6 +151,9 @@ int main(int argc, char *argv[])
                                 s->sendKeysym(0xffeb, true); s->sendKeysym('c', true);
                                 s->sendKeysym('c', false); s->sendKeysym(0xffeb, false);
                                 s->sendKey(0x1e, true); s->sendKey(0x1e, false);   // scancode path: 'a'
+                                // BURROW_DEMO_CLOSE=1 closes the session afterwards (lock-on-disconnect test).
+                                if (qEnvironmentVariableIntValue("BURROW_DEMO_CLOSE"))
+                                    QTimer::singleShot(700, s, [s] { s->close(); });
                             });
                         });
                     });

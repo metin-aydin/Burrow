@@ -747,6 +747,7 @@ QString AppController::startSession(const Model::Device &dev, const QString &use
         v.username = user;
         v.password = pass;
         v.clipboard = dev.clipboard;
+        v.lockOnDisconnect = dev.lockOnDisconnect;
         if (!tunnelId.isEmpty()) {
             v.tunnelHandle = m_tunnelMgr.handle(tunnelId);
             if (v.tunnelHandle <= 0)

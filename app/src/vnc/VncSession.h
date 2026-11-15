@@ -28,6 +28,7 @@ public:
         QString username, password;
         QString clipboard = QStringLiteral("both");   // both | to_remote | to_local | off
         int tunnelHandle = 0;    // netcore tunnel (0 = direct)
+        bool lockOnDisconnect = false;   // Control+Command+Q before closing (a Mac)
     };
 
     explicit VncSession(Params params, QObject *parent = nullptr);

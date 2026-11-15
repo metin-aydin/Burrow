@@ -117,6 +117,17 @@ void VncSession::close()
     if (m_state == QLatin1String("closed"))
         return;
     releaseKeys();
+    if (m_p.lockOnDisconnect && m_state == QLatin1String("connected")) {
+        // Control+Command+Q locks a Mac (Command is Super). Sent before the socket closes.
+        const quint32 ctrl = 0xffe3, cmd = 0xffeb, q = 'q';
+        sendKeysym(ctrl, true);
+        sendKeysym(cmd, true);
+        sendKeysym(q, true);
+        sendKeysym(q, false);
+        sendKeysym(cmd, false);
+        sendKeysym(ctrl, false);
+        QThread::msleep(300);   // let the keys leave before the connection does
+    }
     m_stop = true;
     if (const int fd = m_fd.load(); fd >= 0)
         ::shutdown(fd, SHUT_RDWR);   // wakes the reader
