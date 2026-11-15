@@ -99,6 +99,71 @@ jobs:
       - name: AppImage
         run: tools/package-appimage.sh build 0.0.0-ci /home/runner/burrow-deps
 
+  windows:
+    name: Windows build
+    runs-on: windows-2025
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: netcore/go.mod
+          cache-dependency-path: netcore/go.sum
+      # MSYS2 UCRT64 (ADR 0010): gcc for cgo and the app, Qt 6, FreeRDP 3, OpenSSL. "inherit" keeps the Go
+      # installed above on PATH.
+      - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
+        with:
+          msystem: UCRT64
+          update: true
+          path-type: inherit
+      # libopenconnect is built from source by tools/windows-deps.sh. Only pushes to our own branches write
+      # the cache; pull requests may read it but never fill it.
+      - name: Restore libopenconnect
+        id: deps
+        uses: actions/cache/restore@v4
+        with:
+          path: C:/burrow-deps
+          key: windows-deps-${{ hashFiles('tools/windows-deps.sh', 'tools/windows/openconnect-pipe-tun.patch') }}
+      - name: Install dependencies
+        run: tools/windows-deps.sh C:/burrow-deps
+      - name: Save libopenconnect
+        if: github.event_name == 'push' && steps.deps.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: C:/burrow-deps
+          key: windows-deps-${{ hashFiles('tools/windows-deps.sh', 'tools/windows/openconnect-pipe-tun.patch') }}
+      - name: Go tests
+        working-directory: netcore
+        env:
+          CGO_ENABLED: "1"
+        run: |
+          export PATH="/c/burrow-deps/bin:$PATH" PKG_CONFIG_PATH=/c/burrow-deps/lib/pkgconfig
+          go vet ./...
+          go test ./...
+      - name: Configure
+        run: |
+          # POSIX form: MSYS2 splits a C:/ path at the colon, and converts this one for native programs.
+          export PKG_CONFIG_PATH=/c/burrow-deps/lib/pkgconfig
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: |
+          export PKG_CONFIG_PATH=/c/burrow-deps/lib/pkgconfig   # Go asks pkg-config while building
+          cmake --build build
+      - name: Tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          export PATH="/c/burrow-deps/bin:$PATH"
+          cd build && ctest --output-on-failure
+      - name: Package
+        timeout-minutes: 20
+        run: tools/package-windows.sh build 0.0.0 C:/burrow-deps
+      - name: Start the packaged app
+        timeout-minutes: 5
+        run: tools/windows/smoke-test.sh dist/Burrow-0.0.0-windows-x64-portable.zip
+
   scripts:
     name: Release scripts
     runs-on: ubuntu-latest

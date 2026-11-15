@@ -4,6 +4,45 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Windows portu (ADR 0010) — `Windows build` CI'da yeşil.** Kullanıcıyla kararlar: MSYS2 UCRT64 (gcc; cgo ve Go
+  c-archive için), paket/imza/güncelleme "JumpDesk'teki gibi" → imzasız NSIS kullanıcı başına kurulum + taşınabilir
+  zip, Windows `latest.json`'a girer (SHA-256 + uygulama imzalıysa aynı Authenticode yayıncısı; sessiz kurulum
+  `/S /RELAUNCH /WAITPID=`). Kod: GP tüneli openconnect'e mesaj modlu named pipe ile bağlanıyor (Windows'ta
+  `setup_tun_fd` HANDLE alıyor; TAP ioctl'ünü pipe'ta atlayan küçük yama `tools/windows/openconnect-pipe-tun.patch`,
+  aynı yama mingw-w64 12+'da olmayan `sec_api/stdlib_s.h`'yi de düzeltiyor); RDP/VNC için `app/src/net/LocalSocket`
+  (Unix socketpair, Windows'ta karşı ucu doğrulanan loopback çifti) ve Go'da Winsock `net.Conn`; Windows scancode'ları;
+  Mac kısayol modları Windows/Linux'ta kapalı (Win tuşu Ctrl'e çevrilmesin); `Updater_win.cpp`. Araçlar:
+  `tools/windows-deps.sh` (libopenconnect 9.21 kaynaktan, SHA-256'lı), `tools/package-windows.sh`, `tools/windows/burrow.nsi`,
+  `tools/windows/smoke-test.sh` (paket DLL kontrolü + offscreen açılış). Windows'ta doğrulanan: Go testleri (named pipe
+  paket sınırları testi dahil), Qt testleri (soket çifti testi dahil), kurulum 87 MB / zip 124 MB. **Doğrulanmayan:**
+  gerçek GP sunucusuna Windows'tan bağlantı ve gerçek masaüstünde arayüz — kullanıcıda. Windows Hello yok.
+  Yolda: MSYS2 `C:/` biçimli `PKG_CONFIG_PATH`'i `:`'den bölüyor → `/c/...` biçimi; openconnect.h `SOCKET` için
+  winsock2.h istemiyor; DLL toplama döngüsü her dosyayı bir kez tarayacak hale getirildi (ilk hali 20+ dk sürdü).
+
+- **Release'te RDP girişi (NLA) çalışmıyordu → düzeltildi.** v0.1.0 (GitHub release) ile GP tüneli açılıyor ama RDP
+  "Couldn't reach the computer" ile düşüyordu. Stderr logu: `OpenSSL LEGACY provider failed to load` →
+  `Failed to initialize digest md4` → NTLM yok → `SEC_E_NO_CREDENTIALS`. Sebep: paketteki `libcrypto.4` legacy
+  modülünü CI'ın Homebrew yolunda arıyor; o yol başka Mac'te yok, bu Mac'te var ama ad-hoc imzalı olduğu için hardened
+  runtime (library validation) yüklemiyor. Yerel derleme hardened olmadığı için sorun görünmüyordu. Düzeltme:
+  `tools/mac-bundle-ossl-modules.sh` modülü `Contents/PlugIns/ossl-modules/`'e kopyalayıp paketteki libcrypto'ya
+  bağlıyor (release.yml macdeployqt'den sonra çağırıyor); `package-windows.sh` `legacy.dll`'i `ossl-modules/`'e
+  koyuyor; `main.cpp` açılışta `OPENSSL_MODULES`'u bu klasöre yönlendiriyor. Uygulamanın kendi logu yok (yalnız
+  stderr): teşhis için `/Applications/Burrow.app/Contents/MacOS/Burrow > log 2>&1` ile açılmalı.
+- **Touch ID kaldırıldı** (kullanıcı kararı, ADR 0004 güncellendi). Kod vardı ama Data Protection keychain
+  provisioning profile istediği için release'te hiç çalışmıyordu; seçenekler sunulunca kullanıcı "parmak izini kaldır"
+  dedi. Silinenler: `app/src/platform/Biometric*`, `fingerprint.svg`, `AppController` Touch ID API'si, kilit ekranı
+  butonu ve ayar anahtarı, `VaultStore::openWithKey/exportKey`, C API `NetcoreVaultOpenWithKey/ExportKey`, Go
+  `OpenWithKey/ExportKey`, `LocalAuthentication`/`Security` framework bağlantıları, 12 çeviri. DEK dönüşümü testi
+  Go'da doğrudan anahtar karşılaştırmasıyla yeniden yazıldı. `go test ./internal/vault`, `tst_vault` geçti; kilit ve
+  ayar ekranı geçici kasayla görüntülenip kontrol edildi. README ekran görüntüleri (`lock-screen.png`,
+  `settings.png`) hâlâ Touch ID gösteriyor; `tools/readme-shots.sh` ile yeniden alınmalı.
+- **README ve repo açıklaması Ubuntu AppImage'a göre güncellendi:** platform tablosu, kurulum (chmod + FUSE 2 notu),
+  güncellemelerin yalnız macOS'ta olduğu; açıklama "macOS and Ubuntu now, Windows next".
+- **İlk release yayımlandı: v0.1.0** (PR #2, merge `218e0bb`). Varlıklar: mac-arm64 dmg + zip, linux-x64 AppImage +
+  sha256, `latest.json` (yalnız mac-arm64). İndirilen Mac uygulaması doğrulandı: Developer ID (JTRUY8Y2ZF), hardened
+  runtime, `spctl` "Notarized Developer ID", staple geçerli. Yolda düzeltilenler: çeviri satır numaraları (iki kez,
+  başka oturumun commit'leri yüzünden), kararsız `TestSealAndAcceptWindow` (Seal kabul edilmeden çağrılıyordu),
+  `govulncheck` v1.1.4 → v1.9.0 (Go 1.27'de çöküyordu). `Linux build` master'ın zorunlu kontrollerine eklendi.
 - **Ubuntu AppImage + Linux CI:** `tools/linux-deps.sh` (Ubuntu 24.04: apt paketleri, aqtinstall ile Qt 6.10.1,
   kaynaktan FreeRDP 3.33.1 — X11/SDL/sunucu/FFmpeg kapalı), `tools/package-appimage.sh` (linuxdeploy +
   linuxdeploy-plugin-qt, sabitlenmiş sürümler; Qt, QML, FreeRDP, openconnect içeride; GStreamer sistemden),

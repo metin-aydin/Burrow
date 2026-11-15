@@ -8,7 +8,6 @@ import "C"
 
 import (
 	"encoding/base32"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"os"
@@ -101,26 +100,6 @@ func NetcoreVaultOpen(path, password *C.char, errOut *C.int) C.int {
 	return registerVault(v)
 }
 
-// NetcoreVaultOpenWithKey opens the vault with a base64 data key (Touch ID).
-//
-//export NetcoreVaultOpenWithKey
-func NetcoreVaultOpenWithKey(path, keyB64 *C.char, errOut *C.int) C.int {
-	key, err := base64.StdEncoding.DecodeString(C.GoString(keyB64))
-	if err != nil {
-		setErr(errOut, vaultWrongPassword)
-		return 0
-	}
-	v, err := vault.OpenWithKey(C.GoString(path), key)
-	for i := range key {
-		key[i] = 0
-	}
-	setErr(errOut, vaultCode(err))
-	if err != nil {
-		return 0
-	}
-	return registerVault(v)
-}
-
 // NetcoreVaultDocument returns the decrypted JSON document (free with
 // NetcoreFreeSecret), or NULL.
 //
@@ -153,26 +132,6 @@ func NetcoreVaultChangePassword(h C.int, newPassword *C.char) C.int {
 		return vaultBadHandle
 	}
 	return vaultCode(v.ChangePassword(C.GoString(newPassword)))
-}
-
-// NetcoreVaultExportKey returns the base64 data key for storage behind
-// Touch ID (free with NetcoreFreeSecret), or NULL.
-//
-//export NetcoreVaultExportKey
-func NetcoreVaultExportKey(h C.int) *C.char {
-	v := lookupVault(h)
-	if v == nil {
-		return nil
-	}
-	key, err := v.ExportKey()
-	if err != nil {
-		return nil
-	}
-	s := C.CString(base64.StdEncoding.EncodeToString(key))
-	for i := range key {
-		key[i] = 0
-	}
-	return s
 }
 
 //export NetcoreVaultClose

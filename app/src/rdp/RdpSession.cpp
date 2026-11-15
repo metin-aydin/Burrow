@@ -22,8 +22,7 @@
 #include <freerdp/transport_io.h>
 #include <winpr/synch.h>
 
-#include <sys/socket.h>
-#include <unistd.h>
+#include "net/LocalSocket.h"
 
 #include <libnetcore.h>
 
@@ -94,7 +93,7 @@ void onChannelDisconnected(void *context, const ChannelDisconnectedEventArgs *e)
     sessionOf(static_cast<rdpContext *>(context))->onChannelDisconnected(e->name);
 }
 
-// Every TCP connection FreeRDP makes goes through netcore over a socketpair: no listening port.
+// Every TCP connection FreeRDP makes goes through netcore over a local socket pair: no listening port.
 int tcpConnect(rdpContext *context, rdpSettings *, const char *hostname, int port, DWORD)
 {
     return sessionOf(context)->connectSocket(hostname, port);
@@ -241,7 +240,12 @@ void setMonitorDefs(rdpSettings *s, const QList<QRect> &rects, int scale, bool s
 RdpSession::RdpSession(Params params, QObject *parent)
     : RemoteSession(parent)
     , m_p(std::move(params))
+#ifdef Q_OS_MACOS
     , m_keys(KeyMapper::modeFromString(m_p.keyMap))
+#else
+    // The Mac shortcut modes translate Cmd; on Windows and Linux that key is the Windows key itself.
+    , m_keys(KeyMapper::Mode::Off)
+#endif
 {
     m_clip = new RdpClipboard(RdpClipboard::modeFromString(m_p.clipboard),
                               [this](std::function<void()> f) { post(std::move(f)); }, this);
@@ -809,14 +813,14 @@ void RdpSession::sendMonitorLayout()
 int RdpSession::connectSocket(const char *hostname, int port)
 {
     int fds[2];
-    if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) != 0)
+    if (!localsocket::pair(fds))
         return -1;
     // Always the device's real address: the tunnel (or direct dialer) resolves and reaches it.
     const QString host = m_p.pinHost.isEmpty() ? QString::fromUtf8(hostname) : m_p.pinHost;
     const int p = m_p.pinPort ? m_p.pinPort : port;
     QByteArray target = QStringLiteral("%1:%2").arg(host).arg(p).toUtf8();
     if (NetcoreConnectFD(m_p.tunnelHandle, target.data(), fds[1]) != 0) {
-        ::close(fds[0]);
+        localsocket::close(fds[0]);
         return -1;
     }
     return fds[0];

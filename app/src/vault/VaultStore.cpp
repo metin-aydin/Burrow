@@ -81,17 +81,6 @@ VaultStore::Result VaultStore::open(const QString &password)
     return finishOpen(h, err);
 }
 
-VaultStore::Result VaultStore::openWithKey(const QByteArray &keyB64)
-{
-    lock();
-    QByteArray path = m_path.toUtf8();
-    QByteArray key = keyB64;
-    int err = 0;
-    int h = NetcoreVaultOpenWithKey(path.data(), key.data(), &err);
-    wipe(key);
-    return finishOpen(h, err);
-}
-
 VaultStore::Result VaultStore::finishOpen(int handle, int err)
 {
     if (handle <= 0)
@@ -141,16 +130,6 @@ bool VaultStore::verifyPassword(const QString &password) const
     if (h > 0)
         NetcoreVaultClose(h);
     return h > 0;
-}
-
-QByteArray VaultStore::exportKey() const
-{
-    if (!isOpen())
-        return {};
-    char *raw = NetcoreVaultExportKey(m_handle);
-    QByteArray key(raw ? raw : "");
-    NetcoreFreeSecret(raw);
-    return key;
 }
 
 void VaultStore::lock()

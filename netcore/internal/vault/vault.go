@@ -103,18 +103,6 @@ func Open(path, password string) (*Vault, error) {
 	return finishOpen(path, env, dek)
 }
 
-// OpenWithKey unlocks the vault with a previously exported data key (Touch ID).
-func OpenWithKey(path string, dek []byte) (*Vault, error) {
-	if len(dek) != keySize {
-		return nil, ErrWrongPassword
-	}
-	env, err := readEnvelope(path)
-	if err != nil {
-		return nil, err
-	}
-	return finishOpen(path, env, append([]byte(nil), dek...))
-}
-
 func finishOpen(path string, env envelope, dek []byte) (*Vault, error) {
 	doc, err := open(dek, env.Data, dataAAD(env))
 	if err != nil {
@@ -151,8 +139,8 @@ func (v *Vault) ChangePassword(newPassword string) error {
 	if v.dek == nil {
 		return ErrClosed
 	}
-	// Rotate the data key as well: the old password (or an old Touch ID copy,
-	// or an old backup file) must not be able to open anything written from now on.
+	// Rotate the data key as well: the old password (or an old backup
+	// file) must not be able to open anything written from now on.
 	blobs := v.readAllBlobs()
 	defer func() {
 		for _, b := range blobs {
@@ -204,16 +192,6 @@ func (v *Vault) readAllBlobs() map[string][]byte {
 		}
 	}
 	return out
-}
-
-// ExportKey returns a copy of the data key, for storage behind Touch ID.
-func (v *Vault) ExportKey() ([]byte, error) {
-	v.mu.Lock()
-	defer v.mu.Unlock()
-	if v.dek == nil {
-		return nil, ErrClosed
-	}
-	return append([]byte(nil), v.dek...), nil
 }
 
 // blobPath maps a blob name to a file next to the vault. Names are restricted

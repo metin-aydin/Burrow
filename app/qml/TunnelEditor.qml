@@ -346,7 +346,7 @@ BDialog {
         }
         AdvancedToggle {}
         BField { id: tsControl; visible: root.showAdvanced; Layout.fillWidth: true; label: qsTr("Control Server"); placeholder: qsTr("Tailscale if empty (enter a URL for Headscale)") }
-        BField { id: tsHost; visible: root.showAdvanced; Layout.fillWidth: true; label: qsTr("Node Name"); hint: qsTr("How this Mac appears in your tailnet.") }
+        BField { id: tsHost; visible: root.showAdvanced; Layout.fillWidth: true; label: qsTr("Node Name"); hint: qsTr("How this computer appears in your tailnet.") }
     }
 
     // --- Cloudflare ----------------------------------------------------------------

@@ -21,10 +21,18 @@ bitiyor (yenilemeden önce release durur). Değerleri kullanıcı ekler (Claude 
 Yapıldı (2026-11-15): `release` ortamı (yalnız `master`) ve 5 secret'ın hepsi. Parolalı olanları kullanıcı
 `.github/scripts/set-release-secrets.sh` ile ekledi; sertifika yenilenince aynı betik kullanılır.
 
-`master` dalı (ilk commit'te) ve kural setleri de 2026-11-15'te kuruldu; ilk PR ilk release'i çıkarır.
+`master` dalı ve kural setleri 2026-11-15'te kuruldu. İlk release v0.1.0 aynı gün çıktı; imza + notarization
+CI'da doğrulandı. Linux AppImage release'te var ama `latest.json`'da yok (Linux'ta uygulama içi güncelleme yok).
+
+**Dikkat:** Başka bir oturum kaynak dosyalarda satır kaydırırsa CI'ın Translations adımı düşer; PR'dan önce
+`cmake --build build --target Burrow_lupdate` çalıştırıp `app/i18n`'i commit et.
+
+Windows (2026-11-15, ADR 0010): kullanıcı "JumpDesk'te nasılsa her şey aynı olsun" dedi → imzasız NSIS kurulum
+(`-setup.exe`, kullanıcı başına) + taşınabilir zip; `latest.json`'da `windows-x64` = setup.exe; güncelleme SHA-256 +
+(uygulama imzalıysa) aynı Authenticode yayıncısı, sessiz kurulum `/S /RELAUNCH /WAITPID=`. Windows sertifikası yok.
 
 Henüz yapılmayan:
-Intel/Ubuntu/Windows paketleri; Touch ID için provisioning profile (release'te Touch ID şimdilik çalışmaz).
+Intel paketi; Linux uygulama içi güncellemesi (JumpDesk'te AppImage de güncelleniyor); Windows kod imzalama.
 
 **Nasıl uygulanır:** Yeni CI işi eklenince dal korumasındaki zorunlu kontrol listesini de güncelle.
 Bkz. [[feedback-github-via-mcp]], [[project-github-meta]].

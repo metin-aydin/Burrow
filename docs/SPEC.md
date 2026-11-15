@@ -17,7 +17,7 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
 - İlk açılışta ana şifre (master password) belirlenir.
 - Her açılışta ana şifre sorulur. Şifre olmadan cihaz listesi, kayıtlı şifreler ve
   bağlantılar erişilemez.
-- Veri kasası ana şifreden türetilen anahtarla şifrelenir (Argon2id + XChaCha20-Poly1305, ADR 0004); isteğe bağlı Touch ID ile açma.
+- Veri kasası ana şifreden türetilen anahtarla şifrelenir (Argon2id + XChaCha20-Poly1305, ADR 0004); yalnız ana şifreyle açılır (Touch ID 2026-11-15'te kaldırıldı, ADR 0004).
 - Ana şifre unutulursa veri kurtarılamaz (bilinçli tercih).
 
 ## 3. Tünel profilleri

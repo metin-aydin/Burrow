@@ -8,9 +8,8 @@ BDialog {
     dialogWidth: 520
     title: qsTr("Settings")
     property string pwError
-    property string touchError
 
-    onOpened: { cur.text = ""; next.text = ""; again.text = ""; pwError = ""; touchError = ""; touch.checked = App.touchIdEnabled }
+    onOpened: { cur.text = ""; next.text = ""; again.text = ""; pwError = "" }
 
     SectionTitle { text: qsTr("Language"); first: true }
     BCombo {
@@ -35,18 +34,6 @@ BDialog {
     }
 
     SectionTitle { text: qsTr("Security") }
-    BSwitch {
-        id: touch
-        Layout.fillWidth: true
-        enabled: App.touchIdAvailable
-        title: qsTr("Unlock With Touch ID")
-        description: App.touchIdAvailable ? qsTr("Unlock the vault with your fingerprint instead of the master password. The master password always keeps working.")
-                                          : qsTr("This Mac has no Touch ID.")
-        checked: App.touchIdEnabled
-        onToggled: { root.touchError = App.setTouchIdEnabled(checked); checked = App.touchIdEnabled }
-    }
-    Text { visible: root.touchError !== ""; text: root.touchError; color: Theme.danger; font.pixelSize: Theme.fontLabel; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-
     BCombo {
         Layout.fillWidth: true
         label: qsTr("Auto-Lock")
@@ -90,6 +77,7 @@ BDialog {
         enabled: App.updater.supported
         title: qsTr("Check For Updates Automatically")
         description: App.updater.supported ? qsTr("Checks GitHub every 6 hours. Nothing is downloaded without asking.")
+                                           : Qt.platform.os === "windows" ? qsTr("The portable version doesn't update itself. Download new versions from GitHub, or use the installer.")
                                            : qsTr("Automatic updates aren't available on this platform yet.")
         checked: App.updater.autoCheck
         onToggled: App.updater.autoCheck = checked

@@ -10,7 +10,9 @@ class QNetworkReply;
 // In-app updates from GitHub Releases (ADR 0002), same behaviour as the author's JumpDesk/UPaste:
 // checks 15 s after launch and every 6 hours (packaged builds only), never downloads without asking,
 // verifies the SHA-256 from the release manifest and, on macOS, that the new app carries the same
-// Developer ID team signature before replacing the running bundle.
+// Developer ID team signature before replacing the running bundle. On Windows (ADR 0010) the update is
+// the installer, run silently; when the running Burrow is Authenticode-signed the installer must be
+// validly signed by the same publisher (electron-updater's rule, as in JumpDesk).
 class Updater : public QObject
 {
     Q_OBJECT
@@ -40,6 +42,12 @@ public:
     // Compares dotted versions ("1.10.0" > "1.9.3"). Public for tests.
     static int compareVersions(const QString &a, const QString &b);
     static QString platformKey();
+    // The update package's file name for a version: never taken from the manifest as a path.
+    static QString assetName(const QString &version);
+#ifdef Q_OS_WIN
+    // Subject of the valid Authenticode signer of a file, or empty when it isn't validly signed.
+    static QString signerSubject(const QString &path);
+#endif
 
 signals:
     void changed();
@@ -50,6 +58,9 @@ private:
     void onManifest(QNetworkReply *reply);
     void onDownloaded(QNetworkReply *reply);
     QString installMac();
+#ifdef Q_OS_WIN
+    QString installWindows();
+#endif
 
     QNetworkAccessManager *m_net;
     QTimer m_timer;

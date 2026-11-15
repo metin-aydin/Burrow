@@ -8,6 +8,7 @@ require (
 	github.com/makiuchi-d/gozxing v0.1.1
 	github.com/rs/zerolog v1.35.1
 	golang.org/x/crypto v0.59.0
+	golang.org/x/sys v0.50.0
 	gvisor.dev/gvisor v0.0.0-20260915211658-a6f909f08a72
 	tailscale.com v1.104.7
 )
@@ -65,7 +66,6 @@ require (
 	golang.org/x/net v0.62.0 // indirect
 	golang.org/x/oauth2 v0.37.0 // indirect
 	golang.org/x/sync v0.25.0 // indirect
-	golang.org/x/sys v0.50.0 // indirect
 	golang.org/x/term v0.48.0 // indirect
 	golang.org/x/text v0.44.0 // indirect
 	golang.org/x/time v0.16.0 // indirect

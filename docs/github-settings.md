@@ -7,7 +7,7 @@ What the repository should have on GitHub itself (not in files). Applied through
 
 - **Description:** Cross-platform remote desktop with private tunnels built in: RDP to Windows and Ubuntu,
   Screen Sharing to Macs, with GlobalProtect, Tailscale and Cloudflare running inside the app only. Open source;
-  macOS now, Ubuntu and Windows next.
+  macOS and Ubuntu now, Windows next.
 - **Website:** empty (same as the author's other repositories).
 - **Topics:** `rdp`, `remote-desktop`, `vnc`, `screen-sharing`, `freerdp`, `globalprotect`, `openconnect`,
   `tailscale`, `cloudflare-access`, `vpn`, `totp`, `cross-platform`, `macos`, `linux`, `windows`, `qt6`, `qml`,
@@ -19,7 +19,7 @@ What the repository should have on GitHub itself (not in files). Applied through
 - **Default branch:** `development`.
 - **`development`** (ruleset): block force pushes and deletion; direct pushes allowed.
 - **`master`** (ruleset): changes only through a pull request from `development` (merge commits only);
-  required status checks `Go netcore tests`, `macOS build`, `Release scripts`, `Linux build` (CI) and `Analyze (go)`,
+  required status checks `Go netcore tests`, `macOS build`, `Release scripts`, `Linux build`, `Windows build` (CI) and `Analyze (go)`,
   `Analyze (actions)` (CodeQL); block force pushes and deletion. `master` was created at the first commit
   with the Release workflow disabled for that moment, so creating the branch published nothing; the first
   `development` → `master` pull request makes the first release.

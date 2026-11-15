@@ -79,7 +79,7 @@ jobs:
     strategy:
       matrix:
         include:
-          # Apple Silicon. Intel and Windows (installer) join as those ports land; Linux has its own job below.
+          # Apple Silicon. Intel joins when that port lands; Linux and Windows have their own jobs below.
           - os: macos-15
             platform: mac-arm64
     runs-on: ${{ matrix.os }}
@@ -117,6 +117,7 @@ jobs:
       - name: Bundle Qt, QML and libraries
         run: |
           "$(brew --prefix qt)/bin/macdeployqt" build/app/Burrow.app -qmldir=app/qml -always-overwrite
+          tools/mac-bundle-ossl-modules.sh build/app/Burrow.app
       - name: Import signing certificate
         env:
           CSC_LINK: ${{ secrets.CSC_LINK }}
@@ -216,8 +217,63 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "v${{ needs.prepare.outputs.version }}" dist/*.AppImage dist/*.AppImage.sha256 --clobber
 
+  # Windows (ADR 0010, same shape as JumpDesk): a per-user NSIS installer, which is also the in-app update
+  # package, and a portable zip. Unsigned for now: when a code signing certificate arrives, a signing step
+  # goes here and the updater starts requiring the same publisher on its own.
+  windows:
+    needs: prepare
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
+    environment: release
+    runs-on: windows-2025
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: netcore/go.mod
+          cache-dependency-path: netcore/go.sum
+      - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
+        with:
+          msystem: UCRT64
+          update: true
+          path-type: inherit
+      - name: Install dependencies
+        run: tools/windows-deps.sh C:/burrow-deps
+      - name: Build
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          export PATH="/c/burrow-deps/bin:$PATH" PKG_CONFIG_PATH=/c/burrow-deps/lib/pkgconfig
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DBURROW_VERSION=${{ needs.prepare.outputs.version }}
+          cmake --build build
+          (cd build && ctest --output-on-failure)
+      - name: Package
+        run: |
+          tools/package-windows.sh build ${{ needs.prepare.outputs.version }} C:/burrow-deps
+          tools/windows/smoke-test.sh dist/Burrow-${{ needs.prepare.outputs.version }}-windows-x64-portable.zip
+          cd dist && for f in *.exe *.zip; do sha256sum "$f" > "$f.sha256"; done
+      - name: Update manifest fragment
+        run: |
+          f="Burrow-${{ needs.prepare.outputs.version }}-windows-x64-setup.exe"
+          printf '{"windows-x64": {"name": "%s", "sha256": "%s", "size": %s}}\n' \
+            "$f" "$(sha256sum "dist/$f" | cut -d' ' -f1)" "$(stat -c %s "dist/$f")" > fragment-windows-x64.json
+          cat fragment-windows-x64.json
+      - name: Upload
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "v${{ needs.prepare.outputs.version }}" dist/*.exe dist/*.zip dist/*.sha256 --clobber
+      - uses: actions/upload-artifact@v7
+        with:
+          name: fragment-windows-x64
+          path: fragment-windows-x64.json
+
   publish:
-    needs: [prepare, build, linux]
+    needs: [prepare, build, linux, windows]
     if: github.ref == 'refs/heads/master'
     permissions:
       contents: write
@@ -245,7 +301,7 @@ jobs:
           gh release edit "v$VERSION" --repo "$GITHUB_REPOSITORY" --draft=false --latest
 
   discard:
-    needs: [prepare, build, publish]
+    needs: [prepare, build, linux, windows, publish]
     if: failure() && needs.prepare.result == 'success'
     permissions:
       contents: write

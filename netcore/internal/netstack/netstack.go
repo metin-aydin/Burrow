@@ -13,7 +13,6 @@ import (
 	"os"
 	"strconv"
 	"sync"
-	"syscall"
 
 	"gvisor.dev/gvisor/pkg/buffer"
 	"gvisor.dev/gvisor/pkg/tcpip"
@@ -29,19 +28,18 @@ import (
 
 const nicID = 1
 
-// Stack is a userspace IP stack whose "wire" is a datagram socket carrying raw IP packets.
+// Stack is a userspace IP stack whose "wire" carries one raw IP packet per read or write: a datagram
+// socket on Unix, a message-mode named pipe on Windows.
 type Stack struct {
-	s      *stack.Stack
-	ep     *channel.Endpoint
-	file   *os.File
+	s        *stack.Stack
+	ep       *channel.Endpoint
+	file     io.ReadWriteCloser
 	dns      []netip.Addr
 	afPrefix bool
 	cancel   context.CancelFunc
-	wg     sync.WaitGroup
+	wg       sync.WaitGroup
 }
 
-// New starts the stack on fd (one raw IP packet per datagram), with this side's VPN address and
-// the VPN's DNS servers.
 // Options tune how packets are framed on the socket.
 type Options struct {
 	// AFPrefix: each packet carries a 4-byte address-family header (BSD/macOS tun framing, which
@@ -49,11 +47,10 @@ type Options struct {
 	AFPrefix bool
 }
 
-func New(fd int, mtu int, local netip.Addr, dns []netip.Addr) (*Stack, error) {
-	return NewWithOptions(fd, mtu, local, dns, Options{})
-}
-
-func NewWithOptions(fd int, mtu int, local netip.Addr, dns []netip.Addr, opt Options) (*Stack, error) {
+// NewPacketConn starts the stack on wire (one raw IP packet per Read/Write; it must unblock pending
+// reads with os.ErrClosed or io.EOF when closed), with this side's VPN address and the VPN's DNS
+// servers. The stack owns wire and closes it.
+func NewPacketConn(wire io.ReadWriteCloser, mtu int, local netip.Addr, dns []netip.Addr, opt Options) (*Stack, error) {
 	if mtu <= 0 {
 		mtu = 1300
 	}
@@ -79,12 +76,7 @@ func NewWithOptions(fd int, mtu int, local netip.Addr, dns []netip.Addr, opt Opt
 		{Destination: header.IPv4EmptySubnet, NIC: nicID},
 		{Destination: header.IPv6EmptySubnet, NIC: nicID},
 	})
-	TuneSocket(fd)
-	// Non-blocking so the Go poller owns the fd and Close unblocks pending reads.
-	if err := syscall.SetNonblock(fd, true); err != nil {
-		return nil, fmt.Errorf("netstack: %v", err)
-	}
-	ns := &Stack{s: s, ep: ep, file: os.NewFile(uintptr(fd), "vpn-packets"), dns: dns, afPrefix: opt.AFPrefix}
+	ns := &Stack{s: s, ep: ep, file: wire, dns: dns, afPrefix: opt.AFPrefix}
 	ctx, cancel := context.WithCancel(context.Background())
 	ns.cancel = cancel
 	ns.wg.Add(2)
@@ -143,9 +135,9 @@ func (ns *Stack) outbound(ctx context.Context) {
 		view := pkt.ToView()
 		data := view.AsSlice()
 		if ns.afPrefix && len(data) > 0 {
-			af := uint32(syscall.AF_INET)
+			af := uint32(afInet)
 			if data[0]>>4 == 6 {
-				af = uint32(syscall.AF_INET6)
+				af = uint32(afInet6)
 			}
 			framed := make([]byte, 4+len(data))
 			binary.BigEndian.PutUint32(framed, af)
@@ -159,18 +151,6 @@ func (ns *Stack) outbound(ctx context.Context) {
 			return
 		}
 		// Other errors (ENOBUFS under bursts) drop the packet; TCP retransmits it.
-	}
-}
-
-// TuneSocket raises the buffers of a packet socket (macOS defaults to a few KB for datagram
-// sockets, which drops bursts of full-size packets).
-func TuneSocket(fd int) {
-	for _, opt := range []int{syscall.SO_SNDBUF, syscall.SO_RCVBUF} {
-		for size := 4 << 20; size >= 64<<10; size /= 2 {
-			if syscall.SetsockoptInt(fd, syscall.SOL_SOCKET, opt, size) == nil {
-				break
-			}
-		}
 	}
 }
 

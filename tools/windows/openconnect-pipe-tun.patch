@@ -1,0 +1,25 @@
+--- a/compat.c
++++ b/compat.c
+@@ -27,7 +27,7 @@
+ #include <inttypes.h>
+ 
+ #ifdef _WIN32
+-#include <sec_api/stdlib_s.h> /* errno_t, size_t */
++#include <stdlib.h> /* errno_t, size_t (mingw-w64 12+ dropped sec_api/) */
+ #ifndef HAVE_GETENV_S_DECL
+ errno_t getenv_s(
+ 	size_t     *ret_required_buf_size,
+--- a/tun-win32.c
++++ b/tun-win32.c
+@@ -990,8 +990,9 @@
+ 
+ 	/* Toggle media status so that network location awareness picks up all the configuration
+ 	   that occurred and properly assigns the network so the user can adjust firewall
+-	   settings. */
+-	for (data = 0; data <= 1; data++) {
++	   settings. A message-mode named pipe (an application's userspace stack on the other end)
++	   carries the same packets but has no TAP device behind it, so there is nothing to toggle. */
++	for (data = 0; data <= 1 && GetFileType((HANDLE)tun_fd) != FILE_TYPE_PIPE; data++) {
+ 		if (!DeviceIoControl((HANDLE)tun_fd, TAP_IOCTL_SET_MEDIA_STATUS,
+ 					&data, sizeof(data), &data, sizeof(data), &len, NULL)) {
+ 			char *errstr = openconnect__win32_strerror(GetLastError());

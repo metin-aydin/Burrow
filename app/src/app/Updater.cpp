@@ -87,10 +87,23 @@ void Updater::setAutoCheck(bool on)
 
 bool Updater::supported() const
 {
-#ifdef Q_OS_MACOS
+#if defined(Q_OS_MACOS)
     return true;
+#elif defined(Q_OS_WIN)
+    // Installed copies only (the installer leaves its uninstaller next to Burrow.exe); the portable zip
+    // doesn't update itself, as with JumpDesk.
+    return QFile::exists(QDir(QCoreApplication::applicationDirPath()).filePath(QStringLiteral("uninstall.exe")));
 #else
-    return false; // Ubuntu (AppImage/deb) and Windows installers follow with their ports.
+    return false; // Ubuntu (AppImage/deb) follows.
+#endif
+}
+
+QString Updater::assetName(const QString &version)
+{
+#ifdef Q_OS_WIN
+    return QStringLiteral("Burrow-%1-%2-setup.exe").arg(version, platformKey());
+#else
+    return QStringLiteral("Burrow-%1-%2.zip").arg(version, platformKey());
 #endif
 }
 
@@ -161,7 +174,7 @@ void Updater::onManifest(QNetworkReply *reply)
     m_notes = m.value("notes").toString();
     // The file name is never taken from the manifest as a path: it must be exactly the name the release
     // workflow produces for this version and platform.
-    const QString expected = QStringLiteral("Burrow-%1-%2.zip").arg(version, platformKey());
+    const QString expected = assetName(version);
     if (asset.value("name").toString() != expected) {
         setState(QStringLiteral("error"), tr("The update information is invalid."));
         return;
@@ -231,6 +244,13 @@ void Updater::install()
     setState(QStringLiteral("installing"));
 #ifdef Q_OS_MACOS
     const QString err = installMac();
+    if (!err.isEmpty()) {
+        setState(QStringLiteral("error"), err);
+        return;
+    }
+    QCoreApplication::quit();
+#elif defined(Q_OS_WIN)
+    const QString err = installWindows();
     if (!err.isEmpty()) {
         setState(QStringLiteral("error"), err);
         return;

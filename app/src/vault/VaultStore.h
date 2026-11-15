@@ -24,12 +24,10 @@ public:
 
     Result create(const QString &password);
     Result open(const QString &password);
-    Result openWithKey(const QByteArray &keyB64);
     Result save();
     Result changePassword(const QString &newPassword);
     // Checks a password against the file without touching the open vault.
     bool verifyPassword(const QString &password) const;
-    QByteArray exportKey() const;   // base64 data key, for Touch ID storage
     void lock();
 
     // Encrypted side files (device previews, ADR 0005). Thread-safe.
