@@ -160,6 +160,9 @@ jobs:
       - name: Package
         timeout-minutes: 20
         run: tools/package-windows.sh build 0.0.0 C:/burrow-deps
+      - name: Start the packaged app
+        timeout-minutes: 5
+        run: tools/windows/smoke-test.sh dist/Burrow-0.0.0-windows-x64-portable.zip
 
   scripts:
     name: Release scripts

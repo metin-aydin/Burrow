@@ -117,6 +117,7 @@ jobs:
       - name: Bundle Qt, QML and libraries
         run: |
           "$(brew --prefix qt)/bin/macdeployqt" build/app/Burrow.app -qmldir=app/qml -always-overwrite
+          tools/mac-bundle-ossl-modules.sh build/app/Burrow.app
       - name: Import signing certificate
         env:
           CSC_LINK: ${{ secrets.CSC_LINK }}
@@ -254,6 +255,7 @@ jobs:
       - name: Package
         run: |
           tools/package-windows.sh build ${{ needs.prepare.outputs.version }} C:/burrow-deps
+          tools/windows/smoke-test.sh dist/Burrow-${{ needs.prepare.outputs.version }}-windows-x64-portable.zip
           cd dist && for f in *.exe *.zip; do sha256sum "$f" > "$f.sha256"; done
       - name: Update manifest fragment
         run: |
