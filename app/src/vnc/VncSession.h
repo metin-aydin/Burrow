@@ -38,6 +38,8 @@ public:
     QString error() const override { return m_error; }
     QString phase() const override { return m_phase; }
     QSize desktopSize() const override;
+    QVariantList monitors() const override;
+    bool multiMonitor() const override;
     bool wasConnected() const override { return m_wasConnected; }
 
     void start() override;
@@ -68,6 +70,7 @@ private:
     bool readRaw(int x, int y, int w, int h);
     bool readCopyRect(int x, int y, int w, int h);
     bool readZrle(int x, int y, int w, int h);
+    bool readExtendedDesktopSize(int w, int h);
     void resizeFrame(int w, int h);
     void requestUpdate(bool incremental);
     bool readExact(void *buf, size_t n);
@@ -88,6 +91,9 @@ private:
     bool m_wasConnected = false;
     mutable QMutex m_frameLock;
     QImage m_frame;
+    QList<QRect> m_screens;          // ExtendedDesktopSize screens (guarded by m_frameLock)
+    bool m_screensReported = false;  // worker thread: the server sent ExtendedDesktopSize
+    bool m_firstUpdate = true;       // worker thread
     z_stream_s *m_zrle = nullptr;   // one zlib stream for the whole connection (worker thread)
     QByteArray m_zbuf;
     // Pointer state (GUI thread).

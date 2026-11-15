@@ -24,7 +24,7 @@ namespace {
 constexpr int kMaxSide = 16384;   // sanity limit for server-sent sizes
 
 enum : quint8 { SecNone = 1, SecVnc = 2, SecApple = 30 };
-enum : qint32 { EncRaw = 0, EncCopyRect = 1, EncZrle = 16, EncDesktopSize = -223 };
+enum : qint32 { EncRaw = 0, EncCopyRect = 1, EncZrle = 16, EncDesktopSize = -223, EncExtendedDesktopSize = -308 };
 
 void putU16(QByteArray &b, quint16 v) { b.append(char(v >> 8)).append(char(v & 0xff)); }
 void putU32(QByteArray &b, quint32 v) { putU16(b, quint16(v >> 16)); putU16(b, quint16(v & 0xffff)); }
@@ -65,6 +65,24 @@ QSize VncSession::desktopSize() const
 {
     QMutexLocker lock(&m_frameLock);
     return m_frame.size();
+}
+
+// The server's screens (ExtendedDesktopSize) when it has several, as {x, y, width, height}.
+QVariantList VncSession::monitors() const
+{
+    QMutexLocker lock(&m_frameLock);
+    QVariantList out;
+    if (m_screens.size() < 2)
+        return out;
+    for (const QRect &r : m_screens)
+        out.append(QVariantMap{{"x", r.x()}, {"y", r.y()}, {"width", r.width()}, {"height", r.height()}});
+    return out;
+}
+
+bool VncSession::multiMonitor() const
+{
+    QMutexLocker lock(&m_frameLock);
+    return m_screens.size() > 1;
 }
 
 QImage VncSession::frame() const
@@ -281,7 +299,7 @@ QString VncSession::handshake()
     pf.append(char(16)).append(char(8)).append(char(0)).append(3, '\0');
     QByteArray enc;
     enc.append(char(2)).append(char(0));
-    const qint32 encodings[] = {EncZrle, EncCopyRect, EncRaw, EncDesktopSize};
+    const qint32 encodings[] = {EncZrle, EncCopyRect, EncRaw, EncExtendedDesktopSize, EncDesktopSize};
     putU16(enc, quint16(std::size(encodings)));
     for (qint32 e : encodings)
         putU32(enc, quint32(e));
@@ -482,6 +500,12 @@ bool VncSession::readFramebufferUpdate()
         const int x = qFromBigEndian<quint16>(r), y = qFromBigEndian<quint16>(r + 2);
         const int w = qFromBigEndian<quint16>(r + 4), hh = qFromBigEndian<quint16>(r + 6);
         const qint32 enc = qFromBigEndian<qint32>(r + 8);
+        if (enc == EncExtendedDesktopSize) {
+            if (!readExtendedDesktopSize(w, hh))
+                return false;
+            dirty = QRect(0, 0, w, hh);
+            continue;
+        }
         if (enc == EncDesktopSize) {
             if (w <= 0 || hh <= 0 || w > kMaxSide || hh > kMaxSide)
                 return false;
@@ -508,8 +532,53 @@ bool VncSession::readFramebufferUpdate()
         }
         dirty = dirty.united(QRect(x, y, w, hh));
     }
+    if (m_firstUpdate) {
+        m_firstUpdate = false;
+        if (!m_screensReported)
+            qInfo("vnc: the server doesn't report its screens (no ExtendedDesktopSize): one picture");
+    }
     if (!dirty.isEmpty())
         emit frameUpdated(dirty);
+    return true;
+}
+
+// ExtendedDesktopSize: the framebuffer size and the screens in it (one per remote display).
+bool VncSession::readExtendedDesktopSize(int w, int h)
+{
+    uchar head[4];
+    if (!readExact(head, 4))
+        return false;
+    const int count = head[0];
+    QList<QRect> screens;
+    for (int i = 0; i < count; ++i) {
+        uchar s[16];
+        if (!readExact(s, 16))
+            return false;
+        const QRect r(qFromBigEndian<quint16>(s + 4), qFromBigEndian<quint16>(s + 6),
+                      qFromBigEndian<quint16>(s + 8), qFromBigEndian<quint16>(s + 10));
+        if (!r.isEmpty())
+            screens.append(r);
+    }
+    if (w <= 0 || h <= 0 || w > kMaxSide || h > kMaxSide)
+        return false;
+    // Only screens inside the framebuffer; anything else is ignored rather than trusted.
+    const QRect fb(0, 0, w, h);
+    QList<QRect> valid;
+    for (const QRect &r : std::as_const(screens))
+        if (fb.contains(r) && valid.size() < 16)
+            valid.append(r);
+    m_screensReported = true;
+    QStringList desc;
+    for (const QRect &r : std::as_const(valid))
+        desc << QStringLiteral("%1x%2+%3+%4").arg(r.width()).arg(r.height()).arg(r.x()).arg(r.y());
+    qInfo("vnc: server screens %dx%d: %s", w, h, qPrintable(desc.join(QStringLiteral(", "))));
+    if (desktopSize() != QSize(w, h))
+        resizeFrame(w, h);
+    {
+        QMutexLocker lock(&m_frameLock);
+        m_screens = valid;
+    }
+    QMetaObject::invokeMethod(this, [this] { emit desktopSizeChanged(); }, Qt::QueuedConnection);
     return true;
 }
 

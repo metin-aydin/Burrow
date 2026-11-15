@@ -10,9 +10,13 @@ ColumnLayout {
     property alias text: field.text
     property alias placeholder: field.placeholderText
     property bool password: false
+    // Whether a password field currently shows its text; hidden again whenever the field is hidden.
+    property bool revealed: false
     property alias field: field
     signal accepted()
     spacing: 6
+    onVisibleChanged: if (!visible) revealed = false
+    onPasswordChanged: revealed = false
 
     Text {
         visible: root.label !== ""
@@ -27,15 +31,33 @@ ColumnLayout {
         // Fixed implicit width: the layout decides the width, so typing never resizes the field.
         implicitWidth: 120
         implicitHeight: Theme.controlHeight
-        echoMode: root.password ? TextInput.Password : TextInput.Normal
+        echoMode: root.password && !root.revealed ? TextInput.Password : TextInput.Normal
         color: Theme.text
         placeholderTextColor: Theme.textMuted
         selectionColor: Theme.accent
         selectedTextColor: Theme.accentText
         font.pixelSize: 13
         leftPadding: 12
-        rightPadding: 12
+        rightPadding: root.password ? revealBtn.width + 8 : 12
         onAccepted: root.accepted()
+
+        // Show / hide toggle for secret fields. Never takes focus, so the caret stays in the field
+        // and Tab still moves field to field.
+        BButton {
+            id: revealBtn
+            visible: root.password
+            variant: "ghost"
+            iconName: root.revealed ? "eye-off" : "eye"
+            tip: root.revealed ? qsTr("Hide Password") : qsTr("Show Password")
+            focusPolicy: Qt.NoFocus
+            implicitHeight: parent.height - 8
+            leftPadding: 7
+            rightPadding: 7
+            anchors.right: parent.right
+            anchors.rightMargin: 4
+            anchors.verticalCenter: parent.verticalCenter
+            onClicked: root.revealed = !root.revealed
+        }
         background: Rectangle {
             radius: Theme.radius
             color: Theme.field

@@ -4,6 +4,13 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- VNC çoklu ekran, standart yol: `ExtendedDesktopSize` (-308) istenip ayrıştırılıyor; sunucu birden çok ekran
+  bildirirse her biri RDP'deki gibi ayrı sekme/pencere (test sunucusuyla doğrulandı). Bildirmezse logda
+  "the server doesn't report its screens" yazar. Apple'ın kendi düzen mesajı (AppleDisplayLayout 0x451) yalnız
+  003.889 el sıkışması + şifreli kayıt katmanından sonra geliyor (zdesk projesinin tersine mühendislik notları);
+  standart yol yetmezse bu ikinci adım. Kullanıcının denediği "macbook-pro" Burrow'un çalıştığı Mac'in kendisiydi
+  (görüntü kendini tekrar ediyordu).
+
 - Tailscale cihaz içe aktarma "Loading"de kalıyordu: pencere listeyi yalnız tünel durumu *değişince* alıyordu;
   "Tailscale İle Giriş Yap"tan sonra tünel zaten bağlı olduğu için değişiklik gelmiyordu. Artık açılışta durum hemen
   kontrol ediliyor; bağlandıktan hemen sonra makine listesi boşsa 1 sn arayla 6 kez yeniden soruluyor. Bu tünelde
