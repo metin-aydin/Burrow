@@ -113,7 +113,7 @@ jobs:
           cache-dependency-path: netcore/go.sum
       # MSYS2 UCRT64 (ADR 0010): gcc for cgo and the app, Qt 6, FreeRDP 3, OpenSSL. "inherit" keeps the Go
       # installed above on PATH.
-      - uses: msys2/setup-msys2@v2
+      - uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
         with:
           msystem: UCRT64
           update: true

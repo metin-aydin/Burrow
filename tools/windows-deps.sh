@@ -1,7 +1,7 @@
 #!/bin/sh
 # Prepares a Windows machine (CI runner or a developer's PC) to build Burrow, inside an MSYS2 UCRT64 shell
 # (ADR 0010): MSYS2 packages for the toolchain, Qt 6, FreeRDP 3, OpenSSL and zlib, and libopenconnect built
-# from source (no Windows package repository has it) with Burrow's named-pipe patch.
+# from source (no Windows package repository has it) with Burrow's patch (named-pipe tun, newer mingw-w64).
 # Usage: tools/windows-deps.sh [prefix]      (default prefix: C:/burrow-deps)
 # Afterwards: PKG_CONFIG_PATH="<prefix>/lib/pkgconfig", and <prefix>/bin on PATH to run Burrow.
 set -eu
