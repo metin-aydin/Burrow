@@ -13,6 +13,7 @@
 #include <QWindow>
 
 #include "app/AppController.h"
+#include "app/LogFile.h"
 #include "app/PreviewProvider.h"
 #include "app/Tray.h"
 #include "rdp/RdpView.h"
@@ -58,6 +59,7 @@ private:
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);   // QApplication: the tray menu uses widgets on every platform
+    LogFile::installIfNoConsole();
     useBundledOpenSslModules();
     QGuiApplication::setApplicationName(QStringLiteral("Burrow"));
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Burrow"));
