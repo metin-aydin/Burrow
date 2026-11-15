@@ -58,6 +58,9 @@ public:
     // The view's size changed (pixels, scale %); protocols that can't resize the remote desktop ignore it.
     virtual void requestResize(const QSize &pixels, int scale) { Q_UNUSED(pixels) Q_UNUSED(scale) }
     virtual void requestMonitorSize(int index, const QSize &pixels) { Q_UNUSED(index) Q_UNUSED(pixels) }
+    // The remote pointer's shape, when the protocol sends one (null image = keep the local arrow).
+    virtual QImage cursorImage() const { return {}; }
+    virtual QPoint cursorHotspot() const { return {}; }
 
 signals:
     void stateChanged();
@@ -67,4 +70,5 @@ signals:
     void certificatePrompt(const QString &address, const QString &fingerprint);
     void certificateTrusted(const QString &deviceId, const QString &pin);
     void closed(RemoteSession *session);
+    void cursorChanged();   // GUI thread
 };

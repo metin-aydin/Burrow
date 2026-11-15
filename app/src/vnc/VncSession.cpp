@@ -28,7 +28,7 @@ enum : quint8 { SecNone = 1, SecVnc = 2, SecApple = 30 };
 enum : qint32 { EncRaw = 0, EncCopyRect = 1, EncZrle = 16, EncDesktopSize = -223, EncExtendedDesktopSize = -308 };
 // Apple's metadata pseudo-encodings (RFB 003.889; measured by the zDesk project, MIT,
 // github.com/andrewtheguy/zdesk docs/apple-vnc-889.md).
-enum : qint32 { EncAppleCursorPos = 0x44c, EncAppleDisplayInfo = 0x44d, EncAppleRekey = 0x44f, EncAppleLayout = 0x451 };
+enum : qint32 { EncAppleCursorPos = 0x44c, EncAppleDisplayInfo = 0x44d, EncAppleRekey = 0x44f, EncAppleCursor = 0x450, EncAppleLayout = 0x451 };
 constexpr int kRecordTrailer = 20;                      // SHA-1
 constexpr int kRecordMaxBody = (65535 / 16) * 16 - 2 - kRecordTrailer;
 
@@ -405,7 +405,7 @@ QString VncSession::handshake()
     // Every encoding listed must be readable: the server takes the list as a promise. A Mac reports
     // its displays only when both DisplayInfo and the layout are listed.
     const QList<qint32> encodings = m_apple
-        ? QList<qint32>{EncZrle, EncRaw, EncAppleCursorPos, EncAppleDisplayInfo, EncAppleRekey, EncAppleLayout, EncDesktopSize}
+        ? QList<qint32>{EncZrle, EncRaw, EncAppleCursorPos, EncAppleDisplayInfo, EncAppleRekey, EncAppleCursor, EncAppleLayout, EncDesktopSize}
         : QList<qint32>{EncZrle, EncCopyRect, EncRaw, EncExtendedDesktopSize, EncDesktopSize};
     putU16(enc, quint16(encodings.size()));
     for (qint32 e : encodings)
@@ -535,6 +535,57 @@ bool VncSession::fillRecord()
         return false;
     m_inBuf = plain.mid(2, body);
     m_inPos = 0;
+    return true;
+}
+
+// Apple's pointer shapes: a u32 cache id and a u32 compressed length. A length of 0 selects a
+// stored shape; otherwise its own zlib stream holds w*h BGRA pixels, then a separate w*h alpha plane.
+bool VncSession::readAppleCursor(int hx, int hy, int w, int h)
+{
+    uchar head[8];
+    if (!readExact(head, 8))
+        return false;
+    const quint32 id = qFromBigEndian<quint32>(head), len = qFromBigEndian<quint32>(head + 4);
+    if (len > 1024 * 1024)
+        return false;
+    QByteArray deflated(int(len), '\0');
+    if (!readExact(deflated.data(), len))
+        return false;
+    CursorShape shape;
+    if (len == 0) {
+        if (!m_cursorCache.contains(id))
+            return true;   // never stored: keep the current shape
+        shape = m_cursorCache.value(id);
+    } else {
+        if (w <= 0 || h <= 0 || w > 256 || h > 256)
+            return true;   // a bad shape is skipped; its bytes are already consumed
+        const qsizetype pixels = qsizetype(w) * h;
+        QByteArray raw(pixels * 5, '\0');
+        uLongf outLen = uLongf(raw.size());
+        if (uncompress(reinterpret_cast<Bytef *>(raw.data()), &outLen,
+                       reinterpret_cast<const Bytef *>(deflated.constData()), uLong(deflated.size())) != Z_OK
+            || qsizetype(outLen) != raw.size())
+            return true;
+        QImage img(w, h, QImage::Format_ARGB32);
+        const auto *bgrx = reinterpret_cast<const uchar *>(raw.constData());
+        const auto *alpha = bgrx + pixels * 4;
+        for (int y = 0; y < h; ++y) {
+            auto *line = reinterpret_cast<QRgb *>(img.scanLine(y));
+            for (int x = 0; x < w; ++x) {
+                const qsizetype i = qsizetype(y) * w + x;
+                line[x] = qRgba(bgrx[i * 4 + 2], bgrx[i * 4 + 1], bgrx[i * 4], alpha[i]);
+            }
+        }
+        shape = {img, QPoint(qBound(0, hx, w - 1), qBound(0, hy, h - 1))};
+        qDebug("vnc: pointer shape %dx%d stored as %u", w, h, id);
+        if (m_cursorCache.size() < 256)
+            m_cursorCache.insert(id, shape);
+    }
+    QMetaObject::invokeMethod(this, [this, shape] {
+        m_cursor = shape.image;
+        m_cursorHot = shape.hotspot;
+        emit cursorChanged();
+    }, Qt::QueuedConnection);
     return true;
 }
 
@@ -828,6 +879,11 @@ bool VncSession::readFramebufferUpdate()
             }
             if (enc == EncAppleLayout) {
                 if (!readAppleLayout())
+                    return false;
+                continue;
+            }
+            if (enc == EncAppleCursor) {   // the header carries the hotspot and the shape's size
+                if (!readAppleCursor(x, y, w, hh))
                     return false;
                 continue;
             }

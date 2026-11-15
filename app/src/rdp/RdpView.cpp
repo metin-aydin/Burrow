@@ -1,5 +1,8 @@
 #include "rdp/RdpView.h"
 
+#include <QCursor>
+#include <QPixmap>
+
 #include <QKeyEvent>
 #include <QPainter>
 #include <QQuickWindow>
@@ -62,6 +65,14 @@ void RdpView::setSession(RemoteSession *s)
             refreshFrame();
             if (m_monitor >= 0)
                 m_resizeTimer.start();   // monitors became known (or changed): fit ours to this view
+        });
+        // The remote pointer's shape, where the protocol sends one (a Mac's I-beam, hand, resize arrows).
+        connect(s, &RemoteSession::cursorChanged, this, [this] {
+            const QImage img = m_session ? m_session->cursorImage() : QImage();
+            if (img.isNull())
+                unsetCursor();
+            else
+                setCursor(QCursor(QPixmap::fromImage(img), m_session->cursorHotspot().x(), m_session->cursorHotspot().y()));
         });
         // Show the current picture right away: a static remote screen may not send updates for a while.
         refreshFrame();

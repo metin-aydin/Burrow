@@ -57,6 +57,8 @@ public:
     bool usesKeysyms() const override { return true; }
     void sendKeysym(quint32 keysym, bool down) override;
     void releaseKeys() override;
+    QImage cursorImage() const override { return m_cursor; }
+    QPoint cursorHotspot() const override { return m_cursorHot; }
 
     // Exposed for tests: the VNC password response and the Apple sign-in block.
     static QByteArray vncAuthResponse(const QByteArray &challenge, const QString &password);
@@ -85,6 +87,7 @@ private:
     bool fillRecord();
     bool startRecords(const uchar *rekeyBody);
     bool readAppleLayout();
+    bool readAppleCursor(int hx, int hy, int w, int h);
     void setState(const QString &state, const QString &error = {});
     void setPhase(const QString &phase);
     void sendPointer();
@@ -122,5 +125,9 @@ private:
     quint8 m_buttons = 0;
     int m_px = 0, m_py = 0;
     QSet<quint32> m_heldKeys;       // keysyms down on the remote side (GUI thread)
-    QString m_lastClipboard;        // last text exchanged, to avoid echoing it back
+    QString m_lastClipboard;
+    struct CursorShape { QImage image; QPoint hotspot; };
+    QHash<quint32, CursorShape> m_cursorCache;   // worker thread: Apple's stored pointer shapes
+    QImage m_cursor;                // GUI thread: current remote pointer shape
+    QPoint m_cursorHot;        // last text exchanged, to avoid echoing it back
 };
