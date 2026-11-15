@@ -321,10 +321,14 @@ unsigned RdpView::scancodeForMacKey(quint32 macKeyCode)
 
 unsigned RdpView::scancodeFor(const QKeyEvent *e) const
 {
-#ifdef Q_OS_MACOS
+#if defined(Q_OS_MACOS)
     return scancodeForMacKey(e->nativeVirtualKey());
+#elif defined(Q_OS_WIN)
+    // Qt gives the hardware scan code with the E0 "extended" flag as bit 8, which is exactly
+    // FreeRDP's RDP_SCANCODE encoding (KBDEXT = 0x100).
+    return e->nativeScanCode() & 0x1ff;
 #else
-    // XKB keycode (Linux) / scancode (Windows) mapping follows with those ports.
+    // Linux: XKB keycode.
     const DWORD vk = GetVirtualKeyCodeFromKeycode(e->nativeScanCode(), WINPR_KEYCODE_TYPE_XKB);
     return vk ? GetVirtualScanCodeFromVirtualKeyCode(vk, WINPR_KBD_TYPE_IBM_ENHANCED) : 0;
 #endif

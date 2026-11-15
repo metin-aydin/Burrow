@@ -37,6 +37,8 @@ BDialog {
     SectionTitle { text: qsTr("Security") }
     BSwitch {
         id: touch
+        // Touch ID exists only on Macs; elsewhere the vault opens with the master password (ADR 0010).
+        visible: Qt.platform.os === "osx"
         Layout.fillWidth: true
         enabled: App.touchIdAvailable
         title: qsTr("Unlock With Touch ID")
@@ -90,6 +92,7 @@ BDialog {
         enabled: App.updater.supported
         title: qsTr("Check For Updates Automatically")
         description: App.updater.supported ? qsTr("Checks GitHub every 6 hours. Nothing is downloaded without asking.")
+                                           : Qt.platform.os === "windows" ? qsTr("The portable version doesn't update itself. Download new versions from GitHub, or use the installer.")
                                            : qsTr("Automatic updates aren't available on this platform yet.")
         checked: App.updater.autoCheck
         onToggled: App.updater.autoCheck = checked

@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"io"
 	"net"
-	"os"
 	"strings"
 	"time"
 	"unsafe"
@@ -226,16 +225,14 @@ func NetcoreConnectFD(tunnelHandle C.int, target *C.char, fd C.int) C.int {
 	if tunnelHandle > 0 {
 		t := lookupTunnel(tunnelHandle)
 		if t == nil {
-			_ = os.NewFile(uintptr(fd), "rdp").Close()
+			closeStream(int(fd))
 			return -1
 		}
 		dial = t.DialContext
 	} else {
 		dial = (&net.Dialer{}).DialContext
 	}
-	file := os.NewFile(uintptr(fd), "rdp")
-	local, err := net.FileConn(file) // dups the descriptor
-	file.Close()
+	local, err := adoptStream(int(fd))
 	if err != nil {
 		return -1
 	}

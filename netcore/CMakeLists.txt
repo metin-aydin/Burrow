@@ -41,6 +41,10 @@ if(APPLE)
     target_link_libraries(netcore INTERFACE
         "-framework CoreFoundation" "-framework Security" "-framework SystemConfiguration"
         "-framework IOKit" resolv)
+elseif(WIN32)
+    # The Go runtime and its standard library (net, crypto, os/user) link against these on Windows.
+    target_link_libraries(netcore INTERFACE ws2_32 winmm ntdll bcrypt userenv iphlpapi dnsapi secur32
+        crypt32 ole32 oleaut32 advapi32 shell32 setupapi wtsapi32 netapi32 mswsock)
 elseif(UNIX)
     target_link_libraries(netcore INTERFACE pthread dl resolv)
 endif()

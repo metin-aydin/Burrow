@@ -236,7 +236,8 @@ BDialog {
         }
         BCombo {
             id: keyCombo
-            visible: !root.isMac
+            // Only a Mac keyboard has Cmd to translate.
+            visible: !root.isMac && Qt.platform.os === "osx"
             Layout.fillWidth: true
             label: qsTr("Mac Shortcuts")
             options: [{ text: qsTr("Translate shortcuts (Cmd+C → Ctrl+C)"), value: "shortcuts" },

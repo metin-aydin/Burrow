@@ -29,7 +29,6 @@ import (
 	"runtime/cgo"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 	"unsafe"
 
@@ -207,24 +206,23 @@ func (t *Tunnel) run() {
 		}
 	}
 
-	fds, err := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_DGRAM, 0)
+	ocEnd, wire, err := newTunWire()
 	if err != nil {
 		t.fail(err.Error())
 		return
 	}
-	netstack.TuneSocket(fds[0])
-	if C.openconnect_setup_tun_fd(t.vpn, C.int(fds[0])) != 0 {
-		syscall.Close(fds[0])
-		syscall.Close(fds[1])
+	if C.burrow_oc_setup_tun(t.vpn, C.intptr_t(ocEnd.handle)) != 0 {
+		ocEnd.close()
+		wire.Close()
 		t.fail("couldn't attach the tunnel")
 		return
 	}
 	// openconnect frames tun packets with a 4-byte address family on macOS/BSD (it only skips that
-	// for --script-tun, which the library API doesn't use).
-	st, err := netstack.NewWithOptions(fds[1], int(mtu), local, dns,
+	// for --script-tun, which the library API doesn't use). Windows (TAP path) and Linux don't.
+	st, err := netstack.NewPacketConn(wire, int(mtu), local, dns,
 		netstack.Options{AFPrefix: runtime.GOOS == "darwin" || strings.HasSuffix(runtime.GOOS, "bsd")})
 	if err != nil {
-		syscall.Close(fds[1])
+		wire.Close()
 		t.fail(err.Error())
 		return
 	}

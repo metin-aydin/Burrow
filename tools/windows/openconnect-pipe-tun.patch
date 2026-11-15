@@ -1,0 +1,14 @@
+--- a/tun-win32.c
++++ b/tun-win32.c
+@@ -990,8 +990,9 @@
+ 
+ 	/* Toggle media status so that network location awareness picks up all the configuration
+ 	   that occurred and properly assigns the network so the user can adjust firewall
+-	   settings. */
+-	for (data = 0; data <= 1; data++) {
++	   settings. A message-mode named pipe (an application's userspace stack on the other end)
++	   carries the same packets but has no TAP device behind it, so there is nothing to toggle. */
++	for (data = 0; data <= 1 && GetFileType((HANDLE)tun_fd) != FILE_TYPE_PIPE; data++) {
+ 		if (!DeviceIoControl((HANDLE)tun_fd, TAP_IOCTL_SET_MEDIA_STATUS,
+ 					&data, sizeof(data), &data, sizeof(data), &len, NULL)) {
+ 			char *errstr = openconnect__win32_strerror(GetLastError());

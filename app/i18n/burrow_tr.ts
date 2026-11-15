@@ -570,32 +570,32 @@
         <translation>Tuşlar Mac&apos;e olduğu gibi gider: Cmd, Cmd olarak kalır.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="241"/>
+        <location filename="../qml/DeviceEditor.qml" line="242"/>
         <source>Mac Shortcuts</source>
         <translation>Mac Kısayolları</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="242"/>
+        <location filename="../qml/DeviceEditor.qml" line="243"/>
         <source>Translate shortcuts (Cmd+C → Ctrl+C)</source>
         <translation>Kısayolları çevir (Cmd+C → Ctrl+C)</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="243"/>
+        <location filename="../qml/DeviceEditor.qml" line="244"/>
         <source>Swap Cmd ↔ Ctrl completely</source>
         <translation>Cmd ↔ Ctrl tamamen yer değiştir</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="244"/>
+        <location filename="../qml/DeviceEditor.qml" line="245"/>
         <source>Off (keys as they are)</source>
         <translation>Kapalı (tuşlar olduğu gibi)</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="260"/>
+        <location filename="../qml/DeviceEditor.qml" line="261"/>
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="261"/>
+        <location filename="../qml/DeviceEditor.qml" line="262"/>
         <source>Save</source>
         <translation>Kaydet</translation>
     </message>
@@ -995,42 +995,42 @@
 <context>
     <name>RdpSession</name>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="177"/>
+        <location filename="../src/rdp/RdpSession.cpp" line="176"/>
         <source>The computer rejected the username or password.</source>
         <translation>Bilgisayar kullanıcı adını veya şifreyi kabul etmedi.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="179"/>
+        <location filename="../src/rdp/RdpSession.cpp" line="178"/>
         <source>The account is locked on the remote computer.</source>
         <translation>Hesap uzak bilgisayarda kilitli.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="181"/>
+        <location filename="../src/rdp/RdpSession.cpp" line="180"/>
         <source>The computer&apos;s address couldn&apos;t be found.</source>
         <translation>Bilgisayarın adresi bulunamadı.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="184"/>
+        <location filename="../src/rdp/RdpSession.cpp" line="183"/>
         <source>Couldn&apos;t reach the computer. Check the address and the tunnel.</source>
         <translation>Bilgisayara ulaşılamadı. Adresi ve tüneli kontrol et.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="186"/>
+        <location filename="../src/rdp/RdpSession.cpp" line="185"/>
         <source>The secure connection couldn&apos;t be established.</source>
         <translation>Güvenli bağlantı kurulamadı.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="188"/>
+        <location filename="../src/rdp/RdpSession.cpp" line="187"/>
         <source>The computer&apos;s certificate doesn&apos;t match the one you trusted, so Burrow didn&apos;t connect. If the change is expected, use Forget Saved Certificate in the device settings.</source>
         <translation>Bilgisayarın sertifikası güvendiğin sertifikayla eşleşmiyor, bu yüzden Burrow bağlanmadı. Değişiklik bekleniyorsa cihaz ayarlarında Kayıtlı Sertifikayı Unut&apos;u kullan.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="190"/>
+        <location filename="../src/rdp/RdpSession.cpp" line="189"/>
         <source>The connection failed (%1).</source>
         <translation>Bağlantı başarısız oldu (%1).</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="371"/>
+        <location filename="../src/rdp/RdpSession.cpp" line="375"/>
         <source>Couldn&apos;t start the RDP engine.</source>
         <translation>RDP motoru başlatılamadı.</translation>
     </message>
@@ -1167,152 +1167,157 @@
         <translation>Güvenlik</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="42"/>
+        <location filename="../qml/SettingsDialog.qml" line="44"/>
         <source>Unlock With Touch ID</source>
         <translation>Touch ID İle Aç</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="43"/>
+        <location filename="../qml/SettingsDialog.qml" line="45"/>
         <source>Unlock the vault with your fingerprint instead of the master password. The master password always keeps working.</source>
         <translation>Kasa, ana şifre yerine parmak iziyle açılabilir. Ana şifre her zaman geçerli kalır.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="44"/>
+        <location filename="../qml/SettingsDialog.qml" line="46"/>
         <source>This Mac has no Touch ID.</source>
         <translation>Bu Mac&apos;te Touch ID yok.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="52"/>
+        <location filename="../qml/SettingsDialog.qml" line="54"/>
         <source>Auto-Lock</source>
         <translation>Otomatik Kilit</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="53"/>
+        <location filename="../qml/SettingsDialog.qml" line="55"/>
         <source>After 5 minutes of inactivity</source>
         <translation>5 dakika işlem yapılmazsa</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="54"/>
+        <location filename="../qml/SettingsDialog.qml" line="56"/>
         <source>After 15 minutes of inactivity</source>
         <translation>15 dakika işlem yapılmazsa</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="55"/>
+        <location filename="../qml/SettingsDialog.qml" line="57"/>
         <source>After 30 minutes of inactivity</source>
         <translation>30 dakika işlem yapılmazsa</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="56"/>
+        <location filename="../qml/SettingsDialog.qml" line="58"/>
         <source>After 1 hour of inactivity</source>
         <translation>1 saat işlem yapılmazsa</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="57"/>
+        <location filename="../qml/SettingsDialog.qml" line="59"/>
         <source>Never</source>
         <translation>Hiçbir Zaman</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="66"/>
+        <location filename="../qml/SettingsDialog.qml" line="68"/>
         <source>Burrow keeps running in the menu bar when you close its window; it locks itself after this much inactivity, but never while a remote desktop is open.</source>
         <translation>Pencereyi kapattığında Burrow menü çubuğunda çalışmaya devam eder; bu süre boyunca işlem yapılmazsa kendini kilitler, ancak açık bir uzak masaüstü varken asla kilitlenmez.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="69"/>
+        <location filename="../qml/SettingsDialog.qml" line="71"/>
         <source>Change Master Password</source>
         <translation>Ana Şifreyi Değiştir</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="70"/>
+        <location filename="../qml/SettingsDialog.qml" line="72"/>
         <source>Current Password</source>
         <translation>Mevcut Şifre</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="73"/>
+        <location filename="../qml/SettingsDialog.qml" line="75"/>
         <source>New Password</source>
         <translation>Yeni Şifre</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="74"/>
+        <location filename="../qml/SettingsDialog.qml" line="76"/>
         <source>New Password (Again)</source>
         <translation>Yeni Şifre (Tekrar)</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="79"/>
+        <location filename="../qml/SettingsDialog.qml" line="81"/>
         <source>Change Password</source>
         <translation>Şifreyi Değiştir</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="87"/>
+        <location filename="../qml/SettingsDialog.qml" line="89"/>
         <source>Updates</source>
         <translation>Güncellemeler</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="91"/>
+        <location filename="../qml/SettingsDialog.qml" line="93"/>
         <source>Check For Updates Automatically</source>
         <translation>Güncellemeleri Otomatik Denetle</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="92"/>
+        <location filename="../qml/SettingsDialog.qml" line="94"/>
         <source>Checks GitHub every 6 hours. Nothing is downloaded without asking.</source>
         <translation>6 saatte bir GitHub&apos;ı denetler. Sormadan hiçbir şey indirilmez.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="93"/>
+        <location filename="../qml/SettingsDialog.qml" line="95"/>
+        <source>The portable version doesn&apos;t update itself. Download new versions from GitHub, or use the installer.</source>
+        <translation>Taşınabilir sürüm kendini güncellemez. Yeni sürümleri GitHub&apos;dan indirin veya kurulum sürümünü kullanın.</translation>
+    </message>
+    <message>
+        <location filename="../qml/SettingsDialog.qml" line="96"/>
         <source>Automatic updates aren&apos;t available on this platform yet.</source>
         <translation>Bu platformda otomatik güncelleme henüz yok.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="108"/>
+        <location filename="../qml/SettingsDialog.qml" line="111"/>
         <source>Checking for updates…</source>
         <translation>Güncellemeler denetleniyor…</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="109"/>
+        <location filename="../qml/SettingsDialog.qml" line="112"/>
         <source>Burrow is up to date.</source>
         <translation>Burrow güncel.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="110"/>
+        <location filename="../qml/SettingsDialog.qml" line="113"/>
         <source>Burrow %1 is available.</source>
         <translation>Burrow %1 yayımlandı.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="111"/>
+        <location filename="../qml/SettingsDialog.qml" line="114"/>
         <source>Downloading %1… %2%</source>
         <translation>%1 indiriliyor… %%2</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="112"/>
+        <location filename="../qml/SettingsDialog.qml" line="115"/>
         <source>Burrow %1 is ready to install. Burrow restarts to finish.</source>
         <translation>Burrow %1 kurulmaya hazır. Bitirmek için Burrow yeniden başlar.</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="113"/>
+        <location filename="../qml/SettingsDialog.qml" line="116"/>
         <source>Installing…</source>
         <translation>Kuruluyor…</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="121"/>
+        <location filename="../qml/SettingsDialog.qml" line="124"/>
         <source>Check Now</source>
         <translation>Şimdi Denetle</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="127"/>
+        <location filename="../qml/SettingsDialog.qml" line="130"/>
         <source>Download Update</source>
         <translation>Güncellemeyi İndir</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="133"/>
+        <location filename="../qml/SettingsDialog.qml" line="136"/>
         <source>Restart And Update</source>
         <translation>Yeniden Başlat Ve Güncelle</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="138"/>
+        <location filename="../qml/SettingsDialog.qml" line="141"/>
         <source>About</source>
         <translation>Hakkında</translation>
     </message>
     <message>
-        <location filename="../qml/SettingsDialog.qml" line="143"/>
+        <location filename="../qml/SettingsDialog.qml" line="146"/>
         <source>Done</source>
         <translation>Bitti</translation>
     </message>
@@ -1685,11 +1690,6 @@
         <translation>Düğüm Adı</translation>
     </message>
     <message>
-        <location filename="../qml/TunnelEditor.qml" line="349"/>
-        <source>How this Mac appears in your tailnet.</source>
-        <translation>Bu Mac&apos;in tailnet&apos;te görünen adı.</translation>
-    </message>
-    <message>
         <location filename="../qml/TunnelEditor.qml" line="414"/>
         <source>Hostname To Test</source>
         <translation>Test Edilecek Host Adı</translation>
@@ -1713,6 +1713,11 @@
         <location filename="../qml/TunnelEditor.qml" line="362"/>
         <source>Publish the computer&apos;s RDP port with cloudflared and protect it with a Cloudflare Access application (free Zero Trust plan). Each device&apos;s address is then its Access hostname, e.g. rdp.example.com. You sign in once in the browser; the token is kept in the encrypted vault.</source>
         <translation>Bilgisayarın RDP portunu cloudflared ile yayınla ve bir Cloudflare Access uygulamasıyla koru (ücretsiz Zero Trust planı). Cihazın adresi Access host adı olur, ör. rdp.example.com. Tarayıcıda bir kez giriş yaparsın; erişim anahtarı şifreli kasada tutulur.</translation>
+    </message>
+    <message>
+        <location filename="../qml/TunnelEditor.qml" line="349"/>
+        <source>How this computer appears in your tailnet.</source>
+        <translation>Bu bilgisayarın tailnet&apos;inizde görünen adı.</translation>
     </message>
     <message>
         <location filename="../qml/TunnelEditor.qml" line="369"/>
@@ -1911,60 +1916,60 @@
 <context>
     <name>Updater</name>
     <message>
-        <location filename="../src/app/Updater.cpp" line="145"/>
+        <location filename="../src/app/Updater.cpp" line="158"/>
         <source>Couldn&apos;t check for updates: %1</source>
         <translation>Güncellemeler denetlenemedi: %1</translation>
     </message>
     <message>
-        <location filename="../src/app/Updater.cpp" line="153"/>
         <location filename="../src/app/Updater.cpp" line="166"/>
-        <location filename="../src/app/Updater.cpp" line="180"/>
+        <location filename="../src/app/Updater.cpp" line="179"/>
+        <location filename="../src/app/Updater.cpp" line="193"/>
         <source>The update information is invalid.</source>
         <translation>Güncelleme bilgisi geçersiz.</translation>
     </message>
     <message>
-        <location filename="../src/app/Updater.cpp" line="206"/>
+        <location filename="../src/app/Updater.cpp" line="219"/>
         <source>Download failed: %1</source>
         <translation>İndirme başarısız: %1</translation>
     </message>
     <message>
-        <location filename="../src/app/Updater.cpp" line="211"/>
+        <location filename="../src/app/Updater.cpp" line="224"/>
         <source>The downloaded update failed verification and was discarded.</source>
         <translation>İndirilen güncelleme doğrulamadan geçemedi ve silindi.</translation>
     </message>
     <message>
-        <location filename="../src/app/Updater.cpp" line="219"/>
+        <location filename="../src/app/Updater.cpp" line="232"/>
         <source>Couldn&apos;t save the update.</source>
         <translation>Güncelleme kaydedilemedi.</translation>
     </message>
     <message>
-        <location filename="../src/app/Updater.cpp" line="250"/>
+        <location filename="../src/app/Updater.cpp" line="270"/>
         <source>Burrow isn&apos;t running from an app bundle, so it can&apos;t update itself.</source>
         <translation>Burrow bir uygulama paketinden çalışmadığı için kendini güncelleyemiyor.</translation>
     </message>
     <message>
-        <location filename="../src/app/Updater.cpp" line="254"/>
+        <location filename="../src/app/Updater.cpp" line="274"/>
         <source>This copy of Burrow isn&apos;t signed, so updates can&apos;t be verified. Download the new version from GitHub.</source>
         <translation>Bu Burrow kopyası imzalı değil, bu yüzden güncellemeler doğrulanamıyor. Yeni sürümü GitHub&apos;dan indir.</translation>
     </message>
     <message>
-        <location filename="../src/app/Updater.cpp" line="265"/>
+        <location filename="../src/app/Updater.cpp" line="285"/>
         <source>Couldn&apos;t unpack the update.</source>
         <translation>Güncelleme açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/app/Updater.cpp" line="272"/>
+        <location filename="../src/app/Updater.cpp" line="292"/>
         <source>The update&apos;s signature doesn&apos;t match this app; it was not installed.</source>
         <translation>Güncellemenin imzası bu uygulamayla eşleşmiyor; kurulmadı.</translation>
     </message>
     <message>
-        <location filename="../src/app/Updater.cpp" line="259"/>
-        <location filename="../src/app/Updater.cpp" line="280"/>
+        <location filename="../src/app/Updater.cpp" line="279"/>
+        <location filename="../src/app/Updater.cpp" line="300"/>
         <source>Couldn&apos;t prepare the update.</source>
         <translation>Güncelleme hazırlanamadı.</translation>
     </message>
     <message>
-        <location filename="../src/app/Updater.cpp" line="297"/>
+        <location filename="../src/app/Updater.cpp" line="317"/>
         <source>Couldn&apos;t start the update.</source>
         <translation>Güncelleme başlatılamadı.</translation>
     </message>
@@ -2000,65 +2005,65 @@
 <context>
     <name>VncSession</name>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="324"/>
+        <location filename="../src/vnc/VncSession.cpp" line="318"/>
         <source>Couldn&apos;t open a connection.</source>
         <translation>Bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="335"/>
+        <location filename="../src/vnc/VncSession.cpp" line="324"/>
         <source>Couldn&apos;t open a connection through the tunnel.</source>
         <translation>Tünel üzerinden bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="362"/>
+        <location filename="../src/vnc/VncSession.cpp" line="351"/>
         <source>The connection to %1 was closed because data arrived damaged or altered.</source>
         <translation>%1 ile bağlantı, veri bozuk ya da değiştirilmiş geldiği için kapatıldı.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="363"/>
+        <location filename="../src/vnc/VncSession.cpp" line="352"/>
         <source>The connection to %1 was lost.</source>
         <translation>%1 ile bağlantı koptu.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="373"/>
+        <location filename="../src/vnc/VncSession.cpp" line="362"/>
         <source>Couldn&apos;t reach %1. Check that Screen Sharing (or another VNC server) is on and the address is right.</source>
         <translation>%1 bilgisayarına ulaşılamadı. Ekran Paylaşımı&apos;nın (ya da başka bir VNC sunucusunun) açık ve adresin doğru olduğunu kontrol et.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="395"/>
+        <location filename="../src/vnc/VncSession.cpp" line="384"/>
         <source>%1 refused the connection: %2</source>
         <translation>%1 bağlantıyı reddetti: %2</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="409"/>
-        <location filename="../src/vnc/VncSession.cpp" line="414"/>
+        <location filename="../src/vnc/VncSession.cpp" line="398"/>
+        <location filename="../src/vnc/VncSession.cpp" line="403"/>
         <source>This Mac signs in with a user name. Enter the Mac&apos;s user name and password in the device settings.</source>
         <translation>Bu Mac kullanıcı adıyla giriş istiyor. Cihaz ayarlarına Mac&apos;in kullanıcı adını ve şifresini gir.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="411"/>
+        <location filename="../src/vnc/VncSession.cpp" line="400"/>
         <source>This VNC server asks for a sign-in method Burrow doesn&apos;t support yet.</source>
         <translation>Bu VNC sunucusu Burrow&apos;un henüz desteklemediği bir giriş yöntemi istiyor.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="438"/>
+        <location filename="../src/vnc/VncSession.cpp" line="427"/>
         <source>The user name or password for %1 is wrong.</source>
         <translation>%1 için kullanıcı adı ya da şifre yanlış.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="455"/>
+        <location filename="../src/vnc/VncSession.cpp" line="444"/>
         <source>%1 sent an invalid screen size.</source>
         <translation>%1 geçersiz bir ekran boyutu gönderdi.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="480"/>
+        <location filename="../src/vnc/VncSession.cpp" line="469"/>
         <source>Couldn&apos;t open the encrypted session with %1.</source>
         <translation>%1 ile şifreli oturum açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="830"/>
-        <location filename="../src/vnc/VncSession.cpp" line="933"/>
-        <location filename="../src/vnc/VncSession.cpp" line="937"/>
+        <location filename="../src/vnc/VncSession.cpp" line="819"/>
+        <location filename="../src/vnc/VncSession.cpp" line="922"/>
+        <location filename="../src/vnc/VncSession.cpp" line="926"/>
         <source>Couldn&apos;t sign in to %1.</source>
         <translation>%1 bilgisayarına giriş yapılamadı.</translation>
     </message>

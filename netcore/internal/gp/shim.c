@@ -1,11 +1,16 @@
 #include "shim.h"
 #include "_cgo_export.h"
 
-#include <netdb.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <netdb.h>
 #include <unistd.h>
+#endif
 
 static int validate_peer_cert(void *privdata, const char *reason)
 {
@@ -87,10 +92,26 @@ int burrow_oc_ip_info(struct openconnect_info *vpninfo, const char **addr, const
     return 0;
 }
 
+int burrow_oc_setup_tun(struct openconnect_info *vpninfo, intptr_t tun)
+{
+#ifdef _WIN32
+    return openconnect_setup_tun_fd(vpninfo, tun);   // a HANDLE (ADR 0010)
+#else
+    return openconnect_setup_tun_fd(vpninfo, (int)tun);
+#endif
+}
+
 void burrow_oc_cancel(int cmd_fd)
 {
     char c = OC_CMD_CANCEL;
+#ifdef _WIN32
+    // Windows: openconnect's command channel is a socket.
+    if (send((SOCKET)cmd_fd, &c, 1, 0) < 0) {
+        /* nothing to do */
+    }
+#else
     if (write(cmd_fd, &c, 1) < 0) {
         /* nothing to do */
     }
+#endif
 }

@@ -28,6 +28,8 @@ qt_add_executable(burrow
     src/app/Updater.h
     src/net/NetCore.cpp
     src/net/NetCore.h
+    src/net/LocalSocket.cpp
+    src/net/LocalSocket.h
     src/rdp/RdpEngine.h
     src/rdp/FreeRdpEngine.cpp
     src/rdp/FreeRdpEngine.h
@@ -76,6 +78,10 @@ if(APPLE)
                                           "-framework Security" "-framework AppKit")
 else()
     target_sources(burrow PRIVATE src/platform/Biometric_stub.cpp src/platform/WindowChrome_stub.cpp)
+endif()
+if(WIN32)
+    target_sources(burrow PRIVATE src/app/Updater_win.cpp)
+    target_link_libraries(burrow PRIVATE ws2_32 wintrust crypt32)
 endif()
 
 target_include_directories(burrow PRIVATE src)
@@ -128,7 +134,7 @@ if(Qt6Test_FOUND)
         src/rdp/RdpClipboard.cpp src/rdp/RdpClipboard.h
         src/app/AppController.cpp src/app/AppController.h src/app/ListModels.cpp src/app/ListModels.h
         src/app/PreviewProvider.cpp src/app/PreviewProvider.h src/app/TunnelManager.cpp src/app/TunnelManager.h
-        src/rdp/RdpSession.cpp src/rdp/RdpSession.h src/rdp/RemoteSession.h src/vnc/VncSession.cpp src/vnc/VncSession.h src/vnc/AppleAdaptive.cpp src/vnc/AppleAdaptive.h src/rdp/FreeRdpEngine.cpp src/rdp/FreeRdpEngine.h src/rdp/RdpEngine.h
+        src/rdp/RdpSession.cpp src/rdp/RdpSession.h src/rdp/RemoteSession.h src/net/LocalSocket.cpp src/net/LocalSocket.h src/vnc/VncSession.cpp src/vnc/VncSession.h src/vnc/AppleAdaptive.cpp src/vnc/AppleAdaptive.h src/rdp/FreeRdpEngine.cpp src/rdp/FreeRdpEngine.h src/rdp/RdpEngine.h
         $<IF:$<BOOL:${APPLE}>,src/platform/Biometric_mac.mm,src/platform/Biometric_stub.cpp>)
     target_compile_definitions(tst_vault PRIVATE BURROW_DEMO_ASSETS="${CMAKE_SOURCE_DIR}/docs/assets/demo")
     target_compile_definitions(tst_vault PRIVATE BURROW_TEST_DATA="${CMAKE_CURRENT_SOURCE_DIR}/tests"
@@ -139,6 +145,10 @@ if(Qt6Test_FOUND)
     if(APPLE)
         set_source_files_properties(src/platform/Biometric_mac.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc")
         target_link_libraries(tst_vault PRIVATE "-framework Foundation" "-framework LocalAuthentication" "-framework Security")
+    endif()
+    if(WIN32)
+        target_sources(tst_vault PRIVATE src/app/Updater_win.cpp)
+        target_link_libraries(tst_vault PRIVATE ws2_32 wintrust crypt32)
     endif()
     target_compile_definitions(tst_vault PRIVATE BURROW_UPDATER_ALLOW_INSECURE=1)
     add_test(NAME tst_vault COMMAND tst_vault)

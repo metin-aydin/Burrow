@@ -1,4 +1,5 @@
 #include "vnc/VncSession.h"
+#include "net/LocalSocket.h"
 
 #include <QClipboard>
 #include <QCryptographicHash>
@@ -14,9 +15,6 @@
 
 #include <zlib.h>
 
-#include <poll.h>
-#include <sys/socket.h>
-#include <unistd.h>
 
 #include <libnetcore.h>
 
@@ -58,7 +56,7 @@ VncSession::~VncSession()
     m_stop = true;
     m_qCv.notify_all();
     if (const int fd = m_fd.load(); fd >= 0)
-        ::shutdown(fd, SHUT_RDWR);
+        localsocket::shutdownBoth(fd);
     m_thread.quit();
     m_thread.wait();
     if (m_zrle) {
@@ -154,7 +152,7 @@ void VncSession::close()
     m_stop = true;
     m_qCv.notify_all();
     if (const int fd = m_fd.load(); fd >= 0)
-        ::shutdown(fd, SHUT_RDWR);   // wakes the reader
+        localsocket::shutdownBoth(fd);   // wakes the reader
 }
 
 void VncSession::setState(const QString &state, const QString &error)
@@ -232,13 +230,13 @@ bool VncSession::rawRead(void *buf, size_t n)
     while (n > 0) {
         if (m_stop)
             return false;
-        pollfd pfd{m_fd.load(), POLLIN, 0};
-        const int r = ::poll(&pfd, 1, 200);
+        const int fd = m_fd.load();
+        const int r = localsocket::waitReadable(fd, 200);
         if (r < 0)
             return false;
         if (r == 0)
             continue;
-        const ssize_t got = ::recv(pfd.fd, p, n, 0);
+        const long got = localsocket::receive(fd, p, n);
         if (got <= 0)
             return false;
         m_statBytes += quint64(got);
@@ -292,7 +290,7 @@ void VncSession::failRecords()
     // session as lost, and later writes are refused.
     m_writeBroken = true;
     if (const int fd = m_fd.load(); fd >= 0)
-        ::shutdown(fd, SHUT_RDWR);
+        localsocket::shutdownBoth(fd);
 }
 
 bool VncSession::rawWrite(const void *buf, size_t n)
@@ -302,11 +300,7 @@ bool VncSession::rawWrite(const void *buf, size_t n)
         return false;
     auto *p = static_cast<const char *>(buf);
     while (n > 0) {
-#ifdef MSG_NOSIGNAL
-        const ssize_t sent = ::send(fd, p, n, MSG_NOSIGNAL);
-#else
-        const ssize_t sent = ::send(fd, p, n, 0);
-#endif
+        const long sent = localsocket::sendSome(fd, p, n);
         if (sent <= 0)
             return false;
         p += sent;
@@ -320,18 +314,13 @@ bool VncSession::rawWrite(const void *buf, size_t n)
 void VncSession::run()
 {
     int fds[2];
-    if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) != 0) {
+    if (!localsocket::pair(fds)) {
         setState(QStringLiteral("closed"), tr("Couldn't open a connection."));
         return;
     }
-#ifdef SO_NOSIGPIPE
-    // macOS: a write after the tunnel closed must not raise SIGPIPE (Linux uses MSG_NOSIGNAL).
-    const int on = 1;
-    setsockopt(fds[0], SOL_SOCKET, SO_NOSIGPIPE, &on, sizeof on);
-#endif
     QByteArray target = QStringLiteral("%1:%2").arg(m_p.host).arg(m_p.port).toUtf8();
     if (NetcoreConnectFD(m_p.tunnelHandle, target.data(), fds[1]) != 0) {
-        ::close(fds[0]);
+        localsocket::close(fds[0]);
         setState(QStringLiteral("closed"), tr("Couldn't open a connection through the tunnel."));
         return;
     }
@@ -347,7 +336,7 @@ void VncSession::run()
         m_io = std::thread([this] { ioLoop(); });
         const bool ok = messageLoop();
         const bool userClosed = m_stop;
-        ::shutdown(fds[0], SHUT_RDWR);   // wakes the reader
+        localsocket::shutdownBoth(fds[0]);   // wakes the reader
         {
             std::lock_guard lock(m_qLock);
             m_ioDone = true;
@@ -357,14 +346,14 @@ void VncSession::run()
             m_io.join();
         qInfo("vnc: connection ended (%s)", userClosed ? "closed by the user" : ok ? "by the server" : "error");
         m_fd = -1;
-        ::close(fds[0]);
+        localsocket::close(fds[0]);
         setState(QStringLiteral("closed"), ok || userClosed ? QString()
                  : m_integrityFailed ? tr("The connection to %1 was closed because data arrived damaged or altered.").arg(m_p.title)
                                      : tr("The connection to %1 was lost.").arg(m_p.title));
         return;
     }
     m_fd = -1;
-    ::close(fds[0]);
+    localsocket::close(fds[0]);
     setState(QStringLiteral("closed"), m_stop ? QString() : err);
 }
 
@@ -617,13 +606,13 @@ void VncSession::ioLoop()
                 break;
         } else {
             chunk.resize(65536);
-            pollfd pfd{m_fd.load(), POLLIN, 0};
-            const int r = ::poll(&pfd, 1, 200);
+            const int fd = m_fd.load();
+            const int r = localsocket::waitReadable(fd, 200);
             if (r < 0)
                 break;
             if (r == 0)
                 continue;
-            const ssize_t got = ::recv(pfd.fd, chunk.data(), size_t(chunk.size()), 0);
+            const long got = localsocket::receive(fd, chunk.data(), size_t(chunk.size()));
             if (got <= 0)
                 break;
             m_statBytes += quint64(got);

@@ -14,6 +14,8 @@ const char *burrow_oc_select_choice(struct oc_form_opt *opt, int i);
 const char *burrow_oc_select_label(struct oc_form_opt *opt, int i);
 int burrow_oc_ip_info(struct openconnect_info *vpninfo, const char **addr, const char **addr6,
                       const char **dns0, const char **dns1, const char **dns2, int *mtu);
+// Attaches the packet wire: an fd on Unix, a HANDLE on Windows.
+int burrow_oc_setup_tun(struct openconnect_info *vpninfo, intptr_t tun);
 void burrow_oc_cancel(int cmd_fd);
 
 #endif

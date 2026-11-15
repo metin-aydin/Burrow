@@ -5,6 +5,7 @@
 
 #include "app/AppController.h"
 #include "app/Updater.h"
+#include "net/LocalSocket.h"
 #include "rdp/KeyMapper.h"
 #include <QUrl>
 #include "rdp/RdpClipboard.h"
@@ -251,12 +252,45 @@ private slots:
 #endif
     }
 
+    void localSocketPair()
+    {
+        // The pair that carries RDP/VNC to netcore: bytes go both ways and a close reads as end of stream.
+        int fds[2];
+        QVERIFY(localsocket::pair(fds));
+        QCOMPARE(localsocket::sendSome(fds[0], "ping", 4), 4L);
+        QVERIFY(localsocket::waitReadable(fds[1], 2000) > 0);
+        char buf[8] = {};
+        QCOMPARE(localsocket::receive(fds[1], buf, sizeof buf), 4L);
+        QCOMPARE(QByteArray(buf, 4), QByteArray("ping"));
+        QCOMPARE(localsocket::sendSome(fds[1], "pong", 4), 4L);
+        QVERIFY(localsocket::waitReadable(fds[0], 2000) > 0);
+        QCOMPARE(localsocket::receive(fds[0], buf, sizeof buf), 4L);
+        QCOMPARE(localsocket::waitReadable(fds[0], 50), 0);
+        localsocket::close(fds[1]);
+        QVERIFY(localsocket::waitReadable(fds[0], 2000) > 0);
+        QCOMPARE(localsocket::receive(fds[0], buf, sizeof buf), 0L);
+        // Writing to a closed peer fails instead of killing the process (SIGPIPE).
+        long sent = 0;
+        for (int i = 0; i < 100 && sent >= 0; ++i)
+            sent = localsocket::sendSome(fds[0], "x", 1);
+        QVERIFY(sent < 0);
+        localsocket::close(fds[0]);
+    }
+
     void updaterFlow()
     {
         // Fake release: manifest + asset in a temp dir, served over file://.
         const QByteArray payload = "fake zip bytes";
         const QString platform = Updater::platformKey();
-        QFile asset(m_dir.filePath("Burrow-9.9.9-" + platform + ".zip"));
+        const QString assetName = Updater::assetName("9.9.9");
+        QCOMPARE(assetName, QString("Burrow-9.9.9-" + platform
+#ifdef Q_OS_WIN
+                                    + "-setup.exe"
+#else
+                                    + ".zip"
+#endif
+                                    ));
+        QFile asset(m_dir.filePath(assetName));
         QVERIFY(asset.open(QIODevice::WriteOnly));
         asset.write(payload);
         asset.close();
@@ -264,7 +298,7 @@ private slots:
             QFile m(m_dir.filePath("latest.json"));
             QVERIFY(m.open(QIODevice::WriteOnly));
             m.write("{\"version\":\"9.9.9\",\"notes\":\"- New\",\"assets\":{\"" + platform.toUtf8()
-                    + "\":{\"name\":\"Burrow-9.9.9-" + platform.toUtf8() + ".zip\",\"sha256\":\"" + sha + "\"}}}");
+                    + "\":{\"name\":\"" + assetName.toUtf8() + "\",\"sha256\":\"" + sha + "\"}}}");
         };
         writeManifest(QCryptographicHash::hash(payload, QCryptographicHash::Sha256).toHex());
         qputenv("BURROW_UPDATE_URL", QUrl::fromLocalFile(m_dir.filePath("latest.json")).toString().toUtf8());
