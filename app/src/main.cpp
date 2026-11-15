@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QDir>
 #include <QEvent>
 
 #include "platform/WindowChrome.h"
@@ -17,6 +18,22 @@
 #include "rdp/RdpView.h"
 
 namespace {
+// Points OpenSSL at the "legacy" provider shipped with the app (MD4/RC4, needed by FreeRDP's NTLM sign-in).
+// Without this libcrypto looks under the build machine's install prefix. Must run before FreeRDP starts;
+// an OPENSSL_MODULES the user set themselves wins.
+void useBundledOpenSslModules()
+{
+    if (qEnvironmentVariableIsSet("OPENSSL_MODULES"))
+        return;
+#if defined(Q_OS_MACOS)
+    const QString dir = QCoreApplication::applicationDirPath() + QStringLiteral("/../PlugIns/ossl-modules");
+#else
+    const QString dir = QCoreApplication::applicationDirPath() + QStringLiteral("/ossl-modules");
+#endif
+    if (QDir(dir).exists())
+        qputenv("OPENSSL_MODULES", QDir::toNativeSeparators(QDir(dir).canonicalPath()).toLocal8Bit());
+}
+
 // Feeds user input to the auto-lock timer.
 class ActivityFilter : public QObject
 {
@@ -41,6 +58,7 @@ private:
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);   // QApplication: the tray menu uses widgets on every platform
+    useBundledOpenSslModules();
     QGuiApplication::setApplicationName(QStringLiteral("Burrow"));
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Burrow"));
     QGuiApplication::setOrganizationDomain(QStringLiteral("metin-aydin.github.io"));

@@ -4,6 +4,15 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Release'te RDP girişi (NLA) çalışmıyordu → düzeltildi.** v0.1.0 (GitHub release) ile GP tüneli açılıyor ama RDP
+  "Couldn't reach the computer" ile düşüyordu. Stderr logu: `OpenSSL LEGACY provider failed to load` →
+  `Failed to initialize digest md4` → NTLM yok → `SEC_E_NO_CREDENTIALS`. Sebep: paketteki `libcrypto.4` legacy
+  modülünü CI'ın Homebrew yolunda arıyor; o yol başka Mac'te yok, bu Mac'te var ama ad-hoc imzalı olduğu için hardened
+  runtime (library validation) yüklemiyor. Yerel derleme hardened olmadığı için sorun görünmüyordu. Düzeltme:
+  `tools/mac-bundle-ossl-modules.sh` modülü `Contents/PlugIns/ossl-modules/`'e kopyalayıp paketteki libcrypto'ya
+  bağlıyor (release.yml macdeployqt'den sonra çağırıyor); `package-windows.sh` `legacy.dll`'i `ossl-modules/`'e
+  koyuyor; `main.cpp` açılışta `OPENSSL_MODULES`'u bu klasöre yönlendiriyor. Uygulamanın kendi logu yok (yalnız
+  stderr): teşhis için `/Applications/Burrow.app/Contents/MacOS/Burrow > log 2>&1` ile açılmalı.
 - **Touch ID kaldırıldı** (kullanıcı kararı, ADR 0004 güncellendi). Kod vardı ama Data Protection keychain
   provisioning profile istediği için release'te hiç çalışmıyordu; seçenekler sunulunca kullanıcı "parmak izini kaldır"
   dedi. Silinenler: `app/src/platform/Biometric*`, `fingerprint.svg`, `AppController` Touch ID API'si, kilit ekranı

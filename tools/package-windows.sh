@@ -45,6 +45,10 @@ while [ -n "$queue" ]; do
     queue=$next
     echo "Collected DLLs: $(ls "$stage" | grep -ci '\.dll$')"
 done
+# OpenSSL's "legacy" provider (MD4/RC4): FreeRDP's NTLM sign-in needs it. libcrypto would look for it under
+# the build machine's MSYS2 path; main.cpp points OPENSSL_MODULES at this copy. Its libcrypto DLL is already staged.
+mkdir -p "$stage/ossl-modules"
+cp /ucrt64/lib/ossl-modules/legacy.dll "$stage/ossl-modules/"
 cp LICENSE THIRD_PARTY_NOTICES.md "$stage/"
 
 echo "Packing..."
