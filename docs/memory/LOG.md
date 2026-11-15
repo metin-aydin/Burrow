@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Ölçüm (yine aynı Mac): yeni çözücüyle güncellemeler 2–4 kat arttı, işlemci 4–5 ms/güncelleme, okuma %20–47 dolu;
+  ama pencereler 5 sn'de yalnız 6–109 kez yenileniyordu. Neden: `QQuickPaintedItem` her karede Retina ekranı
+  işlemcide yumuşatarak ölçekleyip çiziyordu. `RdpView` artık `QQuickItem` + scene graph dokusu
+  (`QSGImageNode`): ölçeklemeyi GPU yapıyor; "view:" satırı saniyedeki kareyi gösteriyor. Sahte Apple sunucusunda
+  her güncelleme bir kare (10/s), yerel RDP'de 24 kare/s.
+
 - Gerçek ölçüm (kullanıcı yine Burrow'un çalıştığı Mac'e bağlandı → görüntü kendini besleyen döngü, en kötü
   durum): 30–88 Mbit/s, 5 sn'de 250–400 Mpx, güncelleme başına 32–78 ms; okuma iş parçacığı dolu, arayüz kopyası
   önemsiz. ZRLE çözücü satır bazlı yeniden yazıldı (ham karo satır satır, tek renk/RLE `fill_n`, çıktı kalıcı

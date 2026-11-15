@@ -6,19 +6,20 @@
 #include <QKeyEvent>
 #include <QPainter>
 #include <QQuickWindow>
+#include <QSGImageNode>
+#include <QSGRectangleNode>
 
 #include <winpr/input.h>
 
 RdpView::RdpView(QQuickItem *parent)
-    : QQuickPaintedItem(parent)
+    : QQuickItem(parent)
 {
+    setFlag(ItemHasContents, true);
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton | Qt::MiddleButton);
     setAcceptHoverEvents(true);
     setFlag(ItemAcceptsInputMethod, false);
     setFlag(ItemIsFocusScope, true);
     setActiveFocusOnTab(false);
-    setFillColor(Qt::black);
-    setOpaquePainting(true);
     m_frameTimer.setSingleShot(true);
     m_frameTimer.setInterval(16);
     connect(&m_frameTimer, &QTimer::timeout, this, &RdpView::refreshDirty);
@@ -41,7 +42,8 @@ RdpView::RdpView(QQuickItem *parent)
 
 void RdpView::geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry)
 {
-    QQuickPaintedItem::geometryChange(newGeometry, oldGeometry);
+    QQuickItem::geometryChange(newGeometry, oldGeometry);
+    update();   // the picture's place follows the item's size
     if (newGeometry.size() != oldGeometry.size())
         m_resizeTimer.start();
 }
@@ -103,6 +105,7 @@ void RdpView::refreshFrame()
     // Only this view's part of the desktop: with several monitors the full picture is large.
     m_frame = m_session->frame(sourceRect());
     m_dirty = QRegion();
+    m_textureDirty = true;
     update();
 }
 
@@ -117,14 +120,11 @@ void RdpView::refreshDirty()
     m_dirty = QRegion();
     if (dirty.isEmpty())
         return;
-    // Copy the changed rectangles into our picture, then repaint just where they land on screen.
-    const QRectF target = targetRect();
-    const double sx = target.width() / src.width(), sy = target.height() / src.height();
-    for (const QRect &r : dirty) {
+    // Copy the changed rectangles into our picture; the next frame uploads it.
+    for (const QRect &r : dirty)
         m_session->copyInto(m_frame, r, r.topLeft() - src.topLeft());
-        const QRectF on(target.x() + (r.x() - src.x()) * sx, target.y() + (r.y() - src.y()) * sy, r.width() * sx, r.height() * sy);
-        update(on.toAlignedRect().adjusted(-1, -1, 1, 1));
-    }
+    m_textureDirty = true;
+    update();
 }
 
 QRect RdpView::sourceRect() const
@@ -157,12 +157,52 @@ QRectF RdpView::targetRect() const
     return QRectF(QPointF((width() - size.width()) / 2, (height() - size.height()) / 2), size);
 }
 
-void RdpView::paint(QPainter *painter)
+// Render thread, while the GUI thread waits: a black background and the picture as a texture.
+QSGNode *RdpView::updatePaintNode(QSGNode *old, UpdatePaintNodeData *)
 {
-    if (m_frame.isNull())
-        return;
-    painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
-    painter->drawImage(targetRect(), m_frame);
+    QSGNode *root = old;
+    QSGRectangleNode *bg = nullptr;
+    QSGImageNode *img = nullptr;
+    if (!root) {
+        root = new QSGNode;
+        bg = window()->createRectangleNode();
+        bg->setColor(Qt::black);
+        root->appendChildNode(bg);
+        img = window()->createImageNode();
+        img->setFiltering(QSGTexture::Linear);
+        img->setOwnsTexture(true);
+        root->appendChildNode(img);
+        m_textureDirty = true;
+    } else {
+        bg = static_cast<QSGRectangleNode *>(root->childAtIndex(0));
+        img = static_cast<QSGImageNode *>(root->childAtIndex(1));
+    }
+    bg->setRect(boundingRect());
+    if (m_frame.isNull()) {
+        img->setRect(QRectF());
+        return root;
+    }
+    if (m_textureDirty || !img->texture()) {
+        QElapsedTimer t;
+        t.start();
+        img->setTexture(window()->createTextureFromImage(m_frame, QQuickWindow::TextureIsOpaque));
+        m_textureDirty = false;
+        m_statUploadNs += t.nsecsElapsed();
+        ++m_statFrames;
+        if (!m_statClock.isValid())
+            m_statClock.start();
+        else if (m_statClock.elapsed() >= 5000) {
+            const double sec = m_statClock.elapsed() / 1000.0;
+            qInfo("view: %.0f s: %d frames (%.0f/s), upload %.1f ms each, %dx%d", sec, m_statFrames,
+                  m_statFrames / sec, m_statUploadNs / 1e6 / m_statFrames, m_frame.width(), m_frame.height());
+            m_statFrames = 0;
+            m_statUploadNs = 0;
+            m_statClock.restart();
+        }
+    }
+    img->setRect(targetRect());
+    img->setSourceRect(QRectF(QPointF(0, 0), m_frame.size()));
+    return root;
 }
 
 QPoint RdpView::toRemote(const QPointF &p) const
@@ -347,5 +387,5 @@ void RdpView::focusOutEvent(QFocusEvent *e)
     if (m_session)
         m_session->releaseKeys();
     m_keysymsDown.clear();
-    QQuickPaintedItem::focusOutEvent(e);
+    QQuickItem::focusOutEvent(e);
 }
