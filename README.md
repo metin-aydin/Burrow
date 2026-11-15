@@ -62,7 +62,7 @@ changes. Secrets are never written to logs. To report a vulnerability, see [SECU
 ## Features
 
 - **Gallery** of every computer as a card with its last screen, filtered by tunnel and searchable.
-- **RDP to Windows and Ubuntu** with FreeRDP 3: H.264 (AVC444/AVC420) decoded in hardware, progressive RemoteFX as a
+- **RDP to Windows and Ubuntu** with FreeRDP 3: H.264 (AVC444/AVC420) decoded in hardware where the system offers it, progressive RemoteFX as a
   fallback, GNOME Remote Login hand-over and certificate pinning.
 - **Screen Sharing to Macs** with a built-in VNC client that speaks Apple's protocol: sign in with the Mac's user,
   encrypted session, the Mac's displays as tabs, Adaptive picture quality and the Mac's own pointer shapes.
@@ -71,12 +71,14 @@ changes. Secrets are never written to logs. To report a vulnerability, see [SECU
 - **Tunnels**: GlobalProtect with OTP (TOTP SHA-1/256/512), Tailscale and Headscale, Cloudflare Access. See
   [Tunnels inside the app](#tunnels-inside-the-app).
 - **Sessions**: automatic sign-in and an option to lock the remote computer when you disconnect.
-- **Clipboard and keyboard**: two-way clipboard over RDP (text, rich text, images and files); Mac shortcuts translated
-  (Cmd+C → Ctrl+C) or swapped.
+- **Clipboard and keyboard**: two-way clipboard over RDP (text, rich text, images and files); on a Mac,
+  shortcuts translated (Cmd+C → Ctrl+C) or swapped.
 - **Encrypted local vault** with a master password and auto-lock after inactivity; Burrow keeps
   running in the menu bar or system tray when its window is closed.
-- **In-app updates** from GitHub Releases, verified by SHA-256 and the Developer ID team before they are installed.
-- English and Turkish interface, light and dark themes, VoiceOver labels and keyboard navigation.
+- **In-app updates** from GitHub Releases on macOS and Windows, verified by SHA-256 and, on macOS, the Developer ID
+  team before they are installed.
+- English and Turkish interface, light and dark themes, screen reader labels (VoiceOver, Narrator) and keyboard
+  navigation.
 
 ## Screenshots
 
@@ -127,8 +129,8 @@ checks can be turned off there.
 ## Development
 
 Burrow is written in Qt 6 (QML and C++20) with FreeRDP 3 and a Go network core linked as a C archive
-([ADR 0001](docs/decisions/0001-tech-stack.md)). Development currently happens on macOS; requirements: Homebrew and the
-Xcode command line tools.
+([ADR 0001](docs/decisions/0001-tech-stack.md)). On macOS the requirements are Homebrew and the Xcode
+command line tools; Windows builds are described below.
 
 ```bash
 git clone https://github.com/metin-aydin/Burrow.git
