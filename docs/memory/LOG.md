@@ -4,6 +4,11 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **İlk release yayımlandı: v0.1.0** (PR #2, merge `218e0bb`). Varlıklar: mac-arm64 dmg + zip, linux-x64 AppImage +
+  sha256, `latest.json` (yalnız mac-arm64). İndirilen Mac uygulaması doğrulandı: Developer ID (JTRUY8Y2ZF), hardened
+  runtime, `spctl` "Notarized Developer ID", staple geçerli. Yolda düzeltilenler: çeviri satır numaraları (iki kez,
+  başka oturumun commit'leri yüzünden), kararsız `TestSealAndAcceptWindow` (Seal kabul edilmeden çağrılıyordu),
+  `govulncheck` v1.1.4 → v1.9.0 (Go 1.27'de çöküyordu). `Linux build` master'ın zorunlu kontrollerine eklendi.
 - **Ubuntu AppImage + Linux CI:** `tools/linux-deps.sh` (Ubuntu 24.04: apt paketleri, aqtinstall ile Qt 6.10.1,
   kaynaktan FreeRDP 3.33.1 — X11/SDL/sunucu/FFmpeg kapalı), `tools/package-appimage.sh` (linuxdeploy +
   linuxdeploy-plugin-qt, sabitlenmiş sürümler; Qt, QML, FreeRDP, openconnect içeride; GStreamer sistemden),
