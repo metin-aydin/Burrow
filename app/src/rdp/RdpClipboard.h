@@ -56,6 +56,7 @@ public:
         bool dir = false;
         quint64 size = 0;
         QDateTime modified;
+        quint64 device = 0, inode = 0;   // Unix: the exact file that was copied
     };
 
     // Converters (public for tests).

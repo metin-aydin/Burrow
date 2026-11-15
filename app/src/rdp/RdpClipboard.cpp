@@ -15,6 +15,12 @@
 #include <QUuid>
 #include <QtEndian>
 
+#ifdef Q_OS_UNIX
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
+
 #include <freerdp/channels/cliprdr.h>
 #include <freerdp/client/cliprdr.h>
 #include <winpr/user.h>
@@ -204,6 +210,13 @@ void RdpClipboard::detach()
 
 void RdpClipboard::onLocalChanged()
 {
+    // Whatever was offered before is no longer on the clipboard, whoever changed it: the remote
+    // side loses access to it before anything else happens.
+    m_post([this] {
+        m_offered.clear();
+        m_in.close();
+        m_inIndex = -1;
+    });
     if (m_ignoreNextChange) {
         m_ignoreNextChange = false;
         return;
@@ -229,12 +242,6 @@ void RdpClipboard::onLocalChanged()
         m_dib = dib;
         m_localFiles = files;
     }
-    // Whatever was offered before is no longer on the clipboard: the remote side loses access to it.
-    m_post([this] {
-        m_offered.clear();
-        m_in.close();
-        m_inIndex = -1;
-    });
     m_post([this] { sendFormatList(); });
 }
 
@@ -584,24 +591,34 @@ unsigned RdpClipboard::onServerFileContentsRequest(unsigned streamId, unsigned l
     const LocalFile &f = m_offered[listIndex];
     if (flags & FILECONTENTS_SIZE) {
         QByteArray size(8, '\0');
-        qToLittleEndian<quint64>(quint64(QFileInfo(f.absolutePath).size()), reinterpret_cast<uchar *>(size.data()));
+        qToLittleEndian<quint64>(f.size, reinterpret_cast<uchar *>(size.data()));
         return sendFileContents(streamId, true, size);
     }
     if (!(flags & FILECONTENTS_RANGE))
         return sendFileContents(streamId, false, {});
     if (m_inIndex != int(listIndex) || !m_in.isOpen()) {
         m_in.close();
-        // The path must still be the regular file that was copied, not a link swapped in since.
+        m_inIndex = -1;
+        // Only the very file that was copied is read, never a link or another file put in its place.
+#ifdef Q_OS_UNIX
+        const int fd = ::open(QFile::encodeName(f.absolutePath).constData(), O_RDONLY | O_NOFOLLOW | O_CLOEXEC);
+        struct stat st {};
+        if (fd < 0)
+            return sendFileContents(streamId, false, {});
+        if (::fstat(fd, &st) != 0 || !S_ISREG(st.st_mode) || quint64(st.st_dev) != f.device
+            || quint64(st.st_ino) != f.inode
+            || !m_in.open(fd, QIODevice::ReadOnly, QFileDevice::AutoCloseHandle)) {
+            ::close(fd);
+            return sendFileContents(streamId, false, {});
+        }
+#else
         const QFileInfo now(f.absolutePath);
-        if (now.isSymLink() || !now.isFile() || now.canonicalFilePath() != f.absolutePath) {
-            m_inIndex = -1;
+        if (now.isSymLink() || !now.isFile() || now.canonicalFilePath() != f.absolutePath)
             return sendFileContents(streamId, false, {});
-        }
         m_in.setFileName(f.absolutePath);
-        if (!m_in.open(QIODevice::ReadOnly)) {
-            m_inIndex = -1;
+        if (!m_in.open(QIODevice::ReadOnly))
             return sendFileContents(streamId, false, {});
-        }
+#endif
         m_inIndex = int(listIndex);
     }
     if (!m_in.seek(qint64(position)))
@@ -636,6 +653,13 @@ bool RdpClipboard::collectLocalFiles(const QList<QUrl> &urls, QList<LocalFile> *
             return true;
         LocalFile f;
         f.absolutePath = canonical;   // checked again before every read
+#ifdef Q_OS_UNIX
+        struct stat st {};
+        if (::stat(QFile::encodeName(canonical).constData(), &st) != 0)
+            return true;
+        f.device = quint64(st.st_dev);
+        f.inode = quint64(st.st_ino);
+#endif
         f.remoteName = parts.join(QLatin1Char('\\'));
         f.dir = fi.isDir();
         f.size = f.dir ? 0 : quint64(fi.size());
