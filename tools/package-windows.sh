@@ -16,6 +16,7 @@ stage=$(mktemp -d)/Burrow
 mkdir -p "$stage" dist
 cp "$BUILD/app/Burrow.exe" "$stage/"
 
+echo "Deploying Qt..."
 # Qt libraries, plugins and the QML modules the app imports.
 windeployqt=$(command -v windeployqt6 || command -v windeployqt || echo /ucrt64/share/qt6/bin/windeployqt.exe)
 "$windeployqt" --release --qmldir "$ROOT/app/qml" --no-translations --no-system-d3d-compiler \
@@ -24,9 +25,11 @@ windeployqt=$(command -v windeployqt6 || command -v windeployqt || echo /ucrt64/
 # Every DLL that Burrow, Qt's plugins and those DLLs load from MSYS2 or the deps prefix (FreeRDP, OpenSSL,
 # openconnect, the MinGW runtime...), until nothing new turns up. Windows' own DLLs stay out.
 export PATH="$PREFIX/bin:/ucrt64/bin:$PATH"
-while :; do
-    added=0
-    for f in $(find "$stage" -iname '*.exe' -o -iname '*.dll'); do
+# Each file is scanned once: the queue holds only what was just added.
+queue=$(find "$stage" -iname '*.exe' -o -iname '*.dll')
+while [ -n "$queue" ]; do
+    next=""
+    for f in $queue; do
         for dep in $(ntldd "$f" 2>/dev/null | sed -n 's/.*=> \(.*\.dll\) .*/\1/Ip' | tr '\\' '/'); do
             dep=$(cygpath -u "$dep")
             case "$dep" in
@@ -36,13 +39,15 @@ while :; do
             name=$(basename "$dep")
             [ -e "$stage/$name" ] && continue
             cp "$dep" "$stage/"
-            added=1
+            next="$next $stage/$name"
         done
     done
-    [ "$added" = 0 ] && break
+    queue=$next
+    echo "Collected DLLs: $(ls "$stage" | grep -ci '\.dll$')"
 done
 cp LICENSE THIRD_PARTY_NOTICES.md "$stage/"
 
+echo "Packing..."
 # Portable: the folder as it is, zipped (no uninstaller, so it never updates itself).
 portable="dist/Burrow-$VERSION-$platform-portable.zip"
 rm -f "$portable"
