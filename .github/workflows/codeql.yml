@@ -1,9 +1,12 @@
 # Static analysis of the Go network core and of the workflows themselves, on every push and weekly.
-# Not on pull requests: the job holds security-events: write, so it only builds code already merged.
+# Pull requests are scanned before merging; GitHub gives pull requests from forks a read-only token, so
+# security-events: write never reaches untrusted code (never use pull_request_target here).
 name: CodeQL
 
 on:
   push:
+    branches: [development, master]
+  pull_request:
     branches: [development, master]
   schedule:
     - cron: "17 4 * * 1"

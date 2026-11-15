@@ -4,8 +4,8 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
-- Güvenlik incelemesi (CI): govulncheck `@v1.1.4`'e sabitlendi; CodeQL artık PR'larda çalışmıyor (yazma izinli jetonla
-  yalnız birleşmiş kod derleniyor). Eylemleri SHA'ya sabitleme doğrulanamadığı için yapılmadı; Dependabot etiketleri izliyor.
+- Güvenlik incelemesi (CI): govulncheck `@v1.1.4`'e sabitlendi; CodeQL PR'larda da çalışıyor (yalnız development/master hedefli;
+  fork PR'ları zaten salt-okunur jeton alır, `pull_request_target` kullanılmaz). Eylemleri SHA'ya sabitleme doğrulanamadığı için yapılmadı; Dependabot etiketleri izliyor.
 
 - GitHub hazırlığı: README güncel özelliklerle yeniden yazıldı (RDP + H.264, Mac/VNC, tüneller, güvenlik, kurulum;
   açık/koyu temaya göre değişen galeri görüntüsü, demo verisiyle yeni ekran görüntüleri). `SECURITY.md`,

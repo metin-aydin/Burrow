@@ -35,4 +35,5 @@ What the repository should have on GitHub itself (not in files). Applied through
 - Private vulnerability reporting: on (SECURITY.md points to it).
 - Dependabot alerts and security updates: on (`.github/dependabot.yml` adds weekly version updates).
 - Secret scanning and push protection: on.
-- Code scanning: the `CodeQL` workflow (Go and Actions).
+- Code scanning: the `CodeQL` workflow (Go and Actions), also on pull requests; add its results as a
+  required check on `master`.
