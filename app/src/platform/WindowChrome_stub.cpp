@@ -2,4 +2,5 @@
 
 namespace WindowChrome {
 void useContentTitleBar(QWindow *) {}
+void dockIconFollowsWindows() {}
 }

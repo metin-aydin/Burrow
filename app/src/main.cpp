@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
     // Closing the window keeps Burrow in the menu bar / tray; Quit is in the tray menu (and Cmd+Q).
     // The vault auto-locks after inactivity (Settings → Auto-Lock), so a hidden window isn't left unlocked.
     QGuiApplication::setQuitOnLastWindowClosed(false);
+    WindowChrome::dockIconFollowsWindows();
     ActivityFilter activity(&controller);
     app.installEventFilter(&activity);
     Tray tray(&controller);
