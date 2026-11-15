@@ -183,9 +183,10 @@ func (ns *Stack) DialContext(ctx context.Context, network, address string) (net.
 	if err != nil {
 		return nil, err
 	}
-	port, err := strconv.Atoi(portStr)
+	// Parse straight into 16 bits so an out-of-range port is an error instead of wrapping around.
+	port, err := strconv.ParseUint(portStr, 10, 16)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("netstack: invalid port %q", portStr)
 	}
 	ip, err := netip.ParseAddr(host)
 	if err != nil {

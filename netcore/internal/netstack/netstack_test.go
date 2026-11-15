@@ -73,4 +73,10 @@ func testDial(t *testing.T, opt Options) {
 	if _, err := client.DialContext(ctx, "tcp", "no-dns.example:1"); err == nil {
 		t.Fatal("resolved a name without DNS servers")
 	}
+	// Out-of-range ports must fail instead of wrapping around to another port (70000 would become 4464).
+	for _, addr := range []string{"10.9.0.1:70000", "10.9.0.1:-1", "10.9.0.1:rdp"} {
+		if _, err := client.DialContext(ctx, "tcp", addr); err == nil {
+			t.Fatalf("dialled %s", addr)
+		}
+	}
 }

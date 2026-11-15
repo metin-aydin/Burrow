@@ -4,6 +4,9 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **CodeQL uyarısı #1 düzeltildi** (`go/incorrect-integer-conversion`, yüksek): `netstack.DialContext` portu
+  `Atoi` + `uint16()` ile çeviriyordu, 70000 → 4464'e sarıyordu. `ParseUint(…, 16)` ile sınırlandı, test eklendi.
+  Dependabot uyarıları repoda kapalı (API 403); secret scanning listesi `gh` belirtecinin kapsamı yetmediği için okunamadı.
 - **Linux derlemesi ilk kez denendi (Fedora 45 konteyneri, aarch64; Qt 6.11.2, FreeRDP 3.33.1, openconnect 9.21):**
   üç sorun düzeltildi: `SO_NOSIGPIPE` yalnız macOS'ta var (Linux'ta `MSG_NOSIGNAL`), Linux'ta çalıştırılabilir dosya
   QML modülünün `Burrow/` klasörüyle çakışıyordu (Linux'ta ad `burrow`), `versionCompare` testi yalnız Mac'te
