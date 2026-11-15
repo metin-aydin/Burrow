@@ -187,6 +187,8 @@ jobs:
     if: github.ref == 'refs/heads/master'
     permissions:
       contents: write
+    # Same protection as the macOS build: only protected branches can use this environment.
+    environment: release
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -206,11 +208,13 @@ jobs:
           cmake --build build
           (cd build && ctest --output-on-failure)
       - name: Package
-        run: tools/package-appimage.sh build ${{ needs.prepare.outputs.version }} /opt/burrow-deps
+        run: |
+          tools/package-appimage.sh build ${{ needs.prepare.outputs.version }} /opt/burrow-deps
+          cd dist && for f in *.AppImage; do sha256sum "$f" > "$f.sha256"; done
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "v${{ needs.prepare.outputs.version }}" dist/*.AppImage --clobber
+        run: gh release upload "v${{ needs.prepare.outputs.version }}" dist/*.AppImage dist/*.AppImage.sha256 --clobber
 
   publish:
     needs: [prepare, build, linux]

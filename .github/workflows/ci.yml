@@ -71,14 +71,22 @@ jobs:
         with:
           go-version-file: netcore/go.mod
       # Qt 6.10+ and FreeRDP 3.33+ aren't in Ubuntu 24.04; tools/linux-deps.sh builds them once per change.
-      - name: Cache Qt and FreeRDP
+      # Only pushes to our own branches write the cache; pull requests may read it but never fill it,
+      # so a pull request can't plant binaries that later runs would execute.
+      - name: Restore Qt and FreeRDP
         id: deps
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: /home/runner/burrow-deps
           key: linux-deps-${{ runner.arch }}-${{ hashFiles('tools/linux-deps.sh') }}
       - name: Install dependencies
         run: tools/linux-deps.sh /home/runner/burrow-deps
+      - name: Save Qt and FreeRDP
+        if: github.event_name == 'push' && steps.deps.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /home/runner/burrow-deps
+          key: linux-deps-${{ runner.arch }}-${{ hashFiles('tools/linux-deps.sh') }}
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="/home/runner/burrow-deps/qt;/home/runner/burrow-deps/freerdp"
       - name: Build

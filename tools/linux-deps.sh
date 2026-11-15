@@ -8,6 +8,8 @@ set -eu
 PREFIX=${1:-/opt/burrow-deps}
 QT_VERSION=6.10.1
 FREERDP_VERSION=3.33.1
+# The commit the tag points to; a moved tag stops the build instead of being built.
+FREERDP_COMMIT=65bcca1913a28cbdd7eb913599f692bd2b707991
 
 # Private scratch space: never reuse a source or build folder someone else could have planted in /tmp.
 WORK=$(mktemp -d)
@@ -29,7 +31,8 @@ $SUDO apt-get install -y -q --no-install-recommends \
     libxcb-shape0 libxcb-xinerama0 libxcb-xkb1 libdbus-1-3 libpulse0 libgstreamer-plugins-base1.0-0 \
     libsm6 libice6 libxcb-util1 libxcb-sync1 libxcb-xfixes0 libxrender1 libxext6 libxi6 libxrandr2 libgstreamer-gl1.0-0 libgstreamer-plugins-bad1.0-0 libgstreamer-plugins-good1.0-0 libwayland-dev
 
-# Qt (aqtinstall reads the official Qt mirrors).
+# Qt (aqtinstall reads the official Qt mirrors and checks every archive against the SHA-256 that
+# Qt publishes in its update metadata).
 if [ "$("$PREFIX/qt/bin/qmake" -query QT_VERSION 2>/dev/null)" != "$QT_VERSION" ]; then
     [ -d "$PREFIX/qt" ] && $PSUDO mv "$PREFIX/qt" "$PREFIX/qt-old-$(date +%s)"
     case "$(uname -m)" in
@@ -49,6 +52,10 @@ if [ ! -f "$PREFIX/freerdp/lib/cmake/FreeRDP3/FreeRDPConfig.cmake" ] \
    && [ ! -f "$PREFIX/freerdp/lib64/cmake/FreeRDP3/FreeRDPConfig.cmake" ]; then
     src="$WORK/freerdp-src"
     git clone -q --depth 1 --branch "$FREERDP_VERSION" https://github.com/FreeRDP/FreeRDP.git "$src"
+    if [ "$(git -C "$src" rev-parse HEAD)" != "$FREERDP_COMMIT" ]; then
+        echo "FreeRDP $FREERDP_VERSION is not commit $FREERDP_COMMIT; refusing to build it." >&2
+        exit 1
+    fi
     cmake -S "$src" -B "$WORK/freerdp-build" -G Ninja -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX="$PREFIX/freerdp" -DCMAKE_INSTALL_LIBDIR=lib \
         -DWITH_CLIENT_SDL=OFF -DWITH_CLIENT_SDL2=OFF -DWITH_CLIENT_SDL3=OFF -DWITH_X11=OFF -DWITH_WAYLAND=OFF \
