@@ -186,30 +186,10 @@ Item {
         }
     }
 
-    Menu {
+    BMenu {
         id: menu
-        padding: 4
-        background: Rectangle {
-            implicitWidth: 180
-            radius: Theme.radius
-            color: Theme.surfaceRaised
-            border.color: Theme.border
-        }
-        component MenuRow: MenuItem {
-            id: mi
-            property string iconName
-            property bool danger: false
-            implicitHeight: 32
-            contentItem: Row {
-                spacing: 10
-                leftPadding: 4
-                Icon { name: mi.iconName; size: 15; color: mi.danger ? Theme.danger : Theme.text; anchors.verticalCenter: parent.verticalCenter }
-                Text { text: mi.text; color: mi.danger ? Theme.danger : Theme.text; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter }
-            }
-            background: Rectangle { radius: 6; color: mi.highlighted ? Theme.hover : "transparent" }
-        }
-        MenuRow { text: qsTr("Edit"); iconName: "edit"; onTriggered: root.editRequested() }
-        MenuRow { text: qsTr("Duplicate"); iconName: "copy"; onTriggered: root.duplicateRequested() }
-        MenuRow { text: qsTr("Delete"); iconName: "trash"; danger: true; onTriggered: root.deleteRequested() }
+        BMenuItem { text: qsTr("Edit"); iconName: "edit"; onTriggered: root.editRequested() }
+        BMenuItem { text: qsTr("Duplicate"); iconName: "copy"; onTriggered: root.duplicateRequested() }
+        BMenuItem { text: qsTr("Delete"); iconName: "trash"; danger: true; onTriggered: root.deleteRequested() }
     }
 }

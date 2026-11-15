@@ -23,7 +23,9 @@ BDialog {
     }
 
     SectionTitle { text: qsTr("Appearance") }
+    function demoCombo() { themeCombo.openPopup() }   // development (BURROW_DEMO_OPEN=combo)
     BCombo {
+        id: themeCombo
         Layout.fillWidth: true
         options: [{ text: qsTr("Match System"), value: "system" },
                   { text: qsTr("Light"), value: "light" },

@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls.Basic
-import QtQuick.Effects
 
 // Burrow's tooltip: a small raised label under its control, shown after a short pause, fading in.
 // Use through BButton.tip, or directly: BToolTip { visible: someArea.containsMouse; text: "…" }.
@@ -25,25 +24,7 @@ ToolTip {
         color: Theme.text
         wrapMode: Text.WordWrap
     }
-    background: Item {
-        implicitWidth: 24
-        implicitHeight: 24
-        RectangularShadow {
-            anchors.fill: bg
-            offset.y: 2
-            blur: 10
-            radius: bg.radius
-            color: Theme.tooltipShadow
-        }
-        Rectangle {
-            id: bg
-            anchors.fill: parent
-            radius: 7
-            color: Theme.surfaceRaised
-            border.width: 1
-            border.color: Theme.borderStrong
-        }
-    }
+    background: BPopupSurface { radius: 7 }
     enter: Transition {
         NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 120; easing.type: Easing.OutCubic }
     }

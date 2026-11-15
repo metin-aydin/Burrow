@@ -420,25 +420,12 @@ Window {
     }
 
     // Right-click on a tab: rename it or open it on a display without dragging.
-    Menu {
+    BMenu {
         id: tabMenu
         property int monitor: 0
-        padding: 4
-        background: Rectangle { implicitWidth: 220; radius: Theme.radius; color: Theme.surfaceRaised; border.color: Theme.border }
-        component TabMenuItem: MenuItem {
-            id: mi
-            implicitHeight: 32
-            contentItem: Text {
-                text: mi.text
-                color: mi.enabled ? Theme.text : Theme.textMuted
-                font.pixelSize: 13
-                leftPadding: 6
-                verticalAlignment: Text.AlignVCenter
-            }
-            background: Rectangle { radius: 6; color: mi.highlighted ? Theme.hover : "transparent" }
-        }
-        TabMenuItem {
+        BMenuItem {
             text: qsTr("Rename")
+            iconName: "edit"
             onTriggered: {
                 const t = strip.children.find(c => c.index === tabMenu.monitor)
                 if (t) t.children.find(c => c.begin !== undefined).begin()
@@ -446,8 +433,9 @@ Window {
         }
         Repeater {
             model: Qt.application.screens.length
-            TabMenuItem {
+            BMenuItem {
                 required property int index
+                iconName: "monitor"
                 readonly property var scr: Qt.application.screens[index]
                 text: qsTr("Open On %1").arg(scr ? scr.name : "")
                 enabled: win.visibleTabs.length > 1

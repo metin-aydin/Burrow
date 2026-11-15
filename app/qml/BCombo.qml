@@ -10,6 +10,8 @@ ColumnLayout {
     property var value
     spacing: 6
 
+    function openPopup() { combo.popup.open() }   // development screenshots
+
     function indexOfValue(v) {
         for (let i = 0; i < options.length; ++i)
             if (options[i].value === v) return i
@@ -33,48 +35,47 @@ ColumnLayout {
         currentIndex: root.indexOfValue(root.value)
         onActivated: (i) => root.value = root.options[i].value
         font.pixelSize: 13
+        hoverEnabled: true
 
         contentItem: Text {
             leftPadding: 12
+            rightPadding: 34
             text: combo.displayText
-            color: Theme.text
+            color: combo.enabled ? Theme.text : Theme.textMuted
             font: combo.font
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
         }
-        indicator: Text {
+        indicator: Icon {
             x: combo.width - width - 12
             anchors.verticalCenter: parent.verticalCenter
-            text: "⌄"
+            name: "chevron"
+            size: 14
             color: Theme.textSecondary
-            font.pixelSize: 14
+            rotation: combo.popup.visible ? -90 : 90
+            Behavior on rotation { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
         }
         background: Rectangle {
             radius: Theme.radius
-            color: Theme.field
-            border.width: combo.activeFocus ? 2 : 1
-            border.color: combo.activeFocus ? Theme.accent : Theme.border
+            color: combo.pressed ? Theme.hover : Theme.field
+            border.width: combo.visualFocus || combo.popup.visible ? 2 : 1
+            border.color: combo.visualFocus || combo.popup.visible ? Theme.accent
+                        : combo.hovered ? Theme.borderStrong : Theme.border
+            Behavior on border.color { ColorAnimation { duration: 100 } }
         }
-        delegate: ItemDelegate {
-            width: combo.width - 8
-            x: 4
-            height: 32
+        delegate: BMenuItem {
+            required property var modelData
+            required property int index
+            width: ListView.view ? ListView.view.width : combo.width
+            text: modelData.text
+            chosen: combo.currentIndex === index
             highlighted: combo.highlightedIndex === index
-            contentItem: Text {
-                text: modelData.text
-                color: Theme.text
-                font.pixelSize: 13
-                verticalAlignment: Text.AlignVCenter
-            }
-            background: Rectangle {
-                radius: 6
-                color: highlighted ? Theme.hover : "transparent"
-            }
         }
         popup: Popup {
             y: combo.height + 4
             width: combo.width
             padding: 4
+            margins: 8
             implicitHeight: Math.min(contentItem.implicitHeight + 8, 320)
             contentItem: ListView {
                 clip: true
@@ -83,11 +84,15 @@ ColumnLayout {
                 implicitHeight: contentHeight
                 model: combo.popup.visible ? combo.delegateModel : null
                 currentIndex: combo.highlightedIndex
+                ScrollIndicator.vertical: ScrollIndicator {}
             }
-            background: Rectangle {
-                radius: Theme.radius
-                color: Theme.surfaceRaised
-                border.color: Theme.border
+            background: BPopupSurface {}
+            enter: Transition {
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 110; easing.type: Easing.OutCubic }
+                NumberAnimation { property: "y"; from: combo.height; to: combo.height + 4; duration: 110; easing.type: Easing.OutCubic }
+            }
+            exit: Transition {
+                NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 80 }
             }
         }
     }

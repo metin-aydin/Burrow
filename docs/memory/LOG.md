@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Açılır menüler yeniden tasarlandı: ortak `BPopupSurface` (yükseltilmiş yüzey, 1px kenar, yumuşak gölge;
+  tooltip de bunu kullanıyor), `BMenu` + `BMenuItem` (ikon, seçili öğede onay, tehlikeli işlemde kırmızı, hover/
+  basılı/pasif durumlar, kısa açılış geçişi). `BCombo`: Unicode `⌄` glifi yerine SVG chevron (açılınca döner), hover
+  kenarı, seçili öğede onay. Cihaz kartı, sekme ve QR menüleri bunlara geçti (QR menüsü daha önce hiç stillenmemişti).
+  Geliştirme kancası `BURROW_DEMO_OPEN=combo`.
+
 - Şifre alanlarına göster/gizle: `BField` (`password: true`) sağında göz ikonlu ghost düğme (`eye`/`eye-off`
   SVG'leri eklendi). Düğme odak almaz (Tab akışı ve imleç alanda kalır); alan gizlenince yeniden maskelenir.
   Tüm şifre alanları (kilit ekranı, ayarlar, cihaz/tünel editörü, kimlik ve VPN istemi, token) bunu otomatik alır.

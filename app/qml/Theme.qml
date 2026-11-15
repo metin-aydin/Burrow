@@ -37,6 +37,7 @@ QtObject {
     readonly property color remoteBackground: "#000000"
     readonly property color modalScrim:    dark ? "#99000000" : "#55141820"
     readonly property color tooltipShadow: dark ? "#80000000" : "#26141820"
+    readonly property color popupShadow:   dark ? "#99000000" : "#33141820"
     readonly property color cardShadow:    dark ? "#000000" : "#30202A40"
     // Toasts are inverted against the window.
     readonly property color toastBg:       dark ? "#F2F3F5" : "#1B1E24"

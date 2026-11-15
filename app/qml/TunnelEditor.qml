@@ -87,11 +87,11 @@ BDialog {
         if (!text) { error = qsTr("No QR code was found in the image."); return }
         importText(text)
     }
-    Menu {
+    BMenu {
         id: qrMenu
-        MenuItem { text: qsTr("From Image File…"); onTriggered: qrFile.open() }
-        MenuItem { text: qsTr("From Clipboard Image"); onTriggered: root.useQr(App.decodeQrClipboard()) }
-        MenuItem { text: qsTr("Scan With Camera…"); onTriggered: qrScan.open() }
+        BMenuItem { text: qsTr("From Image File…"); iconName: "qr"; onTriggered: qrFile.open() }
+        BMenuItem { text: qsTr("From Clipboard Image"); iconName: "copy"; onTriggered: root.useQr(App.decodeQrClipboard()) }
+        BMenuItem { text: qsTr("Scan With Camera…"); iconName: "eye"; onTriggered: qrScan.open() }
     }
     FileDialog {
         id: qrFile
