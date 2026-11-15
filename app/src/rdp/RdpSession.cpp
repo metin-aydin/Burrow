@@ -417,7 +417,10 @@ void RdpSession::onResize(rdpGdi *gdi)
         m_frame = QImage(int(gdi->width), int(gdi->height), QImage::Format_RGB32);
         m_frame.fill(Qt::black);
     }
-    QMetaObject::invokeMethod(this, &RdpSession::desktopSizeChanged, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(this, [this] {
+        m_settled.start();
+        emit desktopSizeChanged();
+    }, Qt::QueuedConnection);
 }
 
 void RdpSession::onPaint(rdpGdi *gdi, int x, int y, int w, int h)
@@ -595,7 +598,11 @@ void RdpSession::onServerMonitors(const QList<QRect> &monitors, const QSize &des
         QMutexLocker lock(&m_frameLock);
         m_serverMonitors = rel;
     }
-    QMetaObject::invokeMethod(this, &RdpSession::desktopSizeChanged, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(this, [this] {
+        m_layoutPending = false;   // the server applied a layout (ours or its own)
+        m_settled.start();
+        emit desktopSizeChanged();
+    }, Qt::QueuedConnection);
 }
 
 void RdpSession::onChannelDisconnected(const char *name)
@@ -647,14 +654,38 @@ void RdpSession::requestMonitorSize(int index, const QSize &pixels)
     if (!m_layoutTimer) {
         m_layoutTimer = new QTimer(this);
         m_layoutTimer->setSingleShot(true);
-        m_layoutTimer->setInterval(250);
+        m_layoutTimer->setInterval(600);
         connect(m_layoutTimer, &QTimer::timeout, this, &RdpSession::sendMonitorLayout);
     }
-    m_layoutTimer->start();
+    m_layoutTimer->start(600);
 }
 
 void RdpSession::sendMonitorLayout()
 {
+    // Wait until the connection has settled and the previous layout was applied.
+    constexpr qint64 kSettleMs = 2500, kPendingTimeoutMs = 6000;
+    if (m_state != QLatin1String("connected")) {
+        m_layoutTimer->start(1000);
+        return;
+    }
+    if (m_layoutPending && m_layoutSent.isValid() && m_layoutSent.elapsed() < kPendingTimeoutMs) {
+        m_layoutTimer->start(500);
+        return;
+    }
+    if (!m_settled.isValid() || m_settled.elapsed() < kSettleMs) {
+        m_layoutTimer->start(int(kSettleMs - (m_settled.isValid() ? m_settled.elapsed() : 0)) + 50);
+        return;
+    }
+    // Nothing to do if the server already has these sizes.
+    const QVariantList mons = monitors();
+    bool same = mons.size() == m_wantedSizes.size();
+    for (int i = 0; same && i < mons.size(); ++i)
+        same = QSize(mons.at(i).toMap().value("width").toInt(), mons.at(i).toMap().value("height").toInt())
+            == m_wantedSizes.at(i);
+    if (same)
+        return;
+    m_layoutPending = true;
+    m_layoutSent.start();
     const QList<QSize> sizes = m_wantedSizes;
     const int scale = m_p.scale;
     post([this, sizes, scale] {

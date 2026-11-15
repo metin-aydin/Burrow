@@ -735,12 +735,27 @@ QString AppController::startSession(const Model::Device &dev, const QString &use
         QList<QScreen *> ordered = screens;
         ordered.removeOne(QGuiApplication::primaryScreen());
         ordered.prepend(QGuiApplication::primaryScreen());
-        for (QScreen *sc : ordered) {
-            const QRect g = sc->geometry().translated(-box.topLeft());
-            p.monitors.append({QRect(qRound(g.x() * k), qRound(g.y() * k), qRound(g.width() * k), qRound(g.height() * k)),
-                               int(screens.indexOf(sc))});
+        // The sizes the monitors had at the end of the last session (they follow their windows), if the
+        // number of displays is the same: then nothing needs resizing once connected.
+        const QJsonArray saved = dev.layout.value("sizes").toArray();
+        if (saved.size() == screens.size()) {
+            int x = 0, h = 0;
+            for (int i = 0; i < saved.size(); ++i) {
+                const QJsonArray wh = saved.at(i).toArray();
+                const int w = qBound(200, wh.at(0).toInt() & ~1, 8192), mh = qBound(200, wh.at(1).toInt(), 8192);
+                p.monitors.append({QRect(x, 0, w, mh), i});
+                x += w;
+                h = qMax(h, mh);
+            }
+            p.size = QSize(x, h);
+        } else {
+            for (QScreen *sc : ordered) {
+                const QRect g = sc->geometry().translated(-box.topLeft());
+                p.monitors.append({QRect(qRound(g.x() * k), qRound(g.y() * k), qRound(g.width() * k), qRound(g.height() * k)),
+                                   int(screens.indexOf(sc))});
+            }
+            p.size = QSize(qRound(box.width() * k), qRound(box.height() * k));
         }
-        p.size = QSize(qRound(box.width() * k), qRound(box.height() * k));
     }
     p.lockOnDisconnect = dev.lockOnDisconnect;   // Win+L on Windows, Super+L on GNOME
     p.knownFingerprint = dev.certFingerprint;

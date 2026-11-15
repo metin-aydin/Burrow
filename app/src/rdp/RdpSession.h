@@ -7,6 +7,7 @@
 #include <QWaitCondition>
 #include <QObject>
 #include <QThread>
+#include <QElapsedTimer>
 #include <QTimer>
 #include <atomic>
 
@@ -139,6 +140,11 @@ private:
     QList<QSize> m_wantedSizes;              // GUI thread: monitor sizes to ask for
     QTimer *m_layoutTimer = nullptr;
     void sendMonitorLayout();
+    // A layout change makes the server rebuild its screens; another one before that finishes (or right
+    // after connecting, while GNOME hands the session over) makes it end the session. So: one at a time.
+    bool m_layoutPending = false;
+    QElapsedTimer m_layoutSent;   // since the pending request went out
+    QElapsedTimer m_settled;      // since the desktop last (re)appeared or changed
     QMutex m_tasksLock;
     QList<std::function<void()>> m_tasks;
 };

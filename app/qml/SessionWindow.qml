@@ -136,6 +136,8 @@ Window {
                             fullscreen: w.visibility === Window.FullScreen })
             }
             out.detached = list
+            // The monitor sizes the server ended up with: the next connection asks for them right away.
+            out.sizes = win.monitors.map(m => [m.width, m.height])
             out.order = win.tabOrder
             out.names = win.tabNames
             App.saveDeviceLayout(win.deviceId, out)
@@ -554,6 +556,7 @@ Window {
             }
         }
         // The prompt was answered (here or elsewhere) once the connection moves on.
+        function onDesktopSizeChanged() { win.scheduleSave() }
         function onPhaseChanged() { if (win.session && win.session.phase !== "certificate") certDialog.close() }
     }
 

@@ -4,6 +4,11 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Çoklu monitörde bağlantının kendiliğinden kopması: GNOME, bir düzen değişikliğinin yeniden kurulumu bitmeden yeni
+  bir istek gelince oturumu kapatıyordu (`ERRINFO_LOGOFF_BY_USER`, pencereler yerleşirken saniyeler içinde 3 istek).
+  Artık istekler sırayla: bağlantı/devir sonrası 2,5 sn beklenir, önceki düzen uygulanmadan (en fazla 6 sn) yenisi
+  gönderilmez, sunucuda zaten aynıysa gönderilmez, 600 ms birleştirme. Son monitör boyutları `layout.sizes` olarak
+  kaydedilir ve sonraki bağlantı doğrudan bu boyutlarla başlar (ekran sayısı aynıysa), böylece siyah kenar kalmaz.
 - Tailscale/Cloudflare bağlama sadeleşti: yeni profil kimliği baştan üretilir, Tailscale node adı otomatik
   (`burrow-<bilgisayar adı>`), Control Server/Node Name ve Cloudflare bastion "Gelişmiş Ayarlar"da. Tailscale'de
   "Tailscale İle Giriş Yap" kaydedip cihaz içe aktarmayı açar (tarayıcı girişi → tailnet makineleri). Cloudflare'de
