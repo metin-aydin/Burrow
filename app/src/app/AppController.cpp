@@ -19,6 +19,7 @@
 #include <QPainter>
 #include <QQmlEngine>
 #include <QSettings>
+#include <QStyleHints>
 #include <QTimer>
 
 #include "app/PreviewProvider.h"
@@ -93,6 +94,36 @@ QString AppController::versionInfo() const
 {
     return tr("Burrow %1 · netcore %2 · %3")
         .arg(QStringLiteral(BURROW_VERSION), NetCore::version(), FreeRdpEngine::engineVersion());
+}
+
+// --- Appearance --------------------------------------------------------------
+// Kept outside the vault (like the language) so the lock screen already uses it.
+namespace {
+const char kThemeKey[] = "ui/theme";
+}
+
+QString AppController::theme() const
+{
+    const QString t = QSettings().value(kThemeKey, QStringLiteral("system")).toString();
+    return t == QLatin1String("light") || t == QLatin1String("dark") ? t : QStringLiteral("system");
+}
+
+void AppController::setTheme(const QString &theme)
+{
+    if (theme == this->theme())
+        return;
+    QSettings().setValue(kThemeKey, theme);
+    applyTheme();
+    emit themeChanged();
+}
+
+void AppController::applyTheme()
+{
+    // The app's own appearance: Theme.qml follows styleHints, and macOS draws the title bars to match.
+    const QString t = theme();
+    QGuiApplication::styleHints()->setColorScheme(t == QLatin1String("light") ? Qt::ColorScheme::Light
+                                                  : t == QLatin1String("dark") ? Qt::ColorScheme::Dark
+                                                                               : Qt::ColorScheme::Unknown);
 }
 
 // --- Language ----------------------------------------------------------------

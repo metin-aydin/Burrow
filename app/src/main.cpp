@@ -60,6 +60,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     controller.applyLanguage(&engine);
+    controller.applyTheme();
     engine.addImageProvider(QStringLiteral("preview"), new PreviewProvider(controller.store()));
     qmlRegisterSingletonInstance("Burrow.Core", 1, 0, "App", &controller);
     qmlRegisterType<RdpView>("Burrow.Core", 1, 0, "RdpView");

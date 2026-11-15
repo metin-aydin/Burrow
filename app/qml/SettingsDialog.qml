@@ -22,6 +22,16 @@ BDialog {
         onValueChanged: if (value !== App.language) App.language = value
     }
 
+    SectionTitle { text: qsTr("Appearance") }
+    BCombo {
+        Layout.fillWidth: true
+        options: [{ text: qsTr("Match System"), value: "system" },
+                  { text: qsTr("Light"), value: "light" },
+                  { text: qsTr("Dark"), value: "dark" }]
+        value: App.theme
+        onValueChanged: if (value !== App.theme) App.theme = value
+    }
+
     SectionTitle { text: qsTr("Security") }
     BSwitch {
         id: touch

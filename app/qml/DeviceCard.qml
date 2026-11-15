@@ -38,7 +38,7 @@ Item {
         layer.enabled: root.hovered
         layer.effect: MultiEffect {
             shadowEnabled: true
-            shadowColor: Theme.dark ? "#000000" : "#30202A40"
+            shadowColor: Theme.cardShadow
             shadowBlur: 0.8
             shadowVerticalOffset: 6
         }
@@ -71,11 +71,11 @@ Item {
                             anchors.centerIn: parent
                             spacing: 6
                             visible: shot.status !== Image.Ready
-                            Icon { anchors.horizontalCenter: parent.horizontalCenter; name: "monitor"; size: 34; color: "#E6FFFFFF" }
+                            Icon { anchors.horizontalCenter: parent.horizontalCenter; name: "monitor"; size: 34; color: Theme.onImageSoft }
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: qsTr("Preview After First Connection")
-                                color: "#CCFFFFFF"
+                                color: Theme.onImageMuted
                                 font.pixelSize: 11
                             }
                         }
@@ -112,12 +112,12 @@ Item {
                     height: 22
                     width: osText.implicitWidth + 16
                     radius: 11
-                    color: "#66000000"
+                    color: Theme.imageScrim
                     Text {
                         id: osText
                         anchors.centerIn: parent
                         text: root.os === "ubuntu" ? "Ubuntu" : "Windows"
-                        color: "white"
+                        color: Theme.onImage
                         font.pixelSize: 11
                         font.weight: Font.Medium
                     }
@@ -130,8 +130,8 @@ Item {
                     width: 28; height: 28
                     opacity: root.hovered || menu.visible ? 1 : 0
                     Behavior on opacity { NumberAnimation { duration: 120 } }
-                    background: Rectangle { radius: 14; color: menuBtn.hovered ? "#99000000" : "#66000000" }
-                    contentItem: Icon { name: "dots"; size: 16; color: "white" }
+                    background: Rectangle { radius: 14; color: menuBtn.hovered ? Theme.imageScrimHover : Theme.imageScrim }
+                    contentItem: Icon { name: "dots"; size: 16; color: Theme.onImage }
                     onClicked: menu.popup(menuBtn, 0, menuBtn.height + 4)
                 }
 

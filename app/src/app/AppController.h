@@ -33,6 +33,7 @@ class AppController : public QObject
     Q_PROPERTY(QString versionInfo READ versionInfo CONSTANT)
     Q_PROPERTY(int autoLockMinutes READ autoLockMinutes WRITE setAutoLockMinutes NOTIFY autoLockChanged)
     Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)   // system | en | tr
+    Q_PROPERTY(QString theme READ theme WRITE setTheme NOTIFY themeChanged)   // system | light | dark
     Q_PROPERTY(QString demoOpen MEMBER m_demoOpen CONSTANT)   // dev: dialog to open on start
 public:
     explicit AppController(QObject *parent = nullptr);
@@ -57,6 +58,10 @@ public:
     void setLanguage(const QString &lang);
     // Installs the translator for the saved (or system) language. Call before loading QML.
     void applyLanguage(QQmlEngine *engine = nullptr);
+    QString theme() const;
+    void setTheme(const QString &theme);
+    // Applies the saved appearance to the whole app (windows, title bars, Theme.dark).
+    void applyTheme();
 
     // --- Vault -------------------------------------------------------------
     Q_INVOKABLE QString createVault(const QString &password, const QString &confirm);
@@ -138,6 +143,7 @@ signals:
     void touchIdEnabledChanged();
     void toast(const QString &message);
     void languageChanged();
+    void themeChanged();
     void autoLockChanged();
     void sessionOpened(RdpSession *session);
     void tunnelStatesChanged();

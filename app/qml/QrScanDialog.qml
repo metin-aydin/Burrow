@@ -34,7 +34,7 @@ BDialog {
         Layout.fillWidth: true
         Layout.preferredHeight: width * 3 / 4
         radius: Theme.radius
-        color: "black"
+        color: Theme.remoteBackground
         clip: true
         VideoOutput {
             id: preview
@@ -62,7 +62,7 @@ BDialog {
             width: parent.width - 40
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WordWrap
-            color: "white"
+            color: Theme.onImage
             font.pixelSize: 13
             text: qsTr("Burrow can't use the camera. Allow it in System Settings → Privacy & Security → Camera.")
         }

@@ -1,7 +1,7 @@
 pragma Singleton
 import QtQuick
 
-// Design tokens. Follows the system light/dark setting.
+// Design tokens. Light or dark as chosen in Settings (App.theme), which sets the app's color scheme.
 QtObject {
     readonly property bool dark: Qt.styleHints.colorScheme === Qt.ColorScheme.Dark
 
@@ -15,23 +15,37 @@ QtObject {
     readonly property color borderStrong:  dark ? "#40392F" : "#CFC7BC"
     readonly property color text:          dark ? "#ECEEF2" : "#14161B"
     readonly property color textSecondary: dark ? "#9CA3AF" : "#5D6472"
-    readonly property color textMuted:     dark ? "#6B7280" : "#8C93A0"
+    readonly property color textMuted:     dark ? "#858C99" : "#6B7280"
 
-    readonly property color accent:        dark ? "#B07A3E" : "#A26E35"
-    readonly property color accentHover:   dark ? "#C08A4C" : "#8F602E"
+    // Accent and status colours keep white or soft-background text at 4.5:1 or more.
+    readonly property color accent:        dark ? "#9C6B34" : "#96652F"
+    readonly property color accentHover:   dark ? "#AD7A40" : "#85592A"
     readonly property color accentText:      "#FFFFFF"
     readonly property color accentSoft:    dark ? "#3A2A18" : "#F5EBDD"
     readonly property color success:       dark ? "#34D399" : "#10A36B"
     readonly property color successSoft:   dark ? "#173528" : "#DDF5EA"
-    readonly property color danger:        dark ? "#F87171" : "#D93A3A"
+    readonly property color danger:        dark ? "#F87171" : "#C42F2F"
     readonly property color dangerSoft:    dark ? "#3A1D1F" : "#FBE4E4"
-    readonly property color warning:       dark ? "#FBBF24" : "#B7791F"
+    readonly property color warning:       dark ? "#FBBF24" : "#946112"
 
-    readonly property color gp:            dark ? "#F48A8A" : "#C23B3B"
+    // Fixed colours for things drawn over device previews and pictures (same in both themes).
+    readonly property color onImage:          "#FFFFFF"
+    readonly property color onImageSoft:      "#E6FFFFFF"
+    readonly property color onImageMuted:     "#CCFFFFFF"
+    readonly property color imageScrim:       "#66000000"
+    readonly property color imageScrimHover:  "#99000000"
+    readonly property color remoteBackground: "#000000"
+    readonly property color modalScrim:    dark ? "#99000000" : "#55141820"
+    readonly property color cardShadow:    dark ? "#000000" : "#30202A40"
+    // Toasts are inverted against the window.
+    readonly property color toastBg:       dark ? "#F2F3F5" : "#1B1E24"
+    readonly property color toastText:     dark ? "#14161B" : "#FFFFFF"
+
+    readonly property color gp:            dark ? "#F48A8A" : "#B03232"
     readonly property color gpSoft:        dark ? "#3A1C1E" : "#FBE5E5"
-    readonly property color ts:            dark ? "#5EEAD4" : "#0F8A7A"
+    readonly property color ts:            dark ? "#5EEAD4" : "#0B7466"
     readonly property color tsSoft:        dark ? "#13332F" : "#DDF4F0"
-    readonly property color cf:            dark ? "#FBA65C" : "#D9670F"
+    readonly property color cf:            dark ? "#FBA65C" : "#A84F0A"
     readonly property color cfSoft:        dark ? "#3A2611" : "#FDEBD9"
 
     readonly property int radius: 10

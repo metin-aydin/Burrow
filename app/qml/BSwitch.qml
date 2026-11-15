@@ -38,7 +38,7 @@ RowLayout {
                 x: sw.checked ? parent.width - width - 3 : 3
                 y: 3
                 width: 16; height: 16; radius: 8
-                color: "white"
+                color: Theme.onImage
                 Behavior on x { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
             }
         }

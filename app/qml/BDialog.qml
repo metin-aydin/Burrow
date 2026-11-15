@@ -21,7 +21,7 @@ Popup {
     padding: 0
     closePolicy: Popup.CloseOnEscape
 
-    Overlay.modal: Rectangle { color: Theme.dark ? "#99000000" : "#55141820" }
+    Overlay.modal: Rectangle { color: Theme.modalScrim }
 
     enter: Transition {
         NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 140 }

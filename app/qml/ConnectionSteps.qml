@@ -59,7 +59,7 @@ ColumnLayout {
                     color: Theme.success
                     opacity: row.done ? 1 : 0
                     Behavior on opacity { NumberAnimation { duration: 220 } }
-                    Icon { anchors.centerIn: parent; name: "check"; size: 13; color: "white" }
+                    Icon { anchors.centerIn: parent; name: "check"; size: 13; color: Theme.onImage }
                 }
                 // Active: spinner, or a countdown ring while waiting.
                 Spinner {
@@ -100,7 +100,7 @@ ColumnLayout {
                     radius: width / 2
                     visible: row.active && root.failed
                     color: Theme.danger
-                    Icon { anchors.centerIn: parent; name: "x"; size: 12; color: "white" }
+                    Icon { anchors.centerIn: parent; name: "x"; size: 12; color: Theme.onImage }
                 }
             }
             Text {

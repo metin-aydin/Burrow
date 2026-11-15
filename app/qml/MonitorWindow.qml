@@ -13,7 +13,7 @@ Window {
     signal reattach(int monitor)
     signal layoutChanged()
 
-    color: "black"
+    color: Theme.remoteBackground
     title: deviceName + " — " + displayName
     // Full screen once the window is on its display (see SessionWindow.detach).
     function goFullScreen(delay) { fullTimer.interval = delay; fullTimer.start() }

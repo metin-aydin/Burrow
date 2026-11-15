@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Tema seçimi: Ayarlar → Görünüm (Sistemle Aynı / Açık / Koyu). Dil gibi `QSettings` `ui/theme`'da (kilit ekranı da
+  uyar), `QStyleHints::setColorScheme` ile tüm uygulamaya (macOS başlık çubukları dahil) uygulanır; `Theme.dark` bunu
+  izler. QML'deki son sabit renkler Theme token'larına taşındı (önizleme üstü metin/örtü, toast, modal örtü, gölge).
+  Kontrast ≥4.5:1 için açık temada vurgu, durum, tünel ve soluk metin renkleri koyulaştırıldı; koyu temada vurgu
+  (#9C6B34) ve soluk metin (#858C99) ayarlandı.
+
 - Pencere minimum genişliği artık galeri başlık satırının doğal genişliğinden hesaplanıyor (dile ve güncelleme
   rozetine göre değişir; en az 760). En dar hâlde EN 841, TR 815 pt; hiçbir buton kesilmiyor. Minimum yükseklik 520.
 
