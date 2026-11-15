@@ -8,6 +8,8 @@ import (
 	"errors"
 	"net"
 	"os"
+	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -88,6 +90,41 @@ func (t *Tunnel) run(ctx context.Context) {
 		case <-tick.C:
 		}
 	}
+}
+
+// Peer is a machine in the tailnet, for "import devices".
+type Peer struct {
+	Name   string `json:"name"`   // MagicDNS short name or host name
+	DNS    string `json:"dns"`    // full MagicDNS name (dialable), may be empty
+	IP     string `json:"ip"`     // first Tailscale address
+	OS     string `json:"os"`
+	Online bool   `json:"online"`
+}
+
+// Peers lists the other machines in the tailnet (needs a connected node).
+func (t *Tunnel) Peers(ctx context.Context) ([]Peer, error) {
+	lc, err := t.srv.LocalClient()
+	if err != nil {
+		return nil, err
+	}
+	st, err := lc.Status(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var out []Peer
+	for _, p := range st.Peer {
+		if p == nil || len(p.TailscaleIPs) == 0 {
+			continue
+		}
+		dns := strings.TrimSuffix(p.DNSName, ".")
+		name := p.HostName
+		if dns != "" {
+			name = strings.SplitN(dns, ".", 2)[0]
+		}
+		out = append(out, Peer{Name: name, DNS: dns, IP: p.TailscaleIPs[0].String(), OS: p.OS, Online: p.Online})
+	}
+	sort.Slice(out, func(i, j int) bool { return strings.ToLower(out[i].Name) < strings.ToLower(out[j].Name) })
+	return out, nil
 }
 
 func (t *Tunnel) DialContext(ctx context.Context, network, address string) (net.Conn, error) {

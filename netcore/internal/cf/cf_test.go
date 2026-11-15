@@ -135,3 +135,28 @@ func TestExchangeRefusesForeignRedirect(t *testing.T) {
 		t.Fatal("org token was sent to a foreign host")
 	}
 }
+
+func TestListApps(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer tok" {
+			w.Write([]byte(`{"success":false,"errors":[{"message":"Invalid API Token"}]}`))
+			return
+		}
+		switch r.URL.Path {
+		case "/accounts":
+			w.Write([]byte(`{"success":true,"result":[{"id":"acc1"}]}`))
+		case "/accounts/acc1/access/apps":
+			w.Write([]byte(`{"success":true,"result":[{"name":"Home RDP","domain":"rdp.example.com","type":"self_hosted"},{"name":"Launcher","domain":"x.cloudflareaccess.com","type":"app_launcher"}]}`))
+		}
+	}))
+	defer srv.Close()
+	apiBase = srv.URL
+	defer func() { apiBase = "https://api.cloudflare.com/client/v4" }()
+	apps, err := ListApps(context.Background(), "tok")
+	if err != nil || len(apps) != 1 || apps[0].Domain != "rdp.example.com" {
+		t.Fatalf("apps = %+v, %v", apps, err)
+	}
+	if _, err := ListApps(context.Background(), "bad"); err == nil || err.Error() != "Invalid API Token" {
+		t.Fatalf("bad token: %v", err)
+	}
+}

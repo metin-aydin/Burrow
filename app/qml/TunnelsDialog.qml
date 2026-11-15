@@ -11,6 +11,7 @@ BDialog {
     subtitle: qsTr("Devices connect through these profiles. The tunnel runs only inside Burrow; the rest of your computer is not affected.")
     signal confirm(string title, string message, string button, var fn)
     signal editTunnel(string id)
+    signal importDevices(string id)
 
     Repeater {
         model: App.tunnels
@@ -63,6 +64,11 @@ BDialog {
                     visible: !!parent.st.state && parent.st.state !== "failed"
                     text: qsTr("Disconnect")
                     onClicked: App.disconnectTunnel(model.tunnelId)
+                }
+                BButton {
+                    visible: model.type === "tailscale" || model.type === "cloudflare"
+                    text: qsTr("Import Devices")
+                    onClicked: root.importDevices(model.tunnelId)
                 }
                 BButton { variant: "ghost"; iconName: "edit"; onClicked: root.editTunnel(model.tunnelId) }
                 BButton {

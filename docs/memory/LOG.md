@@ -4,6 +4,10 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Hesap bağlama / cihaz içe aktarma: Tünel Profilleri'nde Tailscale ve Cloudflare için "Cihazları İçe Aktar". Tailscale:
+  tünel açılır (gerekirse tarayıcı girişi), tailnet makineleri listelenir (`NetcoreTunnelPeers`, MagicDNS adı/IP, OS,
+  çevrimiçi), seçilenler cihaz olur. Cloudflare: OAuth yok → API anahtarıyla (kaydedilmez) Access uygulamaları listelenir
+  (`cf.ListApps`, testli), seçilenler cihaz olur. Hedefte cloudflared kurulumu hâlâ elle. Gerçek hesaplarda denenmedi.
 - Tray menüsü (`app/src/app/Tray.*`, QSystemTrayIcon; uygulama artık QApplication): kayıtlı bilgisayarlar (tıklayınca
   bağlanır, gerekirse önce kilit açtırır), Burrow'u Aç, Kilitle, Çık. macOS'ta tek renkli şablon simge. Pencereyi kapatmak
   uygulamayı tray'de bırakır. macOS'ta durum öğesinin oluştuğu erişilebilirlik API'siyle doğrulandı.

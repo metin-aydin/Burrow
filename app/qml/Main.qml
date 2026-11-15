@@ -67,7 +67,8 @@ ApplicationWindow {
             toast.show(r)
         }
     }
-    TunnelsDialog { id: tunnels; onConfirm: (t, m, b, f) => confirm.ask(t, m, b, f); onEditTunnel: (id) => tunnelEditor.openFor(id) }
+    TunnelsDialog { id: tunnels; onConfirm: (t, m, b, f) => confirm.ask(t, m, b, f); onEditTunnel: (id) => tunnelEditor.openFor(id); onImportDevices: (id) => importDevices.show(id) }
+    ImportDevicesDialog { id: importDevices; toastTarget: toast }
     TunnelEditor { id: tunnelEditor }
     SettingsDialog { id: settings }
     ConfirmDialog { id: confirm }
@@ -111,7 +112,7 @@ ApplicationWindow {
         }
         function onStateChanged() {
             if (App.state !== "unlocked") {
-                deviceEditor.close(); tunnels.close(); tunnelEditor.close(); prompt.close(); tsLogin.close(); connectProgress.close(); settings.close(); confirm.close()
+                deviceEditor.close(); tunnels.close(); tunnelEditor.close(); prompt.close(); tsLogin.close(); connectProgress.close(); importDevices.close(); settings.close(); confirm.close()
             }
         }
     }

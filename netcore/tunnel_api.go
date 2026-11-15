@@ -282,3 +282,41 @@ func NetcoreDecodeQR(gray *C.uchar, w, h C.int) *C.char {
 	}
 	return C.CString(text)
 }
+
+// NetcoreTunnelPeers lists the machines reachable through a tunnel as JSON (Tailscale only for now),
+// or NULL. Free with NetcoreFree.
+//
+//export NetcoreTunnelPeers
+func NetcoreTunnelPeers(h C.int) *C.char {
+	p, ok := lookupTunnel(h).(interface {
+		Peers(context.Context) ([]ts.Peer, error)
+	})
+	if !ok {
+		return nil
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	peers, err := p.Peers(ctx)
+	if err != nil {
+		return nil
+	}
+	b, _ := json.Marshal(peers)
+	return C.CString(string(b))
+}
+
+// NetcoreCloudflareListApps lists Access applications with an API token (not stored). Returns JSON
+// {"apps":[...]} or {"error":"..."}; free with NetcoreFree.
+//
+//export NetcoreCloudflareListApps
+func NetcoreCloudflareListApps(token *C.char) *C.char {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	apps, err := cf.ListApps(ctx, C.GoString(token))
+	var b []byte
+	if err != nil {
+		b, _ = json.Marshal(map[string]string{"error": err.Error()})
+	} else {
+		b, _ = json.Marshal(map[string]any{"apps": apps})
+	}
+	return C.CString(string(b))
+}

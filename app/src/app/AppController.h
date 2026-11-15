@@ -84,6 +84,13 @@ public:
     // tunnelStates[id]. `target` is a device address for Cloudflare. Returns the id used or an error.
     Q_INVOKABLE QVariantMap testTunnel(const QVariantMap &profile, const QString &password, const QString &target);
     Q_INVOKABLE void stopTunnelTest(const QString &tunnelId);
+    // Import devices from a tunnel's network: Tailscale peers (tunnel must be connected) or Cloudflare
+    // Access apps listed with an API token (asynchronous: cloudflareAppsReady). importDevices returns
+    // how many were added.
+    Q_INVOKABLE void openTunnelForImport(const QString &tunnelId);
+    Q_INVOKABLE QVariantList tunnelPeers(const QString &tunnelId) const;
+    Q_INVOKABLE void listCloudflareApps(const QString &apiToken);
+    Q_INVOKABLE int importDevices(const QString &tunnelId, const QVariantList &items);
     Q_INVOKABLE QVariantMap deviceTunnel(const QString &deviceId) const;   // {id, name, type} or {}
     Q_INVOKABLE void forgetCertificate(const QString &id);
 
@@ -122,6 +129,7 @@ signals:
     void tunnelPasswordRequired(const QString &tunnelId, const QString &name);
     void deviceConnecting(const QString &deviceId, const QString &tunnelId);   // waiting for the tunnel
     void deviceConnectFailed(const QString &deviceId, const QString &error);
+    void cloudflareAppsReady(const QVariantMap &result);   // {apps: [...]} or {error}
 
 private:
     QString finishUnlock(VaultStore::Result r);

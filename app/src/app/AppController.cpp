@@ -1,6 +1,9 @@
 #include "app/AppController.h"
 
 #include <QBuffer>
+#include <QJsonArray>
+#include <QtConcurrent/QtConcurrentRun>
+#include <QFutureWatcher>
 #include <QClipboard>
 #include <QUrl>
 #include <QDir>
@@ -461,6 +464,75 @@ void AppController::stopTunnelTest(const QString &tunnelId)
 {
     m_tunnelTesting.remove(tunnelId);
     stopTunnelIfIdle(tunnelId);
+}
+
+void AppController::openTunnelForImport(const QString &tunnelId)
+{
+    // Kept open like a test: it closes again once nothing uses it (stopTunnelTest).
+    m_tunnelTesting.insert(tunnelId);
+    connectTunnel(tunnelId);
+}
+
+QVariantList AppController::tunnelPeers(const QString &tunnelId) const
+{
+    const int h = m_tunnelMgr.handle(tunnelId);
+    if (h <= 0)
+        return {};
+    char *raw = NetcoreTunnelPeers(h);
+    const QVariantList out = QJsonDocument::fromJson(QByteArray(raw ? raw : "[]")).array().toVariantList();
+    if (raw)
+        NetcoreFree(raw);
+    return out;
+}
+
+void AppController::listCloudflareApps(const QString &apiToken)
+{
+    auto *watcher = new QFutureWatcher<QVariantMap>(this);
+    connect(watcher, &QFutureWatcher<QVariantMap>::finished, this, [this, watcher] {
+        emit cloudflareAppsReady(watcher->result());
+        watcher->deleteLater();
+    });
+    QByteArray token = apiToken.toUtf8();
+    watcher->setFuture(QtConcurrent::run([token]() mutable {
+        char *raw = NetcoreCloudflareListApps(token.data());
+        std::fill(token.begin(), token.end(), '\0');
+        const QVariantMap m = QJsonDocument::fromJson(QByteArray(raw ? raw : "{}")).object().toVariantMap();
+        if (raw)
+            NetcoreFree(raw);
+        return m;
+    }));
+}
+
+int AppController::importDevices(const QString &tunnelId, const QVariantList &items)
+{
+    int added = 0;
+    auto &devices = m_store.doc().devices;
+    for (const QVariant &v : items) {
+        const QVariantMap m = v.toMap();
+        const QString host = m.value("host").toString().trimmed();
+        if (host.isEmpty())
+            continue;
+        bool exists = false;
+        for (const Model::Device &d : devices)
+            exists = exists || (d.tunnelId == tunnelId && d.host.compare(host, Qt::CaseInsensitive) == 0);
+        if (exists)
+            continue;
+        Model::Device d;
+        d.id = Model::newId();
+        d.name = m.value("name").toString().trimmed().isEmpty() ? host : m.value("name").toString().trimmed();
+        d.host = host;
+        d.tunnelId = tunnelId;
+        const QString os = m.value("os").toString().toLower();
+        d.os = os.contains(QLatin1String("windows")) ? QStringLiteral("windows")
+             : (os.contains(QLatin1String("linux")) ? QStringLiteral("ubuntu") : QStringLiteral("windows"));
+        devices.append(d);
+        ++added;
+    }
+    if (added) {
+        persist();
+        reloadModels();
+    }
+    return added;
 }
 
 QVariantMap AppController::deviceTunnel(const QString &deviceId) const
