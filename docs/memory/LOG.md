@@ -4,6 +4,13 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Mac çoklu ekran (Apple yolu):** gerçek Mac standart `ExtendedDesktopSize` bildirmedi (log). VNC artık Mac'e
+  RFB 003.889 ile bağlanıyor: ViewerInfo/SetMode/SetEncryption ön adımı, anahtar değişimi, şifreli kayıt katmanı
+  (AES-128-CBC + SHA-1), `AppleDisplayLayout` ile ekranlar sekmelere bölünüyor, `AutoFrameBufferUpdate` ile
+  güncellemeler; sağ tık bitleri ve Option→Meta düzeltmesi. Yerel sahte Apple sunucusuyla (scratchpad/vnc/
+  apple_server.py, libcrypto ctypes) uçtan uca doğrulandı; standart 3.8 yolu da tekrar test edildi. Gerçek Mac'te
+  denenmedi. zDesk (MIT) atfı `THIRD_PARTY_NOTICES.md`'de; ADR 0008 güncellendi. Apple modunda pano yok.
+
 - QR menüsü düğmenin sağ kenarına hizalı açılıyor (önceden pencerenin dışına taşıyordu); iki temada görüntüyle
   doğrulandı. Geliştirme kancası `BURROW_DEMO_OPEN=tunnel-qr`.
 

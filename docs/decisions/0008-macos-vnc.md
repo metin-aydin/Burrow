@@ -27,8 +27,15 @@ yerleşik Ekran Paylaşımı / Uzaktan Yönetim (Apple Remote Desktop) servisi *
   ortak bir görüntü/oturum arayüzüyle aynı pencere, sekme ve tam ekran deneyimine bağlanır.
 - **Klavye/fare:** Mac tuşları (Cmd, Option) X11 keysym olarak doğrudan iletilir.
 - **Pano:** ilk sürümde düz metin (RFB ClientCutText/ServerCutText).
-- **Çoklu monitör:** macOS tüm ekranları tek bir çerçeve olarak gönderir; ilk sürümde tek görünüm, monitörlere bölme
-  sonraki adım.
+- **Çoklu monitör (2026-11-15 güncellendi):** macOS standart `ExtendedDesktopSize`'ı desteklemiyor (denendi). Bu
+  yüzden Mac'e Apple'ın kendi sürümü **RFB 003.889** ile bağlanılır (kullanıcı adı varsa; `BURROW_VNC_STANDARD=1`
+  standart 3.8'e zorlar): tür 30 giriş → ClientInit `0x81` → açık metin ön adım (ViewerInfo, SetMode, SetEncryption
+  1 ve 2) → Mac'in anahtar değişimi (0x44f; anahtar ve IV, girişteki MD5 anahtarıyla AES-ECB) → sonrası her iki yönde
+  kayıt katmanı (AES-128-CBC, yön başına zincir ve sayaç, SHA-1 bütünlük) → `AppleDisplayLayout` (0x451) her ekranın
+  çerçeve içindeki yerini verir; ekranlar RDP'deki gibi sekme/pencere olur, düzenden sonra `AutoFrameBufferUpdate`
+  ile güncellemeler kurulur. Apple'a özgü: sağ/orta fare bitleri yer değiştirir, Option `Meta` olarak gönderilir.
+  Biçim zDesk projesinin (MIT, `THIRD_PARTY_NOTICES.md`) macOS 26.5–26.6'da ölçtüğü notlara dayanır; belgelenmemiştir,
+  bir macOS güncellemesi bozabilir. Apple modunda pano henüz yok (Apple'ın kendi pano protokolü sonraki adım).
 
 ## Sonuçlar
 

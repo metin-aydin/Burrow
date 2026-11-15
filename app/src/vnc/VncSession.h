@@ -10,6 +10,7 @@
 #include "rdp/RemoteSession.h"
 
 struct z_stream_s;
+struct evp_cipher_ctx_st;
 
 // One VNC (RFB 3.8) connection to a Mac's Screen Sharing / Remote Management or any VNC server
 // (ADR 0008). Our own client: Apple's sign-in (security type 30, Mac user name and password),
@@ -73,8 +74,16 @@ private:
     bool readExtendedDesktopSize(int w, int h);
     void resizeFrame(int w, int h);
     void requestUpdate(bool incremental);
-    bool readExact(void *buf, size_t n);
-    bool writeAll(const void *buf, size_t n);   // any thread
+    bool readExact(void *buf, size_t n);        // through the record layer once it is up
+    bool writeAll(const void *buf, size_t n);   // any thread; one whole message per call
+    bool rawRead(void *buf, size_t n);
+    bool rawWrite(const void *buf, size_t n);   // caller holds m_writeLock
+    // Apple's revision (RFB 003.889, ADR 0008): after the rekey every message travels in records
+    // (AES-128-CBC per direction, SHA-1 integrity), and the Mac reports its displays.
+    QString appleSetup();
+    bool fillRecord();
+    bool startRecords(const uchar *rekeyBody);
+    bool readAppleLayout();
     void setState(const QString &state, const QString &error = {});
     void setPhase(const QString &phase);
     void sendPointer();
@@ -94,6 +103,14 @@ private:
     QList<QRect> m_screens;          // ExtendedDesktopSize screens (guarded by m_frameLock)
     bool m_screensReported = false;  // worker thread: the server sent ExtendedDesktopSize
     bool m_firstUpdate = true;       // worker thread
+    std::atomic_bool m_apple{false};
+    uchar m_wrapKey[16] = {};
+    evp_cipher_ctx_st *m_inCtx = nullptr, *m_outCtx = nullptr;
+    quint32 m_inSeq = 0, m_outSeq = 0;
+    std::atomic_bool m_records{false};
+    QByteArray m_inBuf;              // decrypted bytes not read yet (worker thread)
+    qsizetype m_inPos = 0;
+    bool m_armed = false;            // worker thread: Apple pushes updates (AutoFrameBufferUpdate)
     z_stream_s *m_zrle = nullptr;   // one zlib stream for the whole connection (worker thread)
     QByteArray m_zbuf;
     // Pointer state (GUI thread).

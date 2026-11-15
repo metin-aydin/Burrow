@@ -1,6 +1,7 @@
 #include "vnc/VncSession.h"
 
 #include <QClipboard>
+#include <QCryptographicHash>
 #include <QCoreApplication>
 #include <QGuiApplication>
 #include <QRandomGenerator>
@@ -25,6 +26,11 @@ constexpr int kMaxSide = 16384;   // sanity limit for server-sent sizes
 
 enum : quint8 { SecNone = 1, SecVnc = 2, SecApple = 30 };
 enum : qint32 { EncRaw = 0, EncCopyRect = 1, EncZrle = 16, EncDesktopSize = -223, EncExtendedDesktopSize = -308 };
+// Apple's metadata pseudo-encodings (RFB 003.889; measured by the zDesk project, MIT,
+// github.com/andrewtheguy/zdesk docs/apple-vnc-889.md).
+enum : qint32 { EncAppleCursorPos = 0x44c, EncAppleDisplayInfo = 0x44d, EncAppleRekey = 0x44f, EncAppleLayout = 0x451 };
+constexpr int kRecordTrailer = 20;                      // SHA-1
+constexpr int kRecordMaxBody = (65535 / 16) * 16 - 2 - kRecordTrailer;
 
 void putU16(QByteArray &b, quint16 v) { b.append(char(v >> 8)).append(char(v & 0xff)); }
 void putU32(QByteArray &b, quint32 v) { putU16(b, quint16(v >> 16)); putU16(b, quint16(v & 0xffff)); }
@@ -58,6 +64,9 @@ VncSession::~VncSession()
         inflateEnd(m_zrle);
         delete m_zrle;
     }
+    EVP_CIPHER_CTX_free(m_inCtx);
+    EVP_CIPHER_CTX_free(m_outCtx);
+    memset(m_wrapKey, 0, sizeof m_wrapKey);
     m_p.password.fill(QChar(0));
 }
 
@@ -140,6 +149,28 @@ void VncSession::setPhase(const QString &phase)
 
 bool VncSession::readExact(void *buf, size_t n)
 {
+    if (!m_records)
+        return rawRead(buf, n);
+    auto *p = static_cast<char *>(buf);
+    while (n > 0) {
+        if (m_inPos >= m_inBuf.size()) {
+            m_inBuf.clear();
+            m_inPos = 0;
+            if (!fillRecord())
+                return false;
+            continue;
+        }
+        const size_t take = qMin<size_t>(n, size_t(m_inBuf.size() - m_inPos));
+        memcpy(p, m_inBuf.constData() + m_inPos, take);
+        m_inPos += qsizetype(take);
+        p += take;
+        n -= take;
+    }
+    return true;
+}
+
+bool VncSession::rawRead(void *buf, size_t n)
+{
     auto *p = static_cast<char *>(buf);
     while (n > 0) {
         if (m_stop)
@@ -162,6 +193,40 @@ bool VncSession::readExact(void *buf, size_t n)
 bool VncSession::writeAll(const void *buf, size_t n)
 {
     QMutexLocker lock(&m_writeLock);
+    if (!m_records)
+        return rawWrite(buf, n);
+    // One message in as many records as it needs: u16 length, then AES-CBC of
+    // (u16 body length, body, zero filler, SHA-1 of the sequence number and all before it).
+    const auto *msg = static_cast<const char *>(buf);
+    size_t left = n;
+    do {
+        const int body = int(qMin<size_t>(left, size_t(kRecordMaxBody)));
+        const int filler = (16 - (2 + body + kRecordTrailer) % 16) % 16;
+        const int total = 2 + body + filler + kRecordTrailer;
+        QByteArray plain;
+        plain.reserve(total);
+        putU16(plain, quint16(body));
+        plain.append(msg, body);
+        plain.append(filler, '\0');
+        QByteArray seq(4, '\0');
+        qToBigEndian(m_outSeq++, seq.data());
+        plain.append(QCryptographicHash::hash(seq + plain, QCryptographicHash::Sha1));
+        QByteArray rec(2 + total, '\0');
+        qToBigEndian(quint16(total), rec.data());
+        int outLen = 0;
+        if (!EVP_EncryptUpdate(m_outCtx, reinterpret_cast<uchar *>(rec.data() + 2), &outLen,
+                               reinterpret_cast<const uchar *>(plain.constData()), total) || outLen != total)
+            return false;
+        if (!rawWrite(rec.constData(), size_t(rec.size())))
+            return false;
+        msg += body;
+        left -= size_t(body);
+    } while (left > 0);
+    return true;
+}
+
+bool VncSession::rawWrite(const void *buf, size_t n)
+{
     const int fd = m_fd.load();
     if (fd < 0)
         return false;
@@ -218,8 +283,11 @@ QString VncSession::handshake()
     char version[12];
     if (!readExact(version, 12) || memcmp(version, "RFB ", 4) != 0)
         return unreachable;
-    // Version 3.8 (Apple's 3.889 also accepts it).
-    if (!writeAll("RFB 003.008\n", 12))
+    // A Mac (3.889) gets Apple's own revision when we can sign in with a user name: it is the one
+    // that reports the Mac's displays. Everything else, or BURROW_VNC_STANDARD=1, gets RFB 3.8.
+    m_apple = memcmp(version, "RFB 003.889", 11) == 0 && !m_p.username.isEmpty()
+        && !qEnvironmentVariableIntValue("BURROW_VNC_STANDARD");
+    if (!writeAll(m_apple ? "RFB 003.889\n" : "RFB 003.008\n", 12))
         return unreachable;
 
     setPhase(QStringLiteral("signing_in"));
@@ -244,7 +312,7 @@ QString VncSession::handshake()
         chosen = SecApple;
     else if (types.contains(char(SecVnc)) && !m_p.password.isEmpty())
         chosen = SecVnc;
-    else if (types.contains(char(SecNone)))
+    else if (types.contains(char(SecNone)) && !m_apple)
         chosen = SecNone;
     else if (types.contains(char(SecApple)))
         return tr("This Mac signs in with a user name. Enter the Mac's user name and password in the device settings.");
@@ -265,9 +333,10 @@ QString VncSession::handshake()
     if (!readExact(&result, 4))
         return unreachable;
     if (qFromBigEndian(result) != 0) {
-        // Never retried automatically: a wrong password must not lock the account.
+        // Never retried automatically: a wrong password must not lock the account. Apple's revision
+        // sends no reason; RFB 3.8 sends one.
         quint32 len = 0;
-        if (readExact(&len, 4)) {
+        if (!m_apple && readExact(&len, 4)) {
             len = qMin<quint32>(qFromBigEndian(len), 4096);
             QByteArray reason(int(len), '\0');
             readExact(reason.data(), len);
@@ -276,7 +345,8 @@ QString VncSession::handshake()
     }
 
     setPhase(QStringLiteral("opening"));
-    const quint8 shared = 1;   // don't disconnect other viewers
+    // Shared (don't disconnect other viewers); Apple's 0x80 asks for its extended ServerInit.
+    const quint8 shared = m_apple ? 0x81 : 1;
     if (!writeAll(&shared, 1))
         return unreachable;
     uchar init[24];
@@ -290,6 +360,11 @@ QString VncSession::handshake()
     if (w <= 0 || h <= 0 || w > kMaxSide || h > kMaxSide)
         return tr("%1 sent an invalid screen size.").arg(m_p.title);
     resizeFrame(w, h);
+    if (m_apple) {
+        const QString err = appleSetup();
+        if (!err.isEmpty())
+            return err;
+    }
 
     // 32-bit true colour, little endian, 0x00RRGGBB: the same bytes as QImage::Format_RGB32.
     QByteArray pf;
@@ -299,14 +374,200 @@ QString VncSession::handshake()
     pf.append(char(16)).append(char(8)).append(char(0)).append(3, '\0');
     QByteArray enc;
     enc.append(char(2)).append(char(0));
-    const qint32 encodings[] = {EncZrle, EncCopyRect, EncRaw, EncExtendedDesktopSize, EncDesktopSize};
-    putU16(enc, quint16(std::size(encodings)));
+    // Every encoding listed must be readable: the server takes the list as a promise. A Mac reports
+    // its displays only when both DisplayInfo and the layout are listed.
+    const QList<qint32> encodings = m_apple
+        ? QList<qint32>{EncZrle, EncRaw, EncAppleCursorPos, EncAppleDisplayInfo, EncAppleRekey, EncAppleLayout, EncDesktopSize}
+        : QList<qint32>{EncZrle, EncCopyRect, EncRaw, EncExtendedDesktopSize, EncDesktopSize};
+    putU16(enc, quint16(encodings.size()));
     for (qint32 e : encodings)
         putU32(enc, quint32(e));
     if (!writeAll(pf.constData(), size_t(pf.size())) || !writeAll(enc.constData(), size_t(enc.size())))
         return unreachable;
     requestUpdate(false);
     return {};
+}
+
+// Apple's prelude, in cleartext: who we are, control mode, then turn the record layer on. The Mac
+// answers with the rekey; everything after it travels in records.
+QString VncSession::appleSetup()
+{
+    const QString failed = tr("Couldn't open the encrypted session with %1.").arg(m_p.title);
+    // ViewerInfo (0x21): 62 bytes of numbers - viewer class 1, application 2 (Screen Sharing)
+    // version 6.1.0, macOS 26.6.2, then the server message types this viewer handles.
+    uchar vi[66] = {};
+    vi[0] = 0x21;
+    qToBigEndian<quint16>(62, vi + 2);
+    qToBigEndian<quint16>(1, vi + 4);
+    qToBigEndian<quint32>(2, vi + 6);
+    qToBigEndian<quint32>(6, vi + 10);
+    qToBigEndian<quint32>(1, vi + 14);
+    qToBigEndian<quint32>(26, vi + 22);
+    qToBigEndian<quint32>(6, vi + 26);
+    qToBigEndian<quint32>(2, vi + 30);
+    vi[34] = 0xb0; vi[36] = 0x0c; vi[37] = 0x03; vi[38] = 0x90; vi[44] = 0x40;
+    const uchar setMode[4] = {0x0a, 0, 0, 1};                                    // control
+    const uchar encStart[12] = {0x12, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1};          // rekey, AES-128
+    const uchar encInbound[8] = {0x12, 0, 0, 2, 0, 1, 0, 0};                     // decrypt what we send
+    if (!writeAll(vi, sizeof vi) || !writeAll(setMode, 4) || !writeAll(encStart, 12) || !writeAll(encInbound, 8))
+        return failed;
+    // Only Bell and MiscStatus may come before the rekey.
+    for (;;) {
+        quint8 type = 0;
+        if (!readExact(&type, 1))
+            return failed;
+        if (type == 2)
+            continue;
+        if (type == 0x14) {
+            uchar h[3];
+            if (!readExact(h, 3))
+                return failed;
+            QByteArray skip(qFromBigEndian<quint16>(h + 1), '\0');
+            if (!readExact(skip.data(), size_t(skip.size())))
+                return failed;
+            continue;
+        }
+        if (type != 0) {
+            qWarning("vnc: Mac sent message %u before the encrypted session", type);
+            return failed;
+        }
+        uchar h[3];
+        if (!readExact(h, 3))
+            return failed;
+        if (qFromBigEndian<quint16>(h + 1) == 0)
+            continue;
+        uchar rect[12];
+        if (!readExact(rect, 12) || qFromBigEndian<qint32>(rect + 8) != EncAppleRekey
+            || qFromBigEndian<quint16>(h + 1) != 1) {
+            qWarning("vnc: Mac sent something other than the rekey first");
+            return failed;
+        }
+        uchar body[36];
+        if (!readExact(body, 36) || !startRecords(body))
+            return failed;
+        qInfo("vnc: Apple encrypted session up");
+        return {};
+    }
+}
+
+// The rekey: a u32 generation, then the key and the IV, each one AES-128 block (ECB) under the key
+// from sign-in. Both directions start from them; each keeps its own CBC chain and counter.
+bool VncSession::startRecords(const uchar *body)
+{
+    uchar keys[32];
+    int out = 0;
+    EVP_CIPHER_CTX *ecb = EVP_CIPHER_CTX_new();
+    bool ok = ecb && EVP_DecryptInit_ex(ecb, EVP_aes_128_ecb(), nullptr, m_wrapKey, nullptr)
+        && EVP_CIPHER_CTX_set_padding(ecb, 0) && EVP_DecryptUpdate(ecb, keys, &out, body + 4, 32) && out == 32;
+    EVP_CIPHER_CTX_free(ecb);
+    memset(m_wrapKey, 0, sizeof m_wrapKey);
+    if (ok) {
+        m_inCtx = EVP_CIPHER_CTX_new();
+        m_outCtx = EVP_CIPHER_CTX_new();
+        ok = m_inCtx && m_outCtx
+            && EVP_DecryptInit_ex(m_inCtx, EVP_aes_128_cbc(), nullptr, keys, keys + 16) && EVP_CIPHER_CTX_set_padding(m_inCtx, 0)
+            && EVP_EncryptInit_ex(m_outCtx, EVP_aes_128_cbc(), nullptr, keys, keys + 16) && EVP_CIPHER_CTX_set_padding(m_outCtx, 0);
+    }
+    memset(keys, 0, sizeof keys);
+    if (ok) {
+        QMutexLocker lock(&m_writeLock);
+        m_records = true;
+    }
+    return ok;
+}
+
+// One record off the wire: decrypt, check its SHA-1, keep its body for readExact.
+bool VncSession::fillRecord()
+{
+    uchar lb[2];
+    if (!rawRead(lb, 2))
+        return false;
+    const int len = qFromBigEndian<quint16>(lb);
+    if (len < 32 || len % 16 != 0)
+        return false;
+    QByteArray cipher(len, '\0'), plain(len, '\0');
+    if (!rawRead(cipher.data(), size_t(len)))
+        return false;
+    int out = 0;
+    if (!EVP_DecryptUpdate(m_inCtx, reinterpret_cast<uchar *>(plain.data()), &out,
+                           reinterpret_cast<const uchar *>(cipher.constData()), len) || out != len)
+        return false;
+    QByteArray seq(4, '\0');
+    qToBigEndian(m_inSeq++, seq.data());
+    if (QCryptographicHash::hash(seq + plain.left(len - kRecordTrailer), QCryptographicHash::Sha1) != plain.right(kRecordTrailer)) {
+        qWarning("vnc: a record from the Mac failed its integrity check");
+        return false;
+    }
+    const int body = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(plain.constData()));
+    if (2 + body + kRecordTrailer > len)
+        return false;
+    m_inBuf = plain.mid(2, body);
+    m_inPos = 0;
+    return true;
+}
+
+// AppleDisplayLayout: a u16 counting what follows, a 0x14-byte header (framebuffer size at 0x06,
+// the display count at 0x12), then 0x38 bytes per display with its framebuffer edges at 0x1c
+// (top, left, bottom, right). A layout also stops the Mac pushing, so updates are armed again.
+bool VncSession::readAppleLayout()
+{
+    uchar lb[2];
+    if (!readExact(lb, 2))
+        return false;
+    const int len = qFromBigEndian<quint16>(lb);
+    QByteArray p(len, '\0');
+    if (!readExact(p.data(), size_t(len)))
+        return false;
+    const auto *b = reinterpret_cast<const uchar *>(p.constData());
+    if (len < 0x14)
+        return false;
+    const int fbW = qFromBigEndian<quint16>(b + 0x06), fbH = qFromBigEndian<quint16>(b + 0x08);
+    const int count = qFromBigEndian<quint16>(b + 0x12);
+    if (count < 1 || count > 25 || len < 0x14 + count * 0x38 || fbW <= 0 || fbH <= 0 || fbW > kMaxSide || fbH > kMaxSide)
+        return false;
+    QList<QRect> rects;
+    QList<QPoint> origins;
+    for (int i = 0; i < count; ++i) {
+        const uchar *r = b + 0x14 + i * 0x38;
+        const QPoint origin(qint16(qFromBigEndian<quint16>(r + 0x16)), qint16(qFromBigEndian<quint16>(r + 0x14)));
+        const quint32 flags = qFromBigEndian<quint32>(r + 0x24);
+        if ((flags & 0x02) && origins.contains(origin))
+            continue;   // another member of a mirror set: the same picture
+        origins.append(origin);
+        const int top = qint16(qFromBigEndian<quint16>(r + 0x1c)), left = qint16(qFromBigEndian<quint16>(r + 0x1e));
+        const int bottom = qint16(qFromBigEndian<quint16>(r + 0x20)), right = qint16(qFromBigEndian<quint16>(r + 0x22));
+        if (right > left && bottom > top)
+            rects.append(QRect(left, top, right - left, bottom - top));
+    }
+    // Framebuffer coordinates start at the displays' top-left corner.
+    QRect box;
+    for (const QRect &r : std::as_const(rects))
+        box = box.united(r);
+    const QRect fb(0, 0, fbW, fbH);
+    QList<QRect> screens;
+    for (const QRect &r : std::as_const(rects))
+        if (fb.contains(r.translated(-box.topLeft())))
+            screens.append(r.translated(-box.topLeft()));
+    QStringList desc;
+    for (const QRect &r : std::as_const(screens))
+        desc << QStringLiteral("%1x%2+%3+%4").arg(r.width()).arg(r.height()).arg(r.x()).arg(r.y());
+    m_screensReported = true;
+    qInfo("vnc: Mac displays %dx%d: %s", fbW, fbH, qPrintable(desc.join(QStringLiteral(", "))));
+    if (desktopSize() != QSize(fbW, fbH))
+        resizeFrame(fbW, fbH);
+    {
+        QMutexLocker lock(&m_frameLock);
+        m_screens = screens.size() > 1 ? screens : QList<QRect>{};
+    }
+    QMetaObject::invokeMethod(this, [this] { emit desktopSizeChanged(); }, Qt::QueuedConnection);
+    // AutoFrameBufferUpdate (0x09): push every change, interval 0, for the whole framebuffer.
+    QByteArray arm;
+    arm.append(char(0x09)).append(char(0));
+    putU16(arm, 1);
+    putU32(arm, 0);
+    putU16(arm, 0); putU16(arm, 0); putU16(arm, quint16(fbW)); putU16(arm, quint16(fbH));
+    m_armed = writeAll(arm.constData(), size_t(arm.size()));
+    return true;
 }
 
 // Apple Remote Desktop sign-in (type 30): Diffie-Hellman, then the user name and password encrypted
@@ -349,6 +610,8 @@ QString VncSession::authApple()
     unsigned keyOut = 0;
     ok = EVP_Digest(secretBytes.constData(), size_t(secretBytes.size()), key, &keyOut, EVP_md5(), nullptr) && keyOut == 16;
     secretBytes.fill('\0');
+    if (ok)
+        memcpy(m_wrapKey, key, 16);   // also wraps the record layer's first keys (Apple's rekey)
 
     // 64 bytes user name + 64 bytes password, each NUL-terminated, the rest random.
     uchar creds[128];
@@ -446,8 +709,20 @@ bool VncSession::messageLoop()
         case 0:   // FramebufferUpdate
             if (!readFramebufferUpdate())
                 return m_stop;
-            requestUpdate(true);
+            if (!m_armed)   // a Mac pushes updates once armed (see readAppleLayout)
+                requestUpdate(true);
             break;
+        case 0x14: {   // Apple's MiscStatus: pad, u16 length, body (status we don't act on)
+            if (!m_apple)
+                return false;
+            uchar h[3];
+            if (!readExact(h, 3))
+                return m_stop;
+            QByteArray skip(qFromBigEndian<quint16>(h + 1), '\0');
+            if (!readExact(skip.data(), size_t(skip.size())))
+                return m_stop;
+            break;
+        }
         case 1: { // SetColourMapEntries (unused with true colour)
             uchar h[5];
             if (!readExact(h, 5))
@@ -500,6 +775,28 @@ bool VncSession::readFramebufferUpdate()
         const int x = qFromBigEndian<quint16>(r), y = qFromBigEndian<quint16>(r + 2);
         const int w = qFromBigEndian<quint16>(r + 4), hh = qFromBigEndian<quint16>(r + 6);
         const qint32 enc = qFromBigEndian<qint32>(r + 8);
+        if (m_apple) {
+            if (enc == EncAppleCursorPos)
+                continue;   // the pointer's position, in the rectangle header only
+            if (enc == EncAppleDisplayInfo) {   // the older display list: stepped over
+                uchar head[10];
+                if (!readExact(head, 10))
+                    return false;
+                QByteArray skip(qFromBigEndian<quint16>(head + 8) * 0x1c, '\0');
+                if (!readExact(skip.data(), size_t(skip.size())))
+                    return false;
+                continue;
+            }
+            if (enc == EncAppleLayout) {
+                if (!readAppleLayout())
+                    return false;
+                continue;
+            }
+            if (enc == EncAppleRekey) {
+                qWarning("vnc: the Mac changed keys mid-session, which Burrow never asks for");
+                return false;
+            }
+        }
         if (enc == EncExtendedDesktopSize) {
             if (!readExtendedDesktopSize(w, hh))
                 return false;
@@ -768,8 +1065,12 @@ void VncSession::sendPointer()
 {
     if (m_state != QLatin1String("connected"))
         return;
+    // Apple's revision reads the mask as macOS button numbers: right and middle swap places.
+    quint8 mask = m_buttons;
+    if (m_apple)
+        mask = quint8((mask & ~0x06) | ((mask & 0x02) << 1) | ((mask & 0x04) >> 1));
     QByteArray m;
-    m.append(char(5)).append(char(m_buttons));
+    m.append(char(5)).append(char(mask));
     putU16(m, quint16(qMax(0, m_px)));
     putU16(m, quint16(qMax(0, m_py)));
     writeAll(m.constData(), size_t(m.size()));
@@ -815,9 +1116,13 @@ void VncSession::sendKeysym(quint32 keysym, bool down)
         m_heldKeys.insert(keysym);
     else if (!m_heldKeys.remove(keysym))
         return;
+    // A Mac maps Alt to Command and Meta to Option, so Option goes out as Meta there.
+    quint32 sent = keysym;
+    if (m_apple && (keysym == 0xffe9 || keysym == 0xffea))
+        sent = keysym - 2;
     QByteArray m;
     m.append(char(4)).append(char(down ? 1 : 0)).append(2, '\0');
-    putU32(m, keysym);
+    putU32(m, sent);
     writeAll(m.constData(), size_t(m.size()));
 }
 
@@ -860,7 +1165,8 @@ quint32 VncSession::keysymForScancode(unsigned sc)
 
 void VncSession::onLocalClipboard()
 {
-    if (m_state != QLatin1String("connected"))
+    // Apple's revision has its own pasteboard protocol (not implemented yet).
+    if (m_state != QLatin1String("connected") || m_apple)
         return;
     const QString text = QGuiApplication::clipboard()->text();
     if (text.isEmpty() || text == m_lastClipboard)
