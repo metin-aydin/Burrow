@@ -38,7 +38,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libopenconnect-dev pkg-config
       - name: govulncheck
         working-directory: netcore
-        run: go run golang.org/x/vuln/cmd/govulncheck@v1.1.4 ./...   # pinned; bump deliberately
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...   # pinned; bump deliberately (v1.1.4 panics on Go 1.27 syntax)
 
   macos:
     name: macOS build

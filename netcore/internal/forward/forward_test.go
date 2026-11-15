@@ -184,6 +184,15 @@ func TestSealAndAcceptWindow(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer c.Close()
+	// Dial returns once the kernel has queued the connection, which can be before the forwarder
+	// accepts it; a round trip proves it was accepted, as it always is by the time Burrow seals
+	// (the RDP session is already up).
+	c.Write([]byte("x"))
+	buf := make([]byte, 1)
+	c.SetReadDeadline(time.Now().Add(2 * time.Second))
+	if _, err := c.Read(buf); err != nil {
+		t.Fatal(err)
+	}
 	g.Seal()
 	time.Sleep(50 * time.Millisecond)
 	if c2, err := net.DialTimeout("tcp", addr2, time.Second); err == nil {
@@ -191,7 +200,6 @@ func TestSealAndAcceptWindow(t *testing.T) {
 		t.Fatal("connection accepted after Seal")
 	}
 	c.Write([]byte("y")) // the established connection still works
-	buf := make([]byte, 1)
 	c.SetReadDeadline(time.Now().Add(2 * time.Second))
 	if _, err := c.Read(buf); err != nil {
 		t.Fatalf("established connection broken by Seal: %v", err)
