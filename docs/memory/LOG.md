@@ -4,6 +4,9 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- QR menüsü düğmenin sağ kenarına hizalı açılıyor (önceden pencerenin dışına taşıyordu); iki temada görüntüyle
+  doğrulandı. Geliştirme kancası `BURROW_DEMO_OPEN=tunnel-qr`.
+
 - Açılır menüler yeniden tasarlandı: ortak `BPopupSurface` (yükseltilmiş yüzey, 1px kenar, yumuşak gölge;
   tooltip de bunu kullanıyor), `BMenu` + `BMenuItem` (ikon, seçili öğede onay, tehlikeli işlemde kırmızı, hover/
   basılı/pasif durumlar, kısa açılış geçişi). `BCombo`: Unicode `⌄` glifi yerine SVG chevron (açılınca döner), hover

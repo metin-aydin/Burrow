@@ -123,6 +123,7 @@ ApplicationWindow {
             else if (App.demoOpen === "settings") settings.open()
             else if (App.demoOpen === "combo") { settings.open(); Qt.callLater(settings.demoCombo) }
             else if (App.demoOpen === "tunnel") tunnelEditor.openFor(App.tunnels.count ? "" : "")
+            else if (App.demoOpen === "tunnel-qr") { tunnelEditor.openFor(""); tunnelEditor.demoExpand(); Qt.callLater(tunnelEditor.demoQrMenu) }
             else if (App.demoOpen === "tunnel-otp") { tunnelEditor.openFor(""); tunnelEditor.demoExpand() }
             else if (App.demoOpen === "tunnel-test") {
                 for (let i = 0; i < App.tunnels.count; ++i) {

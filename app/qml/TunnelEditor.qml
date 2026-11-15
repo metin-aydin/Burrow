@@ -44,6 +44,7 @@ BDialog {
 
     // Development: show every section for screenshots.
     function demoExpand() { otpOn.checked = true; otpSource.value = "totp" }
+    function demoQrMenu() { qrMenu.popup(qrButton, qrButton.width - qrMenu.width, qrButton.height + 4) }
     function demoTailscale() { typeSeg.value = "tailscale" }
     function demoCloudflare() { typeSeg.value = "cloudflare"; nameField.text = qsTr("Home Lab") }
 
@@ -239,7 +240,7 @@ BDialog {
                         Layout.alignment: Qt.AlignBottom
                         iconName: "qr"
                         tip: qsTr("Read A QR Code")
-                        onClicked: qrMenu.popup(qrButton, 0, qrButton.height + 4)
+                        onClicked: qrMenu.popup(qrButton, qrButton.width - qrMenu.width, qrButton.height + 4)
                     }
                 }
                 // Shown when Import is pressed with nothing to import.
