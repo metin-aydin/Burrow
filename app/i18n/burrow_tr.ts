@@ -94,29 +94,29 @@
         <translation>Tünel profili artık yok.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="650"/>
+        <location filename="../src/app/AppController.cpp" line="664"/>
         <source>Sign in to Cloudflare Access in the browser window that opened.</source>
         <translation>Açılan tarayıcı penceresinde Cloudflare Access&apos;e giriş yap.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="676"/>
+        <location filename="../src/app/AppController.cpp" line="690"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="739"/>
-        <location filename="../src/app/AppController.cpp" line="754"/>
+        <location filename="../src/app/AppController.cpp" line="753"/>
+        <location filename="../src/app/AppController.cpp" line="768"/>
         <source>Couldn&apos;t open a connection through the tunnel.</source>
         <translation>Tünel üzerinden bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="889"/>
+        <location filename="../src/app/AppController.cpp" line="903"/>
         <source>The profile name can&apos;t be empty.</source>
         <translation>Profil adı boş olamaz.</translation>
     </message>
     <message>
         <location filename="../src/app/AppController.cpp" line="515"/>
-        <location filename="../src/app/AppController.cpp" line="893"/>
+        <location filename="../src/app/AppController.cpp" line="907"/>
         <source>Server and username can&apos;t be empty.</source>
         <translation>Sunucu ve kullanıcı adı boş olamaz.</translation>
     </message>
@@ -126,47 +126,47 @@
         <translation>Test için bir cihaz host adı gir.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="896"/>
+        <location filename="../src/app/AppController.cpp" line="910"/>
         <source>The OTP key is invalid.</source>
         <translation>OTP anahtarı geçersiz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="938"/>
+        <location filename="../src/app/AppController.cpp" line="952"/>
         <source>Direct (No Tunnel)</source>
         <translation>Doğrudan (Tünelsiz)</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="972"/>
+        <location filename="../src/app/AppController.cpp" line="986"/>
         <source>Invalid key</source>
         <translation>Geçersiz anahtar</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1027"/>
+        <location filename="../src/app/AppController.cpp" line="1041"/>
         <source>Company VPN</source>
         <translation>Şirket VPN</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1032"/>
+        <location filename="../src/app/AppController.cpp" line="1046"/>
         <source>Home Network</source>
         <translation>Ev Ağı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1040"/>
+        <location filename="../src/app/AppController.cpp" line="1054"/>
         <source>Work PC</source>
         <translation>İş Bilgisayarı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1041"/>
+        <location filename="../src/app/AppController.cpp" line="1055"/>
         <source>Meeting Room</source>
         <translation>Toplantı Odası</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1042"/>
+        <location filename="../src/app/AppController.cpp" line="1056"/>
         <source>Home Desktop</source>
         <translation>Ev Masaüstü</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1043"/>
+        <location filename="../src/app/AppController.cpp" line="1057"/>
         <source>Lab Server</source>
         <translation>Laboratuvar</translation>
     </message>
@@ -628,17 +628,17 @@
         <translation>Tailnet&apos;indeki makineler. Burrow&apos;a eklemek istediklerini seç.</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="46"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="53"/>
         <source>No other machines found in the tailnet.</source>
         <translation>Tailnet&apos;te başka makine bulunamadı.</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="49"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="56"/>
         <source>The tunnel couldn&apos;t be opened.</source>
         <translation>Tünel açılamadı.</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="58"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="71"/>
         <source>No Access applications found.</source>
         <translation>Access uygulaması bulunamadı.</translation>
     </message>
@@ -648,57 +648,62 @@
         <translation>Cloudflare hesabındaki Access uygulamaları. Cloudflare bunların okunmasına yalnızca API token ile izin veriyor: aşağıdaki butonla bir token oluştur (gerekli izin zaten seçili), kopyala ve geri dön. Burrow onu bir kez kullanır ve saklamaz.</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="67"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="80"/>
         <source>No API token on the clipboard. Copy the token Cloudflare shows after you create it.</source>
         <translation>Panoda API token yok. Token&apos;ı oluşturduktan sonra Cloudflare&apos;in gösterdiği değeri kopyala.</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="79"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="92"/>
         <source>Create Token In Cloudflare</source>
         <translation>Cloudflare&apos;de Token Oluştur</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="82"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="95"/>
         <source>Paste Token</source>
         <translation>Token&apos;ı Yapıştır</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="88"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="101"/>
         <source>Or Enter The Token</source>
         <translation>Ya Da Token&apos;ı Gir</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="93"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="106"/>
         <source>List Applications</source>
         <translation>Uygulamaları Listele</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="103"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="116"/>
         <source>Sign in to Tailscale in your browser…</source>
         <translation>Tarayıcında Tailscale&apos;e giriş yap…</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="104"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="117"/>
         <source>Loading…</source>
         <translation>Yükleniyor…</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="151"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="150"/>
+        <source>Already Added</source>
+        <translation>Zaten Ekli</translation>
+    </message>
+    <message>
+        <location filename="../qml/ImportDevicesDialog.qml" line="166"/>
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="155"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="170"/>
         <source>Add Selected</source>
         <translation>Seçilenleri Ekle</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="159"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="174"/>
         <source>1 device added.</source>
         <translation>1 cihaz eklendi.</translation>
     </message>
     <message>
-        <location filename="../qml/ImportDevicesDialog.qml" line="159"/>
+        <location filename="../qml/ImportDevicesDialog.qml" line="174"/>
         <source>%1 devices added.</source>
         <translation>%1 cihaz eklendi.</translation>
     </message>

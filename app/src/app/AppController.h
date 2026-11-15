@@ -107,6 +107,8 @@ public:
     // Lists apps with a token found on the clipboard (then clears it); false if none is there.
     Q_INVOKABLE bool listCloudflareAppsFromClipboard();
     Q_INVOKABLE int importDevices(const QString &tunnelId, const QVariantList &items);
+    // True if a device through this tunnel already has one of these addresses.
+    Q_INVOKABLE bool hasDevice(const QString &tunnelId, const QStringList &hosts) const;
     Q_INVOKABLE QVariantMap deviceTunnel(const QString &deviceId) const;   // {id, name, type} or {}
     Q_INVOKABLE void forgetCertificate(const QString &id);
     // Stops waiting for a device's tunnel (its window was closed while connecting).

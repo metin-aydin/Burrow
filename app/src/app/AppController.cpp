@@ -593,6 +593,16 @@ void AppController::listCloudflareApps(const QString &apiToken)
     }));
 }
 
+bool AppController::hasDevice(const QString &tunnelId, const QStringList &hosts) const
+{
+    for (const Model::Device &d : m_store.doc().devices)
+        if (d.tunnelId == tunnelId)
+            for (const QString &h : hosts)
+                if (!h.trimmed().isEmpty() && d.host.compare(h.trimmed(), Qt::CaseInsensitive) == 0)
+                    return true;
+    return false;
+}
+
 int AppController::importDevices(const QString &tunnelId, const QVariantList &items)
 {
     int added = 0;
@@ -602,11 +612,10 @@ int AppController::importDevices(const QString &tunnelId, const QVariantList &it
         const QString host = m.value("host").toString().trimmed();
         if (host.isEmpty())
             continue;
-        bool exists = false;
-        for (const Model::Device &d : devices)
-            exists = exists || (d.tunnelId == tunnelId && d.host.compare(host, Qt::CaseInsensitive) == 0);
-        if (exists)
-            continue;
+        QStringList hosts = m.value("hosts").toStringList();
+        hosts << host;
+        if (hasDevice(tunnelId, hosts))
+            continue;   // already in Burrow (by name or address)
         Model::Device d;
         d.id = Model::newId();
         d.name = m.value("name").toString().trimmed().isEmpty() ? host : m.value("name").toString().trimmed();
@@ -614,7 +623,12 @@ int AppController::importDevices(const QString &tunnelId, const QVariantList &it
         d.tunnelId = tunnelId;
         const QString os = m.value("os").toString().toLower();
         d.os = os.contains(QLatin1String("windows")) ? QStringLiteral("windows")
-             : (os.contains(QLatin1String("linux")) ? QStringLiteral("ubuntu") : QStringLiteral("windows"));
+             : os.contains(QLatin1String("linux")) ? QStringLiteral("ubuntu")
+             : os.contains(QLatin1String("macos")) ? QStringLiteral("macos") : QStringLiteral("windows");
+        if (d.os == QLatin1String("macos")) {   // Macs are reached over VNC (Screen Sharing, ADR 0008)
+            d.protocol = QStringLiteral("vnc");
+            d.port = 5900;
+        }
         devices.append(d);
         ++added;
     }

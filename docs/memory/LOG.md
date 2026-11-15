@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Tailscale cihaz içe aktarma "Loading"de kalıyordu: pencere listeyi yalnız tünel durumu *değişince* alıyordu;
+  "Tailscale İle Giriş Yap"tan sonra tünel zaten bağlı olduğu için değişiklik gelmiyordu. Artık açılışta durum hemen
+  kontrol ediliyor; bağlandıktan hemen sonra makine listesi boşsa 1 sn arayla 6 kez yeniden soruluyor. Bu tünelde
+  zaten ekli makineler (MagicDNS adı ya da Tailscale IP'si eşleşirse) "Zaten Ekli" olarak gösteriliyor, seçilemiyor
+  ve `importDevices` de atlıyor (`hasDevice`). Tailscale'den gelen macOS makineleri macOS/VNC/5900 olarak ekleniyor.
+
 - **VNC / macOS (ADR 0008) ilk sürüm:** ortak `RemoteSession` arayüzü (RdpView, oturum pencereleri ve
   AppController artık protokolden bağımsız; `RdpSession` bunu uygular). Yeni `VncSession` (src/vnc): RFB 3.8, Apple
   girişi (tür 30: DH + AES-128-ECB, MD5 anahtar; OpenSSL), VNC şifresi (tür 2, DES; `openssl enc` ile doğrulandı,

@@ -9,7 +9,7 @@ BDialog {
     dialogWidth: 520
     property string tunnelId
     property string type
-    property var items: []         // [{name, host, os, detail, online, checked}]
+    property var items: []         // [{name, host, os, detail, online, checked, added}]
     property bool loading: false
     property string error
     readonly property var st: App.tunnelStates[tunnelId] || {}
@@ -28,33 +28,46 @@ BDialog {
         open()
         if (type === "tailscale") {
             loading = true
+            peerTries = 0
             App.openTunnelForImport(id)
+            // The tunnel may already be up (just signed in): then no state change follows.
+            Qt.callLater(root.checkTailnet)
         }
     }
+    // Machines already in Burrow for this tunnel are shown but can't be added again.
+    function withAdded(list) {
+        return list.map(i => Object.assign(i, { added: App.hasDevice(root.tunnelId, i.hosts || [i.host]),
+                                                checked: i.checked && !App.hasDevice(root.tunnelId, i.hosts || [i.host]) }))
+    }
+    property int peerTries: 0
+    function checkTailnet() {
+        if (!root.visible || root.type !== "tailscale" || !root.loading) return
+        if (root.st.state === "connected") {
+            const peers = App.tunnelPeers(root.tunnelId)
+            // Right after connecting the machine list may still be on its way: ask again shortly.
+            if (peers.length === 0 && peerTries < 6) { ++peerTries; peerRetry.start(); return }
+            root.items = withAdded(peers.map(p => ({ name: p.name, host: p.dns || p.ip, hosts: [p.dns, p.ip].filter(h => !!h),
+                                                     os: p.os, detail: (p.dns || p.ip) + (p.os ? " · " + p.os : ""),
+                                                     online: p.online, checked: p.online })))
+            root.loading = false
+            if (root.items.length === 0) root.error = qsTr("No other machines found in the tailnet.")
+        } else if (root.st.state === "failed") {
+            root.loading = false
+            root.error = root.st.error || qsTr("The tunnel couldn't be opened.")
+        }
+    }
+    Timer { id: peerRetry; interval: 1000; onTriggered: root.checkTailnet() }
     onClosed: App.stopTunnelTest(tunnelId)
 
     Connections {
         target: App
-        function onTunnelStatesChanged() {
-            if (!root.visible || root.type !== "tailscale" || !root.loading) return
-            if (root.st.state === "connected") {
-                const peers = App.tunnelPeers(root.tunnelId)
-                root.items = peers.map(p => ({ name: p.name, host: p.dns || p.ip, os: p.os,
-                                               detail: (p.dns || p.ip) + (p.os ? " · " + p.os : ""),
-                                               online: p.online, checked: p.online }))
-                root.loading = false
-                if (root.items.length === 0) root.error = qsTr("No other machines found in the tailnet.")
-            } else if (root.st.state === "failed") {
-                root.loading = false
-                root.error = root.st.error || qsTr("The tunnel couldn't be opened.")
-            }
-        }
+        function onTunnelStatesChanged() { root.checkTailnet() }
         function onCloudflareAppsReady(result) {
             if (!root.visible) return
             root.loading = false
             if (result.error) { root.error = result.error; return }
-            root.items = (result.apps || []).map(a => ({ name: a.name, host: a.domain, os: "windows",
-                                                         detail: a.domain, online: true, checked: true }))
+            root.items = withAdded((result.apps || []).map(a => ({ name: a.name, host: a.domain, os: "windows",
+                                                                   detail: a.domain, online: true, checked: true })))
             if (root.items.length === 0) root.error = qsTr("No Access applications found.")
         }
     }
@@ -113,11 +126,12 @@ BDialog {
             Layout.fillWidth: true
             implicitHeight: 48
             radius: Theme.radius
-            color: rowMouse.containsMouse ? Theme.hover : Theme.surfaceSunken
+            color: rowMouse.containsMouse && !modelData.added ? Theme.hover : Theme.surfaceSunken
             MouseArea {
                 id: rowMouse
                 anchors.fill: parent
                 hoverEnabled: true
+                enabled: !modelData.added
                 onClicked: { const a = root.items.slice(); a[index].checked = !a[index].checked; root.items = a }
             }
             RowLayout {
@@ -125,7 +139,7 @@ BDialog {
                 anchors.leftMargin: 12
                 anchors.rightMargin: 12
                 spacing: 10
-                CheckBox { checked: modelData.checked; onToggled: { const a = root.items.slice(); a[index].checked = checked; root.items = a } }
+                CheckBox { enabled: !modelData.added; checked: modelData.checked; onToggled: { const a = root.items.slice(); a[index].checked = checked; root.items = a } }
                 Rectangle { width: 8; height: 8; radius: 4; color: modelData.online ? Theme.success : Theme.borderStrong }
                 ColumnLayout {
                     Layout.fillWidth: true
@@ -133,6 +147,7 @@ BDialog {
                     Text { text: modelData.name; color: Theme.text; font.pixelSize: 13; font.weight: Font.Medium; elide: Text.ElideRight; Layout.fillWidth: true }
                     Text { text: modelData.detail; color: Theme.textSecondary; font.pixelSize: 11; elide: Text.ElideRight; Layout.fillWidth: true }
                 }
+                Text { visible: !!modelData.added; text: qsTr("Already Added"); color: Theme.textSecondary; font.pixelSize: 12 }
             }
         }
     }
