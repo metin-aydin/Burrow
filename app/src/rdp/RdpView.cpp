@@ -62,6 +62,7 @@ void RdpView::setSession(RemoteSession *s)
             if (part.isEmpty() && !m_frame.isNull())
                 return;
             m_dirty += part;
+            ++m_statUpdates;
             if (!m_frameTimer.isActive())
                 m_frameTimer.start();
         });
@@ -120,6 +121,7 @@ void RdpView::refreshDirty()
     m_dirty = QRegion();
     if (dirty.isEmpty())
         return;
+    ++m_statRefreshes;
     // Copy the changed rectangles into our picture; the next frame uploads it.
     for (const QRect &r : dirty)
         m_session->copyInto(m_frame, r, r.topLeft() - src.topLeft());
@@ -161,26 +163,30 @@ QRectF RdpView::targetRect() const
 QSGNode *RdpView::updatePaintNode(QSGNode *old, UpdatePaintNodeData *)
 {
     QSGNode *root = old;
-    QSGRectangleNode *bg = nullptr;
-    QSGImageNode *img = nullptr;
     if (!root) {
         root = new QSGNode;
-        bg = window()->createRectangleNode();
+        QSGRectangleNode *bg = window()->createRectangleNode();
         bg->setColor(Qt::black);
         root->appendChildNode(bg);
+        m_textureDirty = true;
+    }
+    static_cast<QSGRectangleNode *>(root->childAtIndex(0))->setRect(boundingRect());
+    // The picture's node exists only while there is a picture: an image node without a texture is
+    // an error to the renderer.
+    auto *img = root->childCount() > 1 ? static_cast<QSGImageNode *>(root->childAtIndex(1)) : nullptr;
+    if (m_frame.isNull()) {
+        if (img) {
+            root->removeChildNode(img);
+            delete img;
+        }
+        return root;
+    }
+    if (!img) {
         img = window()->createImageNode();
         img->setFiltering(QSGTexture::Linear);
         img->setOwnsTexture(true);
         root->appendChildNode(img);
         m_textureDirty = true;
-    } else {
-        bg = static_cast<QSGRectangleNode *>(root->childAtIndex(0));
-        img = static_cast<QSGImageNode *>(root->childAtIndex(1));
-    }
-    bg->setRect(boundingRect());
-    if (m_frame.isNull()) {
-        img->setRect(QRectF());
-        return root;
     }
     if (m_textureDirty || !img->texture()) {
         QElapsedTimer t;
@@ -193,9 +199,10 @@ QSGNode *RdpView::updatePaintNode(QSGNode *old, UpdatePaintNodeData *)
             m_statClock.start();
         else if (m_statClock.elapsed() >= 5000) {
             const double sec = m_statClock.elapsed() / 1000.0;
-            qInfo("view: %.0f s: %d frames (%.0f/s), upload %.1f ms each, %dx%d", sec, m_statFrames,
-                  m_statFrames / sec, m_statUploadNs / 1e6 / m_statFrames, m_frame.width(), m_frame.height());
-            m_statFrames = 0;
+            qInfo("view: %.0f s: %d frames (%.0f/s) from %d updates touching it, %d refreshes, upload %.1f ms each, %dx%d",
+                  sec, m_statFrames, m_statFrames / sec, m_statUpdates, m_statRefreshes,
+                  m_statUploadNs / 1e6 / m_statFrames, m_frame.width(), m_frame.height());
+            m_statFrames = m_statUpdates = m_statRefreshes = 0;
             m_statUploadNs = 0;
             m_statClock.restart();
         }

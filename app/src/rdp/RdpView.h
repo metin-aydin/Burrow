@@ -66,6 +66,6 @@ private:
     bool m_textureDirty = true;   // m_frame changed since the last upload (render thread reads it during sync)
     // Frames shown and upload cost, logged every 5 s while the picture changes.
     QElapsedTimer m_statClock;
-    int m_statFrames = 0;
+    int m_statFrames = 0, m_statUpdates = 0, m_statRefreshes = 0;
     qint64 m_statUploadNs = 0;
 };

@@ -4,6 +4,11 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- GPU görünümü: görüntü gelmeden boş resim düğümü çizildiği için "No QSGTexture provided" uyarısı yağıyordu; düğüm
+  artık yalnız görüntü varken var. "view:" satırı görünüme dokunan güncelleme, yenileme ve kare sayısını birlikte
+  gösteriyor (kaybın hangi aşamada olduğu görülsün). Kullanıcının ölçümleri Burrow'un çalıştığı Mac'in kendisine
+  yapılıyor (kendini besleyen döngü, 49–166 Mbit/s); temsilî değil.
+
 - Ölçüm (yine aynı Mac): yeni çözücüyle güncellemeler 2–4 kat arttı, işlemci 4–5 ms/güncelleme, okuma %20–47 dolu;
   ama pencereler 5 sn'de yalnız 6–109 kez yenileniyordu. Neden: `QQuickPaintedItem` her karede Retina ekranı
   işlemcide yumuşatarak ölçekleyip çiziyordu. `RdpView` artık `QQuickItem` + scene graph dokusu
