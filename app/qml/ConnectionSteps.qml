@@ -91,7 +91,7 @@ ColumnLayout {
                     visible: row.active && !root.failed && root.wait > 0
                     text: root.wait
                     color: Theme.warning
-                    font.pixelSize: 9
+                    font.pixelSize: Theme.fontMicro
                     font.weight: Font.DemiBold
                 }
                 // Failed: red circle with a cross.
@@ -107,7 +107,7 @@ ColumnLayout {
                 Layout.fillWidth: true
                 text: row.modelData.label
                 color: row.active && root.failed ? Theme.danger : Theme.text
-                font.pixelSize: 13
+                font.pixelSize: Theme.fontBody
                 font.weight: row.active ? Font.Medium : Font.Normal
                 elide: Text.ElideRight
             }
@@ -121,7 +121,7 @@ ColumnLayout {
         Layout.minimumHeight: 16
         text: root.failed ? "" : root.wait > 0 ? qsTr("Waiting for the next one-time code… %1 s").arg(root.wait) : root.detail
         color: Theme.textSecondary
-        font.pixelSize: 12
+        font.pixelSize: Theme.fontLabel
         wrapMode: Text.WordWrap
     }
 }

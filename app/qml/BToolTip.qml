@@ -15,7 +15,7 @@ ToolTip {
     bottomPadding: 6
     leftPadding: 9
     rightPadding: 9
-    font.pixelSize: 12
+    font.pixelSize: Theme.fontLabel
     font.weight: Font.Medium
 
     contentItem: Text {

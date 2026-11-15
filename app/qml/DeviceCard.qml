@@ -22,8 +22,15 @@ Item {
 
     // The menu belongs to the card: keep the hover look while it is open.
     readonly property bool hovered: hover.hovered || menu.visible
+    Accessible.role: Accessible.Grouping
+    Accessible.name: [root.name, root.tunnelName !== "" ? root.tunnelName : qsTr("Direct"), root.host].join(", ")
 
     HoverHandler { id: hover }
+    // Right-click anywhere on the card: the same Edit / Duplicate / Delete menu as the ••• button.
+    TapHandler {
+        acceptedButtons: Qt.RightButton
+        onTapped: menu.popup()
+    }
 
     Rectangle {
         id: card
@@ -63,7 +70,7 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         gradient: Gradient {
-                            orientation: Gradient.Horizontal
+                            orientation: Gradient.Vertical
                             GradientStop { position: 0; color: Theme.osColors(root.os)[0] }
                             GradientStop { position: 1; color: Theme.osColors(root.os)[1] }
                         }
@@ -77,7 +84,7 @@ Item {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: qsTr("Preview After First Connection")
                                 color: Theme.onImageMuted
-                                font.pixelSize: 11
+                                font.pixelSize: Theme.fontCaption
                             }
                         }
                     }
@@ -122,7 +129,7 @@ Item {
                         anchors.centerIn: parent
                         text: root.os === "ubuntu" ? "Ubuntu" : root.os === "macos" ? "macOS" : "Windows"
                         color: Theme.onImage
-                        font.pixelSize: 11
+                        font.pixelSize: Theme.fontCaption
                         font.weight: Font.Medium
                     }
                 }
@@ -132,9 +139,16 @@ Item {
                     id: menuBtn
                     anchors { right: parent.right; top: parent.top; margins: 6 }
                     width: 28; height: 28
-                    opacity: root.hovered || menu.visible ? 1 : 0
+                    // Also shown while it has keyboard focus, so Tab can reach it without a pointer.
+                    opacity: root.hovered || menu.visible || menuBtn.visualFocus ? 1 : 0
+                    Accessible.name: qsTr("Actions For %1").arg(root.name)
                     Behavior on opacity { NumberAnimation { duration: 120 } }
-                    background: Rectangle { radius: 14; color: menuBtn.hovered ? Theme.imageScrimHover : Theme.imageScrim }
+                    background: Rectangle {
+                        radius: 14
+                        color: menuBtn.hovered ? Theme.imageScrimHover : Theme.imageScrim
+                        border.width: menuBtn.visualFocus ? 2 : 0
+                        border.color: Theme.onImage
+                    }
                     contentItem: Icon { name: "dots"; size: 16; color: Theme.onImage }
                     onClicked: menu.popup(menuBtn, 0, menuBtn.height + 4)
                 }
@@ -157,7 +171,7 @@ Item {
                         Layout.fillWidth: true
                         text: root.name
                         color: Theme.text
-                        font.pixelSize: 15
+                        font.pixelSize: Theme.fontHeading
                         font.weight: Font.DemiBold
                         elide: Text.ElideRight
                     }
@@ -165,6 +179,7 @@ Item {
                         spacing: 6
                         Chip {
                             text: root.tunnelName !== "" ? root.tunnelName : qsTr("Direct")
+                            interactive: false
                             kind: root.tunnelType
                             status: root.tunnelId ? ((App.tunnelStates[root.tunnelId] || {}).state || "") : ""
                         }
@@ -172,7 +187,7 @@ Item {
                             Layout.fillWidth: true
                             text: root.host
                             color: Theme.textSecondary
-                            font.pixelSize: 12
+                            font.pixelSize: Theme.fontLabel
                             elide: Text.ElideRight
                         }
                     }
@@ -180,6 +195,8 @@ Item {
                 BButton {
                     variant: "primary"
                     text: qsTr("Connect")
+                    // Four cards, four "Connect" buttons: the spoken name says which device.
+                    Accessible.name: qsTr("Connect To %1").arg(root.name)
                     onClicked: root.connectRequested()
                 }
             }

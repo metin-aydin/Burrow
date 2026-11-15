@@ -131,6 +131,7 @@ ApplicationWindow {
                     if (App.tunnel(id).type === "tailscale") { tunnelEditor.openFor(id); tunnelEditor.startTest() }
                 }
             }
+            else if (App.demoOpen === "nomatch") content.item.demoSearch("zzz")
             else if (App.demoOpen === "tunnel-cf") { tunnelEditor.openFor(""); tunnelEditor.demoCloudflare() }
             else if (App.demoOpen === "tunnel-ts") { tunnelEditor.openFor(""); tunnelEditor.demoTailscale() }
             else if (App.demoOpen === "tunnel-otp-small") { win.height = 560; tunnelEditor.openFor(""); tunnelEditor.demoExpand() }
@@ -166,4 +167,17 @@ ApplicationWindow {
 
     Shortcut { sequence: "Ctrl+L"; enabled: App.state === "unlocked"; onActivated: App.lock() }
     Shortcut { sequences: [StandardKey.New]; enabled: App.state === "unlocked"; onActivated: deviceEditor.openFor("") }
+    // Standard Mac keys for the gallery; not while a dialog is in front of it.
+    readonly property bool dialogOpen: deviceEditor.opened || credentials.opened || prompt.opened || tsLogin.opened
+        || tunnels.opened || importDevices.opened || tunnelEditor.opened || settings.opened || confirm.opened
+    Shortcut {
+        sequences: [StandardKey.Find]
+        enabled: App.state === "unlocked" && !win.dialogOpen
+        onActivated: content.item.focusSearch()
+    }
+    Shortcut {
+        sequences: [StandardKey.Preferences]
+        enabled: App.state === "unlocked" && !win.dialogOpen
+        onActivated: settings.open()
+    }
 }

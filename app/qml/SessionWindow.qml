@@ -230,7 +230,7 @@ Window {
     // drag out of the window to open it on another display, double-click to rename. Hidden when only
     // one monitor is left here.
     readonly property bool showTabs: tabbed && visibleTabs.length > 1
-    FontMetrics { id: tabMetrics; font.pixelSize: 12; font.weight: Font.Medium }
+    FontMetrics { id: tabMetrics; font.pixelSize: Theme.fontLabel; font.weight: Font.Medium }
     function tabWidth(i) { return Math.ceil(tabMetrics.advanceWidth(tabName(i))) + 36 }
     function tabX(i) {
         let x = 0
@@ -287,7 +287,7 @@ Window {
                         visible: !tab.editing
                         text: win.tabName(tab.index)
                         color: tab.current ? Theme.text : Theme.textSecondary
-                        font.pixelSize: 12
+                        font.pixelSize: Theme.fontLabel
                         font.weight: tab.current ? Font.Medium : Font.Normal
                     }
                     TextInput {
@@ -299,7 +299,7 @@ Window {
                         color: Theme.text
                         selectionColor: Theme.accent
                         selectedTextColor: Theme.accentText
-                        font.pixelSize: 12
+                        font.pixelSize: Theme.fontLabel
                         font.weight: Font.Medium
                         maximumLength: 40
                         function begin() {
@@ -375,7 +375,7 @@ Window {
             visible: win.width > 900
             text: qsTr("Drag a tab out of the window to show it on another display")
             color: Theme.textMuted
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontLabel
         }
     }
     // The tab name being edited, if any: a click anywhere else ends the edit like Esc, and the click
@@ -413,7 +413,7 @@ Window {
                 anchors.centerIn: parent
                 text: ghost.label
                 color: Theme.text
-                font.pixelSize: 12
+                font.pixelSize: Theme.fontLabel
                 font.weight: Font.Medium
             }
         }
@@ -482,7 +482,7 @@ Window {
                         text: (win.failure ? qsTr("Couldn't Connect To %1") : qsTr("Connecting %1"))
                               .arg(App.device(win.deviceId).name || "")
                         color: Theme.text
-                        font.pixelSize: 17
+                        font.pixelSize: Theme.fontTitle
                         font.weight: Font.DemiBold
                         elide: Text.ElideRight
                     }
@@ -491,7 +491,7 @@ Window {
                         visible: !!win.tunnel.id
                         text: qsTr("Through %1").arg(win.tunnel.name || "")
                         color: Theme.textSecondary
-                        font.pixelSize: 12
+                        font.pixelSize: Theme.fontLabel
                         elide: Text.ElideRight
                     }
                 }
@@ -511,7 +511,7 @@ Window {
                     wrapMode: Text.WordWrap
                     text: win.failure
                     color: Theme.danger
-                    font.pixelSize: 13
+                    font.pixelSize: Theme.fontBody
                 }
                 RowLayout {
                     Layout.fillWidth: true
@@ -545,7 +545,7 @@ Window {
             text: certDialog.fingerprint
             color: Theme.text
             font.family: "Menlo"
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontLabel
             wrapMode: Text.WrapAnywhere
         }
         footer: [

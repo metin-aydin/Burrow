@@ -75,9 +75,10 @@ BDialog {
             BField { id: nameField; Layout.fillWidth: true; Layout.preferredWidth: 300; label: qsTr("Name"); placeholder: qsTr("Work PC"); text: root.d.name || "" }
             ColumnLayout {
                 spacing: 6
-                Text { text: qsTr("System"); color: Theme.textSecondary; font.pixelSize: 12; font.weight: Font.Medium }
+                Text { text: qsTr("System"); color: Theme.textSecondary; font.pixelSize: Theme.fontLabel; font.weight: Font.Medium }
                 Segmented {
                     id: osSeg
+                    accessibleName: qsTr("System")
                     options: [{ text: "Windows", value: "windows" }, { text: "Ubuntu", value: "ubuntu" },
                               { text: "macOS", value: "macos" }]
                     value: root.d.os || "windows"
@@ -105,7 +106,7 @@ BDialog {
             visible: root.isMac
             wrapMode: Text.WordWrap
             color: Theme.textSecondary
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontLabel
             text: qsTr("Turn on Screen Sharing on the Mac (System Settings → General → Sharing) and sign in with the Mac's user name and password.")
         }
         BSwitch {
@@ -141,7 +142,7 @@ BDialog {
             wrapMode: Text.WordWrap
             text: qsTr("Burrow trusts this computer's certificate and refuses to connect if it changes.")
             color: Theme.textSecondary
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontLabel
         }
         BButton {
             text: qsTr("Forget Saved Certificate")
@@ -186,7 +187,7 @@ BDialog {
             visible: displaysCombo.value === "all" && !root.isMac
             wrapMode: Text.WordWrap
             color: Theme.textSecondary
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontLabel
             text: qsTr("Each remote monitor opens as a tab. Drag a tab onto another display to give it its own window; Burrow remembers where you put it. Ubuntu's screen sharing shows only its main monitor; use Remote Login on Ubuntu to get several.")
         }
         BSwitch {
@@ -221,7 +222,7 @@ BDialog {
             visible: root.isMac
             wrapMode: Text.WordWrap
             color: Theme.textSecondary
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontLabel
             text: qsTr("Keys reach the Mac as they are: Cmd stays Cmd. Clipboard sharing covers plain text.")
         }
         BCombo {
@@ -240,7 +241,7 @@ BDialog {
         visible: root.error !== ""
         text: root.error
         color: Theme.danger
-        font.pixelSize: 12
+        font.pixelSize: Theme.fontLabel
         Layout.fillWidth: true
         wrapMode: Text.WordWrap
     }

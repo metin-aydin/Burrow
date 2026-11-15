@@ -11,7 +11,7 @@ MenuItem {
     implicitWidth: Math.max(180, row.implicitWidth + 24)
     leftPadding: 10
     rightPadding: 10
-    font.pixelSize: 13
+    font.pixelSize: Theme.fontBody
 
     readonly property color tint: !mi.enabled ? Theme.textMuted : mi.danger ? Theme.danger : Theme.text
     contentItem: Item {

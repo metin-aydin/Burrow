@@ -35,11 +35,11 @@ BDialog {
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 1
-                    Text { text: model.name; color: Theme.text; font.pixelSize: 14; font.weight: Font.Medium }
+                    Text { text: model.name; color: Theme.text; font.pixelSize: Theme.fontEmphasis; font.weight: Font.Medium }
                     Text {
                         text: (model.type === "tailscale" ? "Tailscale" : model.type === "cloudflare" ? "Cloudflare" : "GlobalProtect") + " · " + model.host
-                              + " · " + qsTr("%1 devices").arg(model.users)
-                        color: Theme.textSecondary; font.pixelSize: 12
+                              + " · " + (model.users === 1 ? qsTr("1 device") : qsTr("%1 devices").arg(model.users))
+                        color: Theme.textSecondary; font.pixelSize: Theme.fontLabel
                         elide: Text.ElideRight; Layout.fillWidth: true
                     }
                 }
@@ -57,7 +57,7 @@ BDialog {
                     }
                     color: parent.st.state === "connected" ? Theme.success
                          : parent.st.state === "failed" ? Theme.danger : Theme.textSecondary
-                    font.pixelSize: 12
+                    font.pixelSize: Theme.fontLabel
                 }
                 BButton {
                     // Tunnels open by themselves when a device connects; here they can only be closed.
@@ -70,13 +70,14 @@ BDialog {
                     text: qsTr("Import Devices")
                     onClicked: root.importDevices(model.tunnelId)
                 }
-                BButton { variant: "ghost"; iconName: "edit"; onClicked: root.editTunnel(model.tunnelId) }
+                BButton { variant: "ghost"; iconName: "edit"; tip: qsTr("Edit Profile"); onClicked: root.editTunnel(model.tunnelId) }
                 BButton {
-                    variant: "ghost"; iconName: "trash"
+                    variant: "ghost"; iconName: "trash"; tip: qsTr("Delete Profile")
                     onClicked: {
                         const id = model.tunnelId, n = model.users
                         root.confirm(qsTr("Delete Profile"),
-                            n > 0 ? qsTr("\"%1\" is used by %2 devices; if deleted, they switch to a direct connection.").arg(model.name).arg(n)
+                            n === 1 ? qsTr("\"%1\" is used by 1 device; if deleted, it switches to a direct connection.").arg(model.name)
+                          : n > 1 ? qsTr("\"%1\" is used by %2 devices; if deleted, they switch to a direct connection.").arg(model.name).arg(n)
                                   : qsTr("The profile \"%1\" will be deleted.").arg(model.name),
                             qsTr("Delete"), function() { App.deleteTunnel(id) })
                     }
@@ -89,7 +90,7 @@ BDialog {
         Layout.fillWidth: true
         text: qsTr("No profiles yet. Add one for your GlobalProtect VPN, Tailscale network or Cloudflare Tunnel.")
         color: Theme.textSecondary
-        font.pixelSize: 13
+        font.pixelSize: Theme.fontBody
         wrapMode: Text.WordWrap
     }
 

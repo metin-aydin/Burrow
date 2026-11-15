@@ -18,7 +18,7 @@ BDialog {
         Layout.fillWidth: true
         text: root.url
         color: Theme.textSecondary
-        font.pixelSize: 12
+        font.pixelSize: Theme.fontLabel
         wrapMode: Text.WrapAnywhere
     }
     footer: [

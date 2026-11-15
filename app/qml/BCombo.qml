@@ -22,7 +22,7 @@ ColumnLayout {
         visible: root.label !== ""
         text: root.label
         color: Theme.textSecondary
-        font.pixelSize: 12
+        font.pixelSize: Theme.fontLabel
         font.weight: Font.Medium
     }
     ComboBox {
@@ -34,7 +34,7 @@ ColumnLayout {
         textRole: "text"
         currentIndex: root.indexOfValue(root.value)
         onActivated: (i) => root.value = root.options[i].value
-        font.pixelSize: 13
+        font.pixelSize: Theme.fontBody
         hoverEnabled: true
 
         contentItem: Text {

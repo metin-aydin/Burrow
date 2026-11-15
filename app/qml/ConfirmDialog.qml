@@ -19,7 +19,7 @@ BDialog {
         Layout.fillWidth: true
         text: root.message
         color: Theme.textSecondary
-        font.pixelSize: 13
+        font.pixelSize: Theme.fontBody
         wrapMode: Text.WordWrap
     }
     footer: [

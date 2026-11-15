@@ -63,7 +63,7 @@ BDialog {
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.WordWrap
             color: Theme.onImage
-            font.pixelSize: 13
+            font.pixelSize: Theme.fontBody
             text: qsTr("Burrow can't use the camera. Allow it in System Settings → Privacy & Security → Camera.")
         }
     }
@@ -72,7 +72,7 @@ BDialog {
         visible: root.status !== ""
         text: root.status
         color: Theme.textSecondary
-        font.pixelSize: 12
+        font.pixelSize: Theme.fontLabel
         wrapMode: Text.WordWrap
     }
 

@@ -43,12 +43,14 @@ QtObject {
     readonly property color toastBg:       dark ? "#F2F3F5" : "#1B1E24"
     readonly property color toastText:     dark ? "#14161B" : "#FFFFFF"
 
-    readonly property color gp:            dark ? "#F48A8A" : "#B03232"
-    readonly property color gpSoft:        dark ? "#3A1C1E" : "#FBE5E5"
-    readonly property color ts:            dark ? "#5EEAD4" : "#0B7466"
+    // Tunnel identities. Hues stay clear of the accent (amber), warning, danger (red) and success (green),
+    // so a tunnel chip never reads as a status: GlobalProtect denim, Tailscale teal, Cloudflare plum.
+    readonly property color gp:            dark ? "#93B7DE" : "#2E5A85"
+    readonly property color gpSoft:        dark ? "#1B2633" : "#E2EBF4"
+    readonly property color ts:            dark ? "#6FD3C2" : "#0B7466"
     readonly property color tsSoft:        dark ? "#13332F" : "#DDF4F0"
-    readonly property color cf:            dark ? "#FBA65C" : "#A84F0A"
-    readonly property color cfSoft:        dark ? "#3A2611" : "#FDEBD9"
+    readonly property color cf:            dark ? "#E0A6D6" : "#7B3C70"
+    readonly property color cfSoft:        dark ? "#33202F" : "#F4E5F1"
 
     readonly property int radius: 10
     readonly property int radiusLarge: 16
@@ -63,8 +65,22 @@ QtObject {
     readonly property int titleBarMargin: (titleBarHeight - titleBarControlHeight) / 2
     readonly property string fontFamily: Qt.application.font.family
 
+    // Type scale by role (system font, macOS density). Use these, never a literal pixelSize.
+    // Headings step up in size *and* sit on more space above than below, so a section reads apart
+    // from the field labels (fontLabel) and switch titles (fontBody) under it.
+    readonly property int fontMicro: 9        // digits inside small indicators
+    readonly property int fontCaption: 11     // hints, badges, metadata
+    readonly property int fontLabel: 12       // field labels, secondary lines, chips
+    readonly property int fontBody: 13        // controls and body text
+    readonly property int fontEmphasis: 14    // list row names, inline messages
+    readonly property int fontHeading: 15     // section headings, card names
+    readonly property int fontTitle: 18       // dialog and window titles
+    readonly property int fontDisplay: 22     // lock screen, empty-state title, OTP code
+
+    // Placeholder behind a device card until its first preview: one muted, dark hue per system (top to
+    // bottom), dark in both themes so the white on-image text keeps 7:1. The OS badge names the system.
     function osColors(os) {
-        return os === "ubuntu" ? ["#E9541F", "#7A1F6F"]
-             : os === "macos" ? ["#3B4252", "#1C2230"] : ["#0A6FD1", "#4B2AA8"]
+        return os === "ubuntu" ? ["#4A2E3A", "#33202A"]
+             : os === "macos" ? ["#3B3833", "#2A2724"] : ["#34404C", "#262E37"]
     }
 }

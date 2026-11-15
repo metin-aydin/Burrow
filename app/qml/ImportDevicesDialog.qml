@@ -116,7 +116,7 @@ BDialog {
             text: root.type === "tailscale" && root.st.state === "needs_login" ? qsTr("Sign in to Tailscale in your browser…")
                  : qsTr("Loading…")
             color: Theme.textSecondary
-            font.pixelSize: 13
+            font.pixelSize: Theme.fontBody
         }
     }
 
@@ -139,15 +139,16 @@ BDialog {
                 anchors.leftMargin: 12
                 anchors.rightMargin: 12
                 spacing: 10
-                CheckBox { enabled: !modelData.added; checked: modelData.checked; onToggled: { const a = root.items.slice(); a[index].checked = checked; root.items = a } }
+                CheckBox { enabled: !modelData.added; checked: modelData.checked
+                           Accessible.name: modelData.name + (modelData.added ? ", " + qsTr("Already Added") : ""); onToggled: { const a = root.items.slice(); a[index].checked = checked; root.items = a } }
                 Rectangle { width: 8; height: 8; radius: 4; color: modelData.online ? Theme.success : Theme.borderStrong }
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 0
-                    Text { text: modelData.name; color: Theme.text; font.pixelSize: 13; font.weight: Font.Medium; elide: Text.ElideRight; Layout.fillWidth: true }
-                    Text { text: modelData.detail; color: Theme.textSecondary; font.pixelSize: 11; elide: Text.ElideRight; Layout.fillWidth: true }
+                    Text { text: modelData.name; color: Theme.text; font.pixelSize: Theme.fontBody; font.weight: Font.Medium; elide: Text.ElideRight; Layout.fillWidth: true }
+                    Text { text: modelData.detail; color: Theme.textSecondary; font.pixelSize: Theme.fontCaption; elide: Text.ElideRight; Layout.fillWidth: true }
                 }
-                Text { visible: !!modelData.added; text: qsTr("Already Added"); color: Theme.textSecondary; font.pixelSize: 12 }
+                Text { visible: !!modelData.added; text: qsTr("Already Added"); color: Theme.textSecondary; font.pixelSize: Theme.fontLabel }
             }
         }
     }
@@ -158,7 +159,7 @@ BDialog {
         wrapMode: Text.WordWrap
         text: root.error
         color: Theme.danger
-        font.pixelSize: 12
+        font.pixelSize: Theme.fontLabel
     }
 
     footer: [

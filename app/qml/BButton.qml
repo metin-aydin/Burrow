@@ -11,9 +11,12 @@ Button {
     implicitHeight: Theme.controlHeight
     leftPadding: text ? 14 : 9
     rightPadding: text ? 14 : 9
-    font.pixelSize: 13
+    font.pixelSize: Theme.fontBody
     font.weight: Font.Medium
     hoverEnabled: true
+    // Screen readers: icon-only buttons are named by their tip; labelled ones keep the tip as detail.
+    Accessible.name: text !== "" ? text : tip
+    Accessible.description: text !== "" ? tip : ""
 
     contentItem: Item {
         implicitWidth: row.implicitWidth

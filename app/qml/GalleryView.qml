@@ -19,6 +19,10 @@ Rectangle {
     readonly property int ctlH: Theme.contentTitleBar ? Theme.titleBarControlHeight : Theme.controlHeight
     // The narrowest this screen can be with nothing cut off: the header row at its natural width.
     readonly property real minimumContentWidth: header.implicitWidth + header.Layout.leftMargin + header.Layout.rightMargin
+    // Development screenshots only (BURROW_DEMO_OPEN=nomatch).
+    function demoSearch(t) { search.text = t }
+    // Cmd+F (Main.qml).
+    function focusSearch() { search.forceActiveFocus(); search.selectAll() }
 
     ColumnLayout {
         anchors.fill: parent
@@ -38,10 +42,10 @@ Rectangle {
             ColumnLayout {
                 visible: !Theme.contentTitleBar
                 spacing: 0
-                Text { text: "Burrow"; color: Theme.text; font.pixelSize: 20; font.weight: Font.Bold }
+                Text { text: "Burrow"; color: Theme.text; font.pixelSize: Theme.fontDisplay; font.weight: Font.Bold }
                 Text {
                     text: App.devices.count === 1 ? qsTr("1 device") : qsTr("%1 devices").arg(App.devices.count)
-                    color: Theme.textSecondary; font.pixelSize: 12
+                    color: Theme.textSecondary; font.pixelSize: Theme.fontLabel
                 }
             }
             // Title bar: name and count on one line, like a window title.
@@ -50,11 +54,11 @@ Rectangle {
                 spacing: 8
                 // Optically centred on the traffic lights (text boxes carry descender space below).
                 Layout.topMargin: 4
-                Text { text: "Burrow"; color: Theme.text; font.pixelSize: 15; font.weight: Font.DemiBold; anchors.baseline: count.baseline }
+                Text { text: "Burrow"; color: Theme.text; font.pixelSize: Theme.fontHeading; font.weight: Font.DemiBold; anchors.baseline: count.baseline }
                 Text {
                     id: count
                     text: App.devices.count === 1 ? qsTr("1 device") : qsTr("%1 devices").arg(App.devices.count)
-                    color: Theme.textSecondary; font.pixelSize: 12
+                    color: Theme.textSecondary; font.pixelSize: Theme.fontLabel
                 }
             }
             Item { Layout.fillWidth: true }
@@ -77,9 +81,11 @@ Rectangle {
                     id: search
                     anchors { left: sIcon.right; right: parent.right; top: parent.top; bottom: parent.bottom; leftMargin: 4 }
                     placeholderText: qsTr("Search devices")
+                    Accessible.name: qsTr("Search devices")
+                    Keys.onEscapePressed: text = ""
                     placeholderTextColor: Theme.textMuted
                     color: Theme.text
-                    font.pixelSize: 13
+                    font.pixelSize: Theme.fontBody
                     background: null
                     onTextChanged: App.gallery.query = text
                 }
@@ -155,15 +161,34 @@ Rectangle {
         }
 
         // --- No search results -----------------------------------------------
-        Text {
+        // Says what hides the devices (the search, the filter or both) and clears exactly that.
+        Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: App.devices.count > 0 && App.gallery.count === 0
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            text: qsTr("No matching devices.")
-            color: Theme.textSecondary
-            font.pixelSize: 14
+            readonly property bool searching: search.text !== ""
+            readonly property bool filtering: root.filterTunnel !== "*"
+            ColumnLayout {
+                anchors.centerIn: parent
+                width: Math.min(parent.width - 56, 420)
+                spacing: 12
+                Text {
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.WordWrap
+                    text: parent.parent.searching ? qsTr("No devices match \"%1\".").arg(search.text)
+                                                  : qsTr("No devices use this connection.")
+                    color: Theme.text
+                    font.pixelSize: Theme.fontEmphasis
+                    font.weight: Font.Medium
+                }
+                BButton {
+                    Layout.alignment: Qt.AlignHCenter
+                    text: parent.parent.searching && parent.parent.filtering ? qsTr("Clear Search And Filter")
+                        : parent.parent.searching ? qsTr("Clear Search") : qsTr("Show All Devices")
+                    onClicked: { search.text = ""; root.filterTunnel = "*" }
+                }
+            }
         }
 
         // --- Empty state -----------------------------------------------------
@@ -184,13 +209,13 @@ Rectangle {
                 Text {
                     Layout.alignment: Qt.AlignHCenter
                     text: qsTr("Add Your First Computer")
-                    color: Theme.text; font.pixelSize: 20; font.weight: Font.DemiBold
+                    color: Theme.text; font.pixelSize: Theme.fontDisplay; font.weight: Font.DemiBold
                 }
                 Text {
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WordWrap
-                    color: Theme.textSecondary; font.pixelSize: 13
+                    color: Theme.textSecondary; font.pixelSize: Theme.fontBody
                     text: qsTr("Add the computer you want to reach. If you connect through a VPN or Tailscale, create a tunnel profile first.")
                 }
                 RowLayout {

@@ -70,7 +70,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignHCenter
                 text: root.setup ? qsTr("Welcome To Burrow") : qsTr("Burrow Is Locked")
                 color: Theme.text
-                font.pixelSize: 22
+                font.pixelSize: Theme.fontDisplay
                 font.weight: Font.DemiBold
             }
             Text {
@@ -78,7 +78,7 @@ Rectangle {
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
                 color: Theme.textSecondary
-                font.pixelSize: 13
+                font.pixelSize: Theme.fontBody
                 text: root.setup
                     ? qsTr("Your devices, passwords and OTP keys are encrypted with this master password and stored only on this computer. If you forget it, the data cannot be recovered.")
                     : qsTr("Enter your master password to continue.")
@@ -103,7 +103,7 @@ Rectangle {
                 visible: root.error !== ""
                 text: root.error
                 color: Theme.danger
-                font.pixelSize: 12
+                font.pixelSize: Theme.fontLabel
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
             }

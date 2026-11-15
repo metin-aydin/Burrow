@@ -45,24 +45,27 @@ Popup {
             Text {
                 text: root.title
                 color: Theme.text
-                font.pixelSize: 18
+                font.pixelSize: Theme.fontTitle
                 font.weight: Font.DemiBold
             }
             Text {
                 visible: root.subtitle !== ""
                 text: root.subtitle
                 color: Theme.textSecondary
-                font.pixelSize: 13
+                font.pixelSize: Theme.fontBody
                 wrapMode: Text.WordWrap
                 Layout.fillWidth: true
             }
         }
-        ScrollView {
+        Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             // 8 px above the content and 24 px below it, so the last field never touches the footer.
             Layout.preferredHeight: content.implicitHeight + 32
             Layout.minimumHeight: 60
+        ScrollView {
+            id: scroller
+            anchors.fill: parent
             contentWidth: availableWidth
             contentHeight: content.implicitHeight + 32
             clip: true
@@ -78,6 +81,27 @@ Popup {
                 y: 8
                 spacing: 14
             }
+        }
+        // Scroll cues when the body is taller than the dialog: a hairline under the title once the
+        // content has moved up, and a fade into the footer while more lies below. Without them a field
+        // cut by the footer looks like the end of the form.
+        readonly property Flickable flick: scroller.contentItem
+        readonly property bool scrollable: flick && flick.contentHeight > flick.height + 1
+        Rectangle {
+            anchors { left: parent.left; right: parent.right; top: parent.top }
+            height: 1
+            color: Theme.border
+            visible: parent.scrollable && !parent.flick.atYBeginning
+        }
+        Rectangle {
+            anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+            height: 36
+            visible: parent.scrollable && !parent.flick.atYEnd
+            gradient: Gradient {
+                GradientStop { position: 0; color: Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0) }
+                GradientStop { position: 1; color: Theme.surface }
+            }
+        }
         }
         Rectangle { Layout.fillWidth: true; height: 1; color: Theme.border }
         RowLayout {

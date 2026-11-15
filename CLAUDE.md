@@ -59,6 +59,8 @@ type: user | feedback | project | reference
 - Burrow bir **Operate** yüzeyi (araç/masaüstü uygulaması): gösteriş değil, okunabilirlik, tutarlılık ve
   macOS alışkanlıkları önce gelir. Marka kendini detaylarda gösterir (Toprak rengi, bkz. `docs/memory/project-brand.md`).
 - Renk, boşluk, yazı boyutu yalnızca `app/qml/Theme.qml` token'larından gelir; QML içinde sabit renk/px yazılmaz.
+  Yazı boyutu role göre: `fontMicro/Caption/Label/Body/Emphasis/Heading/Title/Display` (9…22); dialog bölüm
+  başlığı için `SectionTitle` kullanılır.
 - **Yasak kalıplar** (brief açıkça istemedikçe):
   - Aynı boy ikon + başlık + metin kartlarıyla ekran kurmak; iç içe kart.
   - Başlık üstünde küçük etiket (kicker/eyebrow) — mutlak yasak.
@@ -72,6 +74,9 @@ type: user | feedback | project | reference
 - **Zorunlu kontroller:** metin kontrastı ≥4.5:1 (büyük metin ≥3:1), renkli zeminde gri ikincil metin yok;
   hover / disabled / loading / error / empty durumları; klavye odağı; gerçek Türkçe ve İngilizce metinle taşma kontrolü;
   hatalar sorunu ve çözümü söyler.
+- **Erişilebilirlik:** yalnızca ikonlu `BButton`'a mutlaka `tip` verilir (VoiceOver adı odur); tekrarlanan butonlar
+  (`Connect` gibi) `Accessible.name` ile hangi öğeye ait olduğunu söyler; yalnızca gösterim amaçlı `Chip`
+  `interactive: false` alır; `MouseArea` ile yapılan tıklanabilir öğeye `Accessible.role/name` ve klavye desteği eklenir.
 - Impeccable design hook'u kurulmadı: dedektörü yalnızca HTML/CSS/JSX/Vue/Svelte tarar, QML'i taramaz
   ve her düzenlemede dışarıdan ikili indirir. Kontrol yukarıdaki kurallarla ve elle critique ile yapılır.
 

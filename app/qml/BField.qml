@@ -22,7 +22,7 @@ ColumnLayout {
         visible: root.label !== ""
         text: root.label
         color: Theme.textSecondary
-        font.pixelSize: 12
+        font.pixelSize: Theme.fontLabel
         font.weight: Font.Medium
     }
     TextField {
@@ -31,12 +31,15 @@ ColumnLayout {
         // Fixed implicit width: the layout decides the width, so typing never resizes the field.
         implicitWidth: 120
         implicitHeight: Theme.controlHeight
+        Accessible.name: root.label !== "" ? root.label : placeholderText
+        Accessible.description: root.hint
+        Accessible.passwordEdit: root.password && !root.revealed
         echoMode: root.password && !root.revealed ? TextInput.Password : TextInput.Normal
         color: Theme.text
         placeholderTextColor: Theme.textMuted
         selectionColor: Theme.accent
         selectedTextColor: Theme.accentText
-        font.pixelSize: 13
+        font.pixelSize: Theme.fontBody
         leftPadding: 12
         rightPadding: root.password ? revealBtn.width + 8 : 12
         onAccepted: root.accepted()
@@ -69,7 +72,7 @@ ColumnLayout {
         visible: root.hint !== ""
         text: root.hint
         color: Theme.textMuted
-        font.pixelSize: 11
+        font.pixelSize: Theme.fontCaption
         wrapMode: Text.WordWrap
         Layout.fillWidth: true
     }

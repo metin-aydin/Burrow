@@ -17,7 +17,7 @@ Rectangle {
         id: label
         anchors.centerIn: parent
         color: Theme.toastText
-        font.pixelSize: 13
+        font.pixelSize: Theme.fontBody
     }
     Timer { id: hide; interval: 3200; onTriggered: root.shown = false }
     function show(msg) { text = msg; shown = true; hide.restart() }

@@ -34,7 +34,7 @@ BDialog {
         uri.text = ""
         tsControl.text = ts.controlUrl || ""; tsHost.text = ts.hostname || "burrow"
         cfBastion.text = (t.cloudflare || {}).bastion || ""
-        showAdvanced = !!ts.controlUrl || !!(t.cloudflare || {}).bastion
+        showAdvanced = !!ts.controlUrl || !!(t.cloudflare || {}).bastion || totpNonStandard()
         error = ""
         open()
         nameField.field.forceActiveFocus()
@@ -57,6 +57,12 @@ BDialog {
         secret.text = a.secret; alg.value = a.algorithm; digits.value = a.digits
         period.text = String(a.period); issuer = a.issuer; account = a.account
         uri.text = ""; accounts = []
+        if (totpNonStandard()) showAdvanced = true
+    }
+    // Algorithm / digits / period sit under Advanced Settings: authenticator links fill them and almost
+    // every account uses SHA1, 6 digits, 30 s. Anything else is never hidden.
+    function totpNonStandard() {
+        return alg.value !== "SHA1" || digits.value !== 6 || (parseInt(period.text) || 30) !== 30
     }
 
     function importText(text) {
@@ -191,9 +197,10 @@ BDialog {
                  placeholder: typeSeg.value === "tailscale" ? "Tailscale" : typeSeg.value === "cloudflare" ? "Cloudflare" : qsTr("Work VPN") }
         ColumnLayout {
             spacing: 6
-            Text { text: qsTr("Type"); color: Theme.textSecondary; font.pixelSize: 12; font.weight: Font.Medium }
+            Text { text: qsTr("Type"); color: Theme.textSecondary; font.pixelSize: Theme.fontLabel; font.weight: Font.Medium }
             Segmented {
                 id: typeSeg
+                accessibleName: qsTr("Type")
                 options: [{ text: "GlobalProtect", value: "globalprotect" }, { text: "Tailscale", value: "tailscale" },
                           { text: "Cloudflare", value: "cloudflare" }]
             }
@@ -207,8 +214,9 @@ BDialog {
         spacing: 14
         RowLayout {
             spacing: 12
-            BField { id: gpHost; Layout.fillWidth: true; Layout.preferredWidth: 300; label: qsTr("Server"); placeholder: "vpn.example.com" }
-            BField { id: gpGroup; Layout.fillWidth: true; Layout.preferredWidth: 150; label: qsTr("Gateway / Group"); placeholder: qsTr("Optional") }
+            BField { id: gpHost; Layout.alignment: Qt.AlignTop; Layout.fillWidth: true; Layout.preferredWidth: 300; label: qsTr("Server"); placeholder: "vpn.example.com" }
+            BField { id: gpGroup; Layout.alignment: Qt.AlignTop; Layout.fillWidth: true; Layout.preferredWidth: 150; label: qsTr("Gateway / Group"); placeholder: qsTr("Optional")
+                     hint: qsTr("Only if the portal asks.") }
         }
         BField { id: gpUser; Layout.fillWidth: true; label: qsTr("Username") }
         BSwitch { id: gpSave; Layout.fillWidth: true; title: qsTr("Save Password In Vault"); description: qsTr("If not saved, it's asked on every connection.") }
@@ -226,6 +234,17 @@ BDialog {
                     options: [{ text: qsTr("Append to password"), value: "append" }, { text: qsTr("Separate prompt (challenge)"), value: "separate" }] }
                 BCombo { id: otpSource; Layout.fillWidth: true; label: qsTr("OTP Source")
                     options: [{ text: qsTr("Automatic (authenticator key)"), value: "totp" }, { text: qsTr("Enter manually each time"), value: "manual" }] }
+            }
+            // What the chosen OTP type means at sign-in, so the choice isn't a guess.
+            Text {
+                Layout.fillWidth: true
+                Layout.topMargin: -6
+                wrapMode: Text.WordWrap
+                color: Theme.textMuted
+                font.pixelSize: Theme.fontCaption
+                text: otpMode.value === "separate"
+                      ? qsTr("The portal asks for the code in a second step, after the password.")
+                      : qsTr("The code is sent right after the password in the same field (password123456).")
             }
             ColumnLayout {
                 Layout.fillWidth: true
@@ -257,7 +276,7 @@ BDialog {
                         anchors.margins: 10
                         wrapMode: Text.WordWrap
                         color: Theme.text
-                        font.pixelSize: 12
+                        font.pixelSize: Theme.fontLabel
                         text: qsTr("In your authenticator app, export or share the account, then paste the otpauth link above. No link? Use the QR button to read the code from a screenshot, the clipboard or the camera.")
                     }
                 }
@@ -271,9 +290,11 @@ BDialog {
                         Chip { kind: "accent"; text: (modelData.issuer ? modelData.issuer + " — " : "") + modelData.account; onClicked: root.applyAccount(modelData) }
                     }
                 }
+                BField { id: secret; Layout.fillWidth: true; label: qsTr("Key"); password: true; placeholder: qsTr("Base32") }
+                AdvancedToggle {}
                 RowLayout {
+                    visible: root.showAdvanced
                     spacing: 12
-                    BField { id: secret; Layout.fillWidth: true; Layout.preferredWidth: 260; label: qsTr("Key"); password: true; placeholder: qsTr("Base32") }
                     BCombo { id: alg; Layout.preferredWidth: 110; label: qsTr("Algorithm")
                         options: [{ text: "SHA1", value: "SHA1" }, { text: "SHA256", value: "SHA256" }, { text: "SHA512", value: "SHA512" }] }
                     BCombo { id: digits; Layout.preferredWidth: 80; label: qsTr("Digits")
@@ -291,8 +312,8 @@ BDialog {
                         spacing: 14
                         ColumnLayout {
                             spacing: 2
-                            Text { text: qsTr("Current Code"); color: Theme.textSecondary; font.pixelSize: 11 }
-                            Text { id: codeText; text: "—"; color: Theme.text; font.pixelSize: 22; font.weight: Font.DemiBold; font.family: "Menlo" }
+                            Text { text: qsTr("Current Code"); color: Theme.textSecondary; font.pixelSize: Theme.fontCaption }
+                            Text { id: codeText; text: "—"; color: Theme.text; font.pixelSize: Theme.fontDisplay; font.weight: Font.DemiBold; font.family: "Menlo" }
                         }
                         ProgressBar {
                             id: remain
@@ -303,7 +324,7 @@ BDialog {
                         }
                         Text {
                             text: qsTr("Should match the code on your phone")
-                            color: Theme.textMuted; font.pixelSize: 11
+                            color: Theme.textMuted; font.pixelSize: Theme.fontCaption
                         }
                     }
                 }
@@ -320,7 +341,7 @@ BDialog {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             color: Theme.textSecondary
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontLabel
             text: qsTr("Nothing to fill in: Sign In With Tailscale opens the Tailscale sign-in page in your browser, then lists the machines in your tailnet so you can add them.")
         }
         AdvancedToggle {}
@@ -337,7 +358,7 @@ BDialog {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             color: Theme.textSecondary
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontLabel
             text: qsTr("Publish the computer's RDP port with cloudflared and protect it with a Cloudflare Access application (free Zero Trust plan). Each device's address is then its Access hostname, e.g. rdp.example.com. You sign in once in the browser; the token is kept in the encrypted vault.")
         }
         AdvancedToggle {}
@@ -368,12 +389,12 @@ BDialog {
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 2
-                    Text { text: qsTr("Test Connection"); color: Theme.text; font.pixelSize: 13; font.weight: Font.DemiBold }
+                    Text { text: qsTr("Test Connection"); color: Theme.text; font.pixelSize: Theme.fontBody; font.weight: Font.DemiBold }
                     Text {
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                         color: Theme.textSecondary
-                        font.pixelSize: 12
+                        font.pixelSize: Theme.fontLabel
                         text: typeSeg.value === "globalprotect"
                               ? qsTr("Signs in once and closes the tunnel again. A rejected login is never retried.")
                               : qsTr("Checks that the tunnel can be opened with these settings.")
@@ -390,8 +411,9 @@ BDialog {
                 id: cfTestHost
                 visible: typeSeg.value === "cloudflare" && cfBastion.text.trim() === ""
                 Layout.fillWidth: true
-                label: qsTr("Device Hostname")
+                label: qsTr("Hostname To Test")
                 placeholder: "rdp.example.com"
+                hint: qsTr("Any device's Access hostname. Used only for this test; each device keeps its own address.")
             }
             ConnectionSteps {
                 Layout.fillWidth: true
@@ -407,7 +429,7 @@ BDialog {
                 visible: root.testFinished
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
-                font.pixelSize: 13
+                font.pixelSize: Theme.fontBody
                 font.weight: Font.Medium
                 color: root.testResult.state === "connected" ? Theme.success : Theme.danger
                 text: root.testResult.state === "connected"
@@ -421,7 +443,7 @@ BDialog {
         visible: root.error !== ""
         text: root.error
         color: Theme.danger
-        font.pixelSize: 12
+        font.pixelSize: Theme.fontLabel
         Layout.fillWidth: true
         wrapMode: Text.WordWrap
     }
@@ -431,6 +453,11 @@ BDialog {
         implicitWidth: advRow.implicitWidth
         implicitHeight: advRow.implicitHeight
         activeFocusOnTab: true
+        Accessible.role: Accessible.Button
+        Accessible.name: qsTr("Advanced Settings")
+        Accessible.checkable: true
+        Accessible.checked: root.showAdvanced
+        Accessible.onPressAction: root.showAdvanced = !root.showAdvanced
         Keys.onSpacePressed: root.showAdvanced = !root.showAdvanced
         Keys.onReturnPressed: root.showAdvanced = !root.showAdvanced
         Rectangle {
@@ -456,7 +483,7 @@ BDialog {
                 id: advLabel
                 text: qsTr("Advanced Settings")
                 color: advMouse.containsMouse ? Theme.text : Theme.textSecondary
-                font.pixelSize: 12
+                font.pixelSize: Theme.fontLabel
                 font.weight: Font.Medium
             }
         }

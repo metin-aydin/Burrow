@@ -14,18 +14,20 @@ RowLayout {
     ColumnLayout {
         Layout.fillWidth: true
         spacing: 2
-        Text { text: root.title; color: Theme.text; font.pixelSize: 13; font.weight: Font.Medium }
+        Text { text: root.title; color: Theme.text; font.pixelSize: Theme.fontBody; font.weight: Font.Medium }
         Text {
             visible: root.description !== ""
             text: root.description
             color: Theme.textSecondary
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontLabel
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
         }
     }
     Switch {
         id: sw
+        Accessible.name: root.title
+        Accessible.description: root.description
         onToggled: root.toggled()
         opacity: enabled ? 1 : 0.5
         indicator: Rectangle {

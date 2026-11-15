@@ -12,7 +12,7 @@ BDialog {
 
     onOpened: { cur.text = ""; next.text = ""; again.text = ""; pwError = ""; touchError = ""; touch.checked = App.touchIdEnabled }
 
-    SectionTitle { text: qsTr("Language") }
+    SectionTitle { text: qsTr("Language"); first: true }
     BCombo {
         Layout.fillWidth: true
         options: [{ text: qsTr("System Language"), value: "system" },
@@ -45,7 +45,7 @@ BDialog {
         checked: App.touchIdEnabled
         onToggled: { root.touchError = App.setTouchIdEnabled(checked); checked = App.touchIdEnabled }
     }
-    Text { visible: root.touchError !== ""; text: root.touchError; color: Theme.danger; font.pixelSize: 12; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+    Text { visible: root.touchError !== ""; text: root.touchError; color: Theme.danger; font.pixelSize: Theme.fontLabel; wrapMode: Text.WordWrap; Layout.fillWidth: true }
 
     BCombo {
         Layout.fillWidth: true
@@ -62,7 +62,7 @@ BDialog {
         Layout.fillWidth: true
         wrapMode: Text.WordWrap
         color: Theme.textSecondary
-        font.pixelSize: 12
+        font.pixelSize: Theme.fontLabel
         text: qsTr("Burrow keeps running in the menu bar when you close its window; it locks itself after this much inactivity, but never while a remote desktop is open.")
     }
 
@@ -74,7 +74,7 @@ BDialog {
         BField { id: again; Layout.fillWidth: true; label: qsTr("New Password (Again)"); password: true }
     }
     RowLayout {
-        Text { Layout.fillWidth: true; text: root.pwError; color: Theme.danger; font.pixelSize: 12; wrapMode: Text.WordWrap }
+        Text { Layout.fillWidth: true; text: root.pwError; color: Theme.danger; font.pixelSize: Theme.fontLabel; wrapMode: Text.WordWrap }
         BButton {
             text: qsTr("Change Password")
             onClicked: {
@@ -100,7 +100,7 @@ BDialog {
         Text {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
-            font.pixelSize: 12
+            font.pixelSize: Theme.fontLabel
             color: App.updater.state === "error" ? Theme.danger : Theme.textSecondary
             text: {
                 const u = App.updater
@@ -136,7 +136,7 @@ BDialog {
     }
 
     SectionTitle { text: qsTr("About") }
-    Text { text: App.versionInfo; color: Theme.textSecondary; font.pixelSize: 12 }
+    Text { text: App.versionInfo; color: Theme.textSecondary; font.pixelSize: Theme.fontLabel }
 
     footer: [
         Item { Layout.fillWidth: true },
