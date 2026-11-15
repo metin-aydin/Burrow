@@ -579,7 +579,11 @@ Window {
         // The prompt was answered (here or elsewhere) once the connection moves on.
         function onDesktopSizeChanged() { win.scheduleSave() }
         function onPhaseChanged() { if (win.session && win.session.phase !== "certificate") certDialog.close() }
+        function onNotice(message) { sessionToast.show(message) }
     }
+
+    // Short status lines from the session (files copied on the remote computer, for example).
+    Toast { id: sessionToast }
 
     Shortcut { sequence: "Ctrl+Meta+F"; onActivated: win.visibility === Window.FullScreen ? win.showNormal() : win.showFullScreen() }
 }

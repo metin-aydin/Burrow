@@ -4,6 +4,16 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Ubuntu→Mac dosya kopyalama (pano):** kullanıcı Ubuntu'da kopyaladığı dosyayı Mac'e yapıştıramıyordu. Neden:
+  `RdpClipboard` yalnızca metin (CF_UNICODETEXT) ve görsel (CF_DIB) taşıyordu; dosya listesi hiç yoktu. Eklendi:
+  istemci `CB_STREAM_FILECLIP_ENABLED | CB_FILECLIP_NO_FILE_PATHS | CB_HUGE_FILE_SUPPORT_ENABLED` bildiriyor;
+  sunucu `FileGroupDescriptorW` sunarsa liste alınıp `FileContents` ile 1 MiB parçalarla
+  `~/Library/Caches/<app>/Pasted Files/<oturum>/<n>/` altına iniyor, sonra dosya URL'leri Mac panosuna konuyor
+  (Finder'da Cmd+V). Sınır 2 GB / 10.000 öğe; yol temizliği (`..`, mutlak yol, sürücü harfi reddedilir); yeni kopyada
+  iş iptal; klasör oturum kapanınca, çökme artığı 1 gün sonra silinir. Oturum penceresinde toast (`RemoteSession::notice`).
+  Mac→Ubuntu dosya yok; cihaz editörü bunu açıkça söylüyor. SPEC §5.0 güncellendi (kullanıcı kararı: dosyalar
+  geçici olarak diske yazılabilir). Birim testi `clipboardFileList` geçti; gerçek GNOME Remote Desktop/xrdp ile
+  uçtan uca deneme kullanıcıda bekliyor (lokal derleme + demo açılışı hatasız).
 - **README JumpDesk formatında yeniden yazıldı:** ortalanmış logo + başlık, CI/lisans rozetleri, giriş, öne çıkan bölüm
   ("Tunnels inside the app" + Security), Features, Screenshots tablosu, Download, Development, Branches and releases,
   Packaging, Issues and contributions, License. Türkçe bölüm kaldırıldı (README tamamen İngilizce).

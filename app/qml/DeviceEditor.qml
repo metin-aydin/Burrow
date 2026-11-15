@@ -219,11 +219,19 @@ BDialog {
         }
         Text {
             Layout.fillWidth: true
+            visible: clipCombo.value === "both" || clipCombo.value === "to_local"
+            wrapMode: Text.WordWrap
+            color: Theme.textSecondary
+            font.pixelSize: Theme.fontLabel
+            text: qsTr("Covers text and images. Files copied on the remote computer can be pasted on this Mac, up to 2 GB at a time; files from this Mac can't be pasted there yet.")
+        }
+        Text {
+            Layout.fillWidth: true
             visible: root.isMac
             wrapMode: Text.WordWrap
             color: Theme.textSecondary
             font.pixelSize: Theme.fontLabel
-            text: qsTr("Keys reach the Mac as they are: Cmd stays Cmd. Clipboard sharing covers plain text.")
+            text: qsTr("Keys reach the Mac as they are: Cmd stays Cmd.")
         }
         BCombo {
             id: keyCombo

@@ -96,9 +96,10 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
 - Kendi bilgisayarında kopyalanan uzak bilgisayara, uzakta kopyalanan kendi bilgisayarına
   yapıştırılabilir (RDP clipboard kanalı, FreeRDP `cliprdr`).
 - İçerik türleri: düz metin, zengin metin/HTML, görsel (ekran görüntüsü vb.); dosya kopyalama
-  sonraki faz.
+  uzaktan yerele (2026-11-15, bir seferde en fazla 2 GB). Yerelden uzağa dosya sonraki faz.
 - Cihaz ayarı: pano paylaşımı açık / kapalı / sadece yerelden uzağa / sadece uzaktan yerele.
-- Pano içeriği loglanmaz, diske yazılmaz.
+- Pano içeriği loglanmaz, diske yazılmaz. İstisna: uzaktan kopyalanan dosyalar yapıştırılabilmek için oturuma ait
+  özel önbellek klasörüne iner ve oturum kapanınca silinir.
 
 ### 5.0.1 Klavye kısayol eşleme (Mac)
 - Mac'te Cmd+C/V/X/Z/A/S/F… gibi kısayollar uzak bilgisayara Ctrl+C/V/X/Z/A/S/F… olarak gönderilir;

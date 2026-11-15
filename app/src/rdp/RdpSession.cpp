@@ -245,6 +245,7 @@ RdpSession::RdpSession(Params params, QObject *parent)
 {
     m_clip = new RdpClipboard(RdpClipboard::modeFromString(m_p.clipboard),
                               [this](std::function<void()> f) { post(std::move(f)); }, this);
+    connect(m_clip, &RdpClipboard::notice, this, &RemoteSession::notice);
 }
 
 RdpSession::~RdpSession()

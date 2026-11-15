@@ -322,6 +322,50 @@ private slots:
         QCOMPARE(off.map(Cmd, true), (QList<E>{{Cmd, true}}));
     }
 
+    void clipboardFileList()
+    {
+        // Remote names: backslashes become folders; anything leaving the target folder is refused.
+        QCOMPARE(RdpClipboard::safeRelativePath(QStringLiteral("dir\\a.txt")), QStringLiteral("dir/a.txt"));
+        QCOMPARE(RdpClipboard::safeRelativePath(QStringLiteral("a.txt")), QStringLiteral("a.txt"));
+        QVERIFY(RdpClipboard::safeRelativePath(QStringLiteral("..\\x")).isEmpty());
+        QVERIFY(RdpClipboard::safeRelativePath(QStringLiteral("dir/../../x")).isEmpty());
+        QVERIFY(RdpClipboard::safeRelativePath(QStringLiteral("/etc/passwd")).isEmpty());
+        QVERIFY(RdpClipboard::safeRelativePath(QStringLiteral("C:\\x")).isEmpty());
+
+        auto descriptor = [](const QString &name, quint32 flags, quint32 attrs, quint64 size) {
+            QByteArray d(592, '\0');
+            auto *p = reinterpret_cast<uchar *>(d.data());
+            qToLittleEndian<quint32>(flags, p);
+            qToLittleEndian<quint32>(attrs, p + 36);
+            qToLittleEndian<quint32>(quint32(size >> 32), p + 64);
+            qToLittleEndian<quint32>(quint32(size), p + 68);
+            const std::u16string n = name.toStdU16String();
+            for (size_t i = 0; i < n.size() && i < 259; ++i)
+                qToLittleEndian<quint16>(n[i], p + 72 + i * 2);
+            return d;
+        };
+        QByteArray list(4, '\0');
+        qToLittleEndian<quint32>(2u, reinterpret_cast<uchar *>(list.data()));
+        list += descriptor(QStringLiteral("Photos"), 0x04 | 0x40, 0x10, 0);
+        list += descriptor(QStringLiteral("Photos\\big.raw"), 0x04 | 0x40, 0x20, 0x100000005ull);
+        QList<RdpClipboard::RemoteFile> files;
+        QVERIFY(RdpClipboard::parseFileList(list, &files));
+        QCOMPARE(files.size(), 2);
+        QVERIFY(files[0].dir);
+        QCOMPARE(files[1].path, QStringLiteral("Photos/big.raw"));
+        QVERIFY(files[1].hasSize);
+        QCOMPARE(files[1].size, 0x100000005ull);
+        // Truncated lists, absurd counts and unsafe names are rejected as a whole.
+        QVERIFY(!RdpClipboard::parseFileList(list.left(600), &files));
+        QByteArray huge(4, '\0');
+        qToLittleEndian<quint32>(0xFFFFFFFFu, reinterpret_cast<uchar *>(huge.data()));
+        QVERIFY(!RdpClipboard::parseFileList(huge, &files));
+        QByteArray evil(4, '\0');
+        qToLittleEndian<quint32>(1u, reinterpret_cast<uchar *>(evil.data()));
+        evil += descriptor(QStringLiteral("..\\..\\.zshrc"), 0x40, 0, 3);
+        QVERIFY(!RdpClipboard::parseFileList(evil, &files));
+    }
+
     void clipboardDib()
     {
         QImage img(37, 21, QImage::Format_RGB32);   // odd sizes exercise row padding

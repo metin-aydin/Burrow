@@ -74,4 +74,5 @@ signals:
     void certificateTrusted(const QString &deviceId, const QString &pin);
     void closed(RemoteSession *session);
     void cursorChanged();   // GUI thread
+    void notice(const QString &message);   // a short status line, e.g. about clipboard files
 };
