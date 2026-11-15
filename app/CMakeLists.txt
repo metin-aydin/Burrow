@@ -1,7 +1,8 @@
 find_package(Qt6 6.5 REQUIRED COMPONENTS Gui Widgets Network Concurrent Quick QuickControls2 Svg Multimedia LinguistTools)
-find_package(FreeRDP 3 REQUIRED)
-find_package(FreeRDP-Client 3 REQUIRED)
-find_package(WinPR 3 REQUIRED)
+# 3.33 is the release tested with its codecs on (H.264, progressive); older ones lack its codec fixes.
+find_package(FreeRDP 3.33 REQUIRED)
+find_package(FreeRDP-Client 3.33 REQUIRED)
+find_package(WinPR 3.33 REQUIRED)
 # VNC (ADR 0008): Apple sign-in (DH + AES), VNC password (DES) and ZRLE (zlib).
 if(APPLE AND NOT OPENSSL_ROOT_DIR AND EXISTS /opt/homebrew/opt/openssl@3)
     set(OPENSSL_ROOT_DIR /opt/homebrew/opt/openssl@3)
