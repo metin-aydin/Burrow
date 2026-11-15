@@ -242,7 +242,13 @@ private slots:
         QCOMPARE(Updater::compareVersions("1.10.0", "1.9.3"), 1);
         QCOMPARE(Updater::compareVersions("0.2.0", "0.2.0"), 0);
         QCOMPARE(Updater::compareVersions("v0.1.9", "0.2"), -1);
+#if defined(Q_OS_MACOS)
         QVERIFY(Updater::platformKey().startsWith("mac-"));
+#elif defined(Q_OS_WIN)
+        QCOMPARE(Updater::platformKey(), QStringLiteral("windows-x64"));
+#else
+        QCOMPARE(Updater::platformKey(), QStringLiteral("linux-x64"));
+#endif
     }
 
     void updaterFlow()

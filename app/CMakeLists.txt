@@ -101,10 +101,16 @@ elseif(WIN32)
     target_sources(burrow PRIVATE resources/burrow.rc)
 endif()
 
+# Linux: the QML module's "Burrow" folder sits next to the executable, so the binary is "burrow"
+# (the usual Linux spelling); macOS has Burrow.app and Windows Burrow.exe.
+if(UNIX AND NOT APPLE)
+    set_target_properties(burrow PROPERTIES OUTPUT_NAME "burrow")
+else()
+    set_target_properties(burrow PROPERTIES OUTPUT_NAME "Burrow")
+endif()
 set_target_properties(burrow PROPERTIES
     MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/resources/Info.plist.in
     MACOSX_BUNDLE_ICON_FILE Burrow.icns
-    OUTPUT_NAME "Burrow"
     MACOSX_BUNDLE ON
     MACOSX_BUNDLE_BUNDLE_NAME "Burrow"
     MACOSX_BUNDLE_GUI_IDENTIFIER "io.github.metin-aydin.burrow"

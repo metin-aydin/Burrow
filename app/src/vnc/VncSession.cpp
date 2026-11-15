@@ -302,7 +302,11 @@ bool VncSession::rawWrite(const void *buf, size_t n)
         return false;
     auto *p = static_cast<const char *>(buf);
     while (n > 0) {
+#ifdef MSG_NOSIGNAL
+        const ssize_t sent = ::send(fd, p, n, MSG_NOSIGNAL);
+#else
         const ssize_t sent = ::send(fd, p, n, 0);
+#endif
         if (sent <= 0)
             return false;
         p += sent;
@@ -320,8 +324,11 @@ void VncSession::run()
         setState(QStringLiteral("closed"), tr("Couldn't open a connection."));
         return;
     }
+#ifdef SO_NOSIGPIPE
+    // macOS: a write after the tunnel closed must not raise SIGPIPE (Linux uses MSG_NOSIGNAL).
     const int on = 1;
     setsockopt(fds[0], SOL_SOCKET, SO_NOSIGPIPE, &on, sizeof on);
+#endif
     QByteArray target = QStringLiteral("%1:%2").arg(m_p.host).arg(m_p.port).toUtf8();
     if (NetcoreConnectFD(m_p.tunnelHandle, target.data(), fds[1]) != 0) {
         ::close(fds[0]);

@@ -4,6 +4,14 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Linux derlemesi ilk kez denendi (Fedora 45 konteyneri, aarch64; Qt 6.11.2, FreeRDP 3.33.1, openconnect 9.21):**
+  üç sorun düzeltildi: `SO_NOSIGPIPE` yalnız macOS'ta var (Linux'ta `MSG_NOSIGNAL`), Linux'ta çalıştırılabilir dosya
+  QML modülünün `Burrow/` klasörüyle çakışıyordu (Linux'ta ad `burrow`), `versionCompare` testi yalnız Mac'te
+  geçiyordu. Sonuç: derleme temiz, 19/19 test geçti, uygulama ekransız (offscreen) demo modunda hatasız açılıyor.
+  Ubuntu port'u için kalanlar: Ubuntu 24.04'te Qt 6.4 / FreeRDP 3.5 var (6.5 / 3.33 gerekiyor) → Qt ve FreeRDP'yi
+  paketleyen AppImage; CI'da Linux derleme işi; `release.yml`'de AppImage/deb; `Updater` Linux kurulumu; Touch ID
+  yerine Linux karşılığı yok (yalnız kasa şifresi); gerçek masaüstünde (GNOME/KDE) tepsi, pencere ve pano denemesi.
+  Windows için ayrıca: `socketpair`/POSIX soket kodu (`RdpSession`, `VncSession`) ve libopenconnect tun-win32 yaması.
 - **Repo About alanı düzeltildi (`gh api`):** açıklama boştu; README ile uyumlu cross-platform açıklama, web sitesi
   (releases/latest), 18 etiket (`cross-platform`, `linux`, `windows` eklendi) yazıldı, Wiki kapatıldı.
 - **`master` dalı ve kural setleri kuruldu (`gh api`):** `master` ilk commit'te (47a0d0e) oluşturuldu; dal
