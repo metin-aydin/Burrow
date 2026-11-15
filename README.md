@@ -5,8 +5,8 @@
 <h1 align="center">Burrow</h1>
 
 <p align="center">
-  An open-source remote desktop app for macOS with <strong>private tunnels built in</strong>:
-  RDP to Windows and Ubuntu, Screen Sharing to Macs.
+  A cross-platform, open-source remote desktop app with <strong>private tunnels built in</strong>:
+  RDP to Windows and Ubuntu, Screen Sharing to Macs. Available for macOS; Ubuntu and Windows are next.
 </p>
 
 <p align="center">
@@ -18,7 +18,7 @@ Burrow puts every computer you reach into one gallery, each card showing its las
 Ubuntu over RDP and to Macs over Screen Sharing, and it opens the **GlobalProtect, Tailscale or Cloudflare tunnel**
 those computers sit behind by itself, inside the app only: your browser, calls and the rest of the system stay on your
 normal network. Remote monitors open as tabs that you can drag onto your own displays, one-time codes are typed for
-you, and every secret stays in an encrypted vault on your Mac.
+you, and every secret stays in an encrypted vault on your own computer.
 
 > Burrow is an independent project and is not affiliated with Palo Alto Networks, Tailscale, Cloudflare or Apple.
 
@@ -55,7 +55,7 @@ remote desktop app. Burrow opens the tunnel itself, only for its own connections
 | **Tunnel profiles** with their type, server and how many devices use them. | **Tailscale**: nothing to fill in; sign in, then import machines from your tailnet. |
 
 **Security.** Computers, passwords, OTP keys and screen previews live in a local vault encrypted with your master
-password (Argon2id and XChaCha20-Poly1305), and the vault can be unlocked with Touch ID. Nothing is sent to a cloud
+password (Argon2id and XChaCha20-Poly1305); on macOS it can be unlocked with Touch ID. Nothing is sent to a cloud
 service and there is no account. RDP servers are pinned on first use and Burrow refuses to connect if the certificate
 changes. Secrets are never written to logs. To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
@@ -71,10 +71,10 @@ changes. Secrets are never written to logs. To report a vulnerability, see [SECU
 - **Tunnels**: GlobalProtect with OTP (TOTP SHA-1/256/512), Tailscale and Headscale, Cloudflare Access. See
   [Tunnels inside the app](#tunnels-inside-the-app).
 - **Sessions**: automatic sign-in and an option to lock the remote computer when you disconnect.
-- **Clipboard and keyboard**: two-way clipboard over RDP (text, rich text, images); Mac shortcuts translated
+- **Clipboard and keyboard**: two-way clipboard over RDP (text, rich text, images and files); Mac shortcuts translated
   (Cmd+C → Ctrl+C) or swapped.
-- **Encrypted local vault** with a master password, Touch ID and auto-lock after inactivity; Burrow keeps running in
-  the menu bar when its window is closed.
+- **Encrypted local vault** with a master password, Touch ID on macOS and auto-lock after inactivity; Burrow keeps
+  running in the menu bar or system tray when its window is closed.
 - **In-app updates** from GitHub Releases, verified by SHA-256 and the Developer ID team before they are installed.
 - English and Turkish interface, light and dark themes, VoiceOver labels and keyboard navigation.
 
@@ -99,8 +99,11 @@ release is being prepared; until then, [build it](#development).
 | Platform | File | Updates |
 | --- | --- | --- |
 | macOS 13 or later (Apple Silicon) | `Burrow-<version>-mac-arm64.dmg` | In the app |
+| Ubuntu | Planned (next) | |
+| Windows | Planned | |
 
-Open the `.dmg` and drag **Burrow** to Applications. Builds for Ubuntu and Windows are planned.
+On macOS, open the `.dmg` and drag **Burrow** to Applications. Burrow is built with Qt so the same app can run on
+Ubuntu and Windows; those builds come after macOS (the GlobalProtect tunnel needs extra work on Windows).
 
 To reach a Mac, turn on **System Settings → General → Sharing → Screen Sharing** on it. To reach Ubuntu, turn on
 **Remote Desktop** in **Settings → System** (or Remote Login, where your GNOME offers it).
@@ -111,8 +114,9 @@ checks can be turned off there.
 
 ## Development
 
-Requirements: macOS, Homebrew, Xcode command line tools. Burrow is written in Qt 6 (QML and C++20) with FreeRDP 3 and
-a Go network core linked as a C archive ([ADR 0001](docs/decisions/0001-tech-stack.md)).
+Burrow is written in Qt 6 (QML and C++20) with FreeRDP 3 and a Go network core linked as a C archive
+([ADR 0001](docs/decisions/0001-tech-stack.md)). Development currently happens on macOS; requirements: Homebrew and the
+Xcode command line tools.
 
 ```bash
 git clone https://github.com/metin-aydin/Burrow.git

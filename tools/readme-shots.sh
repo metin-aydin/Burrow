@@ -22,6 +22,7 @@ for w in list where (w[kCGWindowOwnerPID as String] as? Int32) == pid && (w[kCGW
     let b = w[kCGWindowBounds as String] as! [String: Double]
     if b["Width"]! * b["Height"]! > best.1 { best = (w[kCGWindowNumber as String] as! Int, b["Width"]! * b["Height"]!) }
 }
+if best.0 == 0 { exit(1) }   // no window yet: never hand screencapture an id of 0
 print(best.0)
 EOF
 swiftc -O "$TMP/winid.swift" -o "$TMP/winid"
@@ -41,10 +42,30 @@ shoot() {   # theme  demo-screen  output-name  [locked]
     unlock="$pw"; [ "${4:-}" = locked ] && unlock=""
     BURROW_VAULT="$TMP/vault.json" BURROW_DEMO_PASSWORD="$unlock" BURROW_DEMO_OPEN="$2" "$BIN" --seed-demo >/dev/null 2>&1 &
     pid=$!
-    sleep 5
-    screencapture -x -l "$("$TMP/winid" "$pid")" "docs/images/$3.png"
+    # Wait for Burrow's window (up to 15 s), then give the demo screen time to settle. Fails closed: without
+    # the window nothing is captured, so the screen or another app can never end up in docs/images.
+    wid=""
+    for _ in $(seq 30); do wid=$("$TMP/winid" "$pid") && break; wid=""; sleep 0.5; done
+    if [ -z "$wid" ]; then
+        kill "$pid" 2>/dev/null || true
+        echo "No Burrow window for $3; nothing captured." >&2
+        exit 1
+    fi
+    sleep 3
+    # Capture to a temp file; docs/images is only touched after a successful capture. The window id is
+    # looked up again right before each try: Qt can replace the window while it sets up the title bar.
+    ok=""
+    for _ in 1 2 3; do
+        wid=$("$TMP/winid" "$pid") && screencapture -x -l "$wid" "$TMP/$3.png" 2>/dev/null && ok=1 && break
+        sleep 1
+    done
     kill "$pid"; wait "$pid" 2>/dev/null || true
-    sips -Z 1600 "docs/images/$3.png" >/dev/null
+    if [ -z "$ok" ]; then
+        echo "Could not capture Burrow's window for $3; nothing written." >&2
+        exit 1
+    fi
+    sips -Z 1600 "$TMP/$3.png" >/dev/null
+    mv "$TMP/$3.png" "docs/images/$3.png"
     echo "docs/images/$3.png"
 }
 shoot light ""          gallery-light
