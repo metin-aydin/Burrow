@@ -27,8 +27,9 @@ class RdpSession : public QObject
     Q_PROPERTY(QString error READ error NOTIFY stateChanged)
     Q_PROPERTY(QString phase READ phase NOTIFY phaseChanged)   // connecting | certificate | signing_in | opening | connected
     Q_PROPERTY(QSize desktopSize READ desktopSize NOTIFY desktopSizeChanged)
-    // [{x, y, width, height, screen}] in desktop pixels when spanning several Mac displays.
-    Q_PROPERTY(QVariantList monitors READ monitors CONSTANT)
+    // [{x, y, width, height}] in desktop pixels when the desktop has several monitors: the layout the
+    // server reports (GFX reset), else the one requested if the desktop matches it; [] = one picture.
+    Q_PROPERTY(QVariantList monitors READ monitors NOTIFY desktopSizeChanged)
     // True once the server accepted the multi-monitor layout (some, like GNOME screen sharing, don't).
     Q_PROPERTY(bool multiMonitor READ multiMonitor NOTIFY desktopSizeChanged)
     Q_PROPERTY(bool wasConnected READ wasConnected NOTIFY stateChanged)
@@ -89,6 +90,8 @@ public:
     unsigned onVerifyCertificate(const QString &fingerprint);
     void onChannelConnected(const char *name, void *iface);
     void onChannelDisconnected(const char *name);
+    void onServerMonitors(const QList<QRect> &monitors, const QSize &desktop);   // worker thread
+    void *origResetGraphics = nullptr;   // the GDI's GFX reset handler we chain to
     int connectSocket(const char *hostname, int port);   // TCPConnect replacement (worker thread)
     bool clipboardEnabled() const { return m_clip && m_clip->enabled(); }
     int scale() const { return m_p.scale; }
@@ -127,6 +130,7 @@ private:
     std::atomic_bool m_certChanged{false};
     RdpClipboard *m_clip = nullptr;
     void *m_disp = nullptr;                  // DispClientContext*, worker thread only
+    QList<QRect> m_serverMonitors;           // guarded by m_frameLock
     QMutex m_tasksLock;
     QList<std::function<void()>> m_tasks;
 };

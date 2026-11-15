@@ -101,6 +101,8 @@ public:
     Q_INVOKABLE void forgetCertificate(const QString &id);
     // Stops waiting for a device's tunnel (its window was closed while connecting).
     Q_INVOKABLE void cancelConnect(const QString &deviceId);
+    // Remembers which remote monitors a device shows in their own windows ({detached: [...]}).
+    Q_INVOKABLE void saveDeviceLayout(const QString &deviceId, const QVariantMap &layout);
     // Logical size a session window opens with on the main display.
     Q_INVOKABLE QSize sessionWindowSize() const;
 

@@ -622,6 +622,18 @@ void AppController::onTunnelState(const QString &tunnelId, const QString &state,
     }
 }
 
+void AppController::saveDeviceLayout(const QString &deviceId, const QVariantMap &layout)
+{
+    for (Model::Device &d : m_store.doc().devices)
+        if (d.id == deviceId) {
+            const QJsonObject o = QJsonObject::fromVariantMap(layout);
+            if (d.layout == o)
+                return;
+            d.layout = o;
+            persist();
+        }
+}
+
 void AppController::cancelConnect(const QString &deviceId)
 {
     for (int i = m_pending.size() - 1; i >= 0; --i)

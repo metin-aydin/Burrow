@@ -152,8 +152,8 @@ BDialog {
             id: displaysCombo
             Layout.fillWidth: true
             label: qsTr("Displays")
-            options: [{ text: qsTr("One window"), value: "window" },
-                      { text: qsTr("All displays (full screen)"), value: "all" }]
+            options: [{ text: qsTr("One monitor"), value: "window" },
+                      { text: qsTr("One monitor per Mac display"), value: "all" }]
             value: root.d.displays || "window"
         }
         Text {
@@ -162,7 +162,7 @@ BDialog {
             wrapMode: Text.WordWrap
             color: Theme.textSecondary
             font.pixelSize: 12
-            text: qsTr("The remote desktop gets one monitor per Mac display. Ubuntu's screen sharing shows only its main monitor; use Remote Login on Ubuntu to get several.")
+            text: qsTr("Each remote monitor opens as a tab. Drag a tab onto another display to give it its own window; Burrow remembers where you put it. Ubuntu's screen sharing shows only its main monitor; use Remote Login on Ubuntu to get several.")
         }
         BSwitch {
             id: retinaSw

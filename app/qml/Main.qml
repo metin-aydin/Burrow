@@ -55,16 +55,6 @@ ApplicationWindow {
         w = sessionWindow.createObject(null, { deviceId: id, tunnel: App.deviceTunnel(id) })
         sessionWindows[id] = w
         w.retry.connect(rid => win.startSession(rid, "", ""))
-        w.spanRequested.connect(function(s) {
-            // One full-screen window per other Mac display.
-            const mons = s.monitors
-            for (let i = 1; i < mons.length; ++i) {
-                const extra = sessionWindow.createObject(null, { deviceId: id, session: s, monitorIndex: i, visible: false })
-                const sc = Qt.application.screens[mons[i].screen]
-                if (sc) extra.screen = sc
-                extra.showFullScreen()
-            }
-        })
         return w
     }
     TailscaleLoginDialog { id: tsLogin }

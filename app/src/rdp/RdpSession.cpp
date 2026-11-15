@@ -6,6 +6,8 @@
 #include <freerdp/channels/channels.h>
 #include <freerdp/channels/cliprdr.h>
 #include <freerdp/channels/disp.h>
+#include <freerdp/channels/rdpgfx.h>
+#include <freerdp/client/rdpgfx.h>
 #include <freerdp/client/cliprdr.h>
 #include <freerdp/client/disp.h>
 #include <freerdp/client.h>
@@ -54,6 +56,23 @@ BOOL desktopResize(rdpContext *ctx)
         return FALSE;
     sessionOf(ctx)->onResize(ctx->gdi);
     return TRUE;
+}
+
+// Learns the monitor layout the server actually uses, then lets the GDI handle the reset.
+UINT resetGraphics(RdpgfxClientContext *gfx, const RDPGFX_RESET_GRAPHICS_PDU *pdu)
+{
+    auto *gdi = static_cast<rdpGdi *>(gfx->custom);
+    RdpSession *session = gdi ? sessionOf(gdi->context) : nullptr;
+    if (session && pdu) {
+        QList<QRect> mons;
+        for (UINT32 i = 0; i < pdu->monitorCount && pdu->monitorDefArray; ++i) {
+            const MONITOR_DEF &m = pdu->monitorDefArray[i];
+            mons.append(QRect(QPoint(m.left, m.top), QPoint(m.right, m.bottom)));
+        }
+        session->onServerMonitors(mons, QSize(int(pdu->width), int(pdu->height)));
+    }
+    auto orig = session ? reinterpret_cast<pcRdpgfxResetGraphics>(session->origResetGraphics) : nullptr;
+    return orig ? orig(gfx, pdu) : CHANNEL_RC_OK;
 }
 
 void onChannelConnected(void *context, const ChannelConnectedEventArgs *e)
@@ -192,18 +211,37 @@ QSize RdpSession::desktopSize() const
 
 QVariantList RdpSession::monitors() const
 {
+    QList<QRect> rects;
+    {
+        QMutexLocker lock(&m_frameLock);
+        const QRect frame(QPoint(0, 0), m_frame.size());
+        bool fits = m_serverMonitors.size() > 1;
+        for (const QRect &r : m_serverMonitors)
+            fits = fits && frame.contains(r);
+        // Development (--seed-demo): BURROW_DEMO_SPLIT=N shows a one-monitor desktop as N side-by-side
+        // monitors, to try the tabs against a single-monitor test server.
+        static const int demoSplit = QCoreApplication::arguments().contains(QStringLiteral("--seed-demo"))
+            ? qEnvironmentVariableIntValue("BURROW_DEMO_SPLIT") : 0;
+        if (demoSplit > 1 && !frame.isEmpty()) {
+            const int w = frame.width() / demoSplit;
+            for (int i = 0; i < demoSplit; ++i)
+                rects.append(QRect(i * w, 0, w, frame.height()));
+        } else if (fits) {
+            rects = m_serverMonitors;
+        } else if (m_p.monitors.size() > 1 && m_frame.size() == m_p.size) {
+            for (const Params::Monitor &m : m_p.monitors)
+                rects.append(m.rect);
+        }
+    }
     QVariantList out;
-    if (m_p.monitors.size() < 2)
-        return out;
-    for (const Params::Monitor &m : m_p.monitors)
-        out.append(QVariantMap{{"x", m.rect.x()}, {"y", m.rect.y()}, {"width", m.rect.width()},
-                               {"height", m.rect.height()}, {"screen", m.screen}});
+    for (const QRect &r : rects)
+        out.append(QVariantMap{{"x", r.x()}, {"y", r.y()}, {"width", r.width()}, {"height", r.height()}});
     return out;
 }
 
 bool RdpSession::multiMonitor() const
 {
-    return m_p.monitors.size() > 1 && desktopSize() == m_p.size;
+    return monitors().size() > 1;
 }
 
 QImage RdpSession::frame() const
@@ -367,6 +405,7 @@ void RdpSession::run()
 
 void RdpSession::onResize(rdpGdi *gdi)
 {
+    qInfo("rdp: desktop %ux%u", gdi->width, gdi->height);
     {
         QMutexLocker lock(&m_frameLock);
         m_frame = QImage(int(gdi->width), int(gdi->height), QImage::Format_RGB32);
@@ -522,6 +561,35 @@ void RdpSession::onChannelConnected(const char *name, void *iface)
         m_clip->attach(static_cast<CliprdrClientContext *>(iface));
     else if (strcmp(name, DISP_DVC_CHANNEL_NAME) == 0)
         m_disp = iface;
+    else if (strcmp(name, RDPGFX_DVC_CHANNEL_NAME) == 0 && iface) {
+        // FreeRDP's own handler (subscribed first) has set up the GDI pipeline; chain to its reset.
+        auto *gfx = static_cast<RdpgfxClientContext *>(iface);
+        if (gfx->ResetGraphics && gfx->ResetGraphics != resetGraphics) {
+            origResetGraphics = reinterpret_cast<void *>(gfx->ResetGraphics);
+            gfx->ResetGraphics = resetGraphics;
+        }
+    }
+}
+
+void RdpSession::onServerMonitors(const QList<QRect> &monitors, const QSize &desktop)
+{
+    // Desktop pixels start at the monitors' top-left corner.
+    QRect box;
+    for (const QRect &r : monitors)
+        box = box.united(r);
+    QList<QRect> rel;
+    for (const QRect &r : monitors)
+        rel.append(r.translated(-box.topLeft()));
+    QStringList desc;
+    for (const QRect &r : rel)
+        desc << QStringLiteral("%1x%2+%3+%4").arg(r.width()).arg(r.height()).arg(r.x()).arg(r.y());
+    qInfo("rdp: server desktop %dx%d, monitors: %s", desktop.width(), desktop.height(),
+          qPrintable(desc.join(QStringLiteral(", "))));
+    {
+        QMutexLocker lock(&m_frameLock);
+        m_serverMonitors = rel;
+    }
+    QMetaObject::invokeMethod(this, &RdpSession::desktopSizeChanged, Qt::QueuedConnection);
 }
 
 void RdpSession::onChannelDisconnected(const char *name)

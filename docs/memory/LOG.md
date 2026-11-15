@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Çoklu monitör sekmeleri: GNOME Remote Login 3 monitörü kabul etti ama kendi düzenine yerleştirdi; Burrow bölemedi
+  ve hepsini tek resimde gösterdi. Gerçek düzen artık GFX ResetGraphics'ten okunuyor (`rdp: server desktop …` logu).
+  Uzak monitörler ana pencerede sekme; sekme pencere dışına sürüklenince (veya sağ tık → "… Üzerinde Aç") o
+  ekranda ayrı pencere (MonitorWindow) açılır. Ayrı pencere kapanınca sekmeye döner, bağlantı sürer. Hangi monitörün
+  hangi ekranda/tam ekran açıldığı cihazın `layout.detached` alanına kaydedilir ve sonraki bağlantıda geri yüklenir.
+  Kayıt 800 ms gecikmeli: çıkışta pencereler kapanırken düzen silinmez. Geliştirme: `BURROW_DEMO_SPLIT=N`.
 - Çoklu monitör düzeltmesi: FreeRDP 3 düzende ana ekranın 0,0 olmasını ister; ana ekran ortada/sağdayken bağlantı
   ön kontrolde reddediliyordu. Düzen artık ana ekrana göre gönderiliyor (görüntü yine sol üstten başlar).
   `BURROW_DEMO_DISPLAYS=all` demo kancası eklendi.
