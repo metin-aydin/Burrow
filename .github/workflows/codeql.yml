@@ -1,10 +1,10 @@
 # Static analysis of the Go network core and of the workflows themselves, on every push and weekly.
+# Not on pull requests: the job holds security-events: write, so it only builds code already merged.
 name: CodeQL
 
 on:
   push:
     branches: [development, master]
-  pull_request:
   schedule:
     - cron: "17 4 * * 1"
 
