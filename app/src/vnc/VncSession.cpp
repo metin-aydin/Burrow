@@ -183,7 +183,7 @@ void VncSession::run()
         setState(QStringLiteral("connected"));
         const bool ok = messageLoop();
         const bool userClosed = m_stop;
-        qInfo("vnc: connection ended (%s)", ok ? "normally" : userClosed ? "closed" : "error");
+        qInfo("vnc: connection ended (%s)", userClosed ? "closed by the user" : ok ? "by the server" : "error");
         m_fd = -1;
         ::close(fds[0]);
         setState(QStringLiteral("closed"), ok || userClosed ? QString() : tr("The connection to %1 was lost.").arg(m_p.title));
@@ -502,7 +502,8 @@ bool VncSession::readFramebufferUpdate()
         default: qWarning("vnc: unexpected encoding %d", enc); return false;
         }
         if (!ok) {
-            qWarning("vnc: couldn't read a %dx%d rectangle (encoding %d)", w, hh, enc);
+            if (!m_stop)   // closing mid-rectangle isn't a decoding error
+                qWarning("vnc: couldn't read a %dx%d rectangle (encoding %d)", w, hh, enc);
             return false;
         }
         dirty = dirty.united(QRect(x, y, w, hh));
