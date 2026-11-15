@@ -4,6 +4,9 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Karar:** MacBook hedefleri için gömülü, kendi yazdığımız VNC (RFB) istemcisi; Apple Uzaktan Yönetim girişi + VNC
+  şifresi, tünel üzerinden, aynı pencere/sekme deneyimi. libvncclient GPL olduğu için elendi. ADR 0008.
+
 - Demo verisi (`--seed-demo`) artık çizim değil gerçek ekran görüntüleri kullanıyor: Wikimedia Commons'tan GPL
   lisanslı Ubuntu 24.04 görselleri (App Center, Dosyalar, masaüstü) `docs/assets/demo/` altında, kaynak/lisans
   `ATTRIBUTION.md`'de; uygulamaya gömülmüyor, kaynak ağacından okunuyor (`BURROW_DEMO_ASSETS`). Windows için özgür
