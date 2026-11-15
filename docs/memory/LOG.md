@@ -4,6 +4,13 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Mac oturumu: kapanırken Control+Command+Q ile kilitleme ("Bağlantı Kesilince Kilitle", Mac'te de Session
+  sekmesinde); Apple imleç şekilleri (0x450 önbelleği: BGRA + ayrı alfa düzlemi, seçim/kayıt) yerel imlece
+  uygulanıyor; VNC 5 sn'de bir hız satırı loglar (güncelleme, MB, Mbit/s, Mpx, çözme ve kopya süresi).
+- Görünüm hızlandı (RDP ve VNC): her güncellemede tüm ekranı kopyalayıp çizmek yerine yalnız değişen
+  dikdörtgenler kopyalanıyor (`copyInto`, ara görüntü yok) ve yalnız o bölge yeniden çiziliyor. Sahte Apple
+  sunucusunda hareketli desenle ve yerel RDP sunucusuyla doğrulandı. Adaptive formatı ölçüm sonucuna göre.
+
 - Güvenlik incelemesi (Apple VNC): kayıt katmanı yalnız tamamlanmış bir Apple (tür 30) girişinin anahtarıyla
   başlar (başka giriş türünde 003.889 reddedilir); DH'de sunucunun açık değeri (1, p-1) aralığında ve asal
   uzunluğu doğru olmalı; kayıt gönderilemezse oturum kapanır ve hiçbir şey açık metin gitmez; bütünlük hatası ayrı

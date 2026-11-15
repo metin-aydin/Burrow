@@ -21,7 +21,7 @@ RdpView::RdpView(QQuickItem *parent)
     setOpaquePainting(true);
     m_frameTimer.setSingleShot(true);
     m_frameTimer.setInterval(16);
-    connect(&m_frameTimer, &QTimer::timeout, this, &RdpView::refreshFrame);
+    connect(&m_frameTimer, &QTimer::timeout, this, &RdpView::refreshDirty);
     // Follow the window size once it settles (dragging sends many intermediate sizes).
     m_resizeTimer.setSingleShot(true);
     m_resizeTimer.setInterval(400);
@@ -55,9 +55,11 @@ void RdpView::setSession(RemoteSession *s)
     m_session = s;
     if (s) {
         connect(s, &RemoteSession::frameUpdated, this, [this](const QRect &r) {
-            // Only updates that touch the part this view shows; at most one copy per frame interval.
-            if (!m_frame.isNull() && !r.intersects(sourceRect()))
+            // Only updates that touch the part this view shows, gathered and copied at most once a frame.
+            const QRect part = r.intersected(sourceRect());
+            if (part.isEmpty() && !m_frame.isNull())
                 return;
+            m_dirty += part;
             if (!m_frameTimer.isActive())
                 m_frameTimer.start();
         });
@@ -100,7 +102,29 @@ void RdpView::refreshFrame()
         return;
     // Only this view's part of the desktop: with several monitors the full picture is large.
     m_frame = m_session->frame(sourceRect());
+    m_dirty = QRegion();
     update();
+}
+
+void RdpView::refreshDirty()
+{
+    const QRect src = sourceRect();
+    if (!m_session || m_frame.isNull() || m_frame.size() != src.size()) {
+        refreshFrame();
+        return;
+    }
+    const QRegion dirty = m_dirty.intersected(src);
+    m_dirty = QRegion();
+    if (dirty.isEmpty())
+        return;
+    // Copy the changed rectangles into our picture, then repaint just where they land on screen.
+    const QRectF target = targetRect();
+    const double sx = target.width() / src.width(), sy = target.height() / src.height();
+    for (const QRect &r : dirty) {
+        m_session->copyInto(m_frame, r, r.topLeft() - src.topLeft());
+        const QRectF on(target.x() + (r.x() - src.x()) * sx, target.y() + (r.y() - src.y()) * sy, r.width() * sx, r.height() * sy);
+        update(on.toAlignedRect().adjusted(-1, -1, 1, 1));
+    }
 }
 
 QRect RdpView::sourceRect() const

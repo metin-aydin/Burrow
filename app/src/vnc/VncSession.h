@@ -5,6 +5,7 @@
 #include <QMutex>
 #include <QSet>
 #include <QThread>
+#include <QElapsedTimer>
 #include <atomic>
 
 #include "rdp/RemoteSession.h"
@@ -49,6 +50,7 @@ public:
 
     QImage frame() const override;
     QImage frame(const QRect &part) const override;
+    void copyInto(QImage &dst, const QRect &part, const QPoint &at) const override;
 
     void sendMouseMove(int x, int y) override;
     void sendMouseButton(Qt::MouseButton button, bool down, int x, int y) override;
@@ -129,5 +131,13 @@ private:
     struct CursorShape { QImage image; QPoint hotspot; };
     QHash<quint32, CursorShape> m_cursorCache;   // worker thread: Apple's stored pointer shapes
     QImage m_cursor;                // GUI thread: current remote pointer shape
-    QPoint m_cursorHot;        // last text exchanged, to avoid echoing it back
+    QPoint m_cursorHot;
+    // Throughput, logged every 5 s while pictures arrive (worker thread, except the copy counters).
+    QElapsedTimer m_statClock;
+    quint64 m_statBytes = 0, m_statPixels = 0;
+    int m_statUpdates = 0;
+    qint64 m_statDecodeNs = 0;
+    mutable std::atomic<qint64> m_statCopyNs{0};
+    mutable std::atomic<int> m_statCopies{0};
+    void logStats();        // last text exchanged, to avoid echoing it back
 };

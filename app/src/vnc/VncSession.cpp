@@ -94,6 +94,23 @@ bool VncSession::multiMonitor() const
     return m_screens.size() > 1;
 }
 
+void VncSession::copyInto(QImage &dst, const QRect &part, const QPoint &at) const
+{
+    QElapsedTimer t;
+    t.start();
+    QMutexLocker lock(&m_frameLock);
+    const QRect src = part.intersected(m_frame.rect());
+    const QRect fit = QRect(at, src.size()).intersected(dst.rect());
+    if (src.isEmpty() || fit.isEmpty() || dst.format() != m_frame.format())
+        return;
+    const int w = fit.width(), dx = fit.x() - at.x(), dy = fit.y() - at.y();
+    for (int row = 0; row < fit.height(); ++row)
+        memcpy(reinterpret_cast<quint32 *>(dst.scanLine(fit.y() + row)) + fit.x(),
+               reinterpret_cast<const quint32 *>(m_frame.constScanLine(src.y() + dy + row)) + src.x() + dx, size_t(w) * 4);
+        m_statCopyNs += t.nsecsElapsed();
+        ++m_statCopies;
+}
+
 QImage VncSession::frame() const
 {
     QMutexLocker lock(&m_frameLock);
@@ -102,8 +119,13 @@ QImage VncSession::frame() const
 
 QImage VncSession::frame(const QRect &part) const
 {
+    QElapsedTimer t;
+    t.start();
     QMutexLocker lock(&m_frameLock);
-    return m_frame.copy(part.intersected(m_frame.rect()));
+    QImage out = m_frame.copy(part.intersected(m_frame.rect()));
+    m_statCopyNs += t.nsecsElapsed();
+    ++m_statCopies;
+    return out;
 }
 
 void VncSession::start()
@@ -195,6 +217,7 @@ bool VncSession::rawRead(void *buf, size_t n)
         const ssize_t got = ::recv(pfd.fd, p, n, 0);
         if (got <= 0)
             return false;
+        m_statBytes += quint64(got);
         p += got;
         n -= size_t(got);
     }
@@ -911,6 +934,8 @@ bool VncSession::readFramebufferUpdate()
             return false;   // a broken or hostile server
         }
         bool ok = false;
+        QElapsedTimer decode;
+        decode.start();
         switch (enc) {
         case EncRaw: ok = readRaw(x, y, w, hh); break;
         case EncCopyRect: ok = readCopyRect(x, y, w, hh); break;
@@ -922,8 +947,12 @@ bool VncSession::readFramebufferUpdate()
                 qWarning("vnc: couldn't read a %dx%d rectangle (encoding %d)", w, hh, enc);
             return false;
         }
+        m_statDecodeNs += decode.nsecsElapsed();
+        m_statPixels += quint64(w) * quint64(hh);
         dirty = dirty.united(QRect(x, y, w, hh));
     }
+    ++m_statUpdates;
+    logStats();
     if (m_firstUpdate) {
         m_firstUpdate = false;
         if (!m_screensReported)
@@ -1152,6 +1181,29 @@ bool VncSession::readZrle(int x, int y, int w, int h)
         }
     }
     return true;
+}
+
+// One line every 5 s while pictures arrive: what came in and what it cost here. "decode" includes
+// waiting for the rest of a rectangle's bytes, so a slow link shows up there too.
+void VncSession::logStats()
+{
+    if (!m_statClock.isValid()) {
+        m_statClock.start();
+        return;
+    }
+    const qint64 ms = m_statClock.elapsed();
+    if (ms < 5000)
+        return;
+    const double s = ms / 1000.0;
+    const int copies = m_statCopies.exchange(0);
+    const qint64 copyNs = m_statCopyNs.exchange(0);
+    qInfo("vnc: %.0f s: %d updates, %.1f MB in (%.1f Mbit/s), %.1f Mpx, decode %.1f ms/update, %d copies %.1f ms each",
+          s, m_statUpdates, m_statBytes / 1e6, m_statBytes * 8 / 1e6 / s, m_statPixels / 1e6,
+          m_statUpdates ? m_statDecodeNs / 1e6 / m_statUpdates : 0.0, copies, copies ? copyNs / 1e6 / copies : 0.0);
+    m_statBytes = m_statPixels = 0;
+    m_statUpdates = 0;
+    m_statDecodeNs = 0;
+    m_statClock.restart();
 }
 
 // --- Input ----------------------------------------------------------------------

@@ -302,6 +302,19 @@ QImage RdpSession::frame(const QRect &part) const
     return m_frame.copy(part.intersected(m_frame.rect()));
 }
 
+void RdpSession::copyInto(QImage &dst, const QRect &part, const QPoint &at) const
+{
+    QMutexLocker lock(&m_frameLock);
+    const QRect src = part.intersected(m_frame.rect());
+    const QRect fit = QRect(at, src.size()).intersected(dst.rect());
+    if (src.isEmpty() || fit.isEmpty() || dst.format() != m_frame.format())
+        return;
+    const int w = fit.width(), dx = fit.x() - at.x(), dy = fit.y() - at.y();
+    for (int row = 0; row < fit.height(); ++row)
+        memcpy(reinterpret_cast<quint32 *>(dst.scanLine(fit.y() + row)) + fit.x(),
+               reinterpret_cast<const quint32 *>(m_frame.constScanLine(src.y() + dy + row)) + src.x() + dx, size_t(w) * 4);
+    }
+
 QImage RdpSession::frame() const
 {
     QMutexLocker lock(&m_frameLock);

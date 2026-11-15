@@ -104,19 +104,19 @@
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="753"/>
-        <location filename="../src/app/AppController.cpp" line="768"/>
+        <location filename="../src/app/AppController.cpp" line="754"/>
+        <location filename="../src/app/AppController.cpp" line="769"/>
         <source>Couldn&apos;t open a connection through the tunnel.</source>
         <translation>Tünel üzerinden bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="903"/>
+        <location filename="../src/app/AppController.cpp" line="904"/>
         <source>The profile name can&apos;t be empty.</source>
         <translation>Profil adı boş olamaz.</translation>
     </message>
     <message>
         <location filename="../src/app/AppController.cpp" line="515"/>
-        <location filename="../src/app/AppController.cpp" line="907"/>
+        <location filename="../src/app/AppController.cpp" line="908"/>
         <source>Server and username can&apos;t be empty.</source>
         <translation>Sunucu ve kullanıcı adı boş olamaz.</translation>
     </message>
@@ -126,47 +126,47 @@
         <translation>Test için bir cihaz host adı gir.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="910"/>
+        <location filename="../src/app/AppController.cpp" line="911"/>
         <source>The OTP key is invalid.</source>
         <translation>OTP anahtarı geçersiz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="952"/>
+        <location filename="../src/app/AppController.cpp" line="953"/>
         <source>Direct (No Tunnel)</source>
         <translation>Doğrudan (Tünelsiz)</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="986"/>
+        <location filename="../src/app/AppController.cpp" line="987"/>
         <source>Invalid key</source>
         <translation>Geçersiz anahtar</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1041"/>
+        <location filename="../src/app/AppController.cpp" line="1042"/>
         <source>Company VPN</source>
         <translation>Şirket VPN</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1046"/>
+        <location filename="../src/app/AppController.cpp" line="1047"/>
         <source>Home Network</source>
         <translation>Ev Ağı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1054"/>
+        <location filename="../src/app/AppController.cpp" line="1055"/>
         <source>Work PC</source>
         <translation>İş Bilgisayarı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1055"/>
+        <location filename="../src/app/AppController.cpp" line="1056"/>
         <source>Meeting Room</source>
         <translation>Toplantı Odası</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1056"/>
+        <location filename="../src/app/AppController.cpp" line="1057"/>
         <source>Home Desktop</source>
         <translation>Ev Masaüstü</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1057"/>
+        <location filename="../src/app/AppController.cpp" line="1058"/>
         <source>Lab Server</source>
         <translation>Laboratuvar</translation>
     </message>
@@ -313,38 +313,39 @@
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="58"/>
-        <location filename="../qml/DeviceEditor.qml" line="60"/>
+        <location filename="../qml/DeviceEditor.qml" line="61"/>
         <source>General</source>
         <translation>Genel</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="59"/>
+        <location filename="../qml/DeviceEditor.qml" line="60"/>
         <source>Clipboard</source>
         <translation>Pano</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="61"/>
-        <location filename="../qml/DeviceEditor.qml" line="160"/>
+        <location filename="../qml/DeviceEditor.qml" line="59"/>
+        <location filename="../qml/DeviceEditor.qml" line="62"/>
+        <location filename="../qml/DeviceEditor.qml" line="161"/>
         <source>Session</source>
         <translation>Oturum</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="62"/>
+        <location filename="../qml/DeviceEditor.qml" line="63"/>
         <source>Clipboard And Keyboard</source>
         <translation>Pano Ve Klavye</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="74"/>
+        <location filename="../qml/DeviceEditor.qml" line="75"/>
         <source>Name</source>
         <translation>Ad</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="74"/>
+        <location filename="../qml/DeviceEditor.qml" line="75"/>
         <source>Work PC</source>
         <translation>İş Bilgisayarı</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="77"/>
+        <location filename="../qml/DeviceEditor.qml" line="78"/>
         <source>System</source>
         <translation>Sistem</translation>
     </message>
@@ -429,117 +430,122 @@
         <translation>Kayıtlı Sertifikayı Unut</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="161"/>
+        <location filename="../qml/DeviceEditor.qml" line="162"/>
         <source>Connect to the existing session</source>
         <translation>Mevcut oturuma bağlan</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="162"/>
+        <location filename="../qml/DeviceEditor.qml" line="163"/>
         <source>Start a new session</source>
         <translation>Yeni oturum aç</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="163"/>
+        <location filename="../qml/DeviceEditor.qml" line="164"/>
         <source>Ask every time</source>
         <translation>Her bağlantıda sor</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="169"/>
+        <location filename="../qml/DeviceEditor.qml" line="170"/>
         <source>Lock When Disconnected</source>
         <translation>Bağlantı Kapanınca Kilitle</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="170"/>
+        <location filename="../qml/DeviceEditor.qml" line="171"/>
+        <source>Burrow locks the Mac (Control+Command+Q) before closing the connection.</source>
+        <translation>Burrow bağlantıyı kapatmadan önce Mac&apos;i kilitler (Control+Command+Q).</translation>
+    </message>
+    <message>
+        <location filename="../qml/DeviceEditor.qml" line="172"/>
         <source>Burrow locks the remote computer (Win+L / Super+L) before closing the connection.</source>
         <translation>Burrow bağlantıyı kapatmadan önce uzak bilgisayarı kilitler (Win+L / Super+L).</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="176"/>
+        <location filename="../qml/DeviceEditor.qml" line="179"/>
         <source>Displays</source>
         <translation>Ekranlar</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="177"/>
+        <location filename="../qml/DeviceEditor.qml" line="180"/>
         <source>One monitor</source>
         <translation>Tek monitör</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="178"/>
+        <location filename="../qml/DeviceEditor.qml" line="181"/>
         <source>One monitor per Mac display</source>
         <translation>Her Mac ekranı için bir monitör</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="187"/>
+        <location filename="../qml/DeviceEditor.qml" line="190"/>
         <source>Each remote monitor opens as a tab. Drag a tab onto another display to give it its own window; Burrow remembers where you put it. Ubuntu&apos;s screen sharing shows only its main monitor; use Remote Login on Ubuntu to get several.</source>
         <translation>Her uzak monitör bir sekme olarak açılır. Bir sekmeyi başka bir ekrana sürükleyerek ayrı pencerede açabilirsin; Burrow nereye koyduğunu hatırlar. Ubuntu&apos;nun ekran paylaşımı yalnızca ana monitörü gösterir; birden fazlası için Ubuntu&apos;da Uzaktan Oturum Açma&apos;yı kullan.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="192"/>
+        <location filename="../qml/DeviceEditor.qml" line="196"/>
         <source>Retina Resolution</source>
         <translation>Retina Çözünürlüğü</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="193"/>
+        <location filename="../qml/DeviceEditor.qml" line="197"/>
         <source>Sharper, but text looks smaller if the remote computer doesn&apos;t scale its display.</source>
         <translation>Daha keskin, ancak uzak bilgisayar ekranını ölçeklemiyorsa yazılar daha küçük görünür.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="208"/>
+        <location filename="../qml/DeviceEditor.qml" line="212"/>
         <source>Clipboard Sharing</source>
         <translation>Pano Paylaşımı</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="209"/>
+        <location filename="../qml/DeviceEditor.qml" line="213"/>
         <source>Both directions</source>
         <translation>Çift yönlü</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="210"/>
+        <location filename="../qml/DeviceEditor.qml" line="214"/>
         <source>Only from this computer to remote</source>
         <translation>Sadece bu bilgisayardan uzağa</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="211"/>
+        <location filename="../qml/DeviceEditor.qml" line="215"/>
         <source>Only from remote to this computer</source>
         <translation>Sadece uzaktan bu bilgisayara</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="212"/>
+        <location filename="../qml/DeviceEditor.qml" line="216"/>
         <source>Off</source>
         <translation>Kapalı</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="221"/>
+        <location filename="../qml/DeviceEditor.qml" line="225"/>
         <source>Keys reach the Mac as they are: Cmd stays Cmd. Clipboard sharing covers plain text.</source>
         <translation>Tuşlar Mac&apos;e olduğu gibi gider: Cmd, Cmd olarak kalır. Pano paylaşımı düz metni kapsar.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="227"/>
+        <location filename="../qml/DeviceEditor.qml" line="231"/>
         <source>Mac Shortcuts</source>
         <translation>Mac Kısayolları</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="228"/>
+        <location filename="../qml/DeviceEditor.qml" line="232"/>
         <source>Translate shortcuts (Cmd+C → Ctrl+C)</source>
         <translation>Kısayolları çevir (Cmd+C → Ctrl+C)</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="229"/>
+        <location filename="../qml/DeviceEditor.qml" line="233"/>
         <source>Swap Cmd ↔ Ctrl completely</source>
         <translation>Cmd ↔ Ctrl tamamen yer değiştir</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="230"/>
+        <location filename="../qml/DeviceEditor.qml" line="234"/>
         <source>Off (keys as they are)</source>
         <translation>Kapalı (tuşlar olduğu gibi)</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="246"/>
+        <location filename="../qml/DeviceEditor.qml" line="250"/>
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="247"/>
+        <location filename="../qml/DeviceEditor.qml" line="251"/>
         <source>Save</source>
         <translation>Kaydet</translation>
     </message>
@@ -901,7 +907,7 @@
         <translation>Bağlantı başarısız oldu (%1).</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="356"/>
+        <location filename="../src/rdp/RdpSession.cpp" line="369"/>
         <source>Couldn&apos;t start the RDP engine.</source>
         <translation>RDP motoru başlatılamadı.</translation>
     </message>
@@ -1833,65 +1839,65 @@
 <context>
     <name>VncSession</name>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="262"/>
+        <location filename="../src/vnc/VncSession.cpp" line="296"/>
         <source>Couldn&apos;t open a connection.</source>
         <translation>Bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="270"/>
+        <location filename="../src/vnc/VncSession.cpp" line="304"/>
         <source>Couldn&apos;t open a connection through the tunnel.</source>
         <translation>Tünel üzerinden bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="285"/>
+        <location filename="../src/vnc/VncSession.cpp" line="319"/>
         <source>The connection to %1 was closed because data arrived damaged or altered.</source>
         <translation>%1 ile bağlantı, veri bozuk ya da değiştirilmiş geldiği için kapatıldı.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="286"/>
+        <location filename="../src/vnc/VncSession.cpp" line="320"/>
         <source>The connection to %1 was lost.</source>
         <translation>%1 ile bağlantı koptu.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="296"/>
+        <location filename="../src/vnc/VncSession.cpp" line="330"/>
         <source>Couldn&apos;t reach %1. Check that Screen Sharing (or another VNC server) is on and the address is right.</source>
         <translation>%1 bilgisayarına ulaşılamadı. Ekran Paylaşımı&apos;nın (ya da başka bir VNC sunucusunun) açık ve adresin doğru olduğunu kontrol et.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="318"/>
+        <location filename="../src/vnc/VncSession.cpp" line="352"/>
         <source>%1 refused the connection: %2</source>
         <translation>%1 bağlantıyı reddetti: %2</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="332"/>
-        <location filename="../src/vnc/VncSession.cpp" line="337"/>
+        <location filename="../src/vnc/VncSession.cpp" line="366"/>
+        <location filename="../src/vnc/VncSession.cpp" line="371"/>
         <source>This Mac signs in with a user name. Enter the Mac&apos;s user name and password in the device settings.</source>
         <translation>Bu Mac kullanıcı adıyla giriş istiyor. Cihaz ayarlarına Mac&apos;in kullanıcı adını ve şifresini gir.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="334"/>
+        <location filename="../src/vnc/VncSession.cpp" line="368"/>
         <source>This VNC server asks for a sign-in method Burrow doesn&apos;t support yet.</source>
         <translation>Bu VNC sunucusu Burrow&apos;un henüz desteklemediği bir giriş yöntemi istiyor.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="361"/>
+        <location filename="../src/vnc/VncSession.cpp" line="395"/>
         <source>The user name or password for %1 is wrong.</source>
         <translation>%1 için kullanıcı adı ya da şifre yanlış.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="378"/>
+        <location filename="../src/vnc/VncSession.cpp" line="412"/>
         <source>%1 sent an invalid screen size.</source>
         <translation>%1 geçersiz bir ekran boyutu gönderdi.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="412"/>
+        <location filename="../src/vnc/VncSession.cpp" line="446"/>
         <source>Couldn&apos;t open the encrypted session with %1.</source>
         <translation>%1 ile şifreli oturum açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="598"/>
-        <location filename="../src/vnc/VncSession.cpp" line="701"/>
-        <location filename="../src/vnc/VncSession.cpp" line="705"/>
+        <location filename="../src/vnc/VncSession.cpp" line="683"/>
+        <location filename="../src/vnc/VncSession.cpp" line="786"/>
+        <location filename="../src/vnc/VncSession.cpp" line="790"/>
         <source>Couldn&apos;t sign in to %1.</source>
         <translation>%1 bilgisayarına giriş yapılamadı.</translation>
     </message>

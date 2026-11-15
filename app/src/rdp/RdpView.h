@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QHash>
+#include <QRegion>
 #include <QPointer>
 #include <QQuickPaintedItem>
 #include <QTimer>
@@ -56,6 +57,8 @@ private:
     QPoint m_wheelAccum;
     QTimer m_resizeTimer;
     QTimer m_frameTimer;     // coalesces desktop updates (one copy per ~16 ms, not per update)
-    void refreshFrame();
+    void refreshFrame();     // whole picture (size, monitor or session changed)
+    void refreshDirty();     // only what changed since the last refresh
+    QRegion m_dirty;         // desktop coordinates, inside sourceRect()
     int m_monitor = -1;
 };

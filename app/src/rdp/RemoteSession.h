@@ -44,6 +44,9 @@ public:
     // Thread-safe copies of the current desktop picture (whole, or one part such as a monitor).
     virtual QImage frame() const = 0;
     virtual QImage frame(const QRect &part) const = 0;
+    // Copies `part` of the desktop into `dst` at `at` (same RGB32 format), without a temporary image:
+    // a view keeps its own picture and refreshes only what changed.
+    virtual void copyInto(QImage &dst, const QRect &part, const QPoint &at) const = 0;
 
     // Input, in remote desktop coordinates, from the GUI thread. Keys are RDP scancodes (the view's
     // common currency); other protocols translate them.
