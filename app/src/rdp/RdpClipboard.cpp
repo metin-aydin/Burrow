@@ -229,6 +229,12 @@ void RdpClipboard::onLocalChanged()
         m_dib = dib;
         m_localFiles = files;
     }
+    // Whatever was offered before is no longer on the clipboard: the remote side loses access to it.
+    m_post([this] {
+        m_offered.clear();
+        m_in.close();
+        m_inIndex = -1;
+    });
     m_post([this] { sendFormatList(); });
 }
 
@@ -585,6 +591,12 @@ unsigned RdpClipboard::onServerFileContentsRequest(unsigned streamId, unsigned l
         return sendFileContents(streamId, false, {});
     if (m_inIndex != int(listIndex) || !m_in.isOpen()) {
         m_in.close();
+        // The path must still be the regular file that was copied, not a link swapped in since.
+        const QFileInfo now(f.absolutePath);
+        if (now.isSymLink() || !now.isFile() || now.canonicalFilePath() != f.absolutePath) {
+            m_inIndex = -1;
+            return sendFileContents(streamId, false, {});
+        }
         m_in.setFileName(f.absolutePath);
         if (!m_in.open(QIODevice::ReadOnly)) {
             m_inIndex = -1;
@@ -606,9 +618,25 @@ bool RdpClipboard::collectLocalFiles(const QList<QUrl> &urls, QList<LocalFile> *
     auto add = [out](const QFileInfo &fi, const QString &rel) {
         if (rel.size() >= 260)   // Windows' MAX_PATH: longer names can't be described; skip them
             return true;
+        // Each name part is made safe for any remote file system: a '\\' or ':' inside a Linux or
+        // macOS file name must not turn into a folder separator or a drive on the remote side.
+        QStringList parts;
+        for (QString part : rel.split(QLatin1Char('/'), Qt::SkipEmptyParts)) {
+            for (QChar &c : part)
+                if (c < QChar(32) || QStringLiteral("\\:*?\"<>|").contains(c))
+                    c = QLatin1Char('_');
+            while (part.endsWith(QLatin1Char('.')) || part.endsWith(QLatin1Char(' ')))
+                part.chop(1);
+            if (part.isEmpty())
+                return true;   // "." / ".." or nothing left: skip the entry
+            parts.append(part);
+        }
+        const QString canonical = fi.canonicalFilePath();
+        if (parts.isEmpty() || canonical.isEmpty())
+            return true;
         LocalFile f;
-        f.absolutePath = fi.absoluteFilePath();
-        f.remoteName = QString(rel).replace(QLatin1Char('/'), QLatin1Char('\\'));
+        f.absolutePath = canonical;   // checked again before every read
+        f.remoteName = parts.join(QLatin1Char('\\'));
         f.dir = fi.isDir();
         f.size = f.dir ? 0 : quint64(fi.size());
         f.modified = fi.lastModified();
