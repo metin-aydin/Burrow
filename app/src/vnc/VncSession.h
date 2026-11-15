@@ -105,6 +105,10 @@ private:
     bool m_firstUpdate = true;       // worker thread
     std::atomic_bool m_apple{false};
     uchar m_wrapKey[16] = {};
+    bool m_wrapKeyValid = false;     // set only by a completed Apple sign-in
+    std::atomic_bool m_integrityFailed{false};
+    bool m_writeBroken = false;      // guarded by m_writeLock
+    void failRecords();              // a record couldn't be sent: the chain is broken, end the session
     evp_cipher_ctx_st *m_inCtx = nullptr, *m_outCtx = nullptr;
     quint32 m_inSeq = 0, m_outSeq = 0;
     std::atomic_bool m_records{false};

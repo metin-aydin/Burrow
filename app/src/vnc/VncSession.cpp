@@ -193,6 +193,8 @@ bool VncSession::rawRead(void *buf, size_t n)
 bool VncSession::writeAll(const void *buf, size_t n)
 {
     QMutexLocker lock(&m_writeLock);
+    if (m_writeBroken)
+        return false;
     if (!m_records)
         return rawWrite(buf, n);
     // One message in as many records as it needs: u16 length, then AES-CBC of
@@ -215,14 +217,24 @@ bool VncSession::writeAll(const void *buf, size_t n)
         qToBigEndian(quint16(total), rec.data());
         int outLen = 0;
         if (!EVP_EncryptUpdate(m_outCtx, reinterpret_cast<uchar *>(rec.data() + 2), &outLen,
-                               reinterpret_cast<const uchar *>(plain.constData()), total) || outLen != total)
+                               reinterpret_cast<const uchar *>(plain.constData()), total) || outLen != total
+            || !rawWrite(rec.constData(), size_t(rec.size()))) {
+            failRecords();   // the chain and counter moved past what was sent: nothing later can be read
             return false;
-        if (!rawWrite(rec.constData(), size_t(rec.size())))
-            return false;
+        }
         msg += body;
         left -= size_t(body);
     } while (left > 0);
     return true;
+}
+
+void VncSession::failRecords()
+{
+    // Records stay on (nothing may go out in cleartext); the socket is closed so the reader ends the
+    // session as lost, and later writes are refused.
+    m_writeBroken = true;
+    if (const int fd = m_fd.load(); fd >= 0)
+        ::shutdown(fd, SHUT_RDWR);
 }
 
 bool VncSession::rawWrite(const void *buf, size_t n)
@@ -269,7 +281,9 @@ void VncSession::run()
         qInfo("vnc: connection ended (%s)", userClosed ? "closed by the user" : ok ? "by the server" : "error");
         m_fd = -1;
         ::close(fds[0]);
-        setState(QStringLiteral("closed"), ok || userClosed ? QString() : tr("The connection to %1 was lost.").arg(m_p.title));
+        setState(QStringLiteral("closed"), ok || userClosed ? QString()
+                 : m_integrityFailed ? tr("The connection to %1 was closed because data arrived damaged or altered.").arg(m_p.title)
+                                     : tr("The connection to %1 was lost.").arg(m_p.title));
         return;
     }
     m_fd = -1;
@@ -318,6 +332,9 @@ QString VncSession::handshake()
         return tr("This Mac signs in with a user name. Enter the Mac's user name and password in the device settings.");
     else
         return tr("This VNC server asks for a sign-in method Burrow doesn't support yet.");
+    // Apple's revision keys its record layer from the Apple sign-in; anything else can't start it.
+    if (m_apple && chosen != SecApple)
+        return tr("This Mac signs in with a user name. Enter the Mac's user name and password in the device settings.");
     if (!writeAll(&chosen, 1))
         return unreachable;
 
@@ -454,6 +471,9 @@ QString VncSession::appleSetup()
 // from sign-in. Both directions start from them; each keeps its own CBC chain and counter.
 bool VncSession::startRecords(const uchar *body)
 {
+    if (!m_wrapKeyValid)
+        return false;
+    m_wrapKeyValid = false;
     uchar keys[32];
     int out = 0;
     EVP_CIPHER_CTX *ecb = EVP_CIPHER_CTX_new();
@@ -496,6 +516,7 @@ bool VncSession::fillRecord()
     qToBigEndian(m_inSeq++, seq.data());
     if (QCryptographicHash::hash(seq + plain.left(len - kRecordTrailer), QCryptographicHash::Sha1) != plain.right(kRecordTrailer)) {
         qWarning("vnc: a record from the Mac failed its integrity check");
+        m_integrityFailed = true;
         return false;
     }
     const int body = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(plain.constData()));
@@ -591,7 +612,12 @@ QString VncSession::authApple()
     BN_set_word(g, generator);
     BIGNUM *y = BN_bin2bn(reinterpret_cast<const uchar *>(serverPub.constData()), keyLen, nullptr);
     BIGNUM *priv = BN_new(), *pub = BN_new(), *secret = BN_new();
-    bool ok = ctx && p && g && y && priv && pub && secret
+    // The server's public value must be in (1, p-1): 0, 1 and p-1 give a secret anyone knows.
+    BIGNUM *pMinus1 = p ? BN_dup(p) : nullptr;
+    const bool yOk = pMinus1 && y && BN_sub_word(pMinus1, 1) && BN_cmp(y, BN_value_one()) > 0 && BN_cmp(y, pMinus1) < 0
+        && generator >= 2 && BN_num_bytes(p) == keyLen;
+    BN_free(pMinus1);
+    bool ok = yOk && ctx && p && g && y && priv && pub && secret
         && BN_rand(priv, keyLen * 8 - 1, BN_RAND_TOP_ANY, BN_RAND_BOTTOM_ANY)
         && BN_mod_exp(pub, g, priv, p, ctx) && BN_mod_exp(secret, y, priv, p, ctx);
     QByteArray pubBytes, secretBytes;
@@ -610,8 +636,10 @@ QString VncSession::authApple()
     unsigned keyOut = 0;
     ok = EVP_Digest(secretBytes.constData(), size_t(secretBytes.size()), key, &keyOut, EVP_md5(), nullptr) && keyOut == 16;
     secretBytes.fill('\0');
-    if (ok)
+    if (ok) {
         memcpy(m_wrapKey, key, 16);   // also wraps the record layer's first keys (Apple's rekey)
+        m_wrapKeyValid = true;
+    }
 
     // 64 bytes user name + 64 bytes password, each NUL-terminated, the rest random.
     uchar creds[128];

@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Güvenlik incelemesi (Apple VNC): kayıt katmanı yalnız tamamlanmış bir Apple (tür 30) girişinin anahtarıyla
+  başlar (başka giriş türünde 003.889 reddedilir); DH'de sunucunun açık değeri (1, p-1) aralığında ve asal
+  uzunluğu doğru olmalı; kayıt gönderilemezse oturum kapanır ve hiçbir şey açık metin gitmez; bütünlük hatası ayrı
+  hata mesajı verir. Not: kayıtlardaki SHA-1 etiketi Apple protokolünün kendisi gereği anahtarsızdır (şifreli
+  blok içinde); güvenlik sınırı sayılmaz, değiştirilemez.
+
 - **Mac çoklu ekran (Apple yolu):** gerçek Mac standart `ExtendedDesktopSize` bildirmedi (log). VNC artık Mac'e
   RFB 003.889 ile bağlanıyor: ViewerInfo/SetMode/SetEncryption ön adımı, anahtar değişimi, şifreli kayıt katmanı
   (AES-128-CBC + SHA-1), `AppleDisplayLayout` ile ekranlar sekmelere bölünüyor, `AutoFrameBufferUpdate` ile
