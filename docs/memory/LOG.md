@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **v0.2.0 yayımlandı** (PR #3): ilk Windows sürümü (setup.exe 87 MB, portable zip 124 MB, sha256 dosyaları) +
+  mac-arm64 + linux-x64; `latest.json`'da `windows-x64` ve `mac-arm64`. Manifestteki SHA-256 indirilen setup.exe ile
+  eşleşti. `Windows build` master'ın zorunlu kontrollerine eklendi (`gh api`), repo açıklaması "macOS, Windows and
+  Ubuntu" oldu. Kullanıcıda doğrulanacak: Windows'tan GP bağlantısı, gerçek masaüstünde RDP/VNC/pano/tepsi,
+  sonraki sürümde Windows uygulama içi güncellemesi.
+
 - **Windows portu (ADR 0010) — `Windows build` CI'da yeşil.** Kullanıcıyla kararlar: MSYS2 UCRT64 (gcc; cgo ve Go
   c-archive için), paket/imza/güncelleme "JumpDesk'teki gibi" → imzasız NSIS kullanıcı başına kurulum + taşınabilir
   zip, Windows `latest.json`'a girer (SHA-256 + uygulama imzalıysa aynı Authenticode yayıncısı; sessiz kurulum
