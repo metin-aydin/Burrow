@@ -4,6 +4,20 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **VNC / macOS (ADR 0008) ilk sürüm:** ortak `RemoteSession` arayüzü (RdpView, oturum pencereleri ve
+  AppController artık protokolden bağımsız; `RdpSession` bunu uygular). Yeni `VncSession` (src/vnc): RFB 3.8, Apple
+  girişi (tür 30: DH + AES-128-ECB, MD5 anahtar; OpenSSL), VNC şifresi (tür 2, DES; `openssl enc` ile doğrulandı,
+  birim testi), Raw/CopyRect/ZRLE/DesktopSize, işaretçi + tekerlek, keysym ile klavye (görünüm `usesKeysyms`
+  oturumlara karakteri gönderir; Cmd → Super_L, Option → Alt), düz metin pano. Cihaz kaydında `protocol` (rdp|vnc),
+  `os`'ta `macos`; düzenleyicide macOS seçilince port 5900, Domain/Session ayarları gizli, Ekran Paylaşımı açıklaması.
+  Yerel Python RFB test sunucusuyla (scratchpad) tüm ZRLE alt türleri, Raw, CopyRect ve girdi olayları doğrulandı;
+  bu Mac'teki Apple sunucusu tür 30 [30, 33, 36, 35] sunuyor. Apple girişi kullanıcının gerçek Mac'inde henüz
+  denenmedi (şifre girilmedi). Geliştirme kancaları: `BURROW_DEMO_PROTOCOL=vnc`, `BURROW_DEMO_INPUT=1`,
+  `BURROW_DEMO_OPEN=device-mac`.
+- Not (test hatası): `cliclick` ile gönderilen tuşlar Burrow öne gelmediği için kullanıcının ön plandaki uygulamasına
+  gitmiş olabilir; panodaki metin yerel test sunucusuna ulaştı, log silindi. Sentetik masaüstü girdisi artık
+  kullanılmıyor; girdi testleri uygulama içi kancayla yapılıyor ve demo VNC cihazında pano kapalı.
+
 - **Karar:** MacBook hedefleri için gömülü, kendi yazdığımız VNC (RFB) istemcisi; Apple Uzaktan Yönetim girişi + VNC
   şifresi, tünel üzerinden, aynı pencere/sekme deneyimi. libvncclient GPL olduğu için elendi. ADR 0008.
 

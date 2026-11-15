@@ -120,7 +120,7 @@ Item {
                     Text {
                         id: osText
                         anchors.centerIn: parent
-                        text: root.os === "ubuntu" ? "Ubuntu" : "Windows"
+                        text: root.os === "ubuntu" ? "Ubuntu" : root.os === "macos" ? "macOS" : "Windows"
                         color: Theme.onImage
                         font.pixelSize: 11
                         font.weight: Font.Medium

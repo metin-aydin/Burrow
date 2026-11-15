@@ -12,6 +12,7 @@
 #include <atomic>
 
 #include "rdp/KeyMapper.h"
+#include "rdp/RemoteSession.h"
 #include "rdp/RdpClipboard.h"
 #include <functional>
 
@@ -20,22 +21,9 @@ struct rdp_gdi;
 
 // One RDP connection, driven by FreeRDP 3 on a worker thread (ADR 0001).
 // The decoded desktop is kept in `frame()`; input is sent from the GUI thread.
-class RdpSession : public QObject
+class RdpSession : public RemoteSession
 {
     Q_OBJECT
-    Q_PROPERTY(QString deviceId READ deviceId CONSTANT)
-    Q_PROPERTY(QString title READ title CONSTANT)
-    Q_PROPERTY(QString state READ state NOTIFY stateChanged)       // connecting | connected | closed
-    Q_PROPERTY(QString error READ error NOTIFY stateChanged)
-    Q_PROPERTY(QString phase READ phase NOTIFY phaseChanged)   // connecting | certificate | signing_in | opening | connected
-    Q_PROPERTY(QSize desktopSize READ desktopSize NOTIFY desktopSizeChanged)
-    // [{x, y, width, height}] in desktop pixels when the desktop has several monitors: the layout the
-    // server reports (GFX reset), else the one requested if the desktop matches it; [] = one picture.
-    Q_PROPERTY(QVariantList monitors READ monitors NOTIFY desktopSizeChanged)
-    // True once the server accepted the multi-monitor layout (some, like GNOME screen sharing, don't).
-    Q_PROPERTY(bool multiMonitor READ multiMonitor NOTIFY desktopSizeChanged)
-    Q_PROPERTY(bool wasConnected READ wasConnected NOTIFY stateChanged)
-    Q_PROPERTY(int scale READ scale CONSTANT)   // percent: 100 logical pixels, 200 Retina
 public:
     struct Params
     {
@@ -59,37 +47,37 @@ public:
     explicit RdpSession(Params params, QObject *parent = nullptr);
     ~RdpSession() override;
 
-    QString deviceId() const { return m_p.deviceId; }
-    QString title() const { return m_p.title; }
-    QString state() const { return m_state; }
-    QString error() const { return m_error; }
-    QString phase() const { return m_phase; }
+    QString deviceId() const override { return m_p.deviceId; }
+    QString title() const override { return m_p.title; }
+    QString state() const override { return m_state; }
+    QString error() const override { return m_error; }
+    QString phase() const override { return m_phase; }
     void setPhase(const QString &phase);   // any thread
-    QSize desktopSize() const;
-    QVariantList monitors() const;
-    bool multiMonitor() const;
-    bool wasConnected() const { return m_wasConnected; }
+    QSize desktopSize() const override;
+    QVariantList monitors() const override;
+    bool multiMonitor() const override;
+    bool wasConnected() const override { return m_wasConnected; }
 
-    void start();
-    Q_INVOKABLE void close();
+    void start() override;
+    void close() override;
     // Answer to certificatePrompt (GUI thread).
-    Q_INVOKABLE void answerCertificate(bool trust);
+    void answerCertificate(bool trust) override;
 
     // Thread-safe copy of the current desktop picture.
-    QImage frame() const;
-    QImage frame(const QRect &part) const;   // copy of just that part (a monitor)
+    QImage frame() const override;
+    QImage frame(const QRect &part) const override;   // copy of just that part (a monitor)
 
     // Input, in remote desktop coordinates. Called from the GUI thread.
-    void sendMouseMove(int x, int y);
-    void sendMouseButton(Qt::MouseButton button, bool down, int x, int y);
-    void sendWheel(int delta, bool horizontal, int x, int y);
-    void sendKey(unsigned scancode, bool down);   // raw scancode; Mac shortcut mapping applied here
-    void releaseKeys();
+    void sendMouseMove(int x, int y) override;
+    void sendMouseButton(Qt::MouseButton button, bool down, int x, int y) override;
+    void sendWheel(int delta, bool horizontal, int x, int y) override;
+    void sendKey(unsigned scancode, bool down) override;   // raw scancode; Mac shortcut mapping applied here
+    void releaseKeys() override;
     // Asks the server to resize the desktop (pixels, scale %). Debounce in the caller.
-    void requestResize(const QSize &pixels, int scale);
+    void requestResize(const QSize &pixels, int scale) override;
     // With several monitors: asks for monitor `index` to have this size (the window showing it). The
     // whole layout is sent shortly after the last change, monitors side by side in index order.
-    void requestMonitorSize(int index, const QSize &pixels);
+    void requestMonitorSize(int index, const QSize &pixels) override;
 
     // FreeRDP callbacks (worker thread).
     void onPaint(rdp_gdi *gdi, int x, int y, int w, int h);
@@ -101,16 +89,7 @@ public:
     void *origResetGraphics = nullptr;   // the GDI's GFX reset handler we chain to
     int connectSocket(const char *hostname, int port);   // TCPConnect replacement (worker thread)
     bool clipboardEnabled() const { return m_clip && m_clip->enabled(); }
-    int scale() const { return m_p.scale; }
-
-signals:
-    void stateChanged();
-    void phaseChanged();
-    void desktopSizeChanged();
-    void frameUpdated(const QRect &rect);
-    void certificatePrompt(const QString &address, const QString &fingerprint);
-    void certificateTrusted(const QString &deviceId, const QString &pin);
-    void closed(RdpSession *session);
+    int scale() const override { return m_p.scale; }
 
 private:
     void run();

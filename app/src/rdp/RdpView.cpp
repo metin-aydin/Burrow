@@ -43,7 +43,7 @@ void RdpView::geometryChange(const QRectF &newGeometry, const QRectF &oldGeometr
         m_resizeTimer.start();
 }
 
-void RdpView::setSession(RdpSession *s)
+void RdpView::setSession(RemoteSession *s)
 {
     if (m_session == s)
         return;
@@ -51,21 +51,21 @@ void RdpView::setSession(RdpSession *s)
         disconnect(m_session, nullptr, this, nullptr);
     m_session = s;
     if (s) {
-        connect(s, &RdpSession::frameUpdated, this, [this](const QRect &r) {
+        connect(s, &RemoteSession::frameUpdated, this, [this](const QRect &r) {
             // Only updates that touch the part this view shows; at most one copy per frame interval.
             if (!m_frame.isNull() && !r.intersects(sourceRect()))
                 return;
             if (!m_frameTimer.isActive())
                 m_frameTimer.start();
         });
-        connect(s, &RdpSession::desktopSizeChanged, this, [this] {
+        connect(s, &RemoteSession::desktopSizeChanged, this, [this] {
             refreshFrame();
             if (m_monitor >= 0)
                 m_resizeTimer.start();   // monitors became known (or changed): fit ours to this view
         });
         // Show the current picture right away: a static remote screen may not send updates for a while.
         refreshFrame();
-        connect(s, &RdpSession::stateChanged, this, [this] {
+        connect(s, &RemoteSession::stateChanged, this, [this] {
             if (m_session && m_session->state() == QLatin1String("connected"))
                 m_resizeTimer.start();   // match the window as soon as the display channel is up
         });
@@ -212,8 +212,75 @@ unsigned RdpView::scancodeFor(const QKeyEvent *e) const
 #endif
 }
 
+quint32 RdpView::keysymFor(const QKeyEvent *e)
+{
+#ifdef Q_OS_MACOS
+    // Modifiers by physical key (Qt swaps Cmd and Ctrl in Qt::Key): Cmd is Super (Command on a Mac).
+    switch (e->nativeVirtualKey()) {
+    case 55: return 0xffeb;  case 54: return 0xffec;   // Command
+    case 56: return 0xffe1;  case 60: return 0xffe2;   // Shift
+    case 58: return 0xffe9;  case 61: return 0xffea;   // Option = Alt
+    case 59: return 0xffe3;  case 62: return 0xffe4;   // Control
+    case 57: return 0xffe5;                            // Caps Lock
+    default: break;
+    }
+#endif
+    switch (e->key()) {
+    case Qt::Key_Escape: return 0xff1b;
+    case Qt::Key_Tab: case Qt::Key_Backtab: return 0xff09;
+    case Qt::Key_Backspace: return 0xff08;
+    case Qt::Key_Return: return 0xff0d;
+    case Qt::Key_Enter: return 0xff8d;
+    case Qt::Key_Insert: return 0xff63;
+    case Qt::Key_Delete: return 0xffff;
+    case Qt::Key_Home: return 0xff50;
+    case Qt::Key_End: return 0xff57;
+    case Qt::Key_PageUp: return 0xff55;
+    case Qt::Key_PageDown: return 0xff56;
+    case Qt::Key_Left: return 0xff51;
+    case Qt::Key_Up: return 0xff52;
+    case Qt::Key_Right: return 0xff53;
+    case Qt::Key_Down: return 0xff54;
+    case Qt::Key_Shift: return 0xffe1;
+    case Qt::Key_Control: return 0xffe3;
+    case Qt::Key_Alt: return 0xffe9;
+    case Qt::Key_Meta: return 0xffeb;
+    case Qt::Key_CapsLock: return 0xffe5;
+    default: break;
+    }
+    if (e->key() >= Qt::Key_F1 && e->key() <= Qt::Key_F35)
+        return 0xffbe + quint32(e->key() - Qt::Key_F1);
+    // The character the key produces, so the remote side gets it whatever its keyboard layout.
+    const QString text = e->text();
+    if (!text.isEmpty() && text.at(0).unicode() >= 0x20 && text.at(0).unicode() != 0x7f
+        && !(e->modifiers() & (Qt::ControlModifier | Qt::MetaModifier))) {
+        const char32_t cp = text.toUcs4().value(0);
+        return cp <= 0xff ? quint32(cp) : 0x01000000u | quint32(cp);
+    }
+    // With Cmd/Ctrl the text is a control code or empty: send the plain key (Cmd+C → Super + c).
+    const int k = e->key();
+    if (k >= Qt::Key_A && k <= Qt::Key_Z)
+        return quint32('a' + (k - Qt::Key_A));
+    if (k >= 0x20 && k < 0x7f)
+        return quint32(k);
+    return 0;
+}
+
 void RdpView::keyPressEvent(QKeyEvent *e)
 {
+    if (m_session && m_session->usesKeysyms()) {
+        // The same keysym goes up as went down, even if modifiers changed in between.
+        const quint32 native = e->nativeVirtualKey() ? e->nativeVirtualKey() : quint32(e->key());
+        quint32 ks = m_keysymsDown.value(native);
+        if (!ks)
+            ks = keysymFor(e);
+        if (ks) {
+            m_keysymsDown.insert(native, ks);
+            m_session->sendKeysym(ks, true);
+        }
+        e->accept();
+        return;
+    }
     // Auto-repeat is sent as repeated key-downs, like a real keyboard.
     if (m_session)
         if (const unsigned sc = scancodeFor(e))
@@ -223,6 +290,15 @@ void RdpView::keyPressEvent(QKeyEvent *e)
 
 void RdpView::keyReleaseEvent(QKeyEvent *e)
 {
+    if (m_session && m_session->usesKeysyms()) {
+        if (!e->isAutoRepeat()) {
+            const quint32 native = e->nativeVirtualKey() ? e->nativeVirtualKey() : quint32(e->key());
+            if (const quint32 ks = m_keysymsDown.take(native))
+                m_session->sendKeysym(ks, false);
+        }
+        e->accept();
+        return;
+    }
     if (m_session && !e->isAutoRepeat()) {
         if (const unsigned sc = scancodeFor(e))
             m_session->sendKey(sc, false);
@@ -235,5 +311,6 @@ void RdpView::focusOutEvent(QFocusEvent *e)
     // Don't leave modifiers stuck on the remote side when switching apps.
     if (m_session)
         m_session->releaseKeys();
+    m_keysymsDown.clear();
     QQuickPaintedItem::focusOutEvent(e);
 }

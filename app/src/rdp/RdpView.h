@@ -1,24 +1,25 @@
 #pragma once
 
+#include <QHash>
 #include <QPointer>
 #include <QQuickPaintedItem>
 #include <QTimer>
 
-#include "rdp/RdpSession.h"
+#include "rdp/RemoteSession.h"
 
-// Shows an RdpSession's desktop (scaled to fit, aspect kept) and forwards mouse
+// Shows a RemoteSession's desktop (scaled to fit, aspect kept) and forwards mouse
 // and keyboard input to it.
 class RdpView : public QQuickPaintedItem
 {
     Q_OBJECT
-    Q_PROPERTY(RdpSession *session READ session WRITE setSession NOTIFY sessionChanged)
+    Q_PROPERTY(RemoteSession *session READ session WRITE setSession NOTIFY sessionChanged)
     // Index into session.monitors to show only that display's part (-1 = the whole desktop).
     Q_PROPERTY(int monitor READ monitor WRITE setMonitor NOTIFY monitorChanged)
 public:
     explicit RdpView(QQuickItem *parent = nullptr);
 
-    RdpSession *session() const { return m_session; }
-    void setSession(RdpSession *s);
+    RemoteSession *session() const { return m_session; }
+    void setSession(RemoteSession *s);
     int monitor() const { return m_monitor; }
     void setMonitor(int m);
 
@@ -47,8 +48,10 @@ private:
     QRectF targetRect() const;
     QPoint toRemote(const QPointF &p) const;
     unsigned scancodeFor(const QKeyEvent *e) const;
+    static quint32 keysymFor(const QKeyEvent *e);   // X keysym for VNC sessions
+    QHash<quint32, quint32> m_keysymsDown;          // native key -> keysym sent on press
 
-    QPointer<RdpSession> m_session;
+    QPointer<RemoteSession> m_session;
     QImage m_frame;
     QPoint m_wheelAccum;
     QTimer m_resizeTimer;

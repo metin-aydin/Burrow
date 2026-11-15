@@ -55,7 +55,8 @@ struct Device
 {
     QString id;
     QString name;
-    QString os = QStringLiteral("windows");          // windows | ubuntu
+    QString os = QStringLiteral("windows");          // windows | ubuntu | macos
+    QString protocol = QStringLiteral("rdp");        // rdp | vnc (ADR 0008; Macs use VNC)
     QString host;
     int port = 3389;
     QString username;

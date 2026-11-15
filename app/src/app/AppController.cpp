@@ -245,7 +245,7 @@ QString AppController::finishUnlock(VaultStore::Result r)
 void AppController::shutdown()
 {
     m_tunnelMgr.stopAll();
-    for (RdpSession *s : std::as_const(m_sessions)) {
+    for (RemoteSession *s : std::as_const(m_sessions)) {
         s->close();
         if (m_store.isOpen())
             setPreview(s->deviceId(), s->frame());
@@ -260,7 +260,7 @@ void AppController::lock()
     m_tunnelMgr.stopAll();
     m_sessionTunnels.clear();
     m_pending.clear();
-    for (RdpSession *s : std::as_const(m_sessions)) {
+    for (RemoteSession *s : std::as_const(m_sessions)) {
         s->close();
         setPreview(s->deviceId(), s->frame());
     }
@@ -441,7 +441,7 @@ QString AppController::connectDevice(const QString &id, const QString &username,
             dev = &d;
     if (!dev)
         return tr("The device no longer exists.");
-    for (RdpSession *s : std::as_const(m_sessions))
+    for (RemoteSession *s : std::as_const(m_sessions))
         if (s->deviceId() == id)
             return tr("%1 is already open.").arg(dev->name);
     for (const Pending &p : std::as_const(m_pending))
@@ -724,6 +724,22 @@ void AppController::stopTunnelIfIdle(const QString &tunnelId)
 QString AppController::startSession(const Model::Device &dev, const QString &user, const QString &pass,
                                     const QString &tunnelId)
 {
+    if (dev.protocol == QLatin1String("vnc")) {
+        VncSession::Params v;
+        v.deviceId = dev.id;
+        v.title = dev.name;
+        v.host = dev.host;
+        v.port = quint16(dev.port);
+        v.username = user;
+        v.password = pass;
+        v.clipboard = dev.clipboard;
+        if (!tunnelId.isEmpty()) {
+            v.tunnelHandle = m_tunnelMgr.handle(tunnelId);
+            if (v.tunnelHandle <= 0)
+                return tr("Couldn't open a connection through the tunnel.");
+        }
+        return registerSession(new VncSession(v, this), tunnelId);
+    }
     RdpSession::Params p;
     p.deviceId = dev.id;
     p.title = dev.name;
@@ -791,17 +807,21 @@ QString AppController::startSession(const Model::Device &dev, const QString &use
     p.lockOnDisconnect = dev.lockOnDisconnect;   // Win+L on Windows, Super+L on GNOME
     p.knownFingerprint = dev.certFingerprint;
 
-    auto *session = new RdpSession(p, this);
+    return registerSession(new RdpSession(p, this), tunnelId);
+}
+
+QString AppController::registerSession(RemoteSession *session, const QString &tunnelId)
+{
     m_sessions.append(session);
     if (!tunnelId.isEmpty())
         m_sessionTunnels.insert(session, tunnelId);
-    connect(session, &RdpSession::certificateTrusted, this, [this](const QString &devId, const QString &fp) {
+    connect(session, &RemoteSession::certificateTrusted, this, [this](const QString &devId, const QString &fp) {
         for (Model::Device &d : m_store.doc().devices)
             if (d.id == devId && d.certFingerprint.isEmpty())   // write-once; replace only via forgetCertificate
                 d.certFingerprint = fp;
         persist();
     });
-    connect(session, &RdpSession::closed, this, [this](RdpSession *s) {
+    connect(session, &RemoteSession::closed, this, [this](RemoteSession *s) {
         // The VPN only stays up while a session uses it (many gateways allow one session per user).
         const QString tid = m_sessionTunnels.take(s);
         if (!tid.isEmpty())

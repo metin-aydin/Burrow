@@ -10,6 +10,8 @@ BDialog {
     property var d: ({})
     property string error
     property string tab: "general"
+    // Macs are reached over VNC (Screen Sharing, ADR 0008); everything else over RDP.
+    readonly property bool isMac: osSeg.value === "macos"
 
     function openFor(id) {
         d = id ? App.device(id) : App.newDevice()
@@ -31,10 +33,12 @@ BDialog {
         nameField.field.forceActiveFocus()
     }
 
+    function demoMac() { osSeg.value = "macos" }   // development (--seed-demo, BURROW_DEMO_OPEN=device-mac)
+
     function save() {
         const m = Object.assign({}, d, {
             name: nameField.text, host: hostField.text, port: parseInt(portField.text) || 3389,
-            os: osSeg.value, tunnelId: tunnelCombo.value || "",
+            os: osSeg.value, protocol: isMac ? "vnc" : "rdp", tunnelId: tunnelCombo.value || "",
             username: userField.text, domain: domainField.text,
             savePassword: savePw.checked, password: savePw.checked ? pwField.text : "",
             autoLogin: savePw.checked && autoLogin.checked,
@@ -50,9 +54,12 @@ BDialog {
     Segmented {
         id: tabSeg
         Layout.fillWidth: true
-        options: [{ text: qsTr("General"), value: "general" },
-                  { text: qsTr("Session"), value: "session" },
-                  { text: qsTr("Clipboard And Keyboard"), value: "input" }]
+        // The Session settings are all RDP ones; a Mac has none of them.
+        options: root.isMac ? [{ text: qsTr("General"), value: "general" },
+                               { text: qsTr("Clipboard"), value: "input" }]
+                            : [{ text: qsTr("General"), value: "general" },
+                               { text: qsTr("Session"), value: "session" },
+                               { text: qsTr("Clipboard And Keyboard"), value: "input" }]
         value: root.tab
         onValueChanged: root.tab = value
     }
@@ -70,8 +77,15 @@ BDialog {
                 Text { text: qsTr("System"); color: Theme.textSecondary; font.pixelSize: 12; font.weight: Font.Medium }
                 Segmented {
                     id: osSeg
-                    options: [{ text: "Windows", value: "windows" }, { text: "Ubuntu", value: "ubuntu" }]
+                    options: [{ text: "Windows", value: "windows" }, { text: "Ubuntu", value: "ubuntu" },
+                              { text: "macOS", value: "macos" }]
                     value: root.d.os || "windows"
+                    // Follow the protocol's usual port unless a custom one was entered.
+                    onValueChanged: {
+                        if (value === "macos" && portField.text === "3389") portField.text = "5900"
+                        else if (value !== "macos" && portField.text === "5900") portField.text = "3389"
+                        if (value === "macos" && root.tab === "session") { root.tab = "general"; tabSeg.value = "general" }
+                    }
                 }
             }
         }
@@ -83,8 +97,16 @@ BDialog {
         BCombo { id: tunnelCombo; Layout.fillWidth: true; label: qsTr("Connection"); value: root.d.tunnelId || "" }
         RowLayout {
             spacing: 12
-            BField { id: userField; Layout.fillWidth: true; Layout.preferredWidth: 300; label: qsTr("Username"); placeholder: qsTr("Asked when connecting if left empty"); text: root.d.username || "" }
-            BField { id: domainField; Layout.fillWidth: true; Layout.preferredWidth: 150; label: qsTr("Domain"); placeholder: qsTr("Optional"); text: root.d.domain || "" }
+            BField { id: userField; Layout.fillWidth: true; Layout.preferredWidth: 300; label: qsTr("Username"); placeholder: root.isMac ? qsTr("The Mac's user name") : qsTr("Asked when connecting if left empty"); text: root.d.username || "" }
+            BField { id: domainField; visible: !root.isMac; Layout.fillWidth: true; Layout.preferredWidth: 150; label: qsTr("Domain"); placeholder: qsTr("Optional"); text: root.d.domain || "" }
+        }
+        Text {
+            Layout.fillWidth: true
+            visible: root.isMac
+            wrapMode: Text.WordWrap
+            color: Theme.textSecondary
+            font.pixelSize: 12
+            text: qsTr("Turn on Screen Sharing on the Mac (System Settings → General → Sharing) and sign in with the Mac's user name and password.")
         }
         BSwitch {
             id: savePw
@@ -103,7 +125,7 @@ BDialog {
         }
         BSwitch {
             id: autoLogin
-            visible: savePw.checked
+            visible: savePw.checked && !root.isMac
             Layout.fillWidth: true
             title: qsTr("Automatic Sign-In")
             description: qsTr("Signs in with the saved password when connecting; if a login screen appears, the password is typed there too.")
@@ -190,8 +212,17 @@ BDialog {
                       { text: qsTr("Off"), value: "off" }]
             value: root.d.clipboard || "both"
         }
+        Text {
+            Layout.fillWidth: true
+            visible: root.isMac
+            wrapMode: Text.WordWrap
+            color: Theme.textSecondary
+            font.pixelSize: 12
+            text: qsTr("Keys reach the Mac as they are: Cmd stays Cmd. Clipboard sharing covers plain text.")
+        }
         BCombo {
             id: keyCombo
+            visible: !root.isMac
             Layout.fillWidth: true
             label: qsTr("Mac Shortcuts")
             options: [{ text: qsTr("Translate shortcuts (Cmd+C → Ctrl+C)"), value: "shortcuts" },

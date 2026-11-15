@@ -6,6 +6,7 @@
 #include "app/Updater.h"
 #include "rdp/KeyMapper.h"
 #include "rdp/RdpClipboard.h"
+#include "vnc/VncSession.h"
 #include <QImage>
 #include <QtEndian>
 #include "net/NetCore.h"
@@ -15,6 +16,23 @@ class TestVault : public QObject
 {
     Q_OBJECT
 private slots:
+    // VNC password response (DES, key bits reversed); expected value from `openssl enc -des-ecb`.
+    void vncAuthResponse()
+    {
+        QByteArray challenge;
+        for (int i = 0; i < 16; ++i)
+            challenge.append(char(i));
+        QCOMPARE(VncSession::vncAuthResponse(challenge, QStringLiteral("testpass")).toHex(),
+                 QByteArray("cb15988006ca0c81bcf3fdefab2c0c58"));
+    }
+    void vncKeysyms()
+    {
+        QCOMPARE(VncSession::keysymForScancode(0x1e), quint32('a'));
+        QCOMPARE(VncSession::keysymForScancode(0x1c), quint32(0xff0d));
+        QCOMPARE(VncSession::keysymForScancode(0x15b), quint32(0xffeb));
+        QCOMPARE(VncSession::keysymForScancode(0x3b), quint32(0xffbe));
+        QCOMPARE(VncSession::keysymForScancode(0x58), quint32(0xffc9));
+    }
     void initTestCase()
     {
         QVERIFY(m_dir.isValid());

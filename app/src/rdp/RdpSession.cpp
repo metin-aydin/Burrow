@@ -238,7 +238,7 @@ void setMonitorDefs(rdpSettings *s, const QList<QRect> &rects, int scale, bool s
 } // namespace
 
 RdpSession::RdpSession(Params params, QObject *parent)
-    : QObject(parent)
+    : RemoteSession(parent)
     , m_p(std::move(params))
     , m_keys(KeyMapper::modeFromString(m_p.keyMap))
 {

@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     engine.addImageProvider(QStringLiteral("preview"), new PreviewProvider(controller.store()));
     qmlRegisterSingletonInstance("Burrow.Core", 1, 0, "App", &controller);
     qmlRegisterType<RdpView>("Burrow.Core", 1, 0, "RdpView");
-    qmlRegisterUncreatableType<RdpSession>("Burrow.Core", 1, 0, "RdpSession", QStringLiteral("Created by App"));
+    qmlRegisterUncreatableType<RemoteSession>("Burrow.Core", 1, 0, "RemoteSession", QStringLiteral("Created by App"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app,
                      [] { QCoreApplication::exit(1); }, Qt::QueuedConnection);
     engine.loadFromModule("Burrow", "Main");
@@ -118,6 +118,12 @@ int main(int argc, char *argv[])
                 d["username"] = target.at(2);
                 d["password"] = target.at(3);
                 d["savePassword"] = true;
+                // BURROW_DEMO_PROTOCOL=vnc makes it a Mac reached over VNC (ADR 0008).
+                if (qEnvironmentVariable("BURROW_DEMO_PROTOCOL") == QLatin1String("vnc")) {
+                    d["protocol"] = QStringLiteral("vnc");
+                    d["os"] = QStringLiteral("macos");
+                    d["clipboard"] = QStringLiteral("off");   // never send this Mac's clipboard to a test server
+                }
                 // BURROW_DEMO_DISPLAYS=all spans every display (multi-monitor test).
                 d["displays"] = qEnvironmentVariable("BURROW_DEMO_DISPLAYS", QStringLiteral("window"));
                 // BURROW_DEMO_LAYOUT=<json> pre-sets the saved monitor layout (tabs/windows restore test).
@@ -127,10 +133,31 @@ int main(int argc, char *argv[])
                 controller.saveDevice(d);
                 const QString id = controller.store()->doc().devices.constLast().id;
                 QTimer::singleShot(500, &controller, [&controller, id] { controller.connectDevice(id); });
+                // BURROW_DEMO_INPUT=1 sends a fixed mouse/key sequence once connected (input test, no
+                // synthetic events on the desktop).
+                if (qEnvironmentVariableIntValue("BURROW_DEMO_INPUT"))
+                    QObject::connect(&controller, &AppController::sessionOpened, &controller, [](RemoteSession *s) {
+                        QObject::connect(s, &RemoteSession::stateChanged, s, [s] {
+                            if (s->state() != QLatin1String("connected"))
+                                return;
+                            qInfo("demo: sending test input");
+                            QTimer::singleShot(800, s, [s] {
+                                s->sendMouseMove(10, 10);
+                                s->sendMouseButton(Qt::LeftButton, true, 100, 120);
+                                s->sendMouseButton(Qt::LeftButton, false, 100, 120);
+                                s->sendWheel(-120, false, 100, 120);
+                                const quint32 keys[] = {'H', 'i', 0xff0d};
+                                for (quint32 k : keys) { s->sendKeysym(k, true); s->sendKeysym(k, false); }
+                                s->sendKeysym(0xffeb, true); s->sendKeysym('c', true);
+                                s->sendKeysym('c', false); s->sendKeysym(0xffeb, false);
+                                s->sendKey(0x1e, true); s->sendKey(0x1e, false);   // scancode path: 'a'
+                            });
+                        });
+                    });
                 // BURROW_DEMO_TRUST=1 answers the certificate prompt automatically (test server only).
                 if (qEnvironmentVariableIntValue("BURROW_DEMO_TRUST"))
-                    QObject::connect(&controller, &AppController::sessionOpened, &controller, [](RdpSession *s) {
-                        QObject::connect(s, &RdpSession::certificatePrompt, s, [s] { s->answerCertificate(true); });
+                    QObject::connect(&controller, &AppController::sessionOpened, &controller, [](RemoteSession *s) {
+                        QObject::connect(s, &RemoteSession::certificatePrompt, s, [s] { s->answerCertificate(true); });
                     });
             });
         // BURROW_GRAB=<file.png> saves every open window after the delay (main window first, then

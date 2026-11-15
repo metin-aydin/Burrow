@@ -2,6 +2,12 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Gui Widgets Network Concurrent Quick Qu
 find_package(FreeRDP 3 REQUIRED)
 find_package(FreeRDP-Client 3 REQUIRED)
 find_package(WinPR 3 REQUIRED)
+# VNC (ADR 0008): Apple sign-in (DH + AES), VNC password (DES) and ZRLE (zlib).
+if(APPLE AND NOT OPENSSL_ROOT_DIR AND EXISTS /opt/homebrew/opt/openssl@3)
+    set(OPENSSL_ROOT_DIR /opt/homebrew/opt/openssl@3)
+endif()
+find_package(OpenSSL 3 REQUIRED COMPONENTS Crypto)
+find_package(ZLIB REQUIRED)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -30,6 +36,9 @@ qt_add_executable(burrow
     src/rdp/RdpClipboard.h
     src/rdp/RdpSession.cpp
     src/rdp/RdpSession.h
+    src/rdp/RemoteSession.h
+    src/vnc/VncSession.cpp
+    src/vnc/VncSession.h
     src/rdp/RdpView.cpp
     src/rdp/RdpView.h
     src/vault/Model.cpp
@@ -74,7 +83,7 @@ target_compile_definitions(burrow PRIVATE BURROW_VERSION="${PROJECT_VERSION}"
 target_link_libraries(burrow PRIVATE Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Concurrent Qt6::Quick Qt6::QuickControls2 Qt6::Svg Qt6::Multimedia netcore::netcore)
 
 message(STATUS "FreeRDP found: ${FreeRDP_VERSION}")
-target_link_libraries(burrow PRIVATE freerdp freerdp-client winpr)
+target_link_libraries(burrow PRIVATE freerdp freerdp-client winpr OpenSSL::Crypto ZLIB::ZLIB)
 target_compile_definitions(burrow PRIVATE BURROW_HAVE_FREERDP=1)
 
 if(APPLE)
@@ -107,14 +116,14 @@ if(Qt6Test_FOUND)
         src/rdp/RdpClipboard.cpp src/rdp/RdpClipboard.h
         src/app/AppController.cpp src/app/AppController.h src/app/ListModels.cpp src/app/ListModels.h
         src/app/PreviewProvider.cpp src/app/PreviewProvider.h src/app/TunnelManager.cpp src/app/TunnelManager.h
-        src/rdp/RdpSession.cpp src/rdp/RdpSession.h src/rdp/FreeRdpEngine.cpp src/rdp/FreeRdpEngine.h src/rdp/RdpEngine.h
+        src/rdp/RdpSession.cpp src/rdp/RdpSession.h src/rdp/RemoteSession.h src/vnc/VncSession.cpp src/vnc/VncSession.h src/rdp/FreeRdpEngine.cpp src/rdp/FreeRdpEngine.h src/rdp/RdpEngine.h
         $<IF:$<BOOL:${APPLE}>,src/platform/Biometric_mac.mm,src/platform/Biometric_stub.cpp>)
     target_compile_definitions(tst_vault PRIVATE BURROW_DEMO_ASSETS="${CMAKE_SOURCE_DIR}/docs/assets/demo")
     target_compile_definitions(tst_vault PRIVATE BURROW_TEST_DATA="${CMAKE_CURRENT_SOURCE_DIR}/tests"
                                                  BURROW_VERSION="${PROJECT_VERSION}")
     set_target_properties(tst_vault PROPERTIES MACOSX_BUNDLE OFF)
     target_include_directories(tst_vault PRIVATE src)
-    target_link_libraries(tst_vault PRIVATE Qt6::Gui Qt6::Network Qt6::Concurrent Qt6::Quick Qt6::Test netcore::netcore freerdp freerdp-client winpr)
+    target_link_libraries(tst_vault PRIVATE Qt6::Gui Qt6::Network Qt6::Concurrent Qt6::Quick Qt6::Test netcore::netcore freerdp freerdp-client winpr OpenSSL::Crypto ZLIB::ZLIB)
     if(APPLE)
         set_source_files_properties(src/platform/Biometric_mac.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc")
         target_link_libraries(tst_vault PRIVATE "-framework Foundation" "-framework LocalAuthentication" "-framework Security")

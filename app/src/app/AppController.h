@@ -11,6 +11,7 @@
 #include "app/TunnelManager.h"
 #include "app/Updater.h"
 #include "rdp/RdpSession.h"
+#include "vnc/VncSession.h"
 #include "vault/VaultStore.h"
 
 // The single object QML talks to (exposed as the `App` singleton). Owns the
@@ -145,7 +146,7 @@ signals:
     void languageChanged();
     void themeChanged();
     void autoLockChanged();
-    void sessionOpened(RdpSession *session);
+    void sessionOpened(RemoteSession *session);
     void tunnelStatesChanged();
     void tunnelLoginRequired(const QString &tunnelId, const QString &name, const QString &url);
     void tunnelOtpRequired(const QString &tunnelId, const QString &name, const QString &prompt);
@@ -159,6 +160,7 @@ private:
     QString persist();
     void reloadModels();
     QString blobPath(const QString &name) const;
+    QString registerSession(RemoteSession *session, const QString &tunnelId);   // takes ownership
     QString startSession(const Model::Device &dev, const QString &user, const QString &pass,
                          const QString &tunnelId);
     void onTunnelState(const QString &tunnelId, const QString &state, const QString &error);
@@ -172,11 +174,11 @@ private:
     Updater m_updater;
     TunnelManager m_tunnelMgr{&m_store};
     QList<Pending> m_pending;
-    QHash<RdpSession *, QString> m_sessionTunnels;   // session -> tunnel it runs through
+    QHash<RemoteSession *, QString> m_sessionTunnels;   // session -> tunnel it runs through
     QSet<QString> m_tunnelTesting;
     QTimer m_idleTimer;                    // tunnels opened by "Test Connection"
     QString m_demoOpen;
-    QList<RdpSession *> m_sessions;
+    QList<RemoteSession *> m_sessions;
     QTranslator m_translator;
     QQmlEngine *m_engine = nullptr;
 };

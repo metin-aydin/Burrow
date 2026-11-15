@@ -63,6 +63,7 @@ QtObject {
     readonly property string fontFamily: Qt.application.font.family
 
     function osColors(os) {
-        return os === "ubuntu" ? ["#E9541F", "#7A1F6F"] : ["#0A6FD1", "#4B2AA8"]
+        return os === "ubuntu" ? ["#E9541F", "#7A1F6F"]
+             : os === "macos" ? ["#3B4252", "#1C2230"] : ["#0A6FD1", "#4B2AA8"]
     }
 }

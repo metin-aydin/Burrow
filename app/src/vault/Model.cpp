@@ -73,7 +73,7 @@ Tunnel tunnelFromJsonImpl(const QJsonObject &o)
 
 QJsonObject deviceToJsonImpl(const Device &d)
 {
-    return {{"id", d.id}, {"name", d.name}, {"os", d.os}, {"host", d.host}, {"port", d.port},
+    return {{"id", d.id}, {"name", d.name}, {"os", d.os}, {"protocol", d.protocol}, {"host", d.host}, {"port", d.port},
             {"username", d.username}, {"domain", d.domain},
             {"password", d.savePassword ? d.password : QString()},
             {"savePassword", d.savePassword}, {"autoLogin", d.autoLogin},
@@ -90,6 +90,7 @@ Device deviceFromJsonImpl(const QJsonObject &o)
     d.id = o.value("id").toString();
     d.name = o.value("name").toString();
     d.os = o.value("os").toString(d.os);
+    d.protocol = o.value("protocol").toString(d.protocol) == QLatin1String("vnc") ? QStringLiteral("vnc") : QStringLiteral("rdp");
     d.host = o.value("host").toString();
     d.port = o.value("port").toInt(d.port);
     d.username = o.value("username").toString();

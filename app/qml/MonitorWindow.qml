@@ -6,7 +6,7 @@ import Burrow.Core
 // the monitor back as a tab; the connection stays open.
 Window {
     id: mw
-    property RdpSession session: null
+    property RemoteSession session: null
     property int monitor: 0
     property string deviceName
     property string displayName

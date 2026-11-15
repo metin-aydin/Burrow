@@ -104,18 +104,19 @@
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="738"/>
+        <location filename="../src/app/AppController.cpp" line="739"/>
+        <location filename="../src/app/AppController.cpp" line="754"/>
         <source>Couldn&apos;t open a connection through the tunnel.</source>
         <translation>Tünel üzerinden bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="869"/>
+        <location filename="../src/app/AppController.cpp" line="889"/>
         <source>The profile name can&apos;t be empty.</source>
         <translation>Profil adı boş olamaz.</translation>
     </message>
     <message>
         <location filename="../src/app/AppController.cpp" line="515"/>
-        <location filename="../src/app/AppController.cpp" line="873"/>
+        <location filename="../src/app/AppController.cpp" line="893"/>
         <source>Server and username can&apos;t be empty.</source>
         <translation>Sunucu ve kullanıcı adı boş olamaz.</translation>
     </message>
@@ -125,47 +126,47 @@
         <translation>Test için bir cihaz host adı gir.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="876"/>
+        <location filename="../src/app/AppController.cpp" line="896"/>
         <source>The OTP key is invalid.</source>
         <translation>OTP anahtarı geçersiz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="918"/>
+        <location filename="../src/app/AppController.cpp" line="938"/>
         <source>Direct (No Tunnel)</source>
         <translation>Doğrudan (Tünelsiz)</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="952"/>
+        <location filename="../src/app/AppController.cpp" line="972"/>
         <source>Invalid key</source>
         <translation>Geçersiz anahtar</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1053"/>
+        <location filename="../src/app/AppController.cpp" line="1027"/>
         <source>Company VPN</source>
         <translation>Şirket VPN</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1058"/>
+        <location filename="../src/app/AppController.cpp" line="1032"/>
         <source>Home Network</source>
         <translation>Ev Ağı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1064"/>
+        <location filename="../src/app/AppController.cpp" line="1040"/>
         <source>Work PC</source>
         <translation>İş Bilgisayarı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1065"/>
+        <location filename="../src/app/AppController.cpp" line="1041"/>
         <source>Meeting Room</source>
         <translation>Toplantı Odası</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1066"/>
+        <location filename="../src/app/AppController.cpp" line="1042"/>
         <source>Home Desktop</source>
         <translation>Ev Masaüstü</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="1067"/>
+        <location filename="../src/app/AppController.cpp" line="1043"/>
         <source>Lab Server</source>
         <translation>Laboratuvar</translation>
     </message>
@@ -283,228 +284,249 @@
 <context>
     <name>DeviceEditor</name>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="16"/>
+        <location filename="../qml/DeviceEditor.qml" line="18"/>
         <source>Edit Device</source>
         <translation>Cihazı Düzenle</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="16"/>
+        <location filename="../qml/DeviceEditor.qml" line="18"/>
         <source>New Device</source>
         <translation>Yeni Cihaz</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="17"/>
+        <location filename="../qml/DeviceEditor.qml" line="19"/>
         <source>Enter the details of the computer you want to connect to.</source>
         <translation>Bağlanmak istediğin bilgisayarın bilgilerini gir.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="53"/>
+        <location filename="../qml/DeviceEditor.qml" line="58"/>
+        <location filename="../qml/DeviceEditor.qml" line="60"/>
         <source>General</source>
         <translation>Genel</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="54"/>
-        <location filename="../qml/DeviceEditor.qml" line="138"/>
+        <location filename="../qml/DeviceEditor.qml" line="59"/>
+        <source>Clipboard</source>
+        <translation>Pano</translation>
+    </message>
+    <message>
+        <location filename="../qml/DeviceEditor.qml" line="61"/>
+        <location filename="../qml/DeviceEditor.qml" line="160"/>
         <source>Session</source>
         <translation>Oturum</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="55"/>
+        <location filename="../qml/DeviceEditor.qml" line="62"/>
         <source>Clipboard And Keyboard</source>
         <translation>Pano Ve Klavye</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="67"/>
+        <location filename="../qml/DeviceEditor.qml" line="74"/>
         <source>Name</source>
         <translation>Ad</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="67"/>
+        <location filename="../qml/DeviceEditor.qml" line="74"/>
         <source>Work PC</source>
         <translation>İş Bilgisayarı</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="70"/>
+        <location filename="../qml/DeviceEditor.qml" line="77"/>
         <source>System</source>
         <translation>Sistem</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="80"/>
+        <location filename="../qml/DeviceEditor.qml" line="94"/>
         <source>Address</source>
         <translation>Adres</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="81"/>
+        <location filename="../qml/DeviceEditor.qml" line="95"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="83"/>
+        <location filename="../qml/DeviceEditor.qml" line="97"/>
         <source>Connection</source>
         <translation>Bağlantı</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="86"/>
+        <location filename="../qml/DeviceEditor.qml" line="100"/>
         <source>Username</source>
         <translation>Kullanıcı Adı</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="86"/>
+        <location filename="../qml/DeviceEditor.qml" line="100"/>
         <source>Asked when connecting if left empty</source>
         <translation>Boş bırakılırsa bağlanırken sorulur</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="87"/>
+        <location filename="../qml/DeviceEditor.qml" line="100"/>
+        <source>The Mac&apos;s user name</source>
+        <translation>Mac&apos;in kullanıcı adı</translation>
+    </message>
+    <message>
+        <location filename="../qml/DeviceEditor.qml" line="101"/>
         <source>Domain</source>
         <translation>Domain</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="87"/>
+        <location filename="../qml/DeviceEditor.qml" line="101"/>
         <source>Optional</source>
         <translation>Opsiyonel</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="92"/>
+        <location filename="../qml/DeviceEditor.qml" line="109"/>
+        <source>Turn on Screen Sharing on the Mac (System Settings → General → Sharing) and sign in with the Mac&apos;s user name and password.</source>
+        <translation>Mac&apos;te Ekran Paylaşımı&apos;nı aç (Sistem Ayarları → Genel → Paylaşım) ve Mac&apos;in kullanıcı adı ile şifresiyle giriş yap.</translation>
+    </message>
+    <message>
+        <location filename="../qml/DeviceEditor.qml" line="114"/>
         <source>Save Password In Vault</source>
         <translation>Şifreyi Kasada Sakla</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="93"/>
+        <location filename="../qml/DeviceEditor.qml" line="115"/>
         <source>The computer&apos;s password is kept in the encrypted vault.</source>
         <translation>Bilgisayarın şifresi şifreli kasada tutulur.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="100"/>
+        <location filename="../qml/DeviceEditor.qml" line="122"/>
         <source>Password</source>
         <translation>Şifre</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="108"/>
+        <location filename="../qml/DeviceEditor.qml" line="130"/>
         <source>Automatic Sign-In</source>
         <translation>Otomatik Giriş</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="109"/>
+        <location filename="../qml/DeviceEditor.qml" line="131"/>
         <source>Signs in with the saved password when connecting; if a login screen appears, the password is typed there too.</source>
         <translation>Bağlanınca kayıtlı şifreyle giriş yapılır; giriş ekranı çıkarsa şifre oraya da yazılır.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="120"/>
+        <location filename="../qml/DeviceEditor.qml" line="142"/>
         <source>Burrow trusts this computer&apos;s certificate and refuses to connect if it changes.</source>
         <translation>Burrow bu bilgisayarın sertifikasına güveniyor; değişirse bağlanmaz.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="125"/>
+        <location filename="../qml/DeviceEditor.qml" line="147"/>
         <source>Forget Saved Certificate</source>
         <translation>Kayıtlı Sertifikayı Unut</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="139"/>
+        <location filename="../qml/DeviceEditor.qml" line="161"/>
         <source>Connect to the existing session</source>
         <translation>Mevcut oturuma bağlan</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="140"/>
+        <location filename="../qml/DeviceEditor.qml" line="162"/>
         <source>Start a new session</source>
         <translation>Yeni oturum aç</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="141"/>
+        <location filename="../qml/DeviceEditor.qml" line="163"/>
         <source>Ask every time</source>
         <translation>Her bağlantıda sor</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="147"/>
+        <location filename="../qml/DeviceEditor.qml" line="169"/>
         <source>Lock When Disconnected</source>
         <translation>Bağlantı Kapanınca Kilitle</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="148"/>
+        <location filename="../qml/DeviceEditor.qml" line="170"/>
         <source>Burrow locks the remote computer (Win+L / Super+L) before closing the connection.</source>
         <translation>Burrow bağlantıyı kapatmadan önce uzak bilgisayarı kilitler (Win+L / Super+L).</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="154"/>
+        <location filename="../qml/DeviceEditor.qml" line="176"/>
         <source>Displays</source>
         <translation>Ekranlar</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="155"/>
+        <location filename="../qml/DeviceEditor.qml" line="177"/>
         <source>One monitor</source>
         <translation>Tek monitör</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="156"/>
+        <location filename="../qml/DeviceEditor.qml" line="178"/>
         <source>One monitor per Mac display</source>
         <translation>Her Mac ekranı için bir monitör</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="165"/>
+        <location filename="../qml/DeviceEditor.qml" line="187"/>
         <source>Each remote monitor opens as a tab. Drag a tab onto another display to give it its own window; Burrow remembers where you put it. Ubuntu&apos;s screen sharing shows only its main monitor; use Remote Login on Ubuntu to get several.</source>
         <translation>Her uzak monitör bir sekme olarak açılır. Bir sekmeyi başka bir ekrana sürükleyerek ayrı pencerede açabilirsin; Burrow nereye koyduğunu hatırlar. Ubuntu&apos;nun ekran paylaşımı yalnızca ana monitörü gösterir; birden fazlası için Ubuntu&apos;da Uzaktan Oturum Açma&apos;yı kullan.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="170"/>
+        <location filename="../qml/DeviceEditor.qml" line="192"/>
         <source>Retina Resolution</source>
         <translation>Retina Çözünürlüğü</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="171"/>
+        <location filename="../qml/DeviceEditor.qml" line="193"/>
         <source>Sharper, but text looks smaller if the remote computer doesn&apos;t scale its display.</source>
         <translation>Daha keskin, ancak uzak bilgisayar ekranını ölçeklemiyorsa yazılar daha küçük görünür.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="186"/>
+        <location filename="../qml/DeviceEditor.qml" line="208"/>
         <source>Clipboard Sharing</source>
         <translation>Pano Paylaşımı</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="187"/>
+        <location filename="../qml/DeviceEditor.qml" line="209"/>
         <source>Both directions</source>
         <translation>Çift yönlü</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="188"/>
+        <location filename="../qml/DeviceEditor.qml" line="210"/>
         <source>Only from this computer to remote</source>
         <translation>Sadece bu bilgisayardan uzağa</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="189"/>
+        <location filename="../qml/DeviceEditor.qml" line="211"/>
         <source>Only from remote to this computer</source>
         <translation>Sadece uzaktan bu bilgisayara</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="190"/>
+        <location filename="../qml/DeviceEditor.qml" line="212"/>
         <source>Off</source>
         <translation>Kapalı</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="196"/>
+        <location filename="../qml/DeviceEditor.qml" line="221"/>
+        <source>Keys reach the Mac as they are: Cmd stays Cmd. Clipboard sharing covers plain text.</source>
+        <translation>Tuşlar Mac&apos;e olduğu gibi gider: Cmd, Cmd olarak kalır. Pano paylaşımı düz metni kapsar.</translation>
+    </message>
+    <message>
+        <location filename="../qml/DeviceEditor.qml" line="227"/>
         <source>Mac Shortcuts</source>
         <translation>Mac Kısayolları</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="197"/>
+        <location filename="../qml/DeviceEditor.qml" line="228"/>
         <source>Translate shortcuts (Cmd+C → Ctrl+C)</source>
         <translation>Kısayolları çevir (Cmd+C → Ctrl+C)</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="198"/>
+        <location filename="../qml/DeviceEditor.qml" line="229"/>
         <source>Swap Cmd ↔ Ctrl completely</source>
         <translation>Cmd ↔ Ctrl tamamen yer değiştir</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="199"/>
+        <location filename="../qml/DeviceEditor.qml" line="230"/>
         <source>Off (keys as they are)</source>
         <translation>Kapalı (tuşlar olduğu gibi)</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="215"/>
+        <location filename="../qml/DeviceEditor.qml" line="246"/>
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="216"/>
+        <location filename="../qml/DeviceEditor.qml" line="247"/>
         <source>Save</source>
         <translation>Kaydet</translation>
     </message>
@@ -772,17 +794,17 @@
         <translation>VPN Şifresi</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="154"/>
+        <location filename="../qml/Main.qml" line="155"/>
         <source>One-Time Code For %1</source>
         <translation>%1 İçin Tek Kullanımlık Kod</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="154"/>
+        <location filename="../qml/Main.qml" line="155"/>
         <source>Enter the code from your authenticator app.</source>
         <translation>Authenticator uygulamasındaki kodu gir.</translation>
     </message>
     <message>
-        <location filename="../qml/Main.qml" line="155"/>
+        <location filename="../qml/Main.qml" line="156"/>
         <source>Code</source>
         <translation>Kod</translation>
     </message>
@@ -869,7 +891,7 @@
 <context>
     <name>SessionWindow</name>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="214"/>
+        <location filename="../qml/SessionWindow.qml" line="217"/>
         <source>The connection failed.</source>
         <translation>Bağlantı kurulamadı.</translation>
     </message>
@@ -880,77 +902,77 @@
         <translation>Ekran %1</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="373"/>
+        <location filename="../qml/SessionWindow.qml" line="376"/>
         <source>Drag a tab out of the window to show it on another display</source>
         <translation>Başka bir ekranda göstermek için sekmeyi pencerenin dışına sürükle</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="438"/>
+        <location filename="../qml/SessionWindow.qml" line="441"/>
         <source>Rename</source>
         <translation>Yeniden Adlandır</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="449"/>
+        <location filename="../qml/SessionWindow.qml" line="452"/>
         <source>Open On %1</source>
         <translation>%1 Üzerinde Aç</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="491"/>
+        <location filename="../qml/SessionWindow.qml" line="494"/>
         <source>Couldn&apos;t Connect To %1</source>
         <translation>%1 Cihazına Bağlanılamadı</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="491"/>
+        <location filename="../qml/SessionWindow.qml" line="494"/>
         <source>Connecting %1</source>
         <translation>%1 Bağlanıyor</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="501"/>
+        <location filename="../qml/SessionWindow.qml" line="504"/>
         <source>Through %1</source>
         <translation>%1 üzerinden</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="513"/>
+        <location filename="../qml/SessionWindow.qml" line="516"/>
         <source>Confirm the certificate to continue.</source>
         <translation>Devam etmek için sertifikayı onayla.</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="514"/>
+        <location filename="../qml/SessionWindow.qml" line="517"/>
         <source>Finish signing in in your browser.</source>
         <translation>Girişi tarayıcında tamamla.</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="530"/>
+        <location filename="../qml/SessionWindow.qml" line="533"/>
         <source>Close</source>
         <translation>Kapat</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="530"/>
+        <location filename="../qml/SessionWindow.qml" line="533"/>
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="536"/>
+        <location filename="../qml/SessionWindow.qml" line="539"/>
         <source>Try Again</source>
         <translation>Tekrar Dene</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="548"/>
+        <location filename="../qml/SessionWindow.qml" line="551"/>
         <source>Trust This Computer?</source>
         <translation>Bu Bilgisayara Güveniyor Musun?</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="551"/>
+        <location filename="../qml/SessionWindow.qml" line="554"/>
         <source>This is the first connection to %1. Check that the fingerprint matches the computer&apos;s certificate, then trust it. Burrow refuses to connect if it changes later.</source>
         <translation>%1 adresine ilk kez bağlanılıyor. Parmak izinin bilgisayarın sertifikasıyla eşleştiğini kontrol et, sonra güven. Sertifika sonradan değişirse Burrow bağlanmaz.</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="562"/>
+        <location filename="../qml/SessionWindow.qml" line="565"/>
         <source>Don&apos;t Connect</source>
         <translation>Bağlanma</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="563"/>
+        <location filename="../qml/SessionWindow.qml" line="566"/>
         <source>Trust And Connect</source>
         <translation>Güven Ve Bağlan</translation>
     </message>
@@ -1788,6 +1810,61 @@
         <location filename="../src/vault/VaultStore.cpp" line="186"/>
         <source>Couldn&apos;t read or write the vault file.</source>
         <translation>Kasa dosyası okunamadı/yazılamadı.</translation>
+    </message>
+</context>
+<context>
+    <name>VncSession</name>
+    <message>
+        <location filename="../src/vnc/VncSession.cpp" line="167"/>
+        <source>Couldn&apos;t open a connection.</source>
+        <translation>Bağlantı açılamadı.</translation>
+    </message>
+    <message>
+        <location filename="../src/vnc/VncSession.cpp" line="175"/>
+        <source>Couldn&apos;t open a connection through the tunnel.</source>
+        <translation>Tünel üzerinden bağlantı açılamadı.</translation>
+    </message>
+    <message>
+        <location filename="../src/vnc/VncSession.cpp" line="189"/>
+        <source>The connection to %1 was lost.</source>
+        <translation>%1 ile bağlantı koptu.</translation>
+    </message>
+    <message>
+        <location filename="../src/vnc/VncSession.cpp" line="199"/>
+        <source>Couldn&apos;t reach %1. Check that Screen Sharing (or another VNC server) is on and the address is right.</source>
+        <translation>%1 bilgisayarına ulaşılamadı. Ekran Paylaşımı&apos;nın (ya da başka bir VNC sunucusunun) açık ve adresin doğru olduğunu kontrol et.</translation>
+    </message>
+    <message>
+        <location filename="../src/vnc/VncSession.cpp" line="218"/>
+        <source>%1 refused the connection: %2</source>
+        <translation>%1 bağlantıyı reddetti: %2</translation>
+    </message>
+    <message>
+        <location filename="../src/vnc/VncSession.cpp" line="232"/>
+        <source>This Mac signs in with a user name. Enter the Mac&apos;s user name and password in the device settings.</source>
+        <translation>Bu Mac kullanıcı adıyla giriş istiyor. Cihaz ayarlarına Mac&apos;in kullanıcı adını ve şifresini gir.</translation>
+    </message>
+    <message>
+        <location filename="../src/vnc/VncSession.cpp" line="234"/>
+        <source>This VNC server asks for a sign-in method Burrow doesn&apos;t support yet.</source>
+        <translation>Bu VNC sunucusu Burrow&apos;un henüz desteklemediği bir giriş yöntemi istiyor.</translation>
+    </message>
+    <message>
+        <location filename="../src/vnc/VncSession.cpp" line="257"/>
+        <source>The user name or password for %1 is wrong.</source>
+        <translation>%1 için kullanıcı adı ya da şifre yanlış.</translation>
+    </message>
+    <message>
+        <location filename="../src/vnc/VncSession.cpp" line="273"/>
+        <source>%1 sent an invalid screen size.</source>
+        <translation>%1 geçersiz bir ekran boyutu gönderdi.</translation>
+    </message>
+    <message>
+        <location filename="../src/vnc/VncSession.cpp" line="298"/>
+        <location filename="../src/vnc/VncSession.cpp" line="392"/>
+        <location filename="../src/vnc/VncSession.cpp" line="396"/>
+        <source>Couldn&apos;t sign in to %1.</source>
+        <translation>%1 bilgisayarına giriş yapılamadı.</translation>
     </message>
 </context>
 </TS>

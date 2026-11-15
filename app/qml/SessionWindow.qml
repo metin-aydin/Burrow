@@ -14,7 +14,7 @@ Window {
     id: win
     property string deviceId
     property var tunnel: ({})             // {id, name, type} or {} for a direct connection
-    property RdpSession session: null
+    property RemoteSession session: null
     property string failure: ""
     property string frozenStep: ""        // the step that failed
     signal retry(string deviceId)
@@ -198,7 +198,10 @@ Window {
 
     function stepList() {
         const name = App.device(deviceId).name || ""
-        const rdp = Steps.rdpSteps(labels, name).map(s => ({ id: "r_" + s.id, label: s.label }))
+        // VNC (Macs) has no certificate step.
+        const vnc = App.device(deviceId).protocol === "vnc"
+        const rdp = Steps.rdpSteps(labels, name).filter(s => !vnc || s.id !== "certificate")
+                         .map(s => ({ id: "r_" + s.id, label: s.label }))
         if (!tunnel.id) return rdp
         return Steps.tunnelSteps(tunnel.type || "", labels).map(s => ({ id: "t_" + s.id, label: s.label })).concat(rdp)
     }
