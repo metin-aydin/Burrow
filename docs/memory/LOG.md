@@ -4,6 +4,9 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Şifre alanlarına göster/gizle: `BField` (`password: true`) sağında göz ikonlu ghost düğme (`eye`/`eye-off`
+  SVG'leri eklendi). Düğme odak almaz (Tab akışı ve imleç alanda kalır); alan gizlenince yeniden maskelenir.
+  Tüm şifre alanları (kilit ekranı, ayarlar, cihaz/tünel editörü, kimlik ve VPN istemi, token) bunu otomatik alır.
 - VNC çoklu ekran, standart yol: `ExtendedDesktopSize` (-308) istenip ayrıştırılıyor; sunucu birden çok ekran
   bildirirse her biri RDP'deki gibi ayrı sekme/pencere (test sunucusuyla doğrulandı). Bildirmezse logda
   "the server doesn't report its screens" yazar. Apple'ın kendi düzen mesajı (AppleDisplayLayout 0x451) yalnız

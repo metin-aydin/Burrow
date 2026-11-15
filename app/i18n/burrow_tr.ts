@@ -172,6 +172,19 @@
     </message>
 </context>
 <context>
+    <name>BField</name>
+    <message>
+        <location filename="../qml/BField.qml" line="51"/>
+        <source>Hide Password</source>
+        <translation>Şifreyi Gizle</translation>
+    </message>
+    <message>
+        <location filename="../qml/BField.qml" line="51"/>
+        <source>Show Password</source>
+        <translation>Şifreyi Göster</translation>
+    </message>
+</context>
+<context>
     <name>Biometric</name>
     <message>
         <location filename="../src/platform/Biometric_mac.mm" line="27"/>
@@ -1820,54 +1833,54 @@
 <context>
     <name>VncSession</name>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="167"/>
+        <location filename="../src/vnc/VncSession.cpp" line="185"/>
         <source>Couldn&apos;t open a connection.</source>
         <translation>Bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="175"/>
+        <location filename="../src/vnc/VncSession.cpp" line="193"/>
         <source>Couldn&apos;t open a connection through the tunnel.</source>
         <translation>Tünel üzerinden bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="189"/>
+        <location filename="../src/vnc/VncSession.cpp" line="207"/>
         <source>The connection to %1 was lost.</source>
         <translation>%1 ile bağlantı koptu.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="199"/>
+        <location filename="../src/vnc/VncSession.cpp" line="217"/>
         <source>Couldn&apos;t reach %1. Check that Screen Sharing (or another VNC server) is on and the address is right.</source>
         <translation>%1 bilgisayarına ulaşılamadı. Ekran Paylaşımı&apos;nın (ya da başka bir VNC sunucusunun) açık ve adresin doğru olduğunu kontrol et.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="218"/>
+        <location filename="../src/vnc/VncSession.cpp" line="236"/>
         <source>%1 refused the connection: %2</source>
         <translation>%1 bağlantıyı reddetti: %2</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="232"/>
+        <location filename="../src/vnc/VncSession.cpp" line="250"/>
         <source>This Mac signs in with a user name. Enter the Mac&apos;s user name and password in the device settings.</source>
         <translation>Bu Mac kullanıcı adıyla giriş istiyor. Cihaz ayarlarına Mac&apos;in kullanıcı adını ve şifresini gir.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="234"/>
+        <location filename="../src/vnc/VncSession.cpp" line="252"/>
         <source>This VNC server asks for a sign-in method Burrow doesn&apos;t support yet.</source>
         <translation>Bu VNC sunucusu Burrow&apos;un henüz desteklemediği bir giriş yöntemi istiyor.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="257"/>
+        <location filename="../src/vnc/VncSession.cpp" line="275"/>
         <source>The user name or password for %1 is wrong.</source>
         <translation>%1 için kullanıcı adı ya da şifre yanlış.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="273"/>
+        <location filename="../src/vnc/VncSession.cpp" line="291"/>
         <source>%1 sent an invalid screen size.</source>
         <translation>%1 geçersiz bir ekran boyutu gönderdi.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="298"/>
-        <location filename="../src/vnc/VncSession.cpp" line="392"/>
-        <location filename="../src/vnc/VncSession.cpp" line="396"/>
+        <location filename="../src/vnc/VncSession.cpp" line="316"/>
+        <location filename="../src/vnc/VncSession.cpp" line="410"/>
+        <location filename="../src/vnc/VncSession.cpp" line="414"/>
         <source>Couldn&apos;t sign in to %1.</source>
         <translation>%1 bilgisayarına giriş yapılamadı.</translation>
     </message>
