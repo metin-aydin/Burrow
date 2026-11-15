@@ -244,10 +244,9 @@ jobs:
         run: tools/windows-deps.sh C:/burrow-deps
       - name: Build
         env:
-          PKG_CONFIG_PATH: C:/burrow-deps/lib/pkgconfig
           QT_QPA_PLATFORM: offscreen
         run: |
-          export PATH="/c/burrow-deps/bin:$PATH"
+          export PATH="/c/burrow-deps/bin:$PATH" PKG_CONFIG_PATH=/c/burrow-deps/lib/pkgconfig
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
             -DBURROW_VERSION=${{ needs.prepare.outputs.version }}
           cmake --build build
