@@ -4,6 +4,9 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Güvenlik incelemesi: VNC okuma iş parçacığı dolu kuyrukta beklerken oturum kapanırsa sonsuza kadar bekliyordu
+  (join takılırdı). Bekleme artık kapanış bayrağını (`m_ioDone`) da dinliyor.
+
 - Kullanıcı "aşırı yavaş" dedi (ölçümde 30–38 kare/s). Neden büyük ihtimalle girdi gecikmesi: Mac güncelleme
   yazarken girdiyi okumuyor; aralık 0'da sürekli değişen ekranda tıklama/tuşlar saniyelerce bekliyor (zDesk
   ölçümü). `AutoFrameBufferUpdate` aralığı artık 33.333 µs (~30/s). Ayrıca: görünüm görüntüyü 512 px karolara

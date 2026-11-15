@@ -625,8 +625,10 @@ void VncSession::ioLoop()
         if (chunk.isEmpty())
             continue;
         std::unique_lock lock(m_qLock);
-        m_qCv.wait(lock, [this] { return m_queued < kMaxQueued || m_stop; });
-        if (m_stop)
+        // Also leave when the session is being torn down (m_ioDone), or a full queue nobody reads
+        // any more would keep this thread, and the join waiting for it, forever.
+        m_qCv.wait(lock, [this] { return m_queued < kMaxQueued || m_stop || m_ioDone; });
+        if (m_stop || m_ioDone)
             break;
         m_queued += size_t(chunk.size());
         m_queue.push_back(std::move(chunk));
