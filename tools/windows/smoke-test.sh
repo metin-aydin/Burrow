@@ -12,9 +12,10 @@ powershell.exe -NoProfile -Command "Expand-Archive -LiteralPath '$(cygpath -w "$
 app="$work/Burrow"
 
 # Only the package itself and Windows on the search path, as on a user's PC.
+ntldd=$(command -v ntldd)
 missing=0
 for f in $(find "$app" -iname '*.exe' -o -iname '*.dll'); do
-    out=$(PATH="$app:/c/Windows/System32" ntldd "$f" 2>&1 || true)
+    out=$(PATH="$app:/c/Windows/System32" "$ntldd" "$f" 2>&1 || true)
     bad=$(printf '%s\n' "$out" | grep -i 'not found' || true)
     if [ -n "$bad" ]; then
         echo "::error::$(basename "$f") needs a DLL that isn't packaged: $bad"
