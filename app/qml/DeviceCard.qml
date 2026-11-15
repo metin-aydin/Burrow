@@ -70,7 +70,8 @@ Item {
                         Column {
                             anchors.centerIn: parent
                             spacing: 6
-                            visible: shot.status !== Image.Ready
+                            // Only when there is no picture: not while one is (re)loading.
+                            visible: !root.preview || shot.status === Image.Error
                             Icon { anchors.horizontalCenter: parent.horizontalCenter; name: "monitor"; size: 34; color: Theme.onImageSoft }
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
@@ -87,8 +88,11 @@ Item {
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
                         cache: false
-                        sourceSize: Qt.size(width * 2, height * 2)
-                        opacity: status === Image.Ready ? 1 : 0
+                        // Decoded once at a fixed size: tied to the card size, every resize step reloaded
+                        // the picture and it flickered. Keeps the old picture while a new one loads.
+                        sourceSize.width: 1280
+                        retainWhileLoading: true
+                        opacity: status === Image.Ready || status === Image.Loading ? 1 : 0
                         Behavior on opacity { NumberAnimation { duration: 200 } }
                     }
                 }

@@ -4,6 +4,14 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Cihaz kartı önizlemesi pencere boyutlanırken yanıp sönüyordu: görsel `sourceSize`'ı kart boyutuna bağlıydı, her
+  adımda yeniden yükleniyor ve arada "Preview After First Connection" görünüyordu. Artık sabit boyutta (1280 px)
+  çözülüyor, yüklenirken eskisi kalıyor (`retainWhileLoading`), yer tutucu yalnız görsel yoksa çıkıyor.
+- Sekme adı düzenleme: alan dışında herhangi bir yere tıklamak (ya da odağın gitmesi) Esc gibi düzenlemeyi iptal
+  ederek bitirir; tıklama tıklanan yere de ulaşır. Enter kaydeder.
+- Tooltip'ler: yeni `BToolTip` (yükseltilmiş yüzey, 1px kenar, yumuşak gölge, 550 ms gecikme, kısa geçiş);
+  `BButton.tip` ile kullanılır. Ayarlar penceresindeki "Lock Now" butonu kaldırıldı (kilit başlık çubuğunda).
+
 - Tema seçimi: Ayarlar → Görünüm (Sistemle Aynı / Açık / Koyu). Dil gibi `QSettings` `ui/theme`'da (kilit ekranı da
   uyar), `QStyleHints::setColorScheme` ile tüm uygulamaya (macOS başlık çubukları dahil) uygulanır; `Theme.dark` bunu
   izler. QML'deki son sabit renkler Theme token'larına taşındı (önizleme üstü metin/örtü, toast, modal örtü, gölge).

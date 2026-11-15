@@ -6,6 +6,8 @@ Button {
     id: control
     property string variant: "secondary"
     property string iconName: ""
+    // Short description shown on hover (and keyboard focus), mainly for icon-only buttons.
+    property string tip: ""
     implicitHeight: Theme.controlHeight
     leftPadding: text ? 14 : 9
     rightPadding: text ? 14 : 9
@@ -58,4 +60,9 @@ Button {
     }
     scale: down ? 0.98 : 1
     Behavior on scale { NumberAnimation { duration: 80 } }
+
+    BToolTip {
+        text: control.tip
+        visible: control.tip !== "" && (control.hovered || control.visualFocus) && !control.pressed
+    }
 }

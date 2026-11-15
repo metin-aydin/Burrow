@@ -137,7 +137,6 @@ BDialog {
     Text { text: App.versionInfo; color: Theme.textSecondary; font.pixelSize: 12 }
 
     footer: [
-        BButton { iconName: "lock"; text: qsTr("Lock Now"); onClicked: { root.close(); App.lock() } },
         Item { Layout.fillWidth: true },
         BButton { variant: "primary"; text: qsTr("Done"); onClicked: root.close() }
     ]

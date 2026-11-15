@@ -85,8 +85,8 @@ Rectangle {
                 }
             }
             BButton { iconName: "tunnel"; Layout.preferredHeight: root.ctlH; text: qsTr("Tunnel Profiles"); onClicked: root.openTunnels() }
-            BButton { iconName: "lock"; Layout.preferredHeight: root.ctlH; variant: "ghost"; onClicked: App.lock(); ToolTip.visible: hovered; ToolTip.text: qsTr("Lock") }
-            BButton { iconName: "settings"; Layout.preferredHeight: root.ctlH; variant: "ghost"; onClicked: root.openSettings(); ToolTip.visible: hovered; ToolTip.text: qsTr("Settings") }
+            BButton { iconName: "lock"; Layout.preferredHeight: root.ctlH; variant: "ghost"; onClicked: App.lock(); tip: qsTr("Lock") }
+            BButton { iconName: "settings"; Layout.preferredHeight: root.ctlH; variant: "ghost"; onClicked: root.openSettings(); tip: qsTr("Settings") }
             BButton { iconName: "plus"; Layout.preferredHeight: root.ctlH; variant: "primary"; text: qsTr("New Device"); onClicked: root.newDevice() }
         }
 

@@ -299,17 +299,22 @@ Window {
                         font.pixelSize: 12
                         font.weight: Font.Medium
                         maximumLength: 40
-                        function begin() { text = win.tabName(tab.index); visible = true; forceActiveFocus(); selectAll() }
+                        function begin() {
+                            text = win.tabName(tab.index); visible = true; forceActiveFocus(); selectAll()
+                            win.tabEditor = editor
+                        }
                         function finish(save) {
                             if (!visible) return
                             visible = false
+                            if (win.tabEditor === editor) win.tabEditor = null
                             if (save) win.renameTab(tab.index, text)
                             view.forceActiveFocus()
                         }
                         Keys.onReturnPressed: finish(true)
                         Keys.onEnterPressed: finish(true)
                         Keys.onEscapePressed: finish(false)
-                        onActiveFocusChanged: if (!activeFocus) finish(true)
+                        // Leaving the field any other way (another app, a click elsewhere) works like Esc.
+                        onActiveFocusChanged: if (!activeFocus) finish(false)
                     }
                     MouseArea {
                         id: tabMouse
@@ -368,6 +373,21 @@ Window {
             text: qsTr("Drag a tab out of the window to show it on another display")
             color: Theme.textMuted
             font.pixelSize: 12
+        }
+    }
+    // The tab name being edited, if any: a click anywhere else ends the edit like Esc, and the click
+    // still reaches what was clicked.
+    property Item tabEditor: null
+    MouseArea {
+        anchors.fill: parent
+        z: 1000
+        visible: win.tabEditor !== null
+        acceptedButtons: Qt.AllButtons
+        onPressed: (m) => {
+            const e = win.tabEditor
+            const p = mapToItem(e, m.x, m.y)
+            if (!e.contains(p)) e.finish(false)
+            m.accepted = false
         }
     }
     function insideWindow(gx, gy) { return gx >= x && gx < x + width && gy >= y && gy < y + height }

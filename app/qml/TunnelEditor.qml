@@ -238,8 +238,7 @@ BDialog {
                         id: qrButton
                         Layout.alignment: Qt.AlignBottom
                         iconName: "qr"
-                        ToolTip.visible: hovered
-                        ToolTip.text: qsTr("Read A QR Code")
+                        tip: qsTr("Read A QR Code")
                         onClicked: qrMenu.popup(qrButton, 0, qrButton.height + 4)
                     }
                 }
