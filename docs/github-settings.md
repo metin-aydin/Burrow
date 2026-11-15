@@ -28,7 +28,7 @@ What the repository should have on GitHub itself (not in files). Applied through
 - **Environment `release`:** deployment branches limited to `master`. Secrets (added by the maintainer only,
   never written anywhere else): `CSC_LINK` (Developer ID Application .p12, base64), `CSC_KEY_PASSWORD`,
   `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID`. Without them the release stops before
-  publishing an unsigned build.
+  publishing an unsigned build. The maintainer stores them with `.github/scripts/set-release-secrets.sh`.
 
 ## Security
 
