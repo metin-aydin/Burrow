@@ -148,7 +148,9 @@ jobs:
           export PKG_CONFIG_PATH=/c/burrow-deps/lib/pkgconfig
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
       - name: Build
-        run: cmake --build build
+        run: |
+          export PKG_CONFIG_PATH=/c/burrow-deps/lib/pkgconfig   # Go asks pkg-config while building
+          cmake --build build
       - name: Tests
         env:
           QT_QPA_PLATFORM: offscreen
