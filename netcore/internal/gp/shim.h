@@ -1,6 +1,9 @@
 #ifndef BURROW_GP_SHIM_H
 #define BURROW_GP_SHIM_H
 
+#ifdef _WIN32
+#include <winsock2.h>   // openconnect.h uses SOCKET without including it
+#endif
 #include <openconnect.h>
 #include <stdint.h>
 
@@ -16,6 +19,8 @@ int burrow_oc_ip_info(struct openconnect_info *vpninfo, const char **addr, const
                       const char **dns0, const char **dns1, const char **dns2, int *mtu);
 // Attaches the packet wire: an fd on Unix, a HANDLE on Windows.
 int burrow_oc_setup_tun(struct openconnect_info *vpninfo, intptr_t tun);
-void burrow_oc_cancel(int cmd_fd);
+// openconnect's command channel: an fd on Unix, a SOCKET on Windows (-1 on failure on both).
+intptr_t burrow_oc_setup_cmd_pipe(struct openconnect_info *vpninfo);
+void burrow_oc_cancel(intptr_t cmd_fd);
 
 #endif

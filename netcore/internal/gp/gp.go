@@ -10,6 +10,7 @@ package gp
 
 /*
 #cgo pkg-config: openconnect
+#cgo windows LDFLAGS: -lws2_32
 #include <stdlib.h>
 #include <string.h>
 #include "shim.h"
@@ -55,7 +56,7 @@ type Tunnel struct {
 	status tunnel.StatusBox
 
 	vpn   *C.struct_openconnect_info
-	cmdFd C.int
+	cmdFd C.intptr_t
 	stack *netstack.Stack
 
 	mu            sync.Mutex
@@ -167,7 +168,7 @@ func (t *Tunnel) run() {
 		return
 	}
 	t.mu.Lock()
-	t.cmdFd = C.openconnect_setup_cmd_pipe(t.vpn)
+	t.cmdFd = C.burrow_oc_setup_cmd_pipe(t.vpn)
 	closing := t.closing
 	t.mu.Unlock()
 	if closing {

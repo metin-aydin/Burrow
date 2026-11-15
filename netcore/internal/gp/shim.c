@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 #ifdef _WIN32
-#include <winsock2.h>
 #include <ws2tcpip.h>
 #else
 #include <netdb.h>
@@ -101,16 +100,25 @@ int burrow_oc_setup_tun(struct openconnect_info *vpninfo, intptr_t tun)
 #endif
 }
 
-void burrow_oc_cancel(int cmd_fd)
+intptr_t burrow_oc_setup_cmd_pipe(struct openconnect_info *vpninfo)
+{
+#ifdef _WIN32
+    SOCKET s = openconnect_setup_cmd_pipe(vpninfo);
+    return s == INVALID_SOCKET ? -1 : (intptr_t)s;
+#else
+    return openconnect_setup_cmd_pipe(vpninfo);
+#endif
+}
+
+void burrow_oc_cancel(intptr_t cmd_fd)
 {
     char c = OC_CMD_CANCEL;
 #ifdef _WIN32
-    // Windows: openconnect's command channel is a socket.
     if (send((SOCKET)cmd_fd, &c, 1, 0) < 0) {
         /* nothing to do */
     }
 #else
-    if (write(cmd_fd, &c, 1) < 0) {
+    if (write((int)cmd_fd, &c, 1) < 0) {
         /* nothing to do */
     }
 #endif
