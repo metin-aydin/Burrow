@@ -5,11 +5,13 @@ What the repository should have on GitHub itself (not in files). Applied through
 
 ## About
 
-- **Description:** Remote desktop through a private tunnel: RDP to Windows and Ubuntu, Screen Sharing to
-  Macs, with GlobalProtect, Tailscale and Cloudflare built in. Open source, macOS.
+- **Description:** Cross-platform remote desktop with private tunnels built in: RDP to Windows and Ubuntu,
+  Screen Sharing to Macs, with GlobalProtect, Tailscale and Cloudflare running inside the app only. Open source;
+  macOS now, Ubuntu and Windows next.
 - **Website:** https://github.com/metin-aydin/Burrow/releases/latest
 - **Topics:** `rdp`, `remote-desktop`, `vnc`, `screen-sharing`, `freerdp`, `globalprotect`, `openconnect`,
-  `tailscale`, `cloudflare-access`, `macos`, `qt6`, `qml`, `golang`, `vpn`, `totp`
+  `tailscale`, `cloudflare-access`, `vpn`, `totp`, `cross-platform`, `macos`, `linux`, `windows`, `qt6`, `qml`,
+  `golang`
 - Releases on, Packages off, Wiki off, Discussions optional, Issues on.
 
 ## Branches

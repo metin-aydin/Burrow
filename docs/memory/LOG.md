@@ -4,6 +4,8 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Repo About alanı düzeltildi (`gh api`):** açıklama boştu; README ile uyumlu cross-platform açıklama, web sitesi
+  (releases/latest), 18 etiket (`cross-platform`, `linux`, `windows` eklendi) yazıldı, Wiki kapatıldı.
 - **`master` dalı ve kural setleri kuruldu (`gh api`):** `master` ilk commit'te (47a0d0e) oluşturuldu; dal
   oluşturma push'u release'i tetiklemesin diye Release iş akışı o an kapatılıp açıldı (çalışma yok). Kural
   setleri: `development` (silme/force push yok), `master` (yalnız PR + merge commit, zorunlu kontroller: Go netcore
