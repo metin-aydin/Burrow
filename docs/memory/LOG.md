@@ -4,6 +4,11 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Adaptive gerçek ölçüm: veri 55–143 → 1–2 Mbit/s, kare 4–6 → 20–25/s; ama çözücü %98 dolu (15–17 ms/güncelleme)
+  çünkü yerel derleme **Debug (-O0)**. Görüntü kodu (`AppleAdaptive.cpp`, `VncSession.cpp`, `RdpView.cpp`) artık
+  Debug'da da `-O2` derleniyor: tam Retina karesi (3456×2234, 120.960 DCT karosu) 661 → 35 ms (tst_vault
+  `adaptiveSpeed`). Renk DC kısayolu ve tam yazılan karolarda okuma atlama eklendi (testler geçiyor).
+
 - Ölçüm: Burrow artık darboğaz değil (görünür ekrana dokunan güncellemelerin hepsi kareye dönüşüyor, okuma
   %25–32 dolu); veri Mac'ten yavaş geliyor. **Apple Adaptive (0x3f3)** eklendi: zDesk çözücüsünün C++ çevirisi
   (`src/vnc/AppleAdaptive.*`), zDesk testleri tst_vault'a taşındı ve geçiyor; sahte Apple sunucusu gerçek 0x3f3

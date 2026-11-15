@@ -1,6 +1,7 @@
 #include <QCryptographicHash>
 #include <QTemporaryDir>
 #include <QtTest>
+#include <QElapsedTimer>
 
 #include "app/AppController.h"
 #include "app/Updater.h"
@@ -98,6 +99,25 @@ private slots:
         BitWriter later = adaptiveOne(7); BitWriter none;
         QVERIFY2(d.decode(f, 8, 0, 8, 8, adaptiveFull(later, none), &drew, &err), qPrintable(err));
         QVERIFY(tileIs(f, 8, 0, rgbPx(127, 127, 127)));
+    }
+    // Speed on a Retina-sized picture of DCT tiles with Y detail (logged, not asserted).
+    void adaptiveSpeed()
+    {
+        const int W = 3456, H = 2234, tiles = ((W + 7) / 8) * ((H + 7) / 8);
+        AppleAdaptive d; QImage f; adaptiveSetup(d, f, W, H);
+        BitWriter cmd; cmd.bits("0").put(5, 3).bits("1").put(15, 4);
+        const int v = tiles - 17;
+        cmd.put(0x80 | (v & 0x7f), 8).put(0x80 | ((v >> 7) & 0x7f), 8).put(v >> 14, 8);
+        BitWriter data;
+        for (int i = 0; i < tiles; ++i)   // chroma DCs, Y DC, a few AC values, end of block
+            data.bits("0 0 0").bits("00 00").bits("1110 000 0").bits("0 10").bits("0 11").bits("0 10").bits("0 01 0");
+        const QByteArray body = adaptiveFull(cmd, data);
+        bool drew; QString err;
+        QElapsedTimer t; t.start();
+        const int runs = 5;
+        for (int i = 0; i < runs; ++i)
+            QVERIFY2(d.decode(f, 0, 0, W, H, body, &drew, &err), qPrintable(err));
+        qInfo("adaptive: %.1f ms per %dx%d full update (%d tiles)", double(t.nsecsElapsed()) / 1e6 / runs, W, H, tiles);
     }
     void adaptiveRefusesBadInput()
     {

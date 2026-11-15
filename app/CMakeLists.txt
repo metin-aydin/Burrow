@@ -79,6 +79,10 @@ else()
 endif()
 
 target_include_directories(burrow PRIVATE src)
+# The picture decoders are pure arithmetic and many times slower unoptimized; keep them fast in
+# Debug builds too, where a remote screen is otherwise unusable.
+set(BURROW_HOT_SOURCES src/vnc/AppleAdaptive.cpp src/vnc/VncSession.cpp src/rdp/RdpView.cpp)
+set_source_files_properties(${BURROW_HOT_SOURCES} PROPERTIES COMPILE_OPTIONS "$<$<CONFIG:Debug>:-O2>")
 target_compile_definitions(burrow PRIVATE BURROW_VERSION="${PROJECT_VERSION}"
     # --seed-demo previews, read from the source tree (development only, not bundled).
     BURROW_DEMO_ASSETS="${CMAKE_SOURCE_DIR}/docs/assets/demo")

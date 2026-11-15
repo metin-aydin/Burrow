@@ -396,9 +396,39 @@ void AppleAdaptive::copyInto(std::array<uint32_t, 64> &tile, ptrdiff_t at) const
     }
 }
 
+// A block with only its DC is one sample throughout; its value through the reference transform.
+static bool flatSample(const std::array<int16_t, 64> &coef, int32_t q0, uint8_t &out)
+{
+    for (size_t i = 1; i < 64; ++i)
+        if (coef[i] != 0)
+            return false;
+    std::array<int16_t, 64> dcOnly{};
+    dcOnly[0] = coef[0];
+    std::array<int32_t, 64> quant{};
+    quant[0] = q0;
+    out = idct(dcOnly, quant)[0];
+    return true;
+}
+
 void AppleAdaptive::inverse(const Block &block, const Tables &tables, std::array<uint32_t, 64> &tile)
 {
     const auto y = idct(block.y, tables.luminance);
+    uint8_t cbFlat = 0, crFlat = 0;
+    // A full update sends chrominance as DC alone: then the colour terms are the same for the whole
+    // tile and only Y varies (same arithmetic as ycc(), hoisted).
+    if (flatSample(block.cb, tables.chrominance[0], cbFlat) && flatSample(block.cr, tables.chrominance[0], crFlat)) {
+        constexpr int32_t half = 1 << 15;
+        const int32_t cb = int32_t(cbFlat) - 128, cr = int32_t(crFlat) - 128;
+        const int32_t dr = (91881 * cr + half) >> 16;
+        const int32_t dg = (-46802 * cr + -22554 * cb + half) >> 16;
+        const int32_t db = (116130 * cb + half) >> 16;
+        for (size_t i = 0; i < 64; ++i) {
+            const int32_t yv = y[i];
+            tile[i] = kOpaque | uint32_t(std::clamp(yv + dr, 0, 255)) << 16 | uint32_t(std::clamp(yv + dg, 0, 255)) << 8
+                | uint32_t(std::clamp(yv + db, 0, 255));
+        }
+        return;
+    }
     const auto cb = idct(block.cb, tables.chrominance);
     const auto cr = idct(block.cr, tables.chrominance);
     for (size_t i = 0; i < 64; ++i)
@@ -477,7 +507,9 @@ bool AppleAdaptive::full(const Rect &rect, const QByteArray &body, QString *erro
             }
             m_tiles[index].update = m_updates;
             m_tiles[index].hasCopy = false;
-            readTile(scan, drawn);
+            // Copies and cache draws can leave pixels as they were; the others draw all 64.
+            if (command == 1 || command == 2 || command >= 6)
+                readTile(scan, drawn);
             switch (command) {
             case 0:
                 drawn.fill(kWhite);
