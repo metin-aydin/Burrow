@@ -3,6 +3,7 @@
 #include <QImage>
 #include <QObject>
 #include <QSet>
+#include <QTimer>
 #include <QTranslator>
 #include <QVariantMap>
 
@@ -30,6 +31,7 @@ class AppController : public QObject
     Q_PROPERTY(bool touchIdAvailable READ touchIdAvailable CONSTANT)
     Q_PROPERTY(bool touchIdEnabled READ touchIdEnabled NOTIFY touchIdEnabledChanged)
     Q_PROPERTY(QString versionInfo READ versionInfo CONSTANT)
+    Q_PROPERTY(int autoLockMinutes READ autoLockMinutes WRITE setAutoLockMinutes NOTIFY autoLockChanged)
     Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)   // system | en | tr
     Q_PROPERTY(QString demoOpen MEMBER m_demoOpen CONSTANT)   // dev: dialog to open on start
 public:
@@ -47,6 +49,10 @@ public:
     VaultStore *store() { return &m_store; }
 
     // --- Language ----------------------------------------------------------
+    int autoLockMinutes() const { return m_store.isOpen() ? m_store.doc().settings.autoLockMinutes : 15; }
+    void setAutoLockMinutes(int minutes);
+    // Called for every user input event; restarts the inactivity timer.
+    void noteActivity();
     QString language() const;
     void setLanguage(const QString &lang);
     // Installs the translator for the saved (or system) language. Call before loading QML.
@@ -122,6 +128,7 @@ signals:
     void touchIdEnabledChanged();
     void toast(const QString &message);
     void languageChanged();
+    void autoLockChanged();
     void sessionOpened(RdpSession *session);
     void tunnelStatesChanged();
     void tunnelLoginRequired(const QString &tunnelId, const QString &name, const QString &url);
@@ -150,7 +157,8 @@ private:
     TunnelManager m_tunnelMgr{&m_store};
     QList<Pending> m_pending;
     QHash<RdpSession *, QString> m_sessionTunnels;   // session -> tunnel it runs through
-    QSet<QString> m_tunnelTesting;                    // tunnels opened by "Test Connection"
+    QSet<QString> m_tunnelTesting;
+    QTimer m_idleTimer;                    // tunnels opened by "Test Connection"
     QString m_demoOpen;
     QList<RdpSession *> m_sessions;
     QTranslator m_translator;

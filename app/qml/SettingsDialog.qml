@@ -35,6 +35,25 @@ BDialog {
     }
     Text { visible: root.touchError !== ""; text: root.touchError; color: Theme.danger; font.pixelSize: 12; wrapMode: Text.WordWrap; Layout.fillWidth: true }
 
+    BCombo {
+        Layout.fillWidth: true
+        label: qsTr("Auto-Lock")
+        options: [{ text: qsTr("After 5 minutes of inactivity"), value: 5 },
+                  { text: qsTr("After 15 minutes of inactivity"), value: 15 },
+                  { text: qsTr("After 30 minutes of inactivity"), value: 30 },
+                  { text: qsTr("After 1 hour of inactivity"), value: 60 },
+                  { text: qsTr("Never"), value: 0 }]
+        value: App.autoLockMinutes
+        onValueChanged: if (value !== App.autoLockMinutes) App.autoLockMinutes = value
+    }
+    Text {
+        Layout.fillWidth: true
+        wrapMode: Text.WordWrap
+        color: Theme.textSecondary
+        font.pixelSize: 12
+        text: qsTr("Burrow keeps running in the menu bar when you close its window; it locks itself after this much inactivity, but never while a remote desktop is open.")
+    }
+
     SectionTitle { text: qsTr("Change Master Password") }
     BField { id: cur; Layout.fillWidth: true; label: qsTr("Current Password"); password: true }
     RowLayout {

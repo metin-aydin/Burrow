@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QIcon>
+#include <QTimer>
 #include <QWindow>
 
 #include "app/AppController.h"
@@ -29,9 +30,10 @@ Tray::Tray(AppController *app, QObject *parent)
         Q_UNUSED(r)
 #endif
     });
-    connect(app, &AppController::stateChanged, this, &Tray::rebuild);
-    connect(app->devices(), &QAbstractItemModel::modelReset, this, &Tray::rebuild);
-    connect(app, &AppController::languageChanged, this, &Tray::rebuild);
+    // Rebuilding destroys the menu's actions, so never do it from inside one of them: queue it.
+    connect(app, &AppController::stateChanged, this, &Tray::rebuild, Qt::QueuedConnection);
+    connect(app->devices(), &QAbstractItemModel::modelReset, this, &Tray::rebuild, Qt::QueuedConnection);
+    connect(app, &AppController::languageChanged, this, &Tray::rebuild, Qt::QueuedConnection);
     rebuild();
     m_icon.show();
 }
@@ -60,16 +62,18 @@ void Tray::rebuild()
             QAction *a = m_menu.addAction(tunnel.isEmpty() ? d.name : QStringLiteral("%1  ·  %2").arg(d.name, tunnel));
             const QString id = d.id;
             connect(a, &QAction::triggered, this, [this, id] {
-                showWindow();
-                emit connectRequested(id);
+                QTimer::singleShot(0, this, [this, id] {
+                    showWindow();
+                    emit connectRequested(id);
+                });
             });
         }
         m_menu.addSeparator();
         m_menu.addAction(tr("Open Burrow"), this, &Tray::showWindow);
-        m_menu.addAction(tr("Lock"), m_app, &AppController::lock);
+        m_menu.addAction(tr("Lock"), this, [this] { QMetaObject::invokeMethod(m_app, &AppController::lock, Qt::QueuedConnection); });
     } else {
         m_menu.addAction(tr("Unlock Burrow…"), this, &Tray::showWindow);
     }
     m_menu.addSeparator();
-    m_menu.addAction(tr("Quit Burrow"), qApp, &QCoreApplication::quit);
+    m_menu.addAction(tr("Quit Burrow"), this, [] { QMetaObject::invokeMethod(qApp, &QCoreApplication::quit, Qt::QueuedConnection); });
 }

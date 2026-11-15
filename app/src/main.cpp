@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QEvent>
 #include <QIcon>
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
@@ -10,6 +11,28 @@
 #include "app/PreviewProvider.h"
 #include "app/Tray.h"
 #include "rdp/RdpView.h"
+
+namespace {
+// Feeds user input to the auto-lock timer.
+class ActivityFilter : public QObject
+{
+public:
+    explicit ActivityFilter(AppController *app) : m_app(app) {}
+    bool eventFilter(QObject *o, QEvent *e) override
+    {
+        switch (e->type()) {
+        case QEvent::KeyPress: case QEvent::MouseButtonPress: case QEvent::Wheel: case QEvent::TouchBegin:
+            m_app->noteActivity();
+            break;
+        default:
+            break;
+        }
+        return QObject::eventFilter(o, e);
+    }
+private:
+    AppController *m_app;
+};
+} // namespace
 
 int main(int argc, char *argv[])
 {
@@ -42,7 +65,10 @@ int main(int argc, char *argv[])
     engine.loadFromModule("Burrow", "Main");
 
     // Closing the window keeps Burrow in the menu bar / tray; Quit is in the tray menu (and Cmd+Q).
+    // The vault auto-locks after inactivity (Settings → Auto-Lock), so a hidden window isn't left unlocked.
     QGuiApplication::setQuitOnLastWindowClosed(false);
+    ActivityFilter activity(&controller);
+    app.installEventFilter(&activity);
     Tray tray(&controller);
     if (auto *window = qobject_cast<QWindow *>(engine.rootObjects().value(0))) {
         tray.setWindow(window);

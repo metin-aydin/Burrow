@@ -45,6 +45,18 @@ AppController::AppController(QObject *parent)
     , m_tunnels(&m_store)
 {
     m_gallery.setSourceModel(&m_devices);
+    // Auto-lock after inactivity, but never while a remote session is open.
+    m_idleTimer.setSingleShot(true);
+    connect(&m_idleTimer, &QTimer::timeout, this, [this] {
+        if (!m_store.isOpen())
+            return;
+        if (!m_sessions.isEmpty()) {
+            noteActivity();
+            return;
+        }
+        lock();
+    });
+    connect(this, &AppController::stateChanged, this, &AppController::noteActivity);
     connect(&m_tunnelMgr, &TunnelManager::statesChanged, this, &AppController::tunnelStatesChanged);
     connect(&m_tunnelMgr, &TunnelManager::stateChanged, this, &AppController::onTunnelState);
     connect(&m_tunnelMgr, &TunnelManager::loginRequired, this, [this](const QString &id, const QString &url) {
@@ -125,6 +137,26 @@ void AppController::applyLanguage(QQmlEngine *engine)
     QLocale::setDefault(QLocale(lang == QLatin1String("tr") ? QLocale::Turkish : QLocale::English));
     if (m_engine)
         m_engine->retranslate();
+}
+
+void AppController::setAutoLockMinutes(int minutes)
+{
+    if (!m_store.isOpen() || minutes == m_store.doc().settings.autoLockMinutes)
+        return;
+    m_store.doc().settings.autoLockMinutes = qBound(0, minutes, 24 * 60);
+    persist();
+    noteActivity();
+    emit autoLockChanged();
+}
+
+void AppController::noteActivity()
+{
+    const int minutes = autoLockMinutes();
+    if (!m_store.isOpen() || minutes <= 0) {
+        m_idleTimer.stop();
+        return;
+    }
+    m_idleTimer.start(minutes * 60 * 1000);
 }
 
 // --- Vault -------------------------------------------------------------------

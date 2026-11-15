@@ -157,7 +157,7 @@ bool fromJson(const QByteArray &json, Document *out)
         doc.tunnels.append(tunnelFromJsonImpl(v.toObject()));
     const QJsonObject s = root.value("settings").toObject();
     doc.settings.touchId = s.value("touchId").toBool();
-    doc.settings.autoLockMinutes = s.value("autoLockMinutes").toInt();
+    doc.settings.autoLockMinutes = s.value("autoLockMinutes").toInt(15);
     *out = doc;
     return true;
 }

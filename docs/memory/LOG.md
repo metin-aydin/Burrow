@@ -4,6 +4,10 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Güvenlik düzeltmesi (inceleme): pencere kapanınca uygulama menü çubuğunda açık kasayla kalıyordu → Ayarlar'a
+  "Otomatik Kilit" (5/15/30/60 dk ya da Hiçbir Zaman, varsayılan 15). Kullanıcı girdisi zamanlayıcıyı sıfırlar; açık
+  uzak masaüstü varken kilitlenmez. Tray menüsü kendi eyleminin içinden yeniden kurulmuyor (kuyruklu bağlantılar,
+  ertelenmiş eylemler).
 - Hesap bağlama / cihaz içe aktarma: Tünel Profilleri'nde Tailscale ve Cloudflare için "Cihazları İçe Aktar". Tailscale:
   tünel açılır (gerekirse tarayıcı girişi), tailnet makineleri listelenir (`NetcoreTunnelPeers`, MagicDNS adı/IP, OS,
   çevrimiçi), seçilenler cihaz olur. Cloudflare: OAuth yok → API anahtarıyla (kaydedilmez) Access uygulamaları listelenir
