@@ -4,6 +4,9 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Güvenlik incelemesi (monitör düzeni): sunucunun bildirdiği monitörler en fazla 16 ve makul boyutla sınırlı,
+  geçersizse yok sayılır; `setMonitorDefs` sayı/boyutu doğrular ve canlı bağlantıda masaüstü boyutuna dokunmaz
+  (yalnız bağlanmadan önce); sunucu düzeni reddederse yeniden istek en fazla 3 kez, artan aralıkla.
 - GNOME oturumu girişten sonra bir kez daha devrediyor (ikinci sunucu yönlendirmesi); yeni bağlantı FreeRDP
   ayarlarındaki ilk monitör listesini gönderdiği için monitörler ilk boyutlara dönüp siyah kenar kalıyordu. Artık her
   düzen isteğinde `MonitorDefArray` de güncelleniyor; sunucu istenenden farklı düzene dönerse düzen yeniden isteniyor.

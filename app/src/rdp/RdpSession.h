@@ -143,6 +143,7 @@ private:
     // A layout change makes the server rebuild its screens; another one before that finishes (or right
     // after connecting, while GNOME hands the session over) makes it end the session. So: one at a time.
     bool m_layoutPending = false;
+    int m_layoutRetries = 0;      // re-asks after the server went back to other sizes
     QElapsedTimer m_layoutSent;   // since the pending request went out
     QElapsedTimer m_settled;      // since the desktop last (re)appeared or changed
     QMutex m_tasksLock;

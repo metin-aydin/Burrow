@@ -65,9 +65,15 @@ UINT resetGraphics(RdpgfxClientContext *gfx, const RDPGFX_RESET_GRAPHICS_PDU *pd
     RdpSession *session = gdi ? sessionOf(gdi->context) : nullptr;
     if (session && pdu) {
         QList<QRect> mons;
-        for (UINT32 i = 0; i < pdu->monitorCount && pdu->monitorDefArray; ++i) {
+        // Untrusted: at most 16 monitors, each of a sane size; anything else is ignored.
+        for (UINT32 i = 0; i < pdu->monitorCount && i < 16 && pdu->monitorDefArray; ++i) {
             const MONITOR_DEF &m = pdu->monitorDefArray[i];
-            mons.append(QRect(QPoint(m.left, m.top), QPoint(m.right, m.bottom)));
+            const qint64 w = qint64(m.right) - m.left + 1, h = qint64(m.bottom) - m.top + 1;
+            if (w < 1 || h < 1 || w > 8192 || h > 8192 || qAbs(qint64(m.left)) > 131072 || qAbs(qint64(m.top)) > 131072) {
+                mons.clear();
+                break;
+            }
+            mons.append(QRect(m.left, m.top, int(w), int(h)));
         }
         session->onServerMonitors(mons, QSize(int(pdu->width), int(pdu->height)));
     }
@@ -185,10 +191,20 @@ QString friendlyError(UINT32 code)
 
 // Writes the client monitor layout FreeRDP sends when (re)connecting. `rects` are in desktop pixels;
 // FreeRDP wants them relative to the primary (first) monitor, which must sit at 0,0.
-void setMonitorDefs(rdpSettings *s, const QList<QRect> &rects, int scale)
+// `setDesktop` also sets the desktop size: only before connecting (on a live connection the GDI buffer
+// follows the server's size, so it is left alone).
+constexpr int kMaxMonitors = 16;          // the protocol's limit
+constexpr int kMaxMonitorSide = 8192;
+void setMonitorDefs(rdpSettings *s, const QList<QRect> &rects, int scale, bool setDesktop)
 {
     const auto count = UINT32(rects.size());
-    if (count == 0 || !freerdp_settings_set_pointer_len(s, FreeRDP_MonitorDefArray, nullptr, count))
+    if (count == 0 || count > UINT32(kMaxMonitors))
+        return;
+    for (const QRect &r : rects)
+        if (r.width() < 200 || r.height() < 200 || r.width() > kMaxMonitorSide || r.height() > kMaxMonitorSide
+            || qAbs(r.x()) > kMaxMonitors * kMaxMonitorSide || qAbs(r.y()) > kMaxMonitors * kMaxMonitorSide)
+            return;
+    if (!freerdp_settings_set_pointer_len(s, FreeRDP_MonitorDefArray, nullptr, count))
         return;
     const QPoint origin = rects.first().topLeft();
     QRect box;
@@ -211,8 +227,10 @@ void setMonitorDefs(rdpSettings *s, const QList<QRect> &rects, int scale)
         mon->attributes.physicalHeight = UINT32(r.height() * 254 / 960);
     }
     freerdp_settings_set_uint32(s, FreeRDP_MonitorCount, count);
-    freerdp_settings_set_uint32(s, FreeRDP_DesktopWidth, uint32_t(box.width()));
-    freerdp_settings_set_uint32(s, FreeRDP_DesktopHeight, uint32_t(box.height()));
+    if (setDesktop) {
+        freerdp_settings_set_uint32(s, FreeRDP_DesktopWidth, uint32_t(box.width()));
+        freerdp_settings_set_uint32(s, FreeRDP_DesktopHeight, uint32_t(box.height()));
+    }
 }
 
 } // namespace
@@ -374,7 +392,7 @@ void RdpSession::run()
         QList<QRect> rects;
         for (const Params::Monitor &m : m_p.monitors)
             rects.append(m.rect);
-        setMonitorDefs(s, rects, m_p.scale);
+        setMonitorDefs(s, rects, m_p.scale, true);
     }
     freerdp_settings_set_bool(s, FreeRDP_RedirectClipboard, m_clip->enabled() ? TRUE : FALSE);
     // Only NLA/TLS: legacy "RDP security" has no server authentication, so a man in the middle could
@@ -613,9 +631,21 @@ void RdpSession::onServerMonitors(const QList<QRect> &monitors, const QSize &des
         m_layoutPending = false;   // the server applied a layout (ours or its own)
         m_settled.start();
         emit desktopSizeChanged();
-        // Back to other sizes than asked for (e.g. after a hand-over): ask again once it settles.
-        if (m_layoutTimer && !m_wantedSizes.isEmpty())
-            m_layoutTimer->start(600);
+        // Back to other sizes than asked for (e.g. after a hand-over): ask again once it settles, a few
+        // times at most, so a server that keeps refusing doesn't get asked forever.
+        if (!m_layoutTimer || m_wantedSizes.isEmpty())
+            return;
+        const QVariantList mons = this->monitors();
+        bool same = mons.size() == m_wantedSizes.size();
+        for (int i = 0; same && i < mons.size(); ++i)
+            same = QSize(mons.at(i).toMap().value("width").toInt(), mons.at(i).toMap().value("height").toInt())
+                == m_wantedSizes.at(i);
+        if (same) {
+            m_layoutRetries = 0;
+        } else if (m_layoutRetries < 3) {
+            ++m_layoutRetries;
+            m_layoutTimer->start(600 * m_layoutRetries);
+        }
     }, Qt::QueuedConnection);
 }
 
@@ -665,6 +695,7 @@ void RdpSession::requestMonitorSize(int index, const QSize &pixels)
     if (m_wantedSizes.at(index) == s)
         return;
     m_wantedSizes[index] = s;
+    m_layoutRetries = 0;
     if (!m_layoutTimer) {
         m_layoutTimer = new QTimer(this);
         m_layoutTimer->setSingleShot(true);
@@ -731,7 +762,7 @@ void RdpSession::sendMonitorLayout()
             QList<QRect> rects;
             for (const DISPLAY_CONTROL_MONITOR_LAYOUT &m : layout)
                 rects.append(QRect(m.Left, m.Top, int(m.Width), int(m.Height)));
-            setMonitorDefs(inst->context->settings, rects, scale);
+            setMonitorDefs(inst->context->settings, rects, scale, false);   // worker thread, as FreeRDP
         }
     });
 }
