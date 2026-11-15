@@ -7,6 +7,7 @@
 #include <QWaitCondition>
 #include <QObject>
 #include <QThread>
+#include <QTimer>
 #include <atomic>
 
 #include "rdp/KeyMapper.h"
@@ -84,6 +85,9 @@ public:
     void releaseKeys();
     // Asks the server to resize the desktop (pixels, scale %). Debounce in the caller.
     void requestResize(const QSize &pixels, int scale);
+    // With several monitors: asks for monitor `index` to have this size (the window showing it). The
+    // whole layout is sent shortly after the last change, monitors side by side in index order.
+    void requestMonitorSize(int index, const QSize &pixels);
 
     // FreeRDP callbacks (worker thread).
     void onPaint(rdp_gdi *gdi, int x, int y, int w, int h);
@@ -132,6 +136,9 @@ private:
     RdpClipboard *m_clip = nullptr;
     void *m_disp = nullptr;                  // DispClientContext*, worker thread only
     QList<QRect> m_serverMonitors;           // guarded by m_frameLock
+    QList<QSize> m_wantedSizes;              // GUI thread: monitor sizes to ask for
+    QTimer *m_layoutTimer = nullptr;
+    void sendMonitorLayout();
     QMutex m_tasksLock;
     QList<std::function<void()>> m_tasks;
 };

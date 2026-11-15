@@ -629,6 +629,60 @@ void RdpSession::requestResize(const QSize &pixels, int scale)
     });
 }
 
+void RdpSession::requestMonitorSize(int index, const QSize &pixels)
+{
+    const QVariantList mons = monitors();
+    if (index < 0 || index >= mons.size())
+        return;
+    if (m_wantedSizes.size() != mons.size()) {
+        m_wantedSizes.clear();
+        for (const QVariant &v : mons)
+            m_wantedSizes.append(QSize(v.toMap().value("width").toInt(), v.toMap().value("height").toInt()));
+    }
+    // The protocol wants even widths between 200 and 8192 pixels.
+    const QSize s(qBound(200, pixels.width() & ~1, 8192), qBound(200, pixels.height(), 8192));
+    if (m_wantedSizes.at(index) == s)
+        return;
+    m_wantedSizes[index] = s;
+    if (!m_layoutTimer) {
+        m_layoutTimer = new QTimer(this);
+        m_layoutTimer->setSingleShot(true);
+        m_layoutTimer->setInterval(250);
+        connect(m_layoutTimer, &QTimer::timeout, this, &RdpSession::sendMonitorLayout);
+    }
+    m_layoutTimer->start();
+}
+
+void RdpSession::sendMonitorLayout()
+{
+    const QList<QSize> sizes = m_wantedSizes;
+    const int scale = m_p.scale;
+    post([this, sizes, scale] {
+        auto *disp = static_cast<DispClientContext *>(m_disp);
+        if (!disp || sizes.isEmpty())
+            return;
+        QList<DISPLAY_CONTROL_MONITOR_LAYOUT> layout(sizes.size());
+        int x = 0;
+        for (int i = 0; i < sizes.size(); ++i) {
+            DISPLAY_CONTROL_MONITOR_LAYOUT &m = layout[i];
+            m = {};
+            m.Flags = i == 0 ? DISPLAY_CONTROL_MONITOR_PRIMARY : 0;
+            m.Left = x;
+            m.Top = 0;
+            m.Width = UINT32(sizes.at(i).width());
+            m.Height = UINT32(sizes.at(i).height());
+            m.DesktopScaleFactor = UINT32(scale);
+            m.DeviceScaleFactor = scale >= 200 ? 180 : scale >= 140 ? 140 : 100;
+            m.PhysicalWidth = m.Width * 254 / 960;
+            m.PhysicalHeight = m.Height * 254 / 960;
+            m.Orientation = ORIENTATION_LANDSCAPE;
+            x += sizes.at(i).width();
+        }
+        qInfo("rdp: asking for %lld monitors", qlonglong(layout.size()));
+        (void)disp->SendMonitorLayout(disp, UINT32(layout.size()), layout.data());
+    });
+}
+
 int RdpSession::connectSocket(const char *hostname, int port)
 {
     int fds[2];

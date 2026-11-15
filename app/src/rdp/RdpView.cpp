@@ -27,7 +27,12 @@ RdpView::RdpView(QQuickItem *parent)
             return;
         // Logical pixels unless the device uses Retina resolution (then scale() is 200 on Retina).
         const qreal dpr = m_session->scale() / 100.0;
-        m_session->requestResize(QSize(qRound(width() * dpr), qRound(height() * dpr)), m_session->scale());
+        const QSize px(qRound(width() * dpr), qRound(height() * dpr));
+        // A view of one monitor of several resizes that monitor; otherwise the whole desktop follows.
+        if (m_monitor >= 0 && m_session->multiMonitor())
+            m_session->requestMonitorSize(m_monitor, px);
+        else
+            m_session->requestResize(px, m_session->scale());
     });
 }
 
@@ -53,7 +58,11 @@ void RdpView::setSession(RdpSession *s)
             if (!m_frameTimer.isActive())
                 m_frameTimer.start();
         });
-        connect(s, &RdpSession::desktopSizeChanged, this, &RdpView::refreshFrame);
+        connect(s, &RdpSession::desktopSizeChanged, this, [this] {
+            refreshFrame();
+            if (m_monitor >= 0)
+                m_resizeTimer.start();   // monitors became known (or changed): fit ours to this view
+        });
         // Show the current picture right away: a static remote screen may not send updates for a while.
         refreshFrame();
         connect(s, &RdpSession::stateChanged, this, [this] {
@@ -70,6 +79,7 @@ void RdpView::setMonitor(int m)
         return;
     m_monitor = m;
     refreshFrame();
+    m_resizeTimer.start();   // the monitor now shown takes this view's size
     emit monitorChanged();
 }
 

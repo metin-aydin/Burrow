@@ -113,13 +113,19 @@ Window {
         for (const k in detached) detached[k].destroy()
         detached = ({}); detachedCount = 0
     }
-    function scheduleSave() { if (!ending && restored) saveTimer.restart() }
+    function scheduleSave() { if (!ending) saveTimer.restart() }
     Timer {
         // Delayed so quitting (which closes every window) doesn't record the windows as closed.
         id: saveTimer
         interval: 800
         onTriggered: {
-            if (win.ending || !win.tabbed) return
+            if (win.ending) return
+            const out = Object.assign({}, App.device(win.deviceId).layout || {})
+            // This window: the display it is on and whether it is full screen.
+            const ms = win.screen
+            out.main = { screen: ms ? ms.name : "", x: ms ? ms.virtualX + ms.width / 2 : 0,
+                         y: ms ? ms.virtualY + ms.height / 2 : 0, fullscreen: win.visibility === Window.FullScreen }
+            if (!win.tabbed || !win.restored) { App.saveDeviceLayout(win.deviceId, out); return }
             const list = []
             for (const k in win.detached) {
                 const w = win.detached[k]
@@ -129,7 +135,10 @@ Window {
                             x: sc ? sc.virtualX + sc.width / 2 : 0, y: sc ? sc.virtualY + sc.height / 2 : 0,
                             fullscreen: w.visibility === Window.FullScreen })
             }
-            App.saveDeviceLayout(win.deviceId, { detached: list, order: win.tabOrder, names: win.tabNames })
+            out.detached = list
+            out.order = win.tabOrder
+            out.names = win.tabNames
+            App.saveDeviceLayout(win.deviceId, out)
         }
     }
     // Puts tabs and windows back the way they were last time.
@@ -158,6 +167,23 @@ Window {
         }
     }
     Component.onDestruction: closeDetached()
+    // Opens where it was left last time (display, full screen), centred on that display; a new device
+    // opens centred on the main display.
+    Component.onCompleted: {
+        const saved = (App.device(deviceId).layout || {}).main || {}
+        const sc = (saved.x !== undefined ? screenAt(saved.x, saved.y) : null) || screenNamed(saved.screen || "")
+                   || screen
+        if (sc) {
+            screen = sc
+            x = sc.virtualX + (sc.width - width) / 2
+            y = sc.virtualY + Math.max(0, sc.height - height) / 2
+        }
+        if (saved.fullscreen) fullTimer.start()
+    }
+    // After the window has appeared on its display (macOS takes hidden windows full screen on the main one).
+    Timer { id: fullTimer; interval: 300; onTriggered: win.showFullScreen() }
+    onVisibilityChanged: scheduleSave()
+    onScreenChanged: scheduleSave()
     Component { id: monitorWindow; MonitorWindow {} }
 
     function stepList() {

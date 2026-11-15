@@ -4,6 +4,10 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Monitör boyutları canlı: her uzak monitör onu gösteren pencerenin boyutunu alır (disp kanalı, tüm düzen yan yana,
+  250 ms birleştirme). Tam ekranda çentik/oran farkından kalan siyah boşluklar ve farklı boyutlu ekranda dar görüntü
+  bunun içindi. Ana oturum penceresinin ekranı ve tam ekran durumu `layout.main` olarak kaydedilir; bağlantı
+  başlarken o ekranda ortalanmış açılır, gerekiyorsa tam ekran olur. Yeni cihaz penceresi ana ekranda ortalanır.
 - Ana pencerede kendi başlık çubuğumuz (macOS): içerik başlık çubuğunun altına uzanır (Qt ExpandedClientAreaHint +
   NoTitleBarBackgroundHint), boş birleşik NSToolbar başlığı 52 pt yapıp trafik ışıklarını ortalar
   (`platform/WindowChrome_mac.mm`). Galeri başlığı bu satırda; boş yerden sürükleyince pencere taşınır, çift tık büyütür.
