@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -39,7 +40,8 @@ func TestCreateOpenRoundTrip(t *testing.T) {
 		t.Fatalf("doc = %s", doc)
 	}
 	st, _ := os.Stat(p)
-	if st.Mode().Perm() != 0o600 {
+	// Windows keeps only the read-only bit; the file's ACL (user profile) is what protects it there.
+	if runtime.GOOS != "windows" && st.Mode().Perm() != 0o600 {
 		t.Fatalf("perm = %v", st.Mode().Perm())
 	}
 	if _, err := os.Stat(p + ".bak"); err != nil {
