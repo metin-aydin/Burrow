@@ -42,6 +42,9 @@ QtObject {
     readonly property bool contentTitleBar: Qt.platform.os === "osx"
     readonly property int titleBarHeight: contentTitleBar ? 52 : 0
     readonly property int trafficLightsInset: contentTitleBar ? 96 : 0
+    // Controls in the title bar are a little smaller, with the same space above, below and to the right.
+    readonly property int titleBarControlHeight: 32
+    readonly property int titleBarMargin: (titleBarHeight - titleBarControlHeight) / 2
     readonly property string fontFamily: Qt.application.font.family
 
     function osColors(os) {

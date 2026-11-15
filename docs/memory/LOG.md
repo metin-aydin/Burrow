@@ -4,6 +4,11 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- GNOME oturumu girişten sonra bir kez daha devrediyor (ikinci sunucu yönlendirmesi); yeni bağlantı FreeRDP
+  ayarlarındaki ilk monitör listesini gönderdiği için monitörler ilk boyutlara dönüp siyah kenar kalıyordu. Artık her
+  düzen isteğinde `MonitorDefArray` de güncelleniyor; sunucu istenenden farklı düzene dönerse düzen yeniden isteniyor.
+- Başlık çubuğu: kontroller 32 pt, üst/alt/sağ boşluk eşit (10 pt, `Theme.titleBarMargin`), başlık metni trafik
+  ışıklarıyla optik olarak hizalı.
 - Çoklu monitörde bağlantının kendiliğinden kopması: GNOME, bir düzen değişikliğinin yeniden kurulumu bitmeden yeni
   bir istek gelince oturumu kapatıyordu (`ERRINFO_LOGOFF_BY_USER`, pencereler yerleşirken saniyeler içinde 3 istek).
   Artık istekler sırayla: bağlantı/devir sonrası 2,5 sn beklenir, önceki düzen uygulanmadan (en fazla 6 sn) yenisi

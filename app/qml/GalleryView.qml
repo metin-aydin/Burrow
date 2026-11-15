@@ -16,6 +16,7 @@ Rectangle {
     signal openSettings()
     signal confirmDelete(string id, string name)
     signal connectDevice(string id)
+    readonly property int ctlH: Theme.contentTitleBar ? Theme.titleBarControlHeight : Theme.controlHeight
 
     ColumnLayout {
         anchors.fill: parent
@@ -28,7 +29,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: Theme.contentTitleBar ? Theme.titleBarHeight : -1
             Layout.leftMargin: Theme.contentTitleBar ? Theme.trafficLightsInset : 28
-            Layout.rightMargin: Theme.contentTitleBar ? 14 : 28
+            Layout.rightMargin: Theme.contentTitleBar ? Theme.titleBarMargin : 28
             Layout.topMargin: Theme.contentTitleBar ? 0 : 22
             spacing: Theme.contentTitleBar ? 8 : 12
             ColumnLayout {
@@ -44,6 +45,8 @@ Rectangle {
             Row {
                 visible: Theme.contentTitleBar
                 spacing: 8
+                // Optically centred on the traffic lights (text boxes carry descender space below).
+                Layout.topMargin: 4
                 Text { text: "Burrow"; color: Theme.text; font.pixelSize: 15; font.weight: Font.DemiBold; anchors.baseline: count.baseline }
                 Text {
                     id: count
@@ -61,7 +64,7 @@ Rectangle {
             // Search
             Rectangle {
                 Layout.preferredWidth: 240
-                height: Theme.controlHeight
+                Layout.preferredHeight: root.ctlH
                 radius: Theme.radius
                 color: Theme.field
                 border.width: search.activeFocus ? 2 : 1
@@ -78,10 +81,10 @@ Rectangle {
                     onTextChanged: App.gallery.query = text
                 }
             }
-            BButton { iconName: "tunnel"; text: qsTr("Tunnel Profiles"); onClicked: root.openTunnels() }
-            BButton { iconName: "lock"; variant: "ghost"; onClicked: App.lock(); ToolTip.visible: hovered; ToolTip.text: qsTr("Lock") }
-            BButton { iconName: "settings"; variant: "ghost"; onClicked: root.openSettings(); ToolTip.visible: hovered; ToolTip.text: qsTr("Settings") }
-            BButton { iconName: "plus"; variant: "primary"; text: qsTr("New Device"); onClicked: root.newDevice() }
+            BButton { iconName: "tunnel"; Layout.preferredHeight: root.ctlH; text: qsTr("Tunnel Profiles"); onClicked: root.openTunnels() }
+            BButton { iconName: "lock"; Layout.preferredHeight: root.ctlH; variant: "ghost"; onClicked: App.lock(); ToolTip.visible: hovered; ToolTip.text: qsTr("Lock") }
+            BButton { iconName: "settings"; Layout.preferredHeight: root.ctlH; variant: "ghost"; onClicked: root.openSettings(); ToolTip.visible: hovered; ToolTip.text: qsTr("Settings") }
+            BButton { iconName: "plus"; Layout.preferredHeight: root.ctlH; variant: "primary"; text: qsTr("New Device"); onClicked: root.newDevice() }
         }
 
         // --- Tunnel filter chips ---------------------------------------------
