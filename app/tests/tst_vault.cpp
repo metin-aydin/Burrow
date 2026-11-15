@@ -6,6 +6,7 @@
 #include "app/AppController.h"
 #include "app/Updater.h"
 #include "rdp/KeyMapper.h"
+#include <QUrl>
 #include "rdp/RdpClipboard.h"
 #include "vnc/VncSession.h"
 #include "vnc/AppleAdaptive.h"
@@ -364,6 +365,31 @@ private slots:
         qToLittleEndian<quint32>(1u, reinterpret_cast<uchar *>(evil.data()));
         evil += descriptor(QStringLiteral("..\\..\\.zshrc"), 0x40, 0, 3);
         QVERIFY(!RdpClipboard::parseFileList(evil, &files));
+
+        // Local → remote: a copied folder is expanded parents first and survives the round trip.
+        QTemporaryDir tmp;
+        QVERIFY(tmp.isValid());
+        QDir(tmp.path()).mkpath(QStringLiteral("Report/img"));
+        auto write = [&](const QString &rel, const QByteArray &bytes) {
+            QFile f(tmp.path() + QLatin1Char('/') + rel);
+            QVERIFY(f.open(QIODevice::WriteOnly));
+            f.write(bytes);
+        };
+        write(QStringLiteral("Report/img/a.png"), QByteArray(10, 'a'));
+        write(QStringLiteral("Report/notes.txt"), QByteArray(3, 'n'));
+        QList<RdpClipboard::LocalFile> local;
+        QVERIFY(RdpClipboard::collectLocalFiles({ QUrl::fromLocalFile(tmp.path() + QStringLiteral("/Report")) }, &local));
+        QCOMPARE(local.size(), 4);
+        QCOMPARE(local[0].remoteName, QStringLiteral("Report"));
+        QVERIFY(local[0].dir);
+        QList<RdpClipboard::RemoteFile> back;
+        QVERIFY(RdpClipboard::parseFileList(RdpClipboard::buildFileList(local), &back));
+        QCOMPARE(back.size(), 4);
+        for (int i = 0; i < 4; ++i) {
+            QCOMPARE(back[i].path, QString(local[i].remoteName).replace(QLatin1Char('\\'), QLatin1Char('/')));
+            QCOMPARE(back[i].dir, local[i].dir);
+            QCOMPARE(back[i].size, local[i].size);
+        }
     }
 
     void clipboardDib()

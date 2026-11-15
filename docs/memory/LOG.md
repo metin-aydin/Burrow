@@ -4,6 +4,14 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Dosya panosu iki yönlü ve platformdan bağımsız:** kullanıcı "her işletim sisteminden her işletim sistemine,
+  iki yönlü" istedi. Yerelden uzağa: panodaki dosya URL'leri (Finder, Explorer, Nautilus) klasörler açılarak
+  listeleniyor, `FileGroupDescriptorW` (id 0xC0F1) olarak sunuluyor; uzak taraf `FileContents` ile parça istedikçe
+  dosya okunuyor (en fazla 8 MiB/istek, yalnızca listedeki dosyalar, klasör içindeki symlink'ler atlanıyor,
+  260+ karakterlik adlar atlanıyor). Uzaktan gelenler Linux'ta Nautilus için `x-special/gnome-copied-files` da alıyor;
+  Windows'ta geçersiz karakterler `_` oluyor. Metinlerden "Mac" çıkarıldı ("bu bilgisayar"). macOS hedefleri (VNC)
+  yalnızca metin: editör bunu söylüyor. Gidiş-dönüş birim testi geçti; Windows/Linux derlemesi ve gerçek sunucuyla
+  uçtan uca deneme yapılmadı.
 - **Ubuntu→Mac dosya kopyalama (pano):** kullanıcı Ubuntu'da kopyaladığı dosyayı Mac'e yapıştıramıyordu. Neden:
   `RdpClipboard` yalnızca metin (CF_UNICODETEXT) ve görsel (CF_DIB) taşıyordu; dosya listesi hiç yoktu. Eklendi:
   istemci `CB_STREAM_FILECLIP_ENABLED | CB_FILECLIP_NO_FILE_PATHS | CB_HUGE_FILE_SUPPORT_ENABLED` bildiriyor;

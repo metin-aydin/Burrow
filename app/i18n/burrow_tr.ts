@@ -555,42 +555,47 @@
         <translation>Kapalı</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="234"/>
+        <location filename="../qml/DeviceEditor.qml" line="226"/>
+        <source>Over VNC only text is shared: files can&apos;t be copied to or from a Mac.</source>
+        <translation>VNC üzerinden yalnızca metin paylaşılır: Mac&apos;e ya da Mac&apos;ten dosya kopyalanamaz.</translation>
+    </message>
+    <message>
+        <location filename="../qml/DeviceEditor.qml" line="227"/>
+        <source>Covers text, images and files. Files from the remote computer are saved on this computer first, up to 2 GB at a time.</source>
+        <translation>Metin, görsel ve dosyaları kapsar. Uzak bilgisayardan gelen dosyalar önce bu bilgisayara kaydedilir (bir seferde en fazla 2 GB).</translation>
+    </message>
+    <message>
+        <location filename="../qml/DeviceEditor.qml" line="235"/>
         <source>Keys reach the Mac as they are: Cmd stays Cmd.</source>
         <translation>Tuşlar Mac&apos;e olduğu gibi gider: Cmd, Cmd olarak kalır.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="226"/>
-        <source>Covers text and images. Files copied on the remote computer can be pasted on this Mac, up to 2 GB at a time; files from this Mac can&apos;t be pasted there yet.</source>
-        <translation>Metin ve görselleri kapsar. Uzak bilgisayarda kopyalanan dosyalar bu Mac&apos;e yapıştırılabilir (bir seferde en fazla 2 GB); bu Mac&apos;teki dosyalar henüz oraya yapıştırılamaz.</translation>
-    </message>
-    <message>
-        <location filename="../qml/DeviceEditor.qml" line="240"/>
+        <location filename="../qml/DeviceEditor.qml" line="241"/>
         <source>Mac Shortcuts</source>
         <translation>Mac Kısayolları</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="241"/>
+        <location filename="../qml/DeviceEditor.qml" line="242"/>
         <source>Translate shortcuts (Cmd+C → Ctrl+C)</source>
         <translation>Kısayolları çevir (Cmd+C → Ctrl+C)</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="242"/>
+        <location filename="../qml/DeviceEditor.qml" line="243"/>
         <source>Swap Cmd ↔ Ctrl completely</source>
         <translation>Cmd ↔ Ctrl tamamen yer değiştir</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="243"/>
+        <location filename="../qml/DeviceEditor.qml" line="244"/>
         <source>Off (keys as they are)</source>
         <translation>Kapalı (tuşlar olduğu gibi)</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="259"/>
+        <location filename="../qml/DeviceEditor.qml" line="260"/>
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="260"/>
+        <location filename="../qml/DeviceEditor.qml" line="261"/>
         <source>Save</source>
         <translation>Kaydet</translation>
     </message>
@@ -939,45 +944,50 @@
 <context>
     <name>RdpClipboard</name>
     <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="289"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="219"/>
+        <source>Too many files to copy to the remote computer at once (more than 10,000). Copy fewer files.</source>
+        <translation>Uzak bilgisayara bir seferde kopyalanacak dosya çok fazla (10.000&apos;den fazla). Daha az dosya kopyalayın.</translation>
+    </message>
+    <message>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="326"/>
         <source>Couldn&apos;t copy the files from the remote computer: their list was unreadable.</source>
         <translation>Dosyalar uzak bilgisayardan kopyalanamadı: dosya listesi okunamadı.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="352"/>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="453"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="395"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="496"/>
         <source>The copied files are larger than 2 GB. Copy fewer files at a time.</source>
         <translation>Kopyalanan dosyalar 2 GB&apos;tan büyük. Bir seferde daha az dosya kopyalayın.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="371"/>
-        <source>Couldn&apos;t copy the files from the remote computer: the cache folder isn&apos;t writable. Check the free space on this Mac.</source>
-        <translation>Dosyalar uzak bilgisayardan kopyalanamadı: önbellek klasörüne yazılamıyor. Bu Mac&apos;teki boş alanı kontrol edin.</translation>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="414"/>
+        <source>Couldn&apos;t copy the files from the remote computer: the cache folder isn&apos;t writable. Check the free space on this computer.</source>
+        <translation>Dosyalar uzak bilgisayardan kopyalanamadı: önbellek klasörüne yazılamıyor. Bu bilgisayardaki boş alanı kontrol edin.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="378"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="458"/>
+        <source>Couldn&apos;t copy the files from the remote computer: a folder couldn&apos;t be created. Check the free space on this computer.</source>
+        <translation>Dosyalar uzak bilgisayardan kopyalanamadı: bir klasör oluşturulamadı. Bu bilgisayardaki boş alanı kontrol edin.</translation>
+    </message>
+    <message>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="466"/>
+        <source>Couldn&apos;t copy the files from the remote computer: a file couldn&apos;t be saved. Check the free space on this computer.</source>
+        <translation>Dosyalar uzak bilgisayardan kopyalanamadı: bir dosya kaydedilemedi. Bu bilgisayardaki boş alanı kontrol edin.</translation>
+    </message>
+    <message>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="421"/>
         <source>Copying files from the remote computer…</source>
         <translation>Dosyalar uzak bilgisayardan kopyalanıyor…</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="415"/>
-        <source>Couldn&apos;t copy the files from the remote computer: a folder couldn&apos;t be created. Check the free space on this Mac.</source>
-        <translation>Dosyalar uzak bilgisayardan kopyalanamadı: bir klasör oluşturulamadı. Bu Mac&apos;teki boş alanı kontrol edin.</translation>
-    </message>
-    <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="423"/>
-        <source>Couldn&apos;t copy the files from the remote computer: a file couldn&apos;t be saved. Check the free space on this Mac.</source>
-        <translation>Dosyalar uzak bilgisayardan kopyalanamadı: bir dosya kaydedilemedi. Bu Mac&apos;teki boş alanı kontrol edin.</translation>
-    </message>
-    <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="441"/>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="446"/>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="462"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="484"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="489"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="505"/>
         <source>Couldn&apos;t copy the files from the remote computer: it stopped sending them. Copy them again.</source>
         <translation>Dosyalar uzak bilgisayardan kopyalanamadı: gönderim yarıda kesildi. Dosyaları yeniden kopyalayın.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="485"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="533"/>
         <source>Files from the remote computer are ready to paste.</source>
         <translation>Uzak bilgisayardaki dosyalar yapıştırılmaya hazır.</translation>
     </message>

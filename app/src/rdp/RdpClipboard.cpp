@@ -28,7 +28,12 @@ constexpr quint32 kFileChunk = 1024u * 1024;
 // FILEDESCRIPTORW on the wire.
 constexpr int kDescriptorBytes = 592;
 constexpr quint32 kFdAttributes = 0x00000004, kFdWriteTime = 0x00000020, kFdFileSize = 0x00000040;
-constexpr quint32 kAttrDirectory = 0x00000010;
+constexpr quint32 kFdProgressUi = 0x00004000;
+constexpr quint32 kAttrDirectory = 0x00000010, kAttrNormal = 0x00000080;
+// Our id for the file list we offer (registered formats live at 0xC000 and above).
+constexpr unsigned kLocalFileFormatId = 0xC0F1;
+// Largest piece of a local file handed over per request.
+constexpr quint32 kMaxContentsReply = 8u * 1024 * 1024;
 const char kFileListFormat[] = "FileGroupDescriptorW";
 
 RdpClipboard *self(CliprdrClientContext *ctx) { return ctx ? static_cast<RdpClipboard *>(ctx->custom) : nullptr; }
@@ -100,6 +105,22 @@ UINT serverFileContentsResponse(CliprdrClientContext *ctx, const CLIPRDR_FILE_CO
                   : QByteArray());
 }
 
+UINT serverFileContentsRequest(CliprdrClientContext *ctx, const CLIPRDR_FILE_CONTENTS_REQUEST *req)
+{
+    auto *c = self(ctx);
+    if (!c || !req)
+        return CHANNEL_RC_OK;
+    return c->onServerFileContentsRequest(req->streamId, req->listIndex, req->dwFlags,
+                                          (quint64(req->nPositionHigh) << 32) | req->nPositionLow,
+                                          req->cbRequested);
+}
+
+quint64 toFileTime(const QDateTime &t)
+{
+    constexpr qint64 kEpochDiffMs = 11644473600000LL;
+    return t.isValid() ? quint64(t.toMSecsSinceEpoch() + kEpochDiffMs) * 10000 : 0;
+}
+
 QDateTime fromFileTime(quint64 ticks)
 {
     // 100 ns ticks since 1601-01-01 UTC.
@@ -154,6 +175,7 @@ void RdpClipboard::attach(CliprdrClientContext *ctx)
     ctx->ServerFormatDataRequest = serverFormatDataRequest;
     ctx->ServerFormatDataResponse = serverFormatDataResponse;
     ctx->ServerFileContentsResponse = serverFileContentsResponse;
+    ctx->ServerFileContentsRequest = serverFileContentsRequest;
 }
 
 void RdpClipboard::detach()
@@ -166,9 +188,13 @@ void RdpClipboard::detach()
         m_ctx->ServerFormatDataRequest = nullptr;
         m_ctx->ServerFormatDataResponse = nullptr;
         m_ctx->ServerFileContentsResponse = nullptr;
+        m_ctx->ServerFileContentsRequest = nullptr;
         m_ctx->custom = nullptr;
     }
     abortFiles();
+    m_in.close();
+    m_inIndex = -1;
+    m_offered.clear();
     m_ctx = nullptr;
     m_ready = false;
     m_serverFiles = false;
@@ -187,14 +213,21 @@ void RdpClipboard::onLocalChanged()
     const QMimeData *md = QGuiApplication::clipboard()->mimeData();
     QString text;
     QByteArray dib;
+    QList<LocalFile> files;
+    if (md && md->hasUrls() && !collectLocalFiles(md->urls(), &files)) {
+        files.clear();
+        emit notice(tr("Too many files to copy to the remote computer at once (more than 10,000). Copy fewer files."));
+    }
     if (md && md->hasImage())
         dib = imageToDib(qvariant_cast<QImage>(md->imageData()));
-    if (md && md->hasText())
+    // With files on the clipboard the text is only their names or paths; the files go instead.
+    if (md && md->hasText() && files.isEmpty())
         text = md->text();
     {
         QMutexLocker lock(&m_lock);
         m_text = text;
         m_dib = dib;
+        m_localFiles = files;
     }
     m_post([this] { sendFormatList(); });
 }
@@ -208,9 +241,8 @@ unsigned RdpClipboard::onMonitorReady()
     general.capabilitySetLength = CB_CAPSTYPE_GENERAL_LEN;
     general.version = CB_CAPS_VERSION_2;
     general.generalFlags = CB_USE_LONG_FORMAT_NAMES;
-    // Files are taken from the remote clipboard as streams (no paths shared), never offered to it.
-    if (toLocal())
-        general.generalFlags |= CB_STREAM_FILECLIP_ENABLED | CB_FILECLIP_NO_FILE_PATHS
+    // Files go both ways as streams; no local paths are shared.
+    general.generalFlags |= CB_STREAM_FILECLIP_ENABLED | CB_FILECLIP_NO_FILE_PATHS
                               | CB_HUGE_FILE_SUPPORT_ENABLED;
     CLIPRDR_CAPABILITIES caps{};
     caps.cCapabilitiesSets = 1;
@@ -226,10 +258,15 @@ unsigned RdpClipboard::sendFormatList()
 {
     if (!m_ctx || !m_ready)
         return CHANNEL_RC_OK;
-    CLIPRDR_FORMAT formats[2] = {};
+    CLIPRDR_FORMAT formats[3] = {};
+    char fileFormatName[] = "FileGroupDescriptorW";
     UINT32 n = 0;
     {
         QMutexLocker lock(&m_lock);
+        if (toRemote() && !m_localFiles.isEmpty() && m_serverFiles) {
+            formats[n].formatId = kLocalFileFormatId;
+            formats[n++].formatName = fileFormatName;
+        }
         if (toRemote() && !m_text.isEmpty())
             formats[n++].formatId = CF_UNICODETEXT;
         if (toRemote() && !m_dib.isEmpty())
@@ -265,7 +302,7 @@ unsigned RdpClipboard::onServerFormatList(const QList<ServerFormat> &formats)
         text = text || f.id == CF_UNICODETEXT;
         dib = dib || f.id == CF_DIB;
     }
-    // Eagerly fetch the best format so it is on the Mac clipboard right away. Files win: the text
+    // Eagerly fetch the best format so it is on the local clipboard right away. Files win: the text
     // that comes with them is just their names.
     m_requested = (m_fileFormat && m_serverFiles) ? m_fileFormat
                 : text ? CF_UNICODETEXT : dib ? CF_DIB : 0;
@@ -316,7 +353,13 @@ unsigned RdpClipboard::onServerFormatDataRequest(unsigned format)
     QByteArray data;
     if (toRemote()) {
         QMutexLocker lock(&m_lock);
-        if (format == CF_UNICODETEXT && !m_text.isEmpty()) {
+        if (format == kLocalFileFormatId && !m_localFiles.isEmpty()) {
+            // The remote side asks for pieces by index into exactly this list.
+            m_offered = m_localFiles;
+            m_in.close();
+            m_inIndex = -1;
+            data = buildFileList(m_offered);
+        } else if (format == CF_UNICODETEXT && !m_text.isEmpty()) {
             const std::u16string s = m_text.toStdU16String();
             data = QByteArray(reinterpret_cast<const char *>(s.c_str()), int((s.size() + 1) * 2));
         } else if (format == CF_DIB) {
@@ -368,7 +411,7 @@ void RdpClipboard::startFiles(const QList<RemoteFile> &files)
         QDir(m_batchDir).removeRecursively();
     m_batchDir = m_sessionDir + QLatin1Char('/') + QString::number(++m_batch);
     if (!QDir().mkpath(m_batchDir)) {
-        failFiles(tr("Couldn't copy the files from the remote computer: the cache folder isn't writable. Check the free space on this Mac."));
+        failFiles(tr("Couldn't copy the files from the remote computer: the cache folder isn't writable. Check the free space on this computer."));
         return;
     }
     m_files = files;
@@ -412,7 +455,7 @@ unsigned RdpClipboard::nextFileStep()
         const QString target = m_batchDir + QLatin1Char('/') + f.path;
         if (f.dir) {
             if (!QDir().mkpath(target)) {
-                failFiles(tr("Couldn't copy the files from the remote computer: a folder couldn't be created. Check the free space on this Mac."));
+                failFiles(tr("Couldn't copy the files from the remote computer: a folder couldn't be created. Check the free space on this computer."));
                 return CHANNEL_RC_OK;
             }
             continue;
@@ -420,7 +463,7 @@ unsigned RdpClipboard::nextFileStep()
         QDir().mkpath(QFileInfo(target).absolutePath());
         m_out.setFileName(target);
         if (!m_out.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-            failFiles(tr("Couldn't copy the files from the remote computer: a file couldn't be saved. Check the free space on this Mac."));
+            failFiles(tr("Couldn't copy the files from the remote computer: a file couldn't be saved. Check the free space on this computer."));
             return CHANNEL_RC_OK;
         }
         m_offset = 0;
@@ -468,7 +511,7 @@ unsigned RdpClipboard::onServerFileContentsResponse(bool ok, unsigned streamId, 
 
 void RdpClipboard::finishFiles()
 {
-    // Top-level entries go on the Mac clipboard; Finder pastes folders with their contents.
+    // Top-level entries go on the local clipboard; file managers paste folders with their contents.
     QList<QUrl> urls;
     for (const RemoteFile &f : std::as_const(m_files))
         if (!f.path.contains(QLatin1Char('/')))
@@ -480,6 +523,11 @@ void RdpClipboard::finishFiles()
     QMetaObject::invokeMethod(this, [this, urls] {
         auto *md = new QMimeData;
         md->setUrls(urls);
+        // GNOME Files (Nautilus) pastes files only from its own format.
+        QByteArray gnome("copy");
+        for (const QUrl &u : urls)
+            gnome += '\n' + u.toEncoded();
+        md->setData(QStringLiteral("x-special/gnome-copied-files"), gnome);
         m_ignoreNextChange = true;
         QGuiApplication::clipboard()->setMimeData(md);
         emit notice(tr("Files from the remote computer are ready to paste."));
@@ -507,6 +555,114 @@ void RdpClipboard::abortFiles()
     ++m_streamId;   // late answers no longer match
 }
 
+// --- Files offered to the remote clipboard (worker thread) -------------------------------
+
+unsigned RdpClipboard::sendFileContents(unsigned streamId, bool ok, const QByteArray &data)
+{
+    CLIPRDR_FILE_CONTENTS_RESPONSE resp{};
+    resp.common.msgType = CB_FILECONTENTS_RESPONSE;
+    resp.common.msgFlags = ok ? CB_RESPONSE_OK : CB_RESPONSE_FAIL;
+    resp.common.dataLen = ok ? UINT32(4 + data.size()) : 4;
+    resp.streamId = streamId;
+    resp.cbRequested = ok ? UINT32(data.size()) : 0;
+    resp.requestedData = ok ? reinterpret_cast<const BYTE *>(data.constData()) : nullptr;
+    return m_ctx ? m_ctx->ClientFileContentsResponse(m_ctx, &resp) : CHANNEL_RC_OK;
+}
+
+unsigned RdpClipboard::onServerFileContentsRequest(unsigned streamId, unsigned listIndex, unsigned flags,
+                                                   quint64 position, quint32 bytes)
+{
+    // Only entries of the list we handed out, and only files, can be read.
+    if (!toRemote() || listIndex >= unsigned(m_offered.size()) || m_offered[listIndex].dir)
+        return sendFileContents(streamId, false, {});
+    const LocalFile &f = m_offered[listIndex];
+    if (flags & FILECONTENTS_SIZE) {
+        QByteArray size(8, '\0');
+        qToLittleEndian<quint64>(quint64(QFileInfo(f.absolutePath).size()), reinterpret_cast<uchar *>(size.data()));
+        return sendFileContents(streamId, true, size);
+    }
+    if (!(flags & FILECONTENTS_RANGE))
+        return sendFileContents(streamId, false, {});
+    if (m_inIndex != int(listIndex) || !m_in.isOpen()) {
+        m_in.close();
+        m_in.setFileName(f.absolutePath);
+        if (!m_in.open(QIODevice::ReadOnly)) {
+            m_inIndex = -1;
+            return sendFileContents(streamId, false, {});
+        }
+        m_inIndex = int(listIndex);
+    }
+    if (!m_in.seek(qint64(position)))
+        return sendFileContents(streamId, false, {});
+    QByteArray data = m_in.read(qMin(bytes, kMaxContentsReply));
+    const UINT rc = sendFileContents(streamId, true, data);
+    data.fill('\0');
+    return rc;
+}
+
+bool RdpClipboard::collectLocalFiles(const QList<QUrl> &urls, QList<LocalFile> *out)
+{
+    out->clear();
+    auto add = [out](const QFileInfo &fi, const QString &rel) {
+        if (rel.size() >= 260)   // Windows' MAX_PATH: longer names can't be described; skip them
+            return true;
+        LocalFile f;
+        f.absolutePath = fi.absoluteFilePath();
+        f.remoteName = QString(rel).replace(QLatin1Char('/'), QLatin1Char('\\'));
+        f.dir = fi.isDir();
+        f.size = f.dir ? 0 : quint64(fi.size());
+        f.modified = fi.lastModified();
+        out->append(f);
+        return out->size() <= kMaxFiles;
+    };
+    for (const QUrl &u : urls) {
+        if (!u.isLocalFile())
+            continue;
+        const QFileInfo top(u.toLocalFile());
+        if (!top.exists() || top.fileName().isEmpty())
+            continue;
+        if (!add(top, top.fileName()))
+            return false;
+        if (!top.isDir())
+            continue;
+        const QDir base(top.absoluteFilePath());
+        QDirIterator it(top.absoluteFilePath(),
+                        QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::NoSymLinks,
+                        QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            it.next();
+            if (!add(it.fileInfo(), top.fileName() + QLatin1Char('/') + base.relativeFilePath(it.filePath())))
+                return false;
+        }
+    }
+    // Parents before children, whatever order the file system listed them in.
+    std::stable_sort(out->begin(), out->end(), [](const LocalFile &a, const LocalFile &b) {
+        return a.remoteName.count(QLatin1Char('\\')) < b.remoteName.count(QLatin1Char('\\'));
+    });
+    return true;
+}
+
+QByteArray RdpClipboard::buildFileList(const QList<LocalFile> &files)
+{
+    // Indexes must match `files` exactly: the remote side asks for contents by index.
+    QByteArray out(4 + files.size() * kDescriptorBytes, '\0');
+    auto *p = reinterpret_cast<uchar *>(out.data());
+    qToLittleEndian<quint32>(quint32(files.size()), p);
+    for (int i = 0; i < files.size(); ++i) {
+        const LocalFile &f = files[i];
+        uchar *d = p + 4 + qint64(i) * kDescriptorBytes;
+        qToLittleEndian<quint32>(kFdAttributes | kFdFileSize | kFdWriteTime | kFdProgressUi, d);
+        qToLittleEndian<quint32>(f.dir ? kAttrDirectory : kAttrNormal, d + 36);
+        qToLittleEndian<quint64>(toFileTime(f.modified), d + 56);
+        qToLittleEndian<quint32>(quint32(f.size >> 32), d + 64);
+        qToLittleEndian<quint32>(quint32(f.size & 0xffffffffu), d + 68);
+        const std::u16string name = f.remoteName.left(259).toStdU16String();
+        for (size_t k = 0; k < name.size(); ++k)
+            qToLittleEndian<quint16>(name[k], d + 72 + k * 2);
+    }
+    return out;
+}
+
 QString RdpClipboard::safeRelativePath(const QString &remoteName)
 {
     QString name = remoteName;
@@ -519,7 +675,23 @@ QString RdpClipboard::safeRelativePath(const QString &remoteName)
     for (const QString &p : parts)
         if (p == QLatin1String(".") || p == QLatin1String("..") || p.contains(QChar(0)))
             return {};
+#ifdef Q_OS_WIN
+    // Names that are fine on Linux or macOS but not allowed on Windows.
+    QStringList fixed;
+    for (QString p : parts) {
+        for (QChar &c : p)
+            if (c < QChar(32) || QStringLiteral(":*?\"<>|").contains(c))
+                c = QLatin1Char('_');
+        while (p.endsWith(QLatin1Char('.')) || p.endsWith(QLatin1Char(' ')))
+            p.chop(1);
+        if (p.isEmpty())
+            return {};
+        fixed.append(p);
+    }
+    return fixed.join(QLatin1Char('/'));
+#else
     return parts.join(QLatin1Char('/'));
+#endif
 }
 
 bool RdpClipboard::parseFileList(const QByteArray &data, QList<RemoteFile> *out)

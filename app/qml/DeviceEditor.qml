@@ -219,11 +219,12 @@ BDialog {
         }
         Text {
             Layout.fillWidth: true
-            visible: clipCombo.value === "both" || clipCombo.value === "to_local"
+            visible: clipCombo.value !== "off"
             wrapMode: Text.WordWrap
             color: Theme.textSecondary
             font.pixelSize: Theme.fontLabel
-            text: qsTr("Covers text and images. Files copied on the remote computer can be pasted on this Mac, up to 2 GB at a time; files from this Mac can't be pasted there yet.")
+            text: root.isMac ? qsTr("Over VNC only text is shared: files can't be copied to or from a Mac.")
+                             : qsTr("Covers text, images and files. Files from the remote computer are saved on this computer first, up to 2 GB at a time.")
         }
         Text {
             Layout.fillWidth: true

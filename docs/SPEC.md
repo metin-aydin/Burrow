@@ -95,8 +95,10 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
 ### 5.0 Pano (kopyala/yapıştır) — çift yönlü
 - Kendi bilgisayarında kopyalanan uzak bilgisayara, uzakta kopyalanan kendi bilgisayarına
   yapıştırılabilir (RDP clipboard kanalı, FreeRDP `cliprdr`).
-- İçerik türleri: düz metin, zengin metin/HTML, görsel (ekran görüntüsü vb.); dosya kopyalama
-  uzaktan yerele (2026-11-15, bir seferde en fazla 2 GB). Yerelden uzağa dosya sonraki faz.
+- İçerik türleri: düz metin, zengin metin/HTML, görsel (ekran görüntüsü vb.) ve dosya/klasör — RDP'de iki yönde,
+  istemci hangi işletim sisteminde çalışırsa çalışsın (Windows, Linux, macOS). Uzaktan gelen dosyalar bir seferde
+  en fazla 2 GB; bir kopyada en fazla 10.000 öğe. macOS hedefleri (VNC) yalnızca düz metin taşır: standart RFB'de
+  dosya aktarımı yok.
 - Cihaz ayarı: pano paylaşımı açık / kapalı / sadece yerelden uzağa / sadece uzaktan yerele.
 - Pano içeriği loglanmaz, diske yazılmaz. İstisna: uzaktan kopyalanan dosyalar yapıştırılabilmek için oturuma ait
   özel önbellek klasörüne iner ve oturum kapanınca silinir.
