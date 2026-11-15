@@ -58,12 +58,13 @@ qt_add_translations(burrow
 
 if(APPLE)
     enable_language(OBJCXX)
-    target_sources(burrow PRIVATE src/platform/Biometric_mac.mm)
-    set_source_files_properties(src/platform/Biometric_mac.mm PROPERTIES COMPILE_FLAGS "-fobjc-arc")
+    target_sources(burrow PRIVATE src/platform/Biometric_mac.mm src/platform/WindowChrome_mac.mm)
+    set_source_files_properties(src/platform/Biometric_mac.mm src/platform/WindowChrome_mac.mm
+                                PROPERTIES COMPILE_FLAGS "-fobjc-arc")
     target_link_libraries(burrow PRIVATE "-framework Foundation" "-framework LocalAuthentication"
-                                          "-framework Security")
+                                          "-framework Security" "-framework AppKit")
 else()
-    target_sources(burrow PRIVATE src/platform/Biometric_stub.cpp)
+    target_sources(burrow PRIVATE src/platform/Biometric_stub.cpp src/platform/WindowChrome_stub.cpp)
 endif()
 
 target_include_directories(burrow PRIVATE src)

@@ -22,17 +22,31 @@ Rectangle {
         spacing: 0
 
         // --- Header ----------------------------------------------------------
+        // On macOS this row is the window's title bar (Theme.titleBarHeight), next to the traffic
+        // lights; elsewhere it is a normal header whose left edge matches the chips and cards (28 px).
         RowLayout {
             Layout.fillWidth: true
-            Layout.leftMargin: 28
-            Layout.rightMargin: 28
-            Layout.topMargin: 22
-            spacing: 12
-            // Left edge matches the filter chips and the cards below (28 px).
+            Layout.preferredHeight: Theme.contentTitleBar ? Theme.titleBarHeight : -1
+            Layout.leftMargin: Theme.contentTitleBar ? Theme.trafficLightsInset : 28
+            Layout.rightMargin: Theme.contentTitleBar ? 14 : 28
+            Layout.topMargin: Theme.contentTitleBar ? 0 : 22
+            spacing: Theme.contentTitleBar ? 8 : 12
             ColumnLayout {
+                visible: !Theme.contentTitleBar
                 spacing: 0
                 Text { text: "Burrow"; color: Theme.text; font.pixelSize: 20; font.weight: Font.Bold }
                 Text {
+                    text: App.devices.count === 1 ? qsTr("1 device") : qsTr("%1 devices").arg(App.devices.count)
+                    color: Theme.textSecondary; font.pixelSize: 12
+                }
+            }
+            // Title bar: name and count on one line, like a window title.
+            Row {
+                visible: Theme.contentTitleBar
+                spacing: 8
+                Text { text: "Burrow"; color: Theme.text; font.pixelSize: 15; font.weight: Font.DemiBold; anchors.baseline: count.baseline }
+                Text {
+                    id: count
                     text: App.devices.count === 1 ? qsTr("1 device") : qsTr("%1 devices").arg(App.devices.count)
                     color: Theme.textSecondary; font.pixelSize: 12
                 }
@@ -75,7 +89,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.leftMargin: 28
             Layout.rightMargin: 28
-            Layout.topMargin: 18
+            Layout.topMargin: Theme.contentTitleBar ? 6 : 18
             spacing: 8
             visible: App.tunnels.count > 0
             Chip { text: qsTr("All"); selected: root.filterTunnel === "*"; onClicked: root.filterTunnel = "*" }
@@ -108,6 +122,7 @@ Rectangle {
             cellHeight: cellWidth * 10 / 16 + 96
             model: App.gallery
             boundsBehavior: Flickable.StopAtBounds
+            boundsMovement: Flickable.StopAtBounds
             ScrollBar.vertical: ScrollBar {}
 
             delegate: Item {

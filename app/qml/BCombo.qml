@@ -78,6 +78,8 @@ ColumnLayout {
             implicitHeight: Math.min(contentItem.implicitHeight + 8, 320)
             contentItem: ListView {
                 clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                boundsMovement: Flickable.StopAtBounds
                 implicitHeight: contentHeight
                 model: combo.popup.visible ? combo.delegateModel : null
                 currentIndex: combo.highlightedIndex

@@ -1,5 +1,7 @@
 #include <QApplication>
 #include <QEvent>
+
+#include "platform/WindowChrome.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QIcon>
@@ -73,6 +75,7 @@ int main(int argc, char *argv[])
     app.installEventFilter(&activity);
     Tray tray(&controller);
     if (auto *window = qobject_cast<QWindow *>(engine.rootObjects().value(0))) {
+        WindowChrome::useContentTitleBar(window);   // our header sits in the title bar (Theme.titleBarHeight)
         tray.setWindow(window);
         QObject::connect(&tray, &Tray::connectRequested, window, [window](const QString &id) {
             QMetaObject::invokeMethod(window, "startSession", Q_ARG(QVariant, id), Q_ARG(QVariant, QString()),

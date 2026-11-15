@@ -4,6 +4,13 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Ana pencerede kendi başlık çubuğumuz (macOS): içerik başlık çubuğunun altına uzanır (Qt ExpandedClientAreaHint +
+  NoTitleBarBackgroundHint), boş birleşik NSToolbar başlığı 52 pt yapıp trafik ışıklarını ortalar
+  (`platform/WindowChrome_mac.mm`). Galeri başlığı bu satırda; boş yerden sürükleyince pencere taşınır, çift tık büyütür.
+  Token'lar: `Theme.titleBarHeight`, `Theme.trafficLightsInset`. ApplicationWindow safe-area dolgusu kapatıldı.
+- Kaydırmada lastik bant (bounce) kaldırıldı: diyaloglar, açılır listeler ve galeri `StopAtBounds`.
+- Varsayılan monitör ayarı "Her Mac ekranı için bir monitör"; mevcut cihazlar bir kerelik geçirildi
+  (`settings.multiMonitorDefault` bayrağı).
 - Monitör sekmeleri iyileştirmeleri: ayrık pencere ilk kareyi hemen çeker (önceden uzak ekran değişene kadar siyah
   kalıyordu); her görünüm yalnızca kendi monitör bölgesini kopyalar ve güncellemeler ~16 ms'de birleştirilir.
   Düzen ekranı merkez noktasıyla kaydedilir (isim yedek), pencere önce o ekranda gösterilip sonra kademeli tam

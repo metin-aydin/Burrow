@@ -66,6 +66,11 @@ Popup {
             contentWidth: availableWidth
             contentHeight: content.implicitHeight + 32
             clip: true
+            // Plain scrolling: no rubber-band bounce at either end (wheel or trackpad).
+            Component.onCompleted: {
+                contentItem.boundsBehavior = Flickable.StopAtBounds
+                contentItem.boundsMovement = Flickable.StopAtBounds
+            }
             ColumnLayout {
                 id: content
                 width: parent.width - 48

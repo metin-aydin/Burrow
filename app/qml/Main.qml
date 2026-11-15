@@ -12,6 +12,25 @@ ApplicationWindow {
     title: "Burrow"
     color: Theme.bg
     font.family: Theme.fontFamily
+    // The content runs under the title bar (our header is in it), so no automatic safe-area padding.
+    topPadding: 0
+    leftPadding: 0
+    rightPadding: 0
+
+    // Our header is the title bar: its empty parts move the window, a double-click zooms it. Declared
+    // under the content so buttons in the header still get their clicks.
+    Item {
+        anchors { left: parent.left; right: parent.right; top: parent.top }
+        height: Math.max(Theme.titleBarHeight, 1)
+        visible: Theme.contentTitleBar
+        DragHandler {
+            target: null
+            onActiveChanged: if (active) win.startSystemMove()
+        }
+        TapHandler {
+            onDoubleTapped: win.visibility === Window.Maximized ? win.showNormal() : win.showMaximized()
+        }
+    }
 
     Loader {
         anchors.fill: parent

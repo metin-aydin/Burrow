@@ -139,7 +139,8 @@ QByteArray toJson(const Document &doc)
         tunnels.append(tunnelToJsonImpl(t));
     QJsonObject root{{"schema", kSchemaVersion}, {"devices", devices}, {"tunnels", tunnels},
                      {"settings", QJsonObject{{"touchId", doc.settings.touchId},
-                                              {"autoLockMinutes", doc.settings.autoLockMinutes}}}};
+                                              {"autoLockMinutes", doc.settings.autoLockMinutes},
+                                              {"multiMonitorDefault", true}}}};
     return QJsonDocument(root).toJson(QJsonDocument::Compact);
 }
 
@@ -161,6 +162,11 @@ bool fromJson(const QByteArray &json, Document *out)
     const QJsonObject s = root.value("settings").toObject();
     doc.settings.touchId = s.value("touchId").toBool();
     doc.settings.autoLockMinutes = s.value("autoLockMinutes").toInt(15);
+    // One-time switch (2026-11-15): every device starts with one monitor per Mac display. Vaults
+    // written before that have no flag; their devices still carry the old single-window default.
+    if (!s.contains("multiMonitorDefault"))
+        for (Device &d : doc.devices)
+            d.displays = QStringLiteral("all");
     *out = doc;
     return true;
 }

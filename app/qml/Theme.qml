@@ -37,6 +37,11 @@ QtObject {
     readonly property int radius: 10
     readonly property int radiusLarge: 16
     readonly property int controlHeight: 36
+    // The main window draws its own header in the title bar on macOS (WindowChrome): its height, and
+    // the room the traffic lights take on the left.
+    readonly property bool contentTitleBar: Qt.platform.os === "osx"
+    readonly property int titleBarHeight: contentTitleBar ? 52 : 0
+    readonly property int trafficLightsInset: contentTitleBar ? 96 : 0
     readonly property string fontFamily: Qt.application.font.family
 
     function osColors(os) {
