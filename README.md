@@ -6,7 +6,7 @@
 
 <p align="center">
   A cross-platform, open-source remote desktop app with <strong>private tunnels built in</strong>:
-  RDP to Windows and Ubuntu, Screen Sharing to Macs. Available for macOS and Ubuntu; Windows is next.
+  RDP to Windows and Ubuntu, Screen Sharing to Macs. Available for macOS, Windows and Ubuntu.
 </p>
 
 <p align="center">
@@ -99,7 +99,7 @@ Get the latest version from the [Releases](https://github.com/metin-aydin/Burrow
 | --- | --- | --- |
 | macOS 13 or later (Apple Silicon) | `Burrow-<version>-mac-arm64.dmg` | In the app |
 | Ubuntu 24.04 or later (x86-64), early build | `Burrow-<version>-linux-x64.AppImage` | From the Releases page |
-| Windows | Planned | |
+| Windows 10 or later (x86-64), early build | `Burrow-<version>-windows-x64-setup.exe` (or `-portable.zip`) | In the app (installer only) |
 
 On macOS, open the `.dmg` and drag **Burrow** to Applications. The app is signed with Developer ID and notarized
 by Apple.
@@ -111,13 +111,16 @@ chmod +x Burrow-*-linux-x64.AppImage
 ./Burrow-*-linux-x64.AppImage
 ```
 
-If it does not start, install FUSE 2 (`sudo apt install libfuse2t64`). The Linux build does not update itself yet. A Windows build comes later (the GlobalProtect
-tunnel needs extra work there).
+If it does not start, install FUSE 2 (`sudo apt install libfuse2t64`). The Linux build does not update itself yet.
+
+On Windows, run the setup file: it installs Burrow for your user only (no administrator rights) and adds Start menu
+and desktop shortcuts. The Windows build is not code-signed yet, so SmartScreen may warn about an unknown publisher:
+choose **More info → Run anyway**. The portable zip runs from any folder but does not update itself.
 
 To reach a Mac, turn on **System Settings → General → Sharing → Screen Sharing** on it. To reach Ubuntu, turn on
 **Remote Desktop** in **Settings → System** (or Remote Login, where your GNOME offers it).
 
-On macOS, Burrow looks for a new version 15 seconds after startup and every six hours. When it finds one, **Settings → Updates**
+On macOS and Windows (installed), Burrow looks for a new version 15 seconds after startup and every six hours. When it finds one, **Settings → Updates**
 downloads it, installs it and restarts the app. Nothing is downloaded or installed without asking, and automatic
 checks can be turned off there.
 
@@ -134,6 +137,17 @@ brew install go cmake ninja qt freerdp openconnect
 cmake -S . -B build -G Ninja -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$(brew --prefix freerdp)"
 cmake --build build
 open build/app/Burrow.app
+```
+
+On Windows, install [MSYS2](https://www.msys2.org) and [Go](https://go.dev/dl/), then in an **MSYS2 UCRT64** shell
+([ADR 0010](docs/decisions/0010-windows-port.md); the script also builds libopenconnect, which no Windows package has):
+
+```bash
+tools/windows-deps.sh C:/burrow-deps
+export PKG_CONFIG_PATH=/c/burrow-deps/lib/pkgconfig
+cmake -S . -B build -G Ninja
+cmake --build build
+PATH="/c/burrow-deps/bin:$PATH" build/app/Burrow.exe
 ```
 
 Try the interface with sample computers in a throwaway vault:

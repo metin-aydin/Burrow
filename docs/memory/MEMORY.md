@@ -16,5 +16,5 @@ Her satır bir hafıza kaydını gösterir. Kayıt içerikleri ilgili dosyadadı
 - [AI slop tasarım yasak](feedback-no-ai-slop-design.md) — Impeccable proje içinde kurulu; QML'de yasak kalıplar, hook yok
 - [Lokal derleme](reference-local-build.md) — bu Mac'te Xcode SDK bayrakları şart; go yolu
 - [Araştırmalar](../research/) — RDP motoru/UI ve tünel/TOTP araştırmaları (2026-11-14)
-- [Kararlar (ADR)](../decisions/) — 0001 teknoloji yığını, 0002 release + otomatik güncelleme, 0003 Ubuntu oturum stratejisi (burrow-agent), 0004 kasa (Touch ID kaldırıldı), 0005 QML arayüz, 0006 çoklu dil, 0007 Cloudflare tüneli, 0008 macOS VNC, 0009 macOS dosya aktarımı (SSFileCopy tersine mühendislik)
+- [Kararlar (ADR)](../decisions/) — 0001 teknoloji yığını, 0002 release + otomatik güncelleme, 0003 Ubuntu oturum stratejisi (burrow-agent), 0004 kasa (Touch ID kaldırıldı), 0005 QML arayüz, 0006 çoklu dil, 0007 Cloudflare tüneli, 0008 macOS VNC, 0009 macOS dosya aktarımı (SSFileCopy tersine mühendislik), 0010 Windows portu (MSYS2, NSIS, JumpDesk gibi güncelleme)
 - [İş günlüğü](LOG.md) — yapılan işlerin kronolojik kaydı

@@ -27,8 +27,12 @@ CI'da doğrulandı. Linux AppImage release'te var ama `latest.json`'da yok (Linu
 **Dikkat:** Başka bir oturum kaynak dosyalarda satır kaydırırsa CI'ın Translations adımı düşer; PR'dan önce
 `cmake --build build --target Burrow_lupdate` çalıştırıp `app/i18n`'i commit et.
 
+Windows (2026-11-15, ADR 0010): kullanıcı "JumpDesk'te nasılsa her şey aynı olsun" dedi → imzasız NSIS kurulum
+(`-setup.exe`, kullanıcı başına) + taşınabilir zip; `latest.json`'da `windows-x64` = setup.exe; güncelleme SHA-256 +
+(uygulama imzalıysa) aynı Authenticode yayıncısı, sessiz kurulum `/S /RELAUNCH /WAITPID=`. Windows sertifikası yok.
+
 Henüz yapılmayan:
-Intel/Ubuntu/Windows paketleri.
+Intel paketi; Linux uygulama içi güncellemesi (JumpDesk'te AppImage de güncelleniyor); Windows kod imzalama.
 
 **Nasıl uygulanır:** Yeni CI işi eklenince dal korumasındaki zorunlu kontrol listesini de güncelle.
 Bkz. [[feedback-github-via-mcp]], [[project-github-meta]].

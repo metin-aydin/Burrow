@@ -4,6 +4,21 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Windows portu (ADR 0010) — `Windows build` CI'da yeşil.** Kullanıcıyla kararlar: MSYS2 UCRT64 (gcc; cgo ve Go
+  c-archive için), paket/imza/güncelleme "JumpDesk'teki gibi" → imzasız NSIS kullanıcı başına kurulum + taşınabilir
+  zip, Windows `latest.json`'a girer (SHA-256 + uygulama imzalıysa aynı Authenticode yayıncısı; sessiz kurulum
+  `/S /RELAUNCH /WAITPID=`). Kod: GP tüneli openconnect'e mesaj modlu named pipe ile bağlanıyor (Windows'ta
+  `setup_tun_fd` HANDLE alıyor; TAP ioctl'ünü pipe'ta atlayan küçük yama `tools/windows/openconnect-pipe-tun.patch`,
+  aynı yama mingw-w64 12+'da olmayan `sec_api/stdlib_s.h`'yi de düzeltiyor); RDP/VNC için `app/src/net/LocalSocket`
+  (Unix socketpair, Windows'ta karşı ucu doğrulanan loopback çifti) ve Go'da Winsock `net.Conn`; Windows scancode'ları;
+  Mac kısayol modları Windows/Linux'ta kapalı (Win tuşu Ctrl'e çevrilmesin); `Updater_win.cpp`. Araçlar:
+  `tools/windows-deps.sh` (libopenconnect 9.21 kaynaktan, SHA-256'lı), `tools/package-windows.sh`, `tools/windows/burrow.nsi`,
+  `tools/windows/smoke-test.sh` (paket DLL kontrolü + offscreen açılış). Windows'ta doğrulanan: Go testleri (named pipe
+  paket sınırları testi dahil), Qt testleri (soket çifti testi dahil), kurulum 87 MB / zip 124 MB. **Doğrulanmayan:**
+  gerçek GP sunucusuna Windows'tan bağlantı ve gerçek masaüstünde arayüz — kullanıcıda. Windows Hello yok.
+  Yolda: MSYS2 `C:/` biçimli `PKG_CONFIG_PATH`'i `:`'den bölüyor → `/c/...` biçimi; openconnect.h `SOCKET` için
+  winsock2.h istemiyor; DLL toplama döngüsü her dosyayı bir kez tarayacak hale getirildi (ilk hali 20+ dk sürdü).
+
 - **Release'te RDP girişi (NLA) çalışmıyordu → düzeltildi.** v0.1.0 (GitHub release) ile GP tüneli açılıyor ama RDP
   "Couldn't reach the computer" ile düşüyordu. Stderr logu: `OpenSSL LEGACY provider failed to load` →
   `Failed to initialize digest md4` → NTLM yok → `SEC_E_NO_CREDENTIALS`. Sebep: paketteki `libcrypto.4` legacy

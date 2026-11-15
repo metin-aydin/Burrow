@@ -31,3 +31,11 @@ cmake --build build
 - Docker belleği sınırlı: derlemede `-j2` kullan, yoksa `cc1plus` öldürülür.
 - Konteynerde FUSE yok: AppImage'ı `--appimage-extract-and-run` ile çalıştır; ekran için `Xvfb :99` + `xwd`.
 - `QT_QPA_PLATFORM=offscreen` macOS'ta bu uygulamayı çökertiyor (139); Linux'ta sorunsuz.
+
+## Windows
+
+- Bu Mac'te Windows derlemesi yok (mingw/zig kurulu değil); Windows işi yalnız CI'da (`Windows build`, windows-2025 +
+  MSYS2 UCRT64) doğrulanıyor. Yerelde Go tarafı için yalnız `GOOS=windows CGO_ENABLED=0 go vet` denenebilir.
+- Windows bilgisayarda: MSYS2 UCRT64 kabuğunda `tools/windows-deps.sh C:/burrow-deps`, sonra
+  `PKG_CONFIG_PATH=/c/burrow-deps/lib/pkgconfig cmake -S . -B build -G Ninja`; çalıştırırken `C:/burrow-deps/bin` PATH'te.
+- libopenconnect 9.21 kaynaktan, `tools/windows/openconnect-pipe-tun.patch` ile (pipe'a TAP ioctl'ü gönderme).
