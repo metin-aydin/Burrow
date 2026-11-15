@@ -190,6 +190,22 @@ QSize RdpSession::desktopSize() const
     return m_frame.size();
 }
 
+QVariantList RdpSession::monitors() const
+{
+    QVariantList out;
+    if (m_p.monitors.size() < 2)
+        return out;
+    for (const Params::Monitor &m : m_p.monitors)
+        out.append(QVariantMap{{"x", m.rect.x()}, {"y", m.rect.y()}, {"width", m.rect.width()},
+                               {"height", m.rect.height()}, {"screen", m.screen}});
+    return out;
+}
+
+bool RdpSession::multiMonitor() const
+{
+    return m_p.monitors.size() > 1 && desktopSize() == m_p.size;
+}
+
 QImage RdpSession::frame() const
 {
     QMutexLocker lock(&m_frameLock);
@@ -224,6 +240,8 @@ void RdpSession::setState(const QString &state, const QString &error)
     QMetaObject::invokeMethod(this, [this, state, error] {
         m_state = state;
         m_error = error;
+        if (state == QLatin1String("connected"))
+            m_wasConnected = true;
         emit stateChanged();
         if (state == QLatin1String("closed"))
             emit closed(this);
@@ -271,6 +289,35 @@ void RdpSession::run()
     freerdp_settings_set_bool(s, FreeRDP_DynamicResolutionUpdate, TRUE);
     freerdp_settings_set_uint32(s, FreeRDP_DesktopScaleFactor, uint32_t(m_p.scale));
     freerdp_settings_set_uint32(s, FreeRDP_DeviceScaleFactor, m_p.scale >= 200 ? 180 : m_p.scale >= 140 ? 140 : 100);
+    if (m_p.monitors.size() > 1) {
+        // One remote monitor per Mac display; the desktop is their bounding box.
+        const auto count = UINT32(m_p.monitors.size());
+        freerdp_settings_set_bool(s, FreeRDP_UseMultimon, TRUE);
+        freerdp_settings_set_bool(s, FreeRDP_SupportMonitorLayoutPdu, TRUE);
+        freerdp_settings_set_bool(s, FreeRDP_HasMonitorAttributes, TRUE);
+        freerdp_settings_set_bool(s, FreeRDP_DynamicResolutionUpdate, FALSE);
+        if (freerdp_settings_set_pointer_len(s, FreeRDP_MonitorDefArray, nullptr, count)) {
+            for (UINT32 i = 0; i < count; ++i) {
+                auto *mon = static_cast<rdpMonitor *>(
+                    freerdp_settings_get_pointer_array_writable(s, FreeRDP_MonitorDefArray, i));
+                if (!mon)
+                    continue;
+                const QRect r = m_p.monitors.at(int(i)).rect;
+                *mon = {};
+                mon->x = r.x();
+                mon->y = r.y();
+                mon->width = r.width();
+                mon->height = r.height();
+                mon->is_primary = i == 0 ? TRUE : FALSE;
+                mon->orig_screen = i;
+                mon->attributes.desktopScaleFactor = UINT32(m_p.scale);
+                mon->attributes.deviceScaleFactor = m_p.scale >= 200 ? 180 : m_p.scale >= 140 ? 140 : 100;
+                mon->attributes.physicalWidth = UINT32(r.width() * 254 / 960);
+                mon->attributes.physicalHeight = UINT32(r.height() * 254 / 960);
+            }
+            freerdp_settings_set_uint32(s, FreeRDP_MonitorCount, count);
+        }
+    }
     freerdp_settings_set_bool(s, FreeRDP_RedirectClipboard, m_clip->enabled() ? TRUE : FALSE);
     // Only NLA/TLS: legacy "RDP security" has no server authentication, so a man in the middle could
     // bypass the certificate pin. Servers that offer only that are refused.
@@ -487,6 +534,8 @@ void RdpSession::requestResize(const QSize &pixels, int scale)
     // The protocol wants even widths between 200 and 8192 pixels.
     const int w = qBound(200, pixels.width() & ~1, 8192);
     const int h = qBound(200, pixels.height(), 8192);
+    if (m_p.monitors.size() > 1)
+        return;   // the layout follows the Mac displays, not a window
     post([this, w, h, scale] {
         auto *disp = static_cast<DispClientContext *>(m_disp);
         if (!disp || desktopSize() == QSize(w, h))

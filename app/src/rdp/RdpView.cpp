@@ -22,8 +22,9 @@ RdpView::RdpView(QQuickItem *parent)
     connect(&m_resizeTimer, &QTimer::timeout, this, [this] {
         if (!m_session || !window() || width() < 50 || height() < 50)
             return;
-        const qreal dpr = window()->effectiveDevicePixelRatio();
-        m_session->requestResize(QSize(qRound(width() * dpr), qRound(height() * dpr)), qRound(dpr * 100));
+        // Logical pixels unless the device uses Retina resolution (then scale() is 200 on Retina).
+        const qreal dpr = m_session->scale() / 100.0;
+        m_session->requestResize(QSize(qRound(width() * dpr), qRound(height() * dpr)), m_session->scale());
     });
 }
 
@@ -58,11 +59,33 @@ void RdpView::setSession(RdpSession *s)
     emit sessionChanged();
 }
 
+void RdpView::setMonitor(int m)
+{
+    if (m_monitor == m)
+        return;
+    m_monitor = m;
+    update();
+    emit monitorChanged();
+}
+
+QRect RdpView::sourceRect() const
+{
+    const QRect all(QPoint(0, 0), m_frame.size());
+    if (m_monitor < 0 || !m_session || !m_session->multiMonitor())
+        return all;
+    const QVariantList mons = m_session->monitors();
+    if (m_monitor >= mons.size())
+        return all;
+    const QVariantMap m = mons.at(m_monitor).toMap();
+    return QRect(m.value("x").toInt(), m.value("y").toInt(), m.value("width").toInt(), m.value("height").toInt())
+        .intersected(all);
+}
+
 QRectF RdpView::targetRect() const
 {
     if (m_frame.isNull())
         return {};
-    QSizeF size = QSizeF(m_frame.size()).scaled(QSizeF(width(), height()), Qt::KeepAspectRatio);
+    QSizeF size = QSizeF(sourceRect().size()).scaled(QSizeF(width(), height()), Qt::KeepAspectRatio);
     return QRectF(QPointF((width() - size.width()) / 2, (height() - size.height()) / 2), size);
 }
 
@@ -71,17 +94,18 @@ void RdpView::paint(QPainter *painter)
     if (m_frame.isNull())
         return;
     painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
-    painter->drawImage(targetRect(), m_frame);
+    painter->drawImage(targetRect(), m_frame, sourceRect());
 }
 
 QPoint RdpView::toRemote(const QPointF &p) const
 {
     const QRectF r = targetRect();
-    if (r.isEmpty())
+    const QRect src = sourceRect();
+    if (r.isEmpty() || src.isEmpty())
         return {};
-    const double sx = m_frame.width() / r.width(), sy = m_frame.height() / r.height();
-    return QPoint(qBound(0, int((p.x() - r.left()) * sx), m_frame.width() - 1),
-                  qBound(0, int((p.y() - r.top()) * sy), m_frame.height() - 1));
+    const double sx = src.width() / r.width(), sy = src.height() / r.height();
+    return QPoint(src.left() + qBound(0, int((p.x() - r.left()) * sx), src.width() - 1),
+                  src.top() + qBound(0, int((p.y() - r.top()) * sy), src.height() - 1));
 }
 
 void RdpView::mousePressEvent(QMouseEvent *e)

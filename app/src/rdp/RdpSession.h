@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QImage>
+#include <QRect>
+#include <QVariantList>
 #include <QMutex>
 #include <QWaitCondition>
 #include <QObject>
@@ -25,6 +27,11 @@ class RdpSession : public QObject
     Q_PROPERTY(QString error READ error NOTIFY stateChanged)
     Q_PROPERTY(QString phase READ phase NOTIFY phaseChanged)   // connecting | certificate | signing_in | opening | connected
     Q_PROPERTY(QSize desktopSize READ desktopSize NOTIFY desktopSizeChanged)
+    // [{x, y, width, height, screen}] in desktop pixels when spanning several Mac displays.
+    Q_PROPERTY(QVariantList monitors READ monitors CONSTANT)
+    // True once the server accepted the multi-monitor layout (some, like GNOME screen sharing, don't).
+    Q_PROPERTY(bool multiMonitor READ multiMonitor NOTIFY desktopSizeChanged)
+    Q_PROPERTY(bool wasConnected READ wasConnected NOTIFY stateChanged)
 public:
     struct Params
     {
@@ -41,6 +48,8 @@ public:
         QString pinHost;                 // the device address the pin belongs to (host may be a tunnel forward)
         quint16 pinPort = 0;
         int tunnelHandle = 0;            // netcore tunnel to carry the connection (0 = direct)
+        struct Monitor { QRect rect; int screen = 0; };
+        QList<Monitor> monitors;         // 2+ = span these displays (first is primary); size = bounding box
     };
 
     explicit RdpSession(Params params, QObject *parent = nullptr);
@@ -53,6 +62,9 @@ public:
     QString phase() const { return m_phase; }
     void setPhase(const QString &phase);   // any thread
     QSize desktopSize() const;
+    QVariantList monitors() const;
+    bool multiMonitor() const;
+    bool wasConnected() const { return m_wasConnected; }
 
     void start();
     Q_INVOKABLE void close();
@@ -105,6 +117,7 @@ private:
     QString m_state = QStringLiteral("connecting");
     QString m_error;
     QString m_phase = QStringLiteral("connecting");
+    bool m_wasConnected = false;
     mutable QMutex m_frameLock;
     QImage m_frame;
     KeyMapper m_keys;

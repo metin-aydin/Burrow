@@ -42,7 +42,31 @@ ApplicationWindow {
     Component { id: sessionWindow; SessionWindow {} }
 
     PromptDialog { id: prompt }
-    ConnectProgress { id: connectProgress; onRetry: (id) => win.startSession(id, "", "") }
+
+    // deviceId -> its session window (the one with the progress; extra displays aren't listed).
+    property var sessionWindows: ({})
+    function liveWindow(id) {
+        const w = sessionWindows[id]
+        return w && w.deviceId === id ? w : null
+    }
+    function windowFor(id) {
+        let w = liveWindow(id)
+        if (w) return w
+        w = sessionWindow.createObject(null, { deviceId: id, tunnel: App.deviceTunnel(id) })
+        sessionWindows[id] = w
+        w.retry.connect(rid => win.startSession(rid, "", ""))
+        w.spanRequested.connect(function(s) {
+            // One full-screen window per other Mac display.
+            const mons = s.monitors
+            for (let i = 1; i < mons.length; ++i) {
+                const extra = sessionWindow.createObject(null, { deviceId: id, session: s, monitorIndex: i, visible: false })
+                const sc = Qt.application.screens[mons[i].screen]
+                if (sc) extra.screen = sc
+                extra.showFullScreen()
+            }
+        })
+        return w
+    }
     TailscaleLoginDialog { id: tsLogin }
 
     function askTunnelPassword(tunnelId, name, retryDevice, user, pass) {
@@ -56,6 +80,9 @@ ApplicationWindow {
 
     function startSession(id, user, pass) {
         if (App.state !== "unlocked") { win.show(); return }
+        const open = liveWindow(id)
+        if (open && open.failure === "") { open.raise(); open.requestActivate(); return }
+        if (open) open.destroy()
         const r = App.connectDevice(id, user || "", pass || "")
         if (r === "credentials") {
             const d = App.device(id)
@@ -98,12 +125,16 @@ ApplicationWindow {
         target: App
         function onToast(message) { toast.show(message) }
         function onSessionOpened(session) {
-            if (connectProgress.visible && connectProgress.deviceId === session.deviceId)
-                connectProgress.close()
-            sessionWindow.createObject(null, { session: session })
+            let w = win.liveWindow(session.deviceId)
+            if (w && w.session) w = null
+            if (!w) { if (win.liveWindow(session.deviceId)) win.liveWindow(session.deviceId).destroy(); w = win.windowFor(session.deviceId) }
+            w.attach(session)
         }
-        function onDeviceConnecting(deviceId, tunnelId) { connectProgress.show(deviceId) }
-        function onDeviceConnectFailed(deviceId, error) { connectProgress.fail(deviceId, error) }
+        function onDeviceConnecting(deviceId, tunnelId) { win.windowFor(deviceId) }
+        function onDeviceConnectFailed(deviceId, error) {
+            const w = win.liveWindow(deviceId)
+            if (w) w.fail(error); else toast.show(error)
+        }
         function onTunnelLoginRequired(tunnelId, name, url) { tsLogin.show(name, url) }
         function onTunnelPasswordRequired(tunnelId, name) { win.askTunnelPassword(tunnelId, name, "", "", "") }
         function onTunnelOtpRequired(tunnelId, name, label) {
@@ -112,7 +143,7 @@ ApplicationWindow {
         }
         function onStateChanged() {
             if (App.state !== "unlocked") {
-                deviceEditor.close(); tunnels.close(); tunnelEditor.close(); prompt.close(); tsLogin.close(); connectProgress.close(); importDevices.close(); settings.close(); confirm.close()
+                deviceEditor.close(); tunnels.close(); tunnelEditor.close(); prompt.close(); tsLogin.close(); importDevices.close(); settings.close(); confirm.close()
             }
         }
     }

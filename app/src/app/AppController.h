@@ -99,6 +99,10 @@ public:
     Q_INVOKABLE int importDevices(const QString &tunnelId, const QVariantList &items);
     Q_INVOKABLE QVariantMap deviceTunnel(const QString &deviceId) const;   // {id, name, type} or {}
     Q_INVOKABLE void forgetCertificate(const QString &id);
+    // Stops waiting for a device's tunnel (its window was closed while connecting).
+    Q_INVOKABLE void cancelConnect(const QString &deviceId);
+    // Logical size a session window opens with on the main display.
+    Q_INVOKABLE QSize sessionWindowSize() const;
 
     // Stores a preview image for a device (called by the RDP session on close).
     void setPreview(const QString &deviceId, const QImage &image);

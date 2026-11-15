@@ -4,6 +4,14 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Oturum penceresi birleşti: Bağlan'a basınca cihaz penceresi hemen açılır; tünel ve RDP aşamaları tek listede
+  gösterilir (ConnectProgress kaldırıldı). Bağlanamazsa pencere hatayı ve Tekrar Dene'yi gösterir. Aşama işaretleri
+  hep aynı boyda (22 px), ayrıntı satırı ayrılmış: tamamlanınca liste zıplamıyor. Onaylanan sertifika penceresi kapanır.
+- Çözünürlük: varsayılan artık Mac'in mantıksal boyutu (yazılar Mac uygulamalarıyla aynı boyda); cihazda "Retina
+  Çözünürlüğü" ile fiziksel piksel + %200 ölçek ipucu. Pencere ekranın %90'ı ile açılır.
+- Çoklu monitör: cihazda "Ekranlar: Tüm ekranlar" → her Mac ekranı için bir uzak monitör (MonitorDefArray), her
+  ekranda tam ekran pencere. Sunucu düzeni reddederse (Ubuntu ekran paylaşımı `mirror-primary` yalnızca ana monitörü
+  gönderir) tek pencereye döner. Ubuntu'da birden çok monitör için Uzaktan Oturum Açma veya `screen-share-mode extend`.
 - Galeri başlığındaki logo kaldırıldı; "Burrow" adı filtre çipleri ve kartlarla aynı sol hizada (28 px).
 - Güvenlik düzeltmesi (inceleme): pencere kapanınca uygulama menü çubuğunda açık kasayla kalıyordu → Ayarlar'a
   "Otomatik Kilit" (5/15/30/60 dk ya da Hiçbir Zaman, varsayılan 15). Kullanıcı girdisi zamanlayıcıyı sıfırlar; açık

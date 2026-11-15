@@ -411,6 +411,9 @@ QString AppController::connectDevice(const QString &id, const QString &username,
     for (RdpSession *s : std::as_const(m_sessions))
         if (s->deviceId() == id)
             return tr("%1 is already open.").arg(dev->name);
+    for (const Pending &p : std::as_const(m_pending))
+        if (p.deviceId == id)
+            return {};   // already waiting for its tunnel; its window shows the progress
 
     const QString user = username.isEmpty() ? dev->username : username;
     const QString pass = password.isEmpty() ? (dev->savePassword ? dev->password : QString()) : password;
@@ -602,7 +605,7 @@ void AppController::onTunnelState(const QString &tunnelId, const QString &state,
                 if (d.id == p.deviceId) {
                     const QString err = startSession(d, p.username, p.password, tunnelId);
                     if (!err.isEmpty())
-                        emit toast(err);
+                        emit deviceConnectFailed(d.id, err);
                 }
         }
     } else if (state == QLatin1String("failed") || state == QLatin1String("stopped")) {
@@ -617,6 +620,25 @@ void AppController::onTunnelState(const QString &tunnelId, const QString &state,
         if (!error.isEmpty() && !notified && !m_tunnelTesting.contains(tunnelId))
             emit toast(tr("%1: %2").arg(tunnelName(tunnelId), error));
     }
+}
+
+void AppController::cancelConnect(const QString &deviceId)
+{
+    for (int i = m_pending.size() - 1; i >= 0; --i)
+        if (m_pending.at(i).deviceId == deviceId) {
+            const QString tid = m_pending.at(i).tunnelId;
+            m_pending[i].password.fill(QChar(0));
+            m_pending.removeAt(i);
+            stopTunnelIfIdle(tid);
+        }
+}
+
+QSize AppController::sessionWindowSize() const
+{
+    const QScreen *screen = QGuiApplication::primaryScreen();
+    const QSize avail = screen ? screen->availableSize() : QSize(1440, 900);
+    // Most of the screen, so the remote desktop is readable; the window can still be resized.
+    return QSize(qMax(800, int(avail.width() * 0.9)), qMax(560, int(avail.height() * 0.9)));
 }
 
 void AppController::stopTunnelIfIdle(const QString &tunnelId)
@@ -653,11 +675,37 @@ QString AppController::startSession(const Model::Device &dev, const QString &use
     p.domain = dev.domain;
     p.keyMap = dev.keyMap;
     p.clipboard = dev.clipboard;
-    // Start at the size the session window opens with; the view then follows the window.
+    // Start at the size the session window opens with; the view then follows the window. By default
+    // the remote desktop gets the Mac's logical size, so text is as large as in Mac apps; "Retina"
+    // sends physical pixels with a 200 % scale hint (sharper, but servers that ignore the hint show
+    // everything at half size).
     const QScreen *screen = QGuiApplication::primaryScreen();
-    const qreal dpr = screen ? screen->devicePixelRatio() : 1.0;
+    const qreal dpr = dev.retina && screen ? screen->devicePixelRatio() : 1.0;
     p.scale = qRound(dpr * 100);
-    p.size = QSize(qRound(1280 * dpr) & ~1, qRound(820 * dpr));
+    const QSize win = sessionWindowSize();
+    p.size = QSize(qRound(win.width() * dpr) & ~1, qRound(win.height() * dpr));
+    const auto screens = QGuiApplication::screens();
+    if (dev.displays == QLatin1String("all") && screens.size() > 1) {
+        // Span every display: one remote monitor per Mac screen, primary first, in desktop pixels
+        // relative to the screens' bounding box. Mixed pixel densities fall back to logical pixels.
+        bool sameDpr = true;
+        for (const QScreen *sc : screens)
+            sameDpr = sameDpr && qFuzzyCompare(sc->devicePixelRatio(), screens.first()->devicePixelRatio());
+        const qreal k = dev.retina && sameDpr ? screens.first()->devicePixelRatio() : 1.0;
+        p.scale = qRound(k * 100);
+        QRect box;
+        for (const QScreen *sc : screens)
+            box = box.united(sc->geometry());
+        QList<QScreen *> ordered = screens;
+        ordered.removeOne(QGuiApplication::primaryScreen());
+        ordered.prepend(QGuiApplication::primaryScreen());
+        for (QScreen *sc : ordered) {
+            const QRect g = sc->geometry().translated(-box.topLeft());
+            p.monitors.append({QRect(qRound(g.x() * k), qRound(g.y() * k), qRound(g.width() * k), qRound(g.height() * k)),
+                               int(screens.indexOf(sc))});
+        }
+        p.size = QSize(qRound(box.width() * k), qRound(box.height() * k));
+    }
     p.lockOnDisconnect = dev.lockOnDisconnect;   // Win+L on Windows, Super+L on GNOME
     p.knownFingerprint = dev.certFingerprint;
 
@@ -679,8 +727,8 @@ QString AppController::startSession(const Model::Device &dev, const QString &use
         const QImage last = s->frame();
         if (!last.isNull() && m_store.isOpen())
             setPreview(s->deviceId(), last);
-        if (!s->error().isEmpty())
-            emit toast(s->error());
+        if (!s->error().isEmpty() && s->wasConnected())
+            emit toast(s->error());   // a failed connect is shown in the session window instead
         m_sessions.removeOne(s);
         s->deleteLater();
     });

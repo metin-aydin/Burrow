@@ -24,6 +24,7 @@ BDialog {
         sessionCombo.value = d.sessionMode || "existing"; lockSw.checked = d.lockOnDisconnect !== false
         onDisc.value = "keep_locked"; clipCombo.value = d.clipboard || "both"
         keyCombo.value = d.keyMap || "shortcuts"
+        displaysCombo.value = d.displays || "window"; retinaSw.checked = !!d.retina
         error = ""
         tab = "general"
         open()
@@ -38,7 +39,8 @@ BDialog {
             savePassword: savePw.checked, password: savePw.checked ? pwField.text : "",
             autoLogin: savePw.checked && autoLogin.checked,
             lockOnDisconnect: lockSw.checked, onDisconnect: onDisc.value,
-            sessionMode: sessionCombo.value, clipboard: clipCombo.value, keyMap: keyCombo.value
+            sessionMode: sessionCombo.value, clipboard: clipCombo.value, keyMap: keyCombo.value,
+            displays: displaysCombo.value, retina: retinaSw.checked
         })
         const err = App.saveDevice(m)
         if (err) { error = err; tab = "general"; return }
@@ -144,6 +146,29 @@ BDialog {
             title: qsTr("Lock When Disconnected")
             description: qsTr("Burrow locks the remote computer (Win+L / Super+L) before closing the connection.")
             checked: root.d.lockOnDisconnect !== false
+        }
+        BCombo {
+            id: displaysCombo
+            Layout.fillWidth: true
+            label: qsTr("Displays")
+            options: [{ text: qsTr("One window"), value: "window" },
+                      { text: qsTr("All displays (full screen)"), value: "all" }]
+            value: root.d.displays || "window"
+        }
+        Text {
+            Layout.fillWidth: true
+            visible: displaysCombo.value === "all"
+            wrapMode: Text.WordWrap
+            color: Theme.textSecondary
+            font.pixelSize: 12
+            text: qsTr("The remote desktop gets one monitor per Mac display. Ubuntu's screen sharing shows only its main monitor; use Remote Login on Ubuntu to get several.")
+        }
+        BSwitch {
+            id: retinaSw
+            Layout.fillWidth: true
+            title: qsTr("Retina Resolution")
+            description: qsTr("Sharper, but text looks smaller if the remote computer doesn't scale its display.")
+            checked: !!root.d.retina
         }
         // "Sign out on disconnect" comes later; until then the session is always kept (locked).
         QtObject { id: onDisc; property string value: "keep_locked" }

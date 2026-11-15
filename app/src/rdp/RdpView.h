@@ -12,11 +12,15 @@ class RdpView : public QQuickPaintedItem
 {
     Q_OBJECT
     Q_PROPERTY(RdpSession *session READ session WRITE setSession NOTIFY sessionChanged)
+    // Index into session.monitors to show only that display's part (-1 = the whole desktop).
+    Q_PROPERTY(int monitor READ monitor WRITE setMonitor NOTIFY monitorChanged)
 public:
     explicit RdpView(QQuickItem *parent = nullptr);
 
     RdpSession *session() const { return m_session; }
     void setSession(RdpSession *s);
+    int monitor() const { return m_monitor; }
+    void setMonitor(int m);
 
     void paint(QPainter *painter) override;
 
@@ -25,6 +29,7 @@ public:
 
 signals:
     void sessionChanged();
+    void monitorChanged();
 
 protected:
     void mousePressEvent(QMouseEvent *e) override;
@@ -38,6 +43,7 @@ protected:
     void geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry) override;
 
 private:
+    QRect sourceRect() const;   // the part of the desktop this view shows
     QRectF targetRect() const;
     QPoint toRemote(const QPointF &p) const;
     unsigned scancodeFor(const QKeyEvent *e) const;
@@ -46,4 +52,5 @@ private:
     QImage m_frame;
     QPoint m_wheelAccum;
     QTimer m_resizeTimer;
+    int m_monitor = -1;
 };
