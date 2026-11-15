@@ -35,6 +35,7 @@ class RdpSession : public QObject
     // True once the server accepted the multi-monitor layout (some, like GNOME screen sharing, don't).
     Q_PROPERTY(bool multiMonitor READ multiMonitor NOTIFY desktopSizeChanged)
     Q_PROPERTY(bool wasConnected READ wasConnected NOTIFY stateChanged)
+    Q_PROPERTY(int scale READ scale CONSTANT)   // percent: 100 logical pixels, 200 Retina
 public:
     struct Params
     {
@@ -96,7 +97,7 @@ public:
     unsigned onVerifyCertificate(const QString &fingerprint);
     void onChannelConnected(const char *name, void *iface);
     void onChannelDisconnected(const char *name);
-    void onServerMonitors(const QList<QRect> &monitors, const QSize &desktop);   // worker thread
+    void onServerMonitors(const QList<QRect> &monitors, const QSize &desktop, bool handedOver);   // worker thread
     void *origResetGraphics = nullptr;   // the GDI's GFX reset handler we chain to
     int connectSocket(const char *hostname, int port);   // TCPConnect replacement (worker thread)
     bool clipboardEnabled() const { return m_clip && m_clip->enabled(); }
@@ -144,6 +145,11 @@ private:
     // after connecting, while GNOME hands the session over) makes it end the session. So: one at a time.
     bool m_layoutPending = false;
     int m_layoutRetries = 0;      // re-asks after the server went back to other sizes
+    // The server handed the session over (GNOME Remote Login). Such servers end the session or hand it
+    // over again when the monitor layout changes while connected, so it is never changed live: the
+    // sizes the windows want are saved and sent when the next connection starts.
+    bool m_handedOver = false;
+    bool m_serverLayoutSeen = false;   // the server told its layout (it may still hand over before)
     QElapsedTimer m_layoutSent;   // since the pending request went out
     QElapsedTimer m_settled;      // since the desktop last (re)appeared or changed
     QMutex m_tasksLock;

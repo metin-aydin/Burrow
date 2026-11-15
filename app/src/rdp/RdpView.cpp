@@ -109,7 +109,16 @@ QRectF RdpView::targetRect() const
 {
     if (m_frame.isNull())
         return {};
-    QSizeF size = QSizeF(sourceRect().size()).scaled(QSizeF(width(), height()), Qt::KeepAspectRatio);
+    // A remote monitor slightly off the view's shape (the server can't be resized right now, see
+    // RdpSession::m_handedOver) fills the view rather than leaving black bars; a larger difference
+    // keeps its proportions.
+    const QSizeF src(sourceRect().size()), view(width(), height());
+    if (src.isEmpty() || view.isEmpty())
+        return {};
+    const double ratio = (view.width() / view.height()) / (src.width() / src.height());
+    if (ratio > 0.92 && ratio < 1.087)
+        return QRectF(QPointF(0, 0), view);
+    QSizeF size = src.scaled(view, Qt::KeepAspectRatio);
     return QRectF(QPointF((width() - size.width()) / 2, (height() - size.height()) / 2), size);
 }
 

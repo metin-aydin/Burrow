@@ -4,6 +4,14 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Çoklu monitörde kopma ve siyah kenar kesin çözüm: GNOME kaynağı ve loglar incelendi. Sunucu oturumu hata kodu
+  vermeden normal kapatıyor (FreeRDP bunu `ERRINFO_LOGOFF_BY_USER` gösteriyor); tetikleyen, oturum devrinden sonra
+  canlı gönderilen monitör düzeni. GNOME Remote Login canlı düzen değişikliğinde oturumu kapatıyor ya da yeniden
+  devredip eski boyutlara dönüyor. Artık sunucu oturumu devrettiyse (`FreeRDP_RedirectionFlags` ≠ 0) canlı düzen
+  hiç gönderilmez; sunucu düzenini bildirmeden de gönderilmez. `layout.sizes` artık sunucunun boyutu değil, her
+  monitörün resminin gerçekten gösterildiği alanın boyutu (ayrık pencere ya da sekme görünümü); sonraki bağlantı
+  tam bu boyutlarla başlar. Arada kalan küçük oran farkında (%8'e kadar) resim görünümü kenarsız doldurur.
+
 - Güvenlik incelemesi (monitör düzeni): sunucunun bildirdiği monitörler en fazla 16 ve makul boyutla sınırlı,
   geçersizse yok sayılır; `setMonitorDefs` sayı/boyutu doğrular ve canlı bağlantıda masaüstü boyutuna dokunmaz
   (yalnız bağlanmadan önce); sunucu düzeni reddederse yeniden istek en fazla 3 kez, artan aralıkla.

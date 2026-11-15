@@ -136,8 +136,16 @@ Window {
                             fullscreen: w.visibility === Window.FullScreen })
             }
             out.detached = list
-            // The monitor sizes the server ended up with: the next connection asks for them right away.
-            out.sizes = win.monitors.map(m => [m.width, m.height])
+            // The size each monitor's picture has (its own window, or the tab view): the next connection
+            // starts with exactly these, as some servers can't change them while connected.
+            const k = win.session ? win.session.scale / 100 : 1
+            const sizes = win.monitors.map((m, i) => {
+                const d = win.detached[i]
+                const w = d ? d.viewSize.width : view.width, h = d ? d.viewSize.height : view.height
+                return [Math.round(w * k) & ~1, Math.round(h * k)]
+            })
+            if (sizes.length > 0 && sizes.every(s => s[0] >= 200 && s[1] >= 200))
+                out.sizes = sizes
             out.order = win.tabOrder
             out.names = win.tabNames
             App.saveDeviceLayout(win.deviceId, out)
@@ -430,6 +438,8 @@ Window {
         anchors { left: parent.left; right: parent.right; top: win.showTabs ? tabBar.bottom : parent.top; bottom: parent.bottom }
         session: win.session
         monitor: win.tabbed ? win.currentMonitor : -1
+        onWidthChanged: win.scheduleSave()
+        onHeightChanged: win.scheduleSave()
         focus: true
         Component.onCompleted: forceActiveFocus()
     }

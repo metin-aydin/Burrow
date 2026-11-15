@@ -22,8 +22,12 @@ Window {
     onClosing: reattach(monitor)
     onScreenChanged: layoutChanged()
     onVisibilityChanged: layoutChanged()
+    // The size this monitor's picture has here; saved so the next connection starts with it.
+    readonly property size viewSize: Qt.size(mv.width, mv.height)
+    onViewSizeChanged: layoutChanged()
 
     RdpView {
+        id: mv
         anchors.fill: parent
         session: mw.session
         monitor: mw.monitor

@@ -75,7 +75,9 @@ UINT resetGraphics(RdpgfxClientContext *gfx, const RDPGFX_RESET_GRAPHICS_PDU *pd
             }
             mons.append(QRect(m.left, m.top, int(w), int(h)));
         }
-        session->onServerMonitors(mons, QSize(int(pdu->width), int(pdu->height)));
+        const bool handedOver = gdi->context && gdi->context->settings
+            && freerdp_settings_get_uint32(gdi->context->settings, FreeRDP_RedirectionFlags) != 0;
+        session->onServerMonitors(mons, QSize(int(pdu->width), int(pdu->height)), handedOver);
     }
     auto orig = session ? reinterpret_cast<pcRdpgfxResetGraphics>(session->origResetGraphics) : nullptr;
     return orig ? orig(gfx, pdu) : CHANNEL_RC_OK;
@@ -609,7 +611,7 @@ void RdpSession::onChannelConnected(const char *name, void *iface)
     }
 }
 
-void RdpSession::onServerMonitors(const QList<QRect> &monitors, const QSize &desktop)
+void RdpSession::onServerMonitors(const QList<QRect> &monitors, const QSize &desktop, bool handedOver)
 {
     // Desktop pixels start at the monitors' top-left corner.
     QRect box;
@@ -627,13 +629,18 @@ void RdpSession::onServerMonitors(const QList<QRect> &monitors, const QSize &des
         QMutexLocker lock(&m_frameLock);
         m_serverMonitors = rel;
     }
-    QMetaObject::invokeMethod(this, [this] {
+    QMetaObject::invokeMethod(this, [this, handedOver] {
+        if (handedOver && !m_handedOver) {
+            m_handedOver = true;
+            qInfo("rdp: session was handed over; monitor sizes change on the next connection only");
+        }
+        m_serverLayoutSeen = true;
         m_layoutPending = false;   // the server applied a layout (ours or its own)
         m_settled.start();
         emit desktopSizeChanged();
         // Back to other sizes than asked for (e.g. after a hand-over): ask again once it settles, a few
         // times at most, so a server that keeps refusing doesn't get asked forever.
-        if (!m_layoutTimer || m_wantedSizes.isEmpty())
+        if (!m_layoutTimer || m_wantedSizes.isEmpty() || m_handedOver)
             return;
         const QVariantList mons = this->monitors();
         bool same = mons.size() == m_wantedSizes.size();
@@ -709,7 +716,9 @@ void RdpSession::sendMonitorLayout()
 {
     // Wait until the connection has settled and the previous layout was applied.
     constexpr qint64 kSettleMs = 2500, kPendingTimeoutMs = 6000;
-    if (m_state != QLatin1String("connected")) {
+    if (m_handedOver)
+        return;   // see m_handedOver
+    if (m_state != QLatin1String("connected") || !m_serverLayoutSeen) {
         m_layoutTimer->start(1000);
         return;
     }
