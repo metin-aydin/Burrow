@@ -6,7 +6,7 @@
 
 <p align="center">
   A cross-platform, open-source remote desktop app with <strong>private tunnels built in</strong>:
-  RDP to Windows and Ubuntu, Screen Sharing to Macs. Available for macOS; Ubuntu and Windows are next.
+  RDP to Windows and Ubuntu, Screen Sharing to Macs. Available for macOS and Ubuntu; Windows is next.
 </p>
 
 <p align="center">
@@ -93,22 +93,32 @@ Screenshots are taken from the built app with sample data by `tools/readme-shots
 
 ## Download
 
-Get the latest version from the [Releases](https://github.com/metin-aydin/Burrow/releases/latest) page. The first
-release is being prepared; until then, [build it](#development).
+Get the latest version from the [Releases](https://github.com/metin-aydin/Burrow/releases/latest) page.
 
 | Platform | File | Updates |
 | --- | --- | --- |
 | macOS 13 or later (Apple Silicon) | `Burrow-<version>-mac-arm64.dmg` | In the app |
-| Ubuntu | Planned (next) | |
+| Ubuntu 24.04 or later (x86-64), early build | `Burrow-<version>-linux-x64.AppImage` | From the Releases page |
 | Windows | Planned | |
 
-On macOS, open the `.dmg` and drag **Burrow** to Applications. Burrow is built with Qt so the same app can run on
-Ubuntu and Windows; those builds come after macOS (the GlobalProtect tunnel needs extra work on Windows).
+On macOS, open the `.dmg` and drag **Burrow** to Applications. The app is signed with Developer ID and notarized
+by Apple.
+
+On Ubuntu, make the AppImage executable and run it:
+
+```bash
+chmod +x Burrow-*-linux-x64.AppImage
+./Burrow-*-linux-x64.AppImage
+```
+
+If it does not start, install FUSE 2 (`sudo apt install libfuse2t64`). The Linux build does not update itself yet
+and has no Touch ID; the vault opens with your master password. A Windows build comes later (the GlobalProtect
+tunnel needs extra work there).
 
 To reach a Mac, turn on **System Settings → General → Sharing → Screen Sharing** on it. To reach Ubuntu, turn on
 **Remote Desktop** in **Settings → System** (or Remote Login, where your GNOME offers it).
 
-Burrow looks for a new version 15 seconds after startup and every six hours. When it finds one, **Settings → Updates**
+On macOS, Burrow looks for a new version 15 seconds after startup and every six hours. When it finds one, **Settings → Updates**
 downloads it, installs it and restarts the app. Nothing is downloaded or installed without asking, and automatic
 checks can be turned off there.
 

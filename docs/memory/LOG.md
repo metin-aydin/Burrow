@@ -4,6 +4,8 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **README ve repo açıklaması Ubuntu AppImage'a göre güncellendi:** platform tablosu, kurulum (chmod + FUSE 2 notu),
+  güncellemelerin yalnız macOS'ta olduğu; açıklama "macOS and Ubuntu now, Windows next".
 - **İlk release yayımlandı: v0.1.0** (PR #2, merge `218e0bb`). Varlıklar: mac-arm64 dmg + zip, linux-x64 AppImage +
   sha256, `latest.json` (yalnız mac-arm64). İndirilen Mac uygulaması doğrulandı: Developer ID (JTRUY8Y2ZF), hardened
   runtime, `spctl` "Notarized Developer ID", staple geçerli. Yolda düzeltilenler: çeviri satır numaraları (iki kez,
