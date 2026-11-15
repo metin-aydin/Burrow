@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Kullanıcı "aşırı yavaş" dedi (ölçümde 30–38 kare/s). Neden büyük ihtimalle girdi gecikmesi: Mac güncelleme
+  yazarken girdiyi okumuyor; aralık 0'da sürekli değişen ekranda tıklama/tuşlar saniyelerce bekliyor (zDesk
+  ölçümü). `AutoFrameBufferUpdate` aralığı artık 33.333 µs (~30/s). Ayrıca: görünüm görüntüyü 512 px karolara
+  bölüp GPU'ya yalnız değişen karoları yüklüyor; VNC'de soket okuma + kayıt şifre çözme ayrı iş parçacığında
+  (32 MB'a kadar kuyruk), çözücü ağı beklemiyor. Apple ve standart VNC yolları, kapanışta kilit ve RDP doğrulandı.
+
 - Adaptive gerçek ölçüm: veri 55–143 → 1–2 Mbit/s, kare 4–6 → 20–25/s; ama çözücü %98 dolu (15–17 ms/güncelleme)
   çünkü yerel derleme **Debug (-O0)**. Görüntü kodu (`AppleAdaptive.cpp`, `VncSession.cpp`, `RdpView.cpp`) artık
   Debug'da da `-O2` derleniyor: tam Retina karesi (3456×2234, 120.960 DCT karosu) 661 → 35 ms (tst_vault

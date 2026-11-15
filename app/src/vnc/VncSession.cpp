@@ -56,6 +56,7 @@ VncSession::VncSession(Params params, QObject *parent)
 VncSession::~VncSession()
 {
     m_stop = true;
+    m_qCv.notify_all();
     if (const int fd = m_fd.load(); fd >= 0)
         ::shutdown(fd, SHUT_RDWR);
     m_thread.quit();
@@ -151,6 +152,7 @@ void VncSession::close()
         QThread::msleep(300);   // let the keys leave before the connection does
     }
     m_stop = true;
+    m_qCv.notify_all();
     if (const int fd = m_fd.load(); fd >= 0)
         ::shutdown(fd, SHUT_RDWR);   // wakes the reader
 }
@@ -182,6 +184,28 @@ void VncSession::setPhase(const QString &phase)
 
 bool VncSession::readExact(void *buf, size_t n)
 {
+    if (m_ioRunning) {
+        auto *p = static_cast<char *>(buf);
+        std::unique_lock lock(m_qLock);
+        while (n > 0) {
+            m_qCv.wait(lock, [this] { return !m_queue.empty() || m_ioDone || m_stop; });
+            if (m_queue.empty())
+                return false;   // the reader ended (connection closed or broken)
+            const QByteArray &front = m_queue.front();
+            const size_t take = qMin<size_t>(n, size_t(front.size() - m_qFront));
+            memcpy(p, front.constData() + m_qFront, take);
+            p += take;
+            n -= take;
+            m_qFront += qsizetype(take);
+            m_queued -= take;
+            if (m_qFront == front.size()) {
+                m_queue.pop_front();
+                m_qFront = 0;
+                m_qCv.notify_all();   // room for the reader again
+            }
+        }
+        return true;
+    }
     if (!m_records)
         return rawRead(buf, n);
     auto *p = static_cast<char *>(buf);
@@ -310,8 +334,20 @@ void VncSession::run()
     if (err.isEmpty()) {
         setPhase(QStringLiteral("connected"));
         setState(QStringLiteral("connected"));
+        // From here on a reader thread fills the queue that readExact() takes from (any bytes the
+        // handshake read ahead are none: it reads exactly what it needs).
+        m_ioRunning = true;
+        m_io = std::thread([this] { ioLoop(); });
         const bool ok = messageLoop();
         const bool userClosed = m_stop;
+        ::shutdown(fds[0], SHUT_RDWR);   // wakes the reader
+        {
+            std::lock_guard lock(m_qLock);
+            m_ioDone = true;
+        }
+        m_qCv.notify_all();
+        if (m_io.joinable())
+            m_io.join();
         qInfo("vnc: connection ended (%s)", userClosed ? "closed by the user" : ok ? "by the server" : "error");
         m_fd = -1;
         ::close(fds[0]);
@@ -524,6 +560,16 @@ bool VncSession::startRecords(const uchar *body)
 // One record off the wire: decrypt, check its SHA-1, keep its body for readExact.
 bool VncSession::fillRecord()
 {
+    QByteArray body;
+    if (!readRecord(body))
+        return false;
+    m_inBuf = body;
+    m_inPos = 0;
+    return true;
+}
+
+bool VncSession::readRecord(QByteArray &bodyOut)
+{
     uchar lb[2];
     if (!rawRead(lb, 2))
         return false;
@@ -547,9 +593,51 @@ bool VncSession::fillRecord()
     const int body = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(plain.constData()));
     if (2 + body + kRecordTrailer > len)
         return false;
-    m_inBuf = plain.mid(2, body);
-    m_inPos = 0;
+    bodyOut = plain.mid(2, body);
     return true;
+}
+
+// The reader thread: whole records (decrypted) or raw chunks into the queue, at most 32 MB ahead.
+void VncSession::ioLoop()
+{
+    constexpr size_t kMaxQueued = 32u << 20;
+    for (;;) {
+        QByteArray chunk;
+        if (m_stop)
+            break;
+        if (m_records) {
+            if (!readRecord(chunk))
+                break;
+        } else {
+            chunk.resize(65536);
+            pollfd pfd{m_fd.load(), POLLIN, 0};
+            const int r = ::poll(&pfd, 1, 200);
+            if (r < 0)
+                break;
+            if (r == 0)
+                continue;
+            const ssize_t got = ::recv(pfd.fd, chunk.data(), size_t(chunk.size()), 0);
+            if (got <= 0)
+                break;
+            m_statBytes += quint64(got);
+            chunk.resize(qsizetype(got));
+        }
+        if (chunk.isEmpty())
+            continue;
+        std::unique_lock lock(m_qLock);
+        m_qCv.wait(lock, [this] { return m_queued < kMaxQueued || m_stop; });
+        if (m_stop)
+            break;
+        m_queued += size_t(chunk.size());
+        m_queue.push_back(std::move(chunk));
+        lock.unlock();
+        m_qCv.notify_all();
+    }
+    {
+        std::lock_guard lock(m_qLock);
+        m_ioDone = true;
+    }
+    m_qCv.notify_all();
 }
 
 // Apple's pointer shapes: a u32 cache id and a u32 compressed length. A length of 0 selects a
@@ -657,11 +745,14 @@ bool VncSession::readAppleLayout()
         m_screens = screens.size() > 1 ? screens : QList<QRect>{};
     }
     QMetaObject::invokeMethod(this, [this] { emit desktopSizeChanged(); }, Qt::QueuedConnection);
-    // AutoFrameBufferUpdate (0x09): push every change, interval 0, for the whole framebuffer.
+    // AutoFrameBufferUpdate (0x09): push changes for the whole framebuffer, at most ~30 times a second.
+    // At interval 0 a Mac that keeps changing writes updates back to back and reads nothing meanwhile,
+    // so clicks and keys wait seconds (zDesk measured 47 of 53 s with input unread, 4 s at 33,333 us,
+    // with about the same picture rate).
     QByteArray arm;
     arm.append(char(0x09)).append(char(0));
     putU16(arm, 1);
-    putU32(arm, 0);
+    putU32(arm, 33333);
     putU16(arm, 0); putU16(arm, 0); putU16(arm, quint16(fbW)); putU16(arm, quint16(fbH));
     m_armed = writeAll(arm.constData(), size_t(arm.size()));
     return true;
@@ -1255,14 +1346,15 @@ void VncSession::logStats()
         return;
     const double s = ms / 1000.0;
     const int copies = m_statCopies.exchange(0);
+    const double bytes = double(m_statBytes.exchange(0));
     const qint64 copyNs = m_statCopyNs.exchange(0);
     // "busy" is the share of the time spent decoding on this machine; the rest of "decode" is waiting
     // for the network.
     qInfo("vnc: %.0f s: %d updates, %.1f MB in (%.1f Mbit/s), %.1f Mpx, decode %.1f ms/update (cpu %.1f ms, busy %.0f%%), %d copies %.1f ms each",
-          s, m_statUpdates, m_statBytes / 1e6, m_statBytes * 8 / 1e6 / s, m_statPixels / 1e6,
+          s, m_statUpdates, bytes / 1e6, bytes * 8 / 1e6 / s, m_statPixels / 1e6,
           m_statUpdates ? m_statDecodeNs / 1e6 / m_statUpdates : 0.0, m_statUpdates ? m_statCpuNs / 1e6 / m_statUpdates : 0.0,
           m_statCpuNs / 1e7 / s, copies, copies ? copyNs / 1e6 / copies : 0.0);
-    m_statBytes = m_statPixels = 0;
+    m_statPixels = 0;
     m_statUpdates = 0;
     m_statDecodeNs = 0;
     m_statCpuNs = 0;

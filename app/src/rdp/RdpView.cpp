@@ -107,7 +107,25 @@ void RdpView::refreshFrame()
     m_frame = m_session->frame(sourceRect());
     m_dirty = QRegion();
     m_textureDirty = true;
+    markTiles(m_frame.rect());
     update();
+}
+
+void RdpView::markTiles(const QRect &r)
+{
+    const int cols = (m_frame.width() + kTile - 1) / kTile, rows = (m_frame.height() + kTile - 1) / kTile;
+    if (cols != m_tileCols || rows != m_tileRows) {
+        m_tileCols = cols;
+        m_tileRows = rows;
+        m_tileDirty.assign(size_t(cols) * size_t(rows), 1);
+        return;
+    }
+    const QRect in = r.intersected(m_frame.rect());
+    if (in.isEmpty())
+        return;
+    for (int ty = in.top() / kTile; ty <= in.bottom() / kTile; ++ty)
+        for (int tx = in.left() / kTile; tx <= in.right() / kTile; ++tx)
+            m_tileDirty[size_t(ty) * size_t(m_tileCols) + size_t(tx)] = 1;
 }
 
 void RdpView::refreshDirty()
@@ -123,8 +141,10 @@ void RdpView::refreshDirty()
         return;
     ++m_statRefreshes;
     // Copy the changed rectangles into our picture; the next frame uploads it.
-    for (const QRect &r : dirty)
+    for (const QRect &r : dirty) {
         m_session->copyInto(m_frame, r, r.topLeft() - src.topLeft());
+        markTiles(r.translated(-src.topLeft()));
+    }
     m_textureDirty = true;
     update();
 }
@@ -159,7 +179,8 @@ QRectF RdpView::targetRect() const
     return QRectF(QPointF((width() - size.width()) / 2, (height() - size.height()) / 2), size);
 }
 
-// Render thread, while the GUI thread waits: a black background and the picture as a texture.
+// Render thread, while the GUI thread waits: a black background, then the picture as a grid of
+// textures, of which only changed tiles are uploaded again.
 QSGNode *RdpView::updatePaintNode(QSGNode *old, UpdatePaintNodeData *)
 {
     QSGNode *root = old;
@@ -168,47 +189,62 @@ QSGNode *RdpView::updatePaintNode(QSGNode *old, UpdatePaintNodeData *)
         QSGRectangleNode *bg = window()->createRectangleNode();
         bg->setColor(Qt::black);
         root->appendChildNode(bg);
-        m_textureDirty = true;
+        root->appendChildNode(new QSGNode);   // the tiles
+        markTiles(m_frame.rect());
     }
     static_cast<QSGRectangleNode *>(root->childAtIndex(0))->setRect(boundingRect());
-    // The picture's node exists only while there is a picture: an image node without a texture is
-    // an error to the renderer.
-    auto *img = root->childCount() > 1 ? static_cast<QSGImageNode *>(root->childAtIndex(1)) : nullptr;
-    if (m_frame.isNull()) {
-        if (img) {
-            root->removeChildNode(img);
-            delete img;
+    QSGNode *grid = root->childAtIndex(1);
+    const int want = m_frame.isNull() ? 0 : m_tileCols * m_tileRows;
+    if (grid->childCount() != want) {   // size changed: new tiles, all uploaded
+        while (QSGNode *n = grid->firstChild()) {
+            grid->removeChildNode(n);
+            delete n;
         }
+        for (int i = 0; i < want; ++i) {
+            QSGImageNode *img = window()->createImageNode();
+            img->setFiltering(QSGTexture::Linear);
+            img->setOwnsTexture(true);
+            grid->appendChildNode(img);
+        }
+        std::fill(m_tileDirty.begin(), m_tileDirty.end(), 1);
+    }
+    if (want == 0)
         return root;
+    const QRectF target = targetRect();
+    const double sx = target.width() / m_frame.width(), sy = target.height() / m_frame.height();
+    QElapsedTimer t;
+    t.start();
+    int uploaded = 0;
+    int i = 0;
+    for (QSGNode *n = grid->firstChild(); n; n = n->nextSibling(), ++i) {
+        auto *img = static_cast<QSGImageNode *>(n);
+        const int tx = i % m_tileCols, ty = i / m_tileCols;
+        const QRect tile = QRect(tx * kTile, ty * kTile, kTile, kTile).intersected(m_frame.rect());
+        if (m_tileDirty[size_t(i)] || !img->texture()) {
+            img->setTexture(window()->createTextureFromImage(m_frame.copy(tile), QQuickWindow::TextureIsOpaque));
+            m_tileDirty[size_t(i)] = 0;
+            ++uploaded;
+        }
+        img->setRect(QRectF(target.x() + tile.x() * sx, target.y() + tile.y() * sy, tile.width() * sx, tile.height() * sy));
+        img->setSourceRect(QRectF(QPointF(0, 0), tile.size()));
     }
-    if (!img) {
-        img = window()->createImageNode();
-        img->setFiltering(QSGTexture::Linear);
-        img->setOwnsTexture(true);
-        root->appendChildNode(img);
-        m_textureDirty = true;
-    }
-    if (m_textureDirty || !img->texture()) {
-        QElapsedTimer t;
-        t.start();
-        img->setTexture(window()->createTextureFromImage(m_frame, QQuickWindow::TextureIsOpaque));
+    if (m_textureDirty) {
         m_textureDirty = false;
         m_statUploadNs += t.nsecsElapsed();
+        m_statTiles += uploaded;
         ++m_statFrames;
         if (!m_statClock.isValid())
             m_statClock.start();
         else if (m_statClock.elapsed() >= 5000) {
             const double sec = m_statClock.elapsed() / 1000.0;
-            qInfo("view: %.0f s: %d frames (%.0f/s) from %d updates touching it, %d refreshes, upload %.1f ms each, %dx%d",
-                  sec, m_statFrames, m_statFrames / sec, m_statUpdates, m_statRefreshes,
-                  m_statUploadNs / 1e6 / m_statFrames, m_frame.width(), m_frame.height());
-            m_statFrames = m_statUpdates = m_statRefreshes = 0;
+            qInfo("view: %.0f s: %d frames (%.0f/s) from %d updates touching it, %d refreshes, %.1f of %d tiles uploaded per frame, %.1f ms each, %dx%d",
+                  sec, m_statFrames, m_statFrames / sec, m_statUpdates, m_statRefreshes, double(m_statTiles) / m_statFrames,
+                  want, m_statUploadNs / 1e6 / m_statFrames, m_frame.width(), m_frame.height());
+            m_statFrames = m_statUpdates = m_statRefreshes = m_statTiles = 0;
             m_statUploadNs = 0;
             m_statClock.restart();
         }
     }
-    img->setRect(targetRect());
-    img->setSourceRect(QRectF(QPointF(0, 0), m_frame.size()));
     return root;
 }
 

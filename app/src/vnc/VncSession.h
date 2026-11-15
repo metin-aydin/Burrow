@@ -7,6 +7,10 @@
 #include <QThread>
 #include <QElapsedTimer>
 #include <atomic>
+#include <condition_variable>
+#include <deque>
+#include <mutex>
+#include <thread>
 
 #include "rdp/RemoteSession.h"
 #include "vnc/AppleAdaptive.h"
@@ -88,6 +92,18 @@ private:
     // (AES-128-CBC per direction, SHA-1 integrity), and the Mac reports its displays.
     QString appleSetup();
     bool fillRecord();
+    bool readRecord(QByteArray &bodyOut);   // one record off the wire, decrypted and checked
+    // Reading (and decrypting) runs on its own thread once connected, so decoding never waits for
+    // the network and the network never waits for decoding. readExact() then takes from this queue.
+    void ioLoop();
+    std::thread m_io;
+    std::atomic_bool m_ioRunning{false};
+    std::mutex m_qLock;
+    std::condition_variable m_qCv;
+    std::deque<QByteArray> m_queue;
+    qsizetype m_qFront = 0;          // bytes of m_queue.front() already taken
+    size_t m_queued = 0;
+    bool m_ioDone = false;
     bool startRecords(const uchar *rekeyBody);
     bool readAppleLayout();
     bool readAppleCursor(int hx, int hy, int w, int h);
@@ -141,7 +157,8 @@ private:
     QPoint m_cursorHot;
     // Throughput, logged every 5 s while pictures arrive (worker thread, except the copy counters).
     QElapsedTimer m_statClock;
-    quint64 m_statBytes = 0, m_statPixels = 0;
+    std::atomic<quint64> m_statBytes{0};
+    quint64 m_statPixels = 0;
     int m_statUpdates = 0;
     qint64 m_statDecodeNs = 0;
     qint64 m_statCpuNs = 0;          // inflate + decode only, without waiting for bytes

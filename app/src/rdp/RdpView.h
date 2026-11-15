@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QHash>
+#include <vector>
 #include <QRegion>
 #include <QPointer>
 #include <QElapsedTimer>
@@ -64,8 +65,13 @@ private:
     QRegion m_dirty;         // desktop coordinates, inside sourceRect()
     int m_monitor = -1;
     bool m_textureDirty = true;   // m_frame changed since the last upload (render thread reads it during sync)
+    // The picture is uploaded as tiles, and only changed tiles go to the GPU again.
+    static constexpr int kTile = 512;
+    std::vector<char> m_tileDirty;   // one per tile of m_frame, row by row
+    int m_tileCols = 0, m_tileRows = 0;
+    void markTiles(const QRect &frameRect);   // in m_frame coordinates
     // Frames shown and upload cost, logged every 5 s while the picture changes.
     QElapsedTimer m_statClock;
-    int m_statFrames = 0, m_statUpdates = 0, m_statRefreshes = 0;
+    int m_statFrames = 0, m_statUpdates = 0, m_statRefreshes = 0, m_statTiles = 0;
     qint64 m_statUploadNs = 0;
 };
