@@ -26,7 +26,7 @@ BDialog {
         keyCombo.value = d.keyMap || "shortcuts"
         displaysCombo.value = d.displays || "window"; retinaSw.checked = !!d.retina
         error = ""
-        tab = "general"
+        tab = "general"; tabSeg.value = "general"   // a click breaks the binding, so reset both
         open()
         nameField.field.forceActiveFocus()
     }
@@ -43,11 +43,12 @@ BDialog {
             displays: displaysCombo.value, retina: retinaSw.checked
         })
         const err = App.saveDevice(m)
-        if (err) { error = err; tab = "general"; return }
+        if (err) { error = err; tab = "general"; tabSeg.value = "general"; return }
         close()
     }
 
     Segmented {
+        id: tabSeg
         Layout.fillWidth: true
         options: [{ text: qsTr("General"), value: "general" },
                   { text: qsTr("Session"), value: "session" },

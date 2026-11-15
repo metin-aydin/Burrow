@@ -4,6 +4,7 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Cihaz düzenleyici her açılışta General sekmesiyle açılır (tıklama Segmented bağlamasını bozuyordu; değer elle sıfırlanıyor).
 - Oturum penceresi birleşti: Bağlan'a basınca cihaz penceresi hemen açılır; tünel ve RDP aşamaları tek listede
   gösterilir (ConnectProgress kaldırıldı). Bağlanamazsa pencere hatayı ve Tekrar Dene'yi gösterir. Aşama işaretleri
   hep aynı boyda (22 px), ayrıntı satırı ayrılmış: tamamlanınca liste zıplamıyor. Onaylanan sertifika penceresi kapanır.
