@@ -9,11 +9,15 @@ Window {
     property RdpSession session: null
     property int monitor: 0
     property string deviceName
+    property string displayName
     signal reattach(int monitor)
     signal layoutChanged()
 
     color: "black"
-    title: qsTr("%1 — Display %2").arg(deviceName).arg(monitor + 1)
+    title: deviceName + " — " + displayName
+    // Full screen once the window is on its display (see SessionWindow.detach).
+    function goFullScreen(delay) { fullTimer.interval = delay; fullTimer.start() }
+    Timer { id: fullTimer; onTriggered: mw.showFullScreen() }
 
     onClosing: reattach(monitor)
     onScreenChanged: layoutChanged()

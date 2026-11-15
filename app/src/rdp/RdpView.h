@@ -52,5 +52,7 @@ private:
     QImage m_frame;
     QPoint m_wheelAccum;
     QTimer m_resizeTimer;
+    QTimer m_frameTimer;     // coalesces desktop updates (one copy per ~16 ms, not per update)
+    void refreshFrame();
     int m_monitor = -1;
 };

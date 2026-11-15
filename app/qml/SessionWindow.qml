@@ -36,14 +36,32 @@ Window {
     property int currentMonitor: 0
     property var detached: ({})           // monitor index -> MonitorWindow
     property int detachedCount: 0
+    property var tabOrder: []             // monitor indices in tab order (user can reorder)
+    property var tabNames: ({})           // monitor index -> name given by the user
     property bool restored: false
     property bool ending: false           // the session is closing: don't record windows going away
 
     function isDetached(i) { return !!detached[i] }
-    function attachedMonitors() {
-        const out = []
-        for (let i = 0; i < monitors.length; ++i) if (!isDetached(i)) out.push(i)
-        return out
+    // Tabs still in this window, in the user's order.
+    readonly property var visibleTabs: {
+        detachedCount
+        return tabOrder.filter(i => i < monitors.length && !isDetached(i))
+    }
+    function attachedMonitors() { return visibleTabs }
+    function tabName(i) { return tabNames[i] || qsTr("Display %1").arg(i + 1) }
+    function renameTab(i, name) {
+        const n = Object.assign({}, tabNames)
+        const t = name.trim()
+        if (t === "" || t === qsTr("Display %1").arg(i + 1)) delete n[i]; else n[i] = t
+        tabNames = n
+        if (detached[i]) detached[i].displayName = tabName(i)
+        scheduleSave()
+    }
+    function moveTab(monitor, beforeMonitor) {
+        const o = tabOrder.filter(i => i !== monitor)
+        const at = beforeMonitor < 0 ? o.length : o.indexOf(beforeMonitor)
+        o.splice(at < 0 ? o.length : at, 0, monitor)
+        if (JSON.stringify(o) !== JSON.stringify(tabOrder)) { tabOrder = o; scheduleSave() }
     }
     function screenAt(gx, gy) {
         const screens = Qt.application.screens
@@ -59,11 +77,13 @@ Window {
         for (let i = 0; i < screens.length; ++i) if (screens[i].name === name) return screens[i]
         return null
     }
-    // Opens monitor `i` in its own window on `sc` (full screen when `full`).
-    function detach(i, sc, full) {
-        if (isDetached(i) || i >= monitors.length || attachedMonitors().length <= 1 || !sc) return
+    // Opens monitor `i` in its own window on `sc`; `full` makes it full screen there (after the window
+    // has appeared on that display: macOS takes a hidden window full screen on the main display).
+    function detach(i, sc, full, delay) {
+        if (isDetached(i) || i >= monitors.length || visibleTabs.length <= 1 || !sc) return
         const w = monitorWindow.createObject(null, { session: session, monitor: i,
-                                                     deviceName: App.device(deviceId).name || "" })
+                                                     deviceName: App.device(deviceId).name || "",
+                                                     displayName: tabName(i) })
         w.screen = sc
         const m = monitors[i]
         const fit = Math.min(sc.width * 0.9 / m.width, sc.height * 0.85 / m.height, 1)
@@ -73,10 +93,11 @@ Window {
         w.y = sc.virtualY + (sc.height - w.height) / 2
         w.reattach.connect(win.reattach)
         w.layoutChanged.connect(win.scheduleSave)
-        if (full) w.showFullScreen(); else w.show()
+        w.show()
+        if (full) w.goFullScreen(delay || 400)
         const d = Object.assign({}, detached); d[i] = w; detached = d
         detachedCount = Object.keys(d).length
-        if (currentMonitor === i) currentMonitor = attachedMonitors()[0]
+        if (currentMonitor === i) currentMonitor = visibleTabs[0]
         scheduleSave()
     }
     function reattach(i) {
@@ -92,7 +113,7 @@ Window {
         for (const k in detached) detached[k].destroy()
         detached = ({}); detachedCount = 0
     }
-    function scheduleSave() { if (!ending) saveTimer.restart() }
+    function scheduleSave() { if (!ending && restored) saveTimer.restart() }
     Timer {
         // Delayed so quitting (which closes every window) doesn't record the windows as closed.
         id: saveTimer
@@ -102,21 +123,38 @@ Window {
             const list = []
             for (const k in win.detached) {
                 const w = win.detached[k]
-                list.push({ monitor: parseInt(k), screen: w.screen ? w.screen.name : "",
+                // The display is found again by a point on it (names can repeat), the name is a fallback.
+                const sc = w.screen
+                list.push({ monitor: parseInt(k), screen: sc ? sc.name : "",
+                            x: sc ? sc.virtualX + sc.width / 2 : 0, y: sc ? sc.virtualY + sc.height / 2 : 0,
                             fullscreen: w.visibility === Window.FullScreen })
             }
-            App.saveDeviceLayout(win.deviceId, { detached: list })
+            App.saveDeviceLayout(win.deviceId, { detached: list, order: win.tabOrder, names: win.tabNames })
         }
     }
-    // Puts monitors back where they were last time.
+    // Puts tabs and windows back the way they were last time.
     onTabbedChanged: {
         if (!tabbed || restored) return
+        const layout = App.device(deviceId).layout || {}
+        const n = monitors.length
+        const order = (layout.order || []).filter(i => i >= 0 && i < n)
+        for (let i = 0; i < n; ++i) if (order.indexOf(i) < 0) order.push(i)
+        tabOrder = order
+        const names = {}
+        const saved = layout.names || {}
+        for (const k in saved) if (parseInt(k) < n && saved[k]) names[k] = saved[k]
+        tabNames = names
+        currentMonitor = order[0]
         restored = true
-        const saved = (App.device(deviceId).layout || {}).detached || []
-        for (let j = 0; j < saved.length; ++j) {
-            const e = saved[j]
-            const sc = screenNamed(e.screen)
-            if (sc && e.monitor < monitors.length) detach(e.monitor, sc, !!e.fullscreen)
+        const list = layout.detached || []
+        let k = 0
+        for (let j = 0; j < list.length; ++j) {
+            const e = list[j]
+            const sc = (e.x !== undefined ? screenAt(e.x, e.y) : null) || screenNamed(e.screen)
+            if (!sc || e.monitor >= n) continue
+            // One display at a time going full screen; macOS animates each.
+            detach(e.monitor, sc, !!e.fullscreen, 500 + 700 * k)
+            if (e.fullscreen) ++k
         }
     }
     Component.onDestruction: closeDetached()
@@ -149,69 +187,131 @@ Window {
         else { if (!session && !failure) App.cancelConnect(deviceId); win.destroy() }
     }
 
-    // Tabs, one per remote monitor still in this window. Drag one out to give it its own window.
+    // Tabs, one per remote monitor still in this window: click to switch, drag sideways to reorder,
+    // drag out of the window to open it on another display, double-click to rename. Hidden when only
+    // one monitor is left here.
+    readonly property bool showTabs: tabbed && visibleTabs.length > 1
+    FontMetrics { id: tabMetrics; font.pixelSize: 12; font.weight: Font.Medium }
+    function tabWidth(i) { return Math.ceil(tabMetrics.advanceWidth(tabName(i))) + 36 }
+    function tabX(i) {
+        let x = 0
+        for (let j = 0; j < visibleTabs.length && visibleTabs[j] !== i; ++j) x += tabWidth(visibleTabs[j]) + 2
+        return x
+    }
+    // The tab under x (in tab-strip coordinates), or -1 past the last one.
+    function tabAtX(x) {
+        let pos = 0
+        for (let j = 0; j < visibleTabs.length; ++j) {
+            const w = tabWidth(visibleTabs[j])
+            if (x < pos + w / 2) return visibleTabs[j]
+            pos += w + 2
+        }
+        return -1
+    }
     Rectangle {
         id: tabBar
         anchors { left: parent.left; right: parent.right; top: parent.top }
-        height: win.tabbed ? 40 : 0
-        visible: win.tabbed
+        height: win.showTabs ? 40 : 0
+        visible: win.showTabs
         color: Theme.surface
         Rectangle { anchors { left: parent.left; right: parent.right; bottom: parent.bottom } height: 1; color: Theme.border }
-        Row {
-            anchors { left: parent.left; leftMargin: 8; bottom: parent.bottom }
-            spacing: 2
+        Item {
+            id: strip
+            anchors { left: parent.left; leftMargin: 8; right: parent.right; top: parent.top; bottom: parent.bottom }
             Repeater {
                 model: win.monitors.length
                 Rectangle {
                     id: tab
                     required property int index
                     readonly property bool current: win.currentMonitor === index
-                    readonly property bool away: win.detachedCount >= 0 && win.isDetached(index)
-                    visible: !away
-                    width: visible ? tabLabel.implicitWidth + 36 : 0
+                    readonly property bool shown: win.visibleTabs.indexOf(index) >= 0
+                    readonly property bool editing: editor.visible
+                    visible: shown
+                    x: tabMouse.dragging ? tabMouse.dragX : win.tabX(index)
+                    Behavior on x { enabled: !tabMouse.dragging; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+                    z: tabMouse.dragging ? 2 : 1
+                    y: parent.height - height
+                    width: win.tabWidth(index)
                     height: 32
                     radius: 7
                     color: current ? Theme.bg : tabMouse.containsMouse ? Theme.hover : "transparent"
-                    opacity: tabMouse.dragging ? 0.5 : 1
+                    border.color: tabMouse.dragging ? Theme.accent : "transparent"
                     // The current tab joins the desktop below it.
                     Rectangle {
                         anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
                         height: 8
                         color: parent.color
-                        visible: tab.current
+                        visible: tab.current && !tabMouse.dragging
                     }
                     Text {
-                        id: tabLabel
                         anchors.centerIn: parent
-                        text: qsTr("Display %1").arg(tab.index + 1)
+                        visible: !tab.editing
+                        text: win.tabName(tab.index)
                         color: tab.current ? Theme.text : Theme.textSecondary
                         font.pixelSize: 12
                         font.weight: tab.current ? Font.Medium : Font.Normal
                     }
+                    TextInput {
+                        id: editor
+                        anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
+                        visible: false
+                        verticalAlignment: TextInput.AlignVCenter
+                        horizontalAlignment: TextInput.AlignHCenter
+                        color: Theme.text
+                        selectionColor: Theme.accent
+                        selectedTextColor: Theme.accentText
+                        font.pixelSize: 12
+                        font.weight: Font.Medium
+                        maximumLength: 40
+                        function begin() { text = win.tabName(tab.index); visible = true; forceActiveFocus(); selectAll() }
+                        function finish(save) {
+                            if (!visible) return
+                            visible = false
+                            if (save) win.renameTab(tab.index, text)
+                            view.forceActiveFocus()
+                        }
+                        Keys.onReturnPressed: finish(true)
+                        Keys.onEnterPressed: finish(true)
+                        Keys.onEscapePressed: finish(false)
+                        onActiveFocusChanged: if (!activeFocus) finish(true)
+                    }
                     MouseArea {
                         id: tabMouse
                         anchors.fill: parent
+                        enabled: !tab.editing
                         hoverEnabled: true
                         acceptedButtons: Qt.LeftButton | Qt.RightButton
                         property point pressAt
                         property bool dragging: false
+                        property real dragX: 0
                         cursorShape: dragging ? Qt.ClosedHandCursor : Qt.ArrowCursor
                         onPressed: (m) => {
-                            if (m.button === Qt.RightButton) { moveMenu.monitor = tab.index; moveMenu.popup(); return }
+                            if (m.button === Qt.RightButton) { tabMenu.monitor = tab.index; tabMenu.popup(); return }
                             win.currentMonitor = tab.index
                             pressAt = Qt.point(m.x, m.y)
                         }
+                        onDoubleClicked: (m) => { if (m.button === Qt.LeftButton) editor.begin() }
                         onPositionChanged: (m) => {
                             if (!pressed || !(m.buttons & Qt.LeftButton)) return
-                            if (!dragging && Math.abs(m.x - pressAt.x) + Math.abs(m.y - pressAt.y) > 8
-                                    && win.attachedMonitors().length > 1)
+                            if (!dragging && Math.abs(m.x - pressAt.x) + Math.abs(m.y - pressAt.y) > 6) {
                                 dragging = true
+                                dragX = tab.x
+                            }
                             if (!dragging) return
                             const g = mapToGlobal(m.x, m.y)
-                            ghost.label = tabLabel.text
+                            const outside = !win.insideWindow(g.x, g.y)
+                            // Inside the window: the tab follows the pointer along the strip and the
+                            // others make room. Outside: a floating label follows the pointer.
+                            const p = mapToItem(strip, m.x, m.y)
+                            dragX = Math.max(0, p.x - pressAt.x)
+                            if (!outside) {
+                                const over = win.tabAtX(p.x)
+                                if (over !== tab.index) win.moveTab(tab.index, over)
+                            }
+                            ghost.label = win.tabName(tab.index)
                             ghost.x = g.x - ghost.width / 2
                             ghost.y = g.y - 15
-                            ghost.visible = !win.insideWindow(g.x, g.y)
+                            ghost.visible = outside && win.visibleTabs.length > 1
                         }
                         onReleased: (m) => {
                             if (!dragging) return
@@ -226,8 +326,9 @@ Window {
             }
         }
         Text {
+            id: hint
             anchors { right: parent.right; rightMargin: 14; verticalCenter: parent.verticalCenter }
-            visible: win.detachedCount >= 0 && win.attachedMonitors().length > 1 && win.width > 760
+            visible: win.width > 900
             text: qsTr("Drag a tab out of the window to show it on another display")
             color: Theme.textMuted
             font.pixelSize: 12
@@ -259,37 +360,46 @@ Window {
         }
     }
 
-    // Right-click on a tab: move it to a display without dragging.
+    // Right-click on a tab: rename it or open it on a display without dragging.
     Menu {
-        id: moveMenu
+        id: tabMenu
         property int monitor: 0
         padding: 4
         background: Rectangle { implicitWidth: 220; radius: Theme.radius; color: Theme.surfaceRaised; border.color: Theme.border }
+        component TabMenuItem: MenuItem {
+            id: mi
+            implicitHeight: 32
+            contentItem: Text {
+                text: mi.text
+                color: mi.enabled ? Theme.text : Theme.textMuted
+                font.pixelSize: 13
+                leftPadding: 6
+                verticalAlignment: Text.AlignVCenter
+            }
+            background: Rectangle { radius: 6; color: mi.highlighted ? Theme.hover : "transparent" }
+        }
+        TabMenuItem {
+            text: qsTr("Rename")
+            onTriggered: {
+                const t = strip.children.find(c => c.index === tabMenu.monitor)
+                if (t) t.children.find(c => c.begin !== undefined).begin()
+            }
+        }
         Repeater {
             model: Qt.application.screens.length
-            MenuItem {
-                id: mi
+            TabMenuItem {
                 required property int index
                 readonly property var scr: Qt.application.screens[index]
                 text: qsTr("Open On %1").arg(scr ? scr.name : "")
-                enabled: win.detachedCount >= 0 && win.attachedMonitors().length > 1
-                implicitHeight: 32
-                contentItem: Text {
-                    text: mi.text
-                    color: mi.enabled ? Theme.text : Theme.textMuted
-                    font.pixelSize: 13
-                    leftPadding: 6
-                    verticalAlignment: Text.AlignVCenter
-                }
-                background: Rectangle { radius: 6; color: mi.highlighted ? Theme.hover : "transparent" }
-                onTriggered: win.detach(moveMenu.monitor, scr, false)
+                enabled: win.visibleTabs.length > 1
+                onTriggered: win.detach(tabMenu.monitor, scr, false)
             }
         }
     }
 
     RdpView {
         id: view
-        anchors { left: parent.left; right: parent.right; top: tabBar.bottom; bottom: parent.bottom }
+        anchors { left: parent.left; right: parent.right; top: win.showTabs ? tabBar.bottom : parent.top; bottom: parent.bottom }
         session: win.session
         monitor: win.tabbed ? win.currentMonitor : -1
         focus: true

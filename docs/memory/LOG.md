@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Monitör sekmeleri iyileştirmeleri: ayrık pencere ilk kareyi hemen çeker (önceden uzak ekran değişene kadar siyah
+  kalıyordu); her görünüm yalnızca kendi monitör bölgesini kopyalar ve güncellemeler ~16 ms'de birleştirilir.
+  Düzen ekranı merkez noktasıyla kaydedilir (isim yedek), pencere önce o ekranda gösterilip sonra kademeli tam
+  ekran yapılır (macOS gizli pencereyi ana ekranda tam ekran yapıyordu). Tek sekme kalınca sekme barı gizlenir.
+  Sekmeler sürüklenerek sıralanır, çift tık / sağ tık ile yeniden adlandırılır; sıra ve isimler `layout.order`,
+  `layout.names` alanlarında saklanır. Geliştirme: `BURROW_DEMO_LAYOUT=<json>`.
 - Çoklu monitör sekmeleri: GNOME Remote Login 3 monitörü kabul etti ama kendi düzenine yerleştirdi; Burrow bölemedi
   ve hepsini tek resimde gösterdi. Gerçek düzen artık GFX ResetGraphics'ten okunuyor (`rdp: server desktop …` logu).
   Uzak monitörler ana pencerede sekme; sekme pencere dışına sürüklenince (veya sağ tık → "… Üzerinde Aç") o

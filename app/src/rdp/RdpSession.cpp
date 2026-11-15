@@ -244,6 +244,12 @@ bool RdpSession::multiMonitor() const
     return monitors().size() > 1;
 }
 
+QImage RdpSession::frame(const QRect &part) const
+{
+    QMutexLocker lock(&m_frameLock);
+    return m_frame.copy(part.intersected(m_frame.rect()));
+}
+
 QImage RdpSession::frame() const
 {
     QMutexLocker lock(&m_frameLock);

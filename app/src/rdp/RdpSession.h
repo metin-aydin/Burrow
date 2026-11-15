@@ -74,6 +74,7 @@ public:
 
     // Thread-safe copy of the current desktop picture.
     QImage frame() const;
+    QImage frame(const QRect &part) const;   // copy of just that part (a monitor)
 
     // Input, in remote desktop coordinates. Called from the GUI thread.
     void sendMouseMove(int x, int y);

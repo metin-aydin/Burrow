@@ -16,6 +16,9 @@ RdpView::RdpView(QQuickItem *parent)
     setActiveFocusOnTab(false);
     setFillColor(Qt::black);
     setOpaquePainting(true);
+    m_frameTimer.setSingleShot(true);
+    m_frameTimer.setInterval(16);
+    connect(&m_frameTimer, &QTimer::timeout, this, &RdpView::refreshFrame);
     // Follow the window size once it settles (dragging sends many intermediate sizes).
     m_resizeTimer.setSingleShot(true);
     m_resizeTimer.setInterval(400);
@@ -43,14 +46,16 @@ void RdpView::setSession(RdpSession *s)
         disconnect(m_session, nullptr, this, nullptr);
     m_session = s;
     if (s) {
-        connect(s, &RdpSession::frameUpdated, this, [this](const QRect &) {
-            m_frame = m_session->frame();
-            update();
+        connect(s, &RdpSession::frameUpdated, this, [this](const QRect &r) {
+            // Only updates that touch the part this view shows; at most one copy per frame interval.
+            if (!m_frame.isNull() && !r.intersects(sourceRect()))
+                return;
+            if (!m_frameTimer.isActive())
+                m_frameTimer.start();
         });
-        connect(s, &RdpSession::desktopSizeChanged, this, [this] {
-            m_frame = m_session->frame();
-            update();
-        });
+        connect(s, &RdpSession::desktopSizeChanged, this, &RdpView::refreshFrame);
+        // Show the current picture right away: a static remote screen may not send updates for a while.
+        refreshFrame();
         connect(s, &RdpSession::stateChanged, this, [this] {
             if (m_session && m_session->state() == QLatin1String("connected"))
                 m_resizeTimer.start();   // match the window as soon as the display channel is up
@@ -64,13 +69,22 @@ void RdpView::setMonitor(int m)
     if (m_monitor == m)
         return;
     m_monitor = m;
-    update();
+    refreshFrame();
     emit monitorChanged();
+}
+
+void RdpView::refreshFrame()
+{
+    if (!m_session)
+        return;
+    // Only this view's part of the desktop: with several monitors the full picture is large.
+    m_frame = m_session->frame(sourceRect());
+    update();
 }
 
 QRect RdpView::sourceRect() const
 {
-    const QRect all(QPoint(0, 0), m_frame.size());
+    const QRect all(QPoint(0, 0), m_session ? m_session->desktopSize() : QSize());
     if (m_monitor < 0 || !m_session || !m_session->multiMonitor())
         return all;
     const QVariantList mons = m_session->monitors();
@@ -94,7 +108,7 @@ void RdpView::paint(QPainter *painter)
     if (m_frame.isNull())
         return;
     painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
-    painter->drawImage(targetRect(), m_frame, sourceRect());
+    painter->drawImage(targetRect(), m_frame);
 }
 
 QPoint RdpView::toRemote(const QPointF &p) const

@@ -771,14 +771,6 @@
     </message>
 </context>
 <context>
-    <name>MonitorWindow</name>
-    <message>
-        <location filename="../qml/MonitorWindow.qml" line="16"/>
-        <source>%1 — Display %2</source>
-        <translation>%1 — Ekran %2</translation>
-    </message>
-</context>
-<context>
     <name>PromptDialog</name>
     <message>
         <location filename="../qml/PromptDialog.qml" line="34"/>
@@ -852,7 +844,7 @@
         <translation>Bağlantı başarısız oldu (%1).</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpSession.cpp" line="298"/>
+        <location filename="../src/rdp/RdpSession.cpp" line="304"/>
         <source>Couldn&apos;t start the RDP engine.</source>
         <translation>RDP motoru başlatılamadı.</translation>
     </message>
@@ -860,82 +852,88 @@
 <context>
     <name>SessionWindow</name>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="140"/>
+        <location filename="../qml/SessionWindow.qml" line="178"/>
         <source>The connection failed.</source>
         <translation>Bağlantı kurulamadı.</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="186"/>
+        <location filename="../qml/SessionWindow.qml" line="51"/>
+        <location filename="../qml/SessionWindow.qml" line="55"/>
         <source>Display %1</source>
         <translation>Ekran %1</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="231"/>
+        <location filename="../qml/SessionWindow.qml" line="332"/>
         <source>Drag a tab out of the window to show it on another display</source>
         <translation>Başka bir ekranda göstermek için sekmeyi pencerenin dışına sürükle</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="274"/>
+        <location filename="../qml/SessionWindow.qml" line="382"/>
+        <source>Rename</source>
+        <translation>Yeniden Adlandır</translation>
+    </message>
+    <message>
+        <location filename="../qml/SessionWindow.qml" line="393"/>
         <source>Open On %1</source>
         <translation>%1 Üzerinde Aç</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="323"/>
+        <location filename="../qml/SessionWindow.qml" line="433"/>
         <source>Couldn&apos;t Connect To %1</source>
         <translation>%1 Cihazına Bağlanılamadı</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="323"/>
+        <location filename="../qml/SessionWindow.qml" line="433"/>
         <source>Connecting %1</source>
         <translation>%1 Bağlanıyor</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="333"/>
+        <location filename="../qml/SessionWindow.qml" line="443"/>
         <source>Through %1</source>
         <translation>%1 üzerinden</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="345"/>
+        <location filename="../qml/SessionWindow.qml" line="455"/>
         <source>Confirm the certificate to continue.</source>
         <translation>Devam etmek için sertifikayı onayla.</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="346"/>
+        <location filename="../qml/SessionWindow.qml" line="456"/>
         <source>Finish signing in in your browser.</source>
         <translation>Girişi tarayıcında tamamla.</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="362"/>
+        <location filename="../qml/SessionWindow.qml" line="472"/>
         <source>Close</source>
         <translation>Kapat</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="362"/>
+        <location filename="../qml/SessionWindow.qml" line="472"/>
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="368"/>
+        <location filename="../qml/SessionWindow.qml" line="478"/>
         <source>Try Again</source>
         <translation>Tekrar Dene</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="380"/>
+        <location filename="../qml/SessionWindow.qml" line="490"/>
         <source>Trust This Computer?</source>
         <translation>Bu Bilgisayara Güveniyor Musun?</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="383"/>
+        <location filename="../qml/SessionWindow.qml" line="493"/>
         <source>This is the first connection to %1. Check that the fingerprint matches the computer&apos;s certificate, then trust it. Burrow refuses to connect if it changes later.</source>
         <translation>%1 adresine ilk kez bağlanılıyor. Parmak izinin bilgisayarın sertifikasıyla eşleştiğini kontrol et, sonra güven. Sertifika sonradan değişirse Burrow bağlanmaz.</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="394"/>
+        <location filename="../qml/SessionWindow.qml" line="504"/>
         <source>Don&apos;t Connect</source>
         <translation>Bağlanma</translation>
     </message>
     <message>
-        <location filename="../qml/SessionWindow.qml" line="395"/>
+        <location filename="../qml/SessionWindow.qml" line="505"/>
         <source>Trust And Connect</source>
         <translation>Güven Ve Bağlan</translation>
     </message>
