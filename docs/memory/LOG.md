@@ -4,6 +4,11 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- RDP internet hızı: FreeRDP'de H.264 ve diğer sıkıştırmalar varsayılan kapalıydı. Artık GFX H.264 (AVC444v2/AVC444,
+  AVC420) — çözme Mac donanımında (FreeRDP VideoToolbox ile derli) — ve yedek olarak Progressive RemoteFX isteniyor;
+  bağlantı türü `freerdp_set_connection_type(AUTODETECT)` ile, sunucu süsleri ölçülen hıza göre ayarlıyor. Yerel
+  shadow sunucusuyla AVC444v2 anlaşıldı, hatasız çözüldü. Gerçek Windows/GNOME sunucuda denenmedi.
+
 - Güvenlik incelemesi: VNC okuma iş parçacığı dolu kuyrukta beklerken oturum kapanırsa sonsuza kadar bekliyordu
   (join takılırdı). Bekleme artık kapanış bayrağını (`m_ioDone`) da dinliyor.
 

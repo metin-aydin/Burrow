@@ -388,8 +388,18 @@ void RdpSession::run()
     freerdp_settings_set_uint32(s, FreeRDP_DesktopHeight, uint32_t(m_p.size.height()));
     freerdp_settings_set_uint32(s, FreeRDP_ColorDepth, 32);
     freerdp_settings_set_bool(s, FreeRDP_SupportGraphicsPipeline, TRUE);  // GNOME needs GFX
+    // Picture codecs, best first: H.264 (AVC444, then AVC420) decoded by the Mac's hardware
+    // (VideoToolbox) carries a moving screen in a fraction of the data; servers without an encoder
+    // fall back to progressive RemoteFX (coarse first, then sharp), and then to the lossless codecs.
+    freerdp_settings_set_bool(s, FreeRDP_GfxH264, TRUE);
+    freerdp_settings_set_bool(s, FreeRDP_GfxAVC444, TRUE);
+    freerdp_settings_set_bool(s, FreeRDP_GfxAVC444v2, TRUE);
+    freerdp_settings_set_bool(s, FreeRDP_GfxProgressive, TRUE);
+    freerdp_settings_set_bool(s, FreeRDP_GfxProgressiveV2, TRUE);
+    freerdp_settings_set_bool(s, FreeRDP_RemoteFxCodec, TRUE);
+    // The link is measured and the server tunes to it (wallpaper, animations, font smoothing).
     freerdp_settings_set_bool(s, FreeRDP_NetworkAutoDetect, TRUE);
-    freerdp_settings_set_uint32(s, FreeRDP_ConnectionType, CONNECTION_TYPE_AUTODETECT);
+    freerdp_set_connection_type(s, CONNECTION_TYPE_AUTODETECT);
     freerdp_settings_set_bool(s, FreeRDP_AutoReconnectionEnabled, TRUE);
     freerdp_settings_set_bool(s, FreeRDP_DesktopResize, TRUE);
     freerdp_settings_set_uint32(s, FreeRDP_KeyboardType, 4);
