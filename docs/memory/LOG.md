@@ -4,6 +4,32 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **README JumpDesk formatında yeniden yazıldı:** ortalanmış logo + başlık, CI/lisans rozetleri, giriş, öne çıkan bölüm
+  ("Tunnels inside the app" + Security), Features, Screenshots tablosu, Download, Development, Branches and releases,
+  Packaging, Issues and contributions, License. Türkçe bölüm kaldırıldı (README tamamen İngilizce).
+  `tools/readme-shots.sh` 8 görüntü üretiyor (kilit ekranı, tünel listesi, Settings, Tailscale editörü eklendi).
+- **İkinci critique 28/40 + düzeltmeler:** Cmd+F aramaya odaklar, Cmd+, Settings'i açar (dialog açıkken çalışmaz), kartta
+  sağ tık menüsü. Tünel editörü: OTP Type seçiminin ne demek olduğunu söyleyen satır, Gateway / Group ipucu,
+  Cloudflare test alanı "Hostname To Test" + yalnızca test için olduğunu söyleyen ipucu (alan zaten profile
+  kaydedilmiyordu; critique'teki "yanlış yerde" bulgusu kısmen yanlıştı). Settings ayrı pencere: yapılmayacak (kullanıcı kararı).
+- **Impeccable polish:** Türkçe arayüz, açık/koyu temada 20 ekran kontrol edildi; taşma/kesilme yok. README görüntüleri
+  (`docs/images/`) yeni renklerle `tools/readme-shots.sh` ile yeniden çekildi (çerçeve + gölge, 1600 px).
+  İlk critique kaydı `app/qml` değiştiği için araç tarafından kapatıldı. Kalan: elle VoiceOver testi.
+- **Impeccable layout:** `BDialog` uzun içerikte kaydırma işareti (başlık altında ince çizgi, footer'a doğru fade);
+  tünel editöründe Key tam genişlik, Algorithm/Digits/Period "Advanced Settings" altında (standart dışı değer
+  varsa kendiliğinden açılır). Tünel satırı hizası zaten doğruydu (critique bulgusu yanlıştı).
+- **Impeccable typeset:** `Theme.qml`'e role göre yazı ölçeği (9/11/12/13/14/15/18/22); 81 sabit `pixelSize` token'a
+  taşındı (17→18, 20→22). `SectionTitle` 15 DemiBold + üstte 14 px boşluk, `Heading` rolü; Settings ve tünel
+  editöründe bölümler artık alan etiketlerinden ayrışıyor. Connect butonuna dokunulmadı (kullanıcı kararı).
+- **Impeccable harden:** VoiceOver adları (BButton tip→ad, BSwitch, BField, Chip, Segmented, kart, "Connect To %1",
+  kart menüsü klavye odağında görünür), Chip/Segmented klavye desteği + odak halkası, gösterim çipleri `interactive: false`.
+  Sonuçsuz aramada neyin gizlediğini söyleyen mesaj + Clear Search / Show All Devices; aramada Esc temizler.
+  "1 devices" düzeltildi. 15 yeni metin çevrildi. Demo: `BURROW_DEMO_OPEN=nomatch`. VoiceOver ağacı terminalden
+  doğrulanamadı (System Events izni yok); elle VoiceOver testi bekliyor.
+- **Impeccable critique + colorize:** `app/qml` ilk critique 27/40 (`.impeccable/critique/`). Colorize: GlobalProtect
+  kırmızı → denim, Cloudflare turuncu → erik (danger/warning/vurgu ile çakışıyordu), kart yer tutucusundaki mavi-mor
+  gradyan → OS başına tek tonlu koyu zemin. Kontrast ≥4.9:1 hesaplandı, açık/koyu ekran görüntüsüyle doğrulandı.
+  `docs/images/` README görüntüleri henüz eski renklerde.
 - Güvenlik incelemesi (CI): govulncheck `@v1.1.4`'e sabitlendi; CodeQL PR'larda da çalışıyor (yalnız development/master hedefli;
   fork PR'ları zaten salt-okunur jeton alır, `pull_request_target` kullanılmaz). Eylemleri SHA'ya sabitleme doğrulanamadığı için yapılmadı; Dependabot etiketleri izliyor.
 
