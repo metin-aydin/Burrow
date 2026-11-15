@@ -4,6 +4,24 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Apple imza malzemesi incelendi:** `~/Downloads/apple-signing-*.zip` içinde Developer ID Application sertifikası
+  (ekip `JTRUY8Y2ZF`, geçerlilik 2027-11-15'e kadar), eşleşen özel anahtar, iki .p12 ve notarization için uygulamaya
+  özgü parola var. Release iş akışı ve güncelleyicide kod değişikliği gerekmiyor. GitHub `release` ortamı ve
+  gizli değerler kullanıcı tarafından eklenecek (Claude parola/anahtar girmez; GitHub MCP'de secret aracı yok).
+- **GitHub `release` ortamı `gh api` ile kuruldu:** dağıtım yalnız `master` dalından; `APPLE_TEAM_ID` eklendi.
+  Kalan 4 secret için `.github/scripts/set-release-secrets.sh` yazıldı (gizli istemle okur, gh'ye stdin ile verir,
+  .p12 parolasını önce doğrular). Kullanıcı artık GitHub işlerinde gh CLI'ye de izin verdi.
+- Zip'teki iki .p12'nin parolası bilinmiyor (OpenSSL "Mac verify error"). Betiğe `developer-id.key cert.pem` modu
+  eklendi: anahtar-sertifika eşleşmesini denetler, yeni parolayla SHA-1/3DES .p12 üretir (macOS `security import`
+  ile test edildi).
+- **Release secret'larının beşi de `release` ortamında** (`gh secret list --env release`, 12:17 UTC). Betik yalnızca
+  .p12 parolası doğrulanınca kaydettiği için CSC_LINK/CSC_KEY_PASSWORD çifti tutarlı. İlk gerçek kanıt ilk release olacak.
+  İmza zip'i ve açılmış klasör Downloads'tan silindi.
+- **macOS dosya aktarımı araştırıldı, ADR 0009 yazıldı:** standart RFB'de dosya aktarımı yok; Extended Clipboard
+  (0xC0A1E5CE) Mac'te panoya bağlanmıyor; Apple panosu (0x1f, zDesk belgeli) yalnız dosya yolu taşıyor; Ekran
+  Paylaşımı'nın dosya kopyası belgesiz `SSFileCopySender/Receiver` ile. Dört seçenek sunuldu (Apple panosu + SFTP,
+  yalnız SFTP, SSFileCopy tersine mühendislik, SMB). Kullanıcı **tersine mühendisliği** seçti. Önce Apple panosu,
+  sonra süreç içi izlemeyle tel biçimi; ~5 gün sonra kontrol noktası. Kod henüz yazılmadı.
 - **Dosya panosu iki yönlü ve platformdan bağımsız:** kullanıcı "her işletim sisteminden her işletim sistemine,
   iki yönlü" istedi. Yerelden uzağa: panodaki dosya URL'leri (Finder, Explorer, Nautilus) klasörler açılarak
   listeleniyor, `FileGroupDescriptorW` (id 0xC0F1) olarak sunuluyor; uzak taraf `FileContents` ile parça istedikçe

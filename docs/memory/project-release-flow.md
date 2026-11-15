@@ -14,10 +14,14 @@ aynı Developer ID ekip imzası doğrular.
 Farklar (bilinçli): dal adı `master` (JumpDesk `main`), sürüm Conventional Commits'ten (JumpDesk patch artırır).
 
 Gizli değerler `release` ortamında, JumpDesk ile aynı adlar: `CSC_LINK`, `CSC_KEY_PASSWORD`, `APPLE_ID`,
-`APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID`. UPaste hafızasına göre sertifika kullanıcının
-`~/Documents/apple-signing` klasöründe; değerleri kullanıcı ekler (Claude parola görmez).
+`APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID`. İmza malzemesi 2026-11-15'te kullanıcının
+`~/Downloads/apple-signing-*.zip` arşivinden secret'lara yüklendi, arşiv sonra silindi (aslı kullanıcıda): Developer ID Application, ekip `JTRUY8Y2ZF`, sertifika 2027-11-15'te
+bitiyor (yenilemeden önce release durur). Değerleri kullanıcı ekler (Claude parola/anahtar girmez).
 
-Henüz yapılmayan: GitHub'da `release` ortamı, dal korumaları, gizli değerler (GitHub MCP bekleniyor);
+Yapıldı (2026-11-15): `release` ortamı (yalnız `master`) ve 5 secret'ın hepsi. Parolalı olanları kullanıcı
+`.github/scripts/set-release-secrets.sh` ile ekledi; sertifika yenilenince aynı betik kullanılır.
+
+Henüz yapılmayan: dal korumaları, `master` dalı;
 Intel/Ubuntu/Windows paketleri; Touch ID için provisioning profile (release'te Touch ID şimdilik çalışmaz).
 
 **Nasıl uygulanır:** Yeni CI işi eklenince dal korumasındaki zorunlu kontrol listesini de güncelle.
