@@ -26,6 +26,20 @@ jobs:
         working-directory: netcore
         run: go test -race ./...
 
+  vulncheck:
+    name: Known Go vulnerabilities
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: netcore/go.mod
+      - name: Install libopenconnect
+        run: sudo apt-get update && sudo apt-get install -y libopenconnect-dev pkg-config
+      - name: govulncheck
+        working-directory: netcore
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
   macos:
     name: macOS build
     runs-on: macos-15

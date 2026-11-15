@@ -4,6 +4,14 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- GitHub hazırlığı: README güncel özelliklerle yeniden yazıldı (RDP + H.264, Mac/VNC, tüneller, güvenlik, kurulum;
+  açık/koyu temaya göre değişen galeri görüntüsü, demo verisiyle yeni ekran görüntüleri). `SECURITY.md`,
+  `.github/dependabot.yml` (Actions + Go, haftalık), `codeql.yml` (Go + Actions), CI'da ayrı `govulncheck` işi.
+  GitHub tarafı ayarlar (açıklama, konular, varsayılan branch, kurallar, `release` ortamı ve sırlar, güvenlik
+  ayarları) `docs/github-settings.md`'de; GitHub MCP bağlanamadığı için ("Incompatible auth server: does not
+  support dynamic client registration") henüz uygulanmadı. Yerel govulncheck çalıştırması izin sistemince
+  reddedildi; sonuç ilk CI çalışmasında görülecek.
+
 - Güvenlik incelemesi (RDP codec): eski RemoteFX kapatıldı (Progressive kapsıyor), H.264 yalnız FreeRDP
   `WITH_GFX_H264=ON` ile derliyse isteniyor, CMake en az FreeRDP 3.33 istiyor (test edilen sürüm).
 
