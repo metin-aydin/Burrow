@@ -4,6 +4,9 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Pencere minimum genişliği artık galeri başlık satırının doğal genişliğinden hesaplanıyor (dile ve güncelleme
+  rozetine göre değişir; en az 760). En dar hâlde EN 841, TR 815 pt; hiçbir buton kesilmiyor. Minimum yükseklik 520.
+
 - Çoklu monitörde kopma ve siyah kenar kesin çözüm: GNOME kaynağı ve loglar incelendi. Sunucu oturumu hata kodu
   vermeden normal kapatıyor (FreeRDP bunu `ERRINFO_LOGOFF_BY_USER` gösteriyor); tetikleyen, oturum devrinden sonra
   canlı gönderilen monitör düzeni. GNOME Remote Login canlı düzen değişikliğinde oturumu kapatıyor ya da yeniden

@@ -6,7 +6,9 @@ ApplicationWindow {
     id: win
     width: 1180
     height: 760
-    minimumWidth: 760
+    // Wide enough for the gallery header (it depends on the language and an update badge), so no
+    // button is ever cut off.
+    minimumWidth: Math.max(760, Math.ceil(content.item && content.item.minimumContentWidth ? content.item.minimumContentWidth : 0))
     minimumHeight: 520
     visible: true
     title: "Burrow"
@@ -33,6 +35,7 @@ ApplicationWindow {
     }
 
     Loader {
+        id: content
         anchors.fill: parent
         sourceComponent: App.state === "unlocked" ? gallery : lockScreen
     }

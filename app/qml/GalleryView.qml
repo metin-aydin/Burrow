@@ -17,6 +17,8 @@ Rectangle {
     signal confirmDelete(string id, string name)
     signal connectDevice(string id)
     readonly property int ctlH: Theme.contentTitleBar ? Theme.titleBarControlHeight : Theme.controlHeight
+    // The narrowest this screen can be with nothing cut off: the header row at its natural width.
+    readonly property real minimumContentWidth: header.implicitWidth + header.Layout.leftMargin + header.Layout.rightMargin
 
     ColumnLayout {
         anchors.fill: parent
@@ -26,6 +28,7 @@ Rectangle {
         // On macOS this row is the window's title bar (Theme.titleBarHeight), next to the traffic
         // lights; elsewhere it is a normal header whose left edge matches the chips and cards (28 px).
         RowLayout {
+            id: header
             Layout.fillWidth: true
             Layout.preferredHeight: Theme.contentTitleBar ? Theme.titleBarHeight : -1
             Layout.leftMargin: Theme.contentTitleBar ? Theme.trafficLightsInset : 28
