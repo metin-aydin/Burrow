@@ -1,6 +1,6 @@
 # GitHub repository settings
 
-What the repository should have on GitHub itself (not in files). Applied through the GitHub MCP
+What the repository should have on GitHub itself (not in files). Applied through the GitHub MCP or `gh api`
 (CLAUDE.md); kept here so the next maintainer can check them. Release flow: ADR 0002.
 
 ## About
@@ -16,8 +16,11 @@ What the repository should have on GitHub itself (not in files). Applied through
 
 - **Default branch:** `development`.
 - **`development`** (ruleset): block force pushes and deletion; direct pushes allowed.
-- **`master`** (ruleset): changes only through a pull request from `development`; required status checks
-  `Go netcore tests`, `macOS build`, `Release scripts` (CI); block force pushes and deletion.
+- **`master`** (ruleset): changes only through a pull request from `development` (merge commits only);
+  required status checks `Go netcore tests`, `macOS build`, `Release scripts` (CI) and `Analyze (go)`,
+  `Analyze (actions)` (CodeQL); block force pushes and deletion. `master` was created at the first commit
+  with the Release workflow disabled for that moment, so creating the branch published nothing; the first
+  `development` → `master` pull request makes the first release.
 - **Tags `v*`** (ruleset): block deletion and updates (published versions never move).
 - Allow merge commits for `development` → `master` (the merged PR's description becomes the release notes).
 
@@ -35,5 +38,4 @@ What the repository should have on GitHub itself (not in files). Applied through
 - Private vulnerability reporting: on (SECURITY.md points to it).
 - Dependabot alerts and security updates: on (`.github/dependabot.yml` adds weekly version updates).
 - Secret scanning and push protection: on.
-- Code scanning: the `CodeQL` workflow (Go and Actions), also on pull requests; add its results as a
-  required check on `master`.
+- Code scanning: the `CodeQL` workflow (Go and Actions), also on pull requests; required on `master`.

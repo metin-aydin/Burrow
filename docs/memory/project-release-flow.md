@@ -21,7 +21,9 @@ bitiyor (yenilemeden önce release durur). Değerleri kullanıcı ekler (Claude 
 Yapıldı (2026-11-15): `release` ortamı (yalnız `master`) ve 5 secret'ın hepsi. Parolalı olanları kullanıcı
 `.github/scripts/set-release-secrets.sh` ile ekledi; sertifika yenilenince aynı betik kullanılır.
 
-Henüz yapılmayan: dal korumaları, `master` dalı;
+`master` dalı (ilk commit'te) ve kural setleri de 2026-11-15'te kuruldu; ilk PR ilk release'i çıkarır.
+
+Henüz yapılmayan:
 Intel/Ubuntu/Windows paketleri; Touch ID için provisioning profile (release'te Touch ID şimdilik çalışmaz).
 
 **Nasıl uygulanır:** Yeni CI işi eklenince dal korumasındaki zorunlu kontrol listesini de güncelle.

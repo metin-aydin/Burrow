@@ -4,6 +4,11 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **`master` dalı ve kural setleri kuruldu (`gh api`):** `master` ilk commit'te (47a0d0e) oluşturuldu; dal
+  oluşturma push'u release'i tetiklemesin diye Release iş akışı o an kapatılıp açıldı (çalışma yok). Kural
+  setleri: `development` (silme/force push yok), `master` (yalnız PR + merge commit, zorunlu kontroller: Go netcore
+  tests, macOS build, Release scripts, Analyze (go), Analyze (actions)), `release tags` (`v*` silinemez/taşınamaz).
+  İlk `development` → `master` PR'ı ilk imzalı release'i çıkaracak.
 - **Apple imza malzemesi incelendi:** `~/Downloads/apple-signing-*.zip` içinde Developer ID Application sertifikası
   (ekip `JTRUY8Y2ZF`, geçerlilik 2027-11-15'e kadar), eşleşen özel anahtar, iki .p12 ve notarization için uygulamaya
   özgü parola var. Release iş akışı ve güncelleyicide kod değişikliği gerekmiyor. GitHub `release` ortamı ve
