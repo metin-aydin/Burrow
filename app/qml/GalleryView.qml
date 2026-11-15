@@ -28,11 +28,7 @@ Rectangle {
             Layout.rightMargin: 28
             Layout.topMargin: 22
             spacing: 12
-            Image {
-                Layout.preferredWidth: 42; Layout.preferredHeight: 42
-                source: "../resources/icons/256x256.png"
-                sourceSize: Qt.size(84, 84)
-            }
+            // Left edge matches the filter chips and the cards below (28 px).
             ColumnLayout {
                 spacing: 0
                 Text { text: "Burrow"; color: Theme.text; font.pixelSize: 20; font.weight: Font.Bold }

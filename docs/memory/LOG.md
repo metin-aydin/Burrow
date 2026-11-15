@@ -4,6 +4,7 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Galeri başlığındaki logo kaldırıldı; "Burrow" adı filtre çipleri ve kartlarla aynı sol hizada (28 px).
 - Güvenlik düzeltmesi (inceleme): pencere kapanınca uygulama menü çubuğunda açık kasayla kalıyordu → Ayarlar'a
   "Otomatik Kilit" (5/15/30/60 dk ya da Hiçbir Zaman, varsayılan 15). Kullanıcı girdisi zamanlayıcıyı sıfırlar; açık
   uzak masaüstü varken kilitlenmez. Tray menüsü kendi eyleminin içinden yeniden kurulmuyor (kuyruklu bağlantılar,
