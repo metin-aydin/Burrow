@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **macOS: başlık ve Dock düzeltmesi** (kullanıcı 0.2.0'da gördü). Pencere kapatılıp tepsiden açılınca Qt NSWindow'u
+  yeniden yaratıyor; yeni pencerede `titleVisibility`/boş toolbar ayarı olmadığı için sistem başlığı "Burrow" header'ın
+  üstüne biniyor, trafik ışıkları kayıyordu. Kapat → "Open Burrow" döngüsüyle (System Events) yeniden üretildi; ayarlar
+  artık her expose'da yeniden uygulanıyor. Ayrıca pencere kapalıyken Dock simgesi gizleniyor (accessory politika),
+  açılınca geri geliyor. Windows'ta gizli pencerenin zaten görev çubuğu düğmesi yok (gerçek Windows'ta denenmedi).
+
 - **v0.2.0 yayımlandı** (PR #3): ilk Windows sürümü (setup.exe 87 MB, portable zip 124 MB, sha256 dosyaları) +
   mac-arm64 + linux-x64; `latest.json`'da `windows-x64` ve `mac-arm64`. Manifestteki SHA-256 indirilen setup.exe ile
   eşleşti. `Windows build` master'ın zorunlu kontrollerine eklendi (`gh api`), repo açıklaması "macOS, Windows and
