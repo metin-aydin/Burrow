@@ -944,50 +944,50 @@
 <context>
     <name>RdpClipboard</name>
     <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="219"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="232"/>
         <source>Too many files to copy to the remote computer at once (more than 10,000). Copy fewer files.</source>
         <translation>Uzak bilgisayara bir seferde kopyalanacak dosya çok fazla (10.000&apos;den fazla). Daha az dosya kopyalayın.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="326"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="339"/>
         <source>Couldn&apos;t copy the files from the remote computer: their list was unreadable.</source>
         <translation>Dosyalar uzak bilgisayardan kopyalanamadı: dosya listesi okunamadı.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="395"/>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="496"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="408"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="509"/>
         <source>The copied files are larger than 2 GB. Copy fewer files at a time.</source>
         <translation>Kopyalanan dosyalar 2 GB&apos;tan büyük. Bir seferde daha az dosya kopyalayın.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="414"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="427"/>
         <source>Couldn&apos;t copy the files from the remote computer: the cache folder isn&apos;t writable. Check the free space on this computer.</source>
         <translation>Dosyalar uzak bilgisayardan kopyalanamadı: önbellek klasörüne yazılamıyor. Bu bilgisayardaki boş alanı kontrol edin.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="458"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="471"/>
         <source>Couldn&apos;t copy the files from the remote computer: a folder couldn&apos;t be created. Check the free space on this computer.</source>
         <translation>Dosyalar uzak bilgisayardan kopyalanamadı: bir klasör oluşturulamadı. Bu bilgisayardaki boş alanı kontrol edin.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="466"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="479"/>
         <source>Couldn&apos;t copy the files from the remote computer: a file couldn&apos;t be saved. Check the free space on this computer.</source>
         <translation>Dosyalar uzak bilgisayardan kopyalanamadı: bir dosya kaydedilemedi. Bu bilgisayardaki boş alanı kontrol edin.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="421"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="434"/>
         <source>Copying files from the remote computer…</source>
         <translation>Dosyalar uzak bilgisayardan kopyalanıyor…</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="484"/>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="489"/>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="505"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="497"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="502"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="518"/>
         <source>Couldn&apos;t copy the files from the remote computer: it stopped sending them. Copy them again.</source>
         <translation>Dosyalar uzak bilgisayardan kopyalanamadı: gönderim yarıda kesildi. Dosyaları yeniden kopyalayın.</translation>
     </message>
     <message>
-        <location filename="../src/rdp/RdpClipboard.cpp" line="533"/>
+        <location filename="../src/rdp/RdpClipboard.cpp" line="546"/>
         <source>Files from the remote computer are ready to paste.</source>
         <translation>Uzak bilgisayardaki dosyalar yapıştırılmaya hazır.</translation>
     </message>
@@ -2000,65 +2000,65 @@
 <context>
     <name>VncSession</name>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="320"/>
+        <location filename="../src/vnc/VncSession.cpp" line="324"/>
         <source>Couldn&apos;t open a connection.</source>
         <translation>Bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="328"/>
+        <location filename="../src/vnc/VncSession.cpp" line="335"/>
         <source>Couldn&apos;t open a connection through the tunnel.</source>
         <translation>Tünel üzerinden bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="355"/>
+        <location filename="../src/vnc/VncSession.cpp" line="362"/>
         <source>The connection to %1 was closed because data arrived damaged or altered.</source>
         <translation>%1 ile bağlantı, veri bozuk ya da değiştirilmiş geldiği için kapatıldı.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="356"/>
+        <location filename="../src/vnc/VncSession.cpp" line="363"/>
         <source>The connection to %1 was lost.</source>
         <translation>%1 ile bağlantı koptu.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="366"/>
+        <location filename="../src/vnc/VncSession.cpp" line="373"/>
         <source>Couldn&apos;t reach %1. Check that Screen Sharing (or another VNC server) is on and the address is right.</source>
         <translation>%1 bilgisayarına ulaşılamadı. Ekran Paylaşımı&apos;nın (ya da başka bir VNC sunucusunun) açık ve adresin doğru olduğunu kontrol et.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="388"/>
+        <location filename="../src/vnc/VncSession.cpp" line="395"/>
         <source>%1 refused the connection: %2</source>
         <translation>%1 bağlantıyı reddetti: %2</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="402"/>
-        <location filename="../src/vnc/VncSession.cpp" line="407"/>
+        <location filename="../src/vnc/VncSession.cpp" line="409"/>
+        <location filename="../src/vnc/VncSession.cpp" line="414"/>
         <source>This Mac signs in with a user name. Enter the Mac&apos;s user name and password in the device settings.</source>
         <translation>Bu Mac kullanıcı adıyla giriş istiyor. Cihaz ayarlarına Mac&apos;in kullanıcı adını ve şifresini gir.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="404"/>
+        <location filename="../src/vnc/VncSession.cpp" line="411"/>
         <source>This VNC server asks for a sign-in method Burrow doesn&apos;t support yet.</source>
         <translation>Bu VNC sunucusu Burrow&apos;un henüz desteklemediği bir giriş yöntemi istiyor.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="431"/>
+        <location filename="../src/vnc/VncSession.cpp" line="438"/>
         <source>The user name or password for %1 is wrong.</source>
         <translation>%1 için kullanıcı adı ya da şifre yanlış.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="448"/>
+        <location filename="../src/vnc/VncSession.cpp" line="455"/>
         <source>%1 sent an invalid screen size.</source>
         <translation>%1 geçersiz bir ekran boyutu gönderdi.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="473"/>
+        <location filename="../src/vnc/VncSession.cpp" line="480"/>
         <source>Couldn&apos;t open the encrypted session with %1.</source>
         <translation>%1 ile şifreli oturum açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/vnc/VncSession.cpp" line="823"/>
-        <location filename="../src/vnc/VncSession.cpp" line="926"/>
-        <location filename="../src/vnc/VncSession.cpp" line="930"/>
+        <location filename="../src/vnc/VncSession.cpp" line="830"/>
+        <location filename="../src/vnc/VncSession.cpp" line="933"/>
+        <location filename="../src/vnc/VncSession.cpp" line="937"/>
         <source>Couldn&apos;t sign in to %1.</source>
         <translation>%1 bilgisayarına giriş yapılamadı.</translation>
     </message>
