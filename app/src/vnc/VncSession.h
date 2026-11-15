@@ -9,6 +9,7 @@
 #include <atomic>
 
 #include "rdp/RemoteSession.h"
+#include "vnc/AppleAdaptive.h"
 
 struct z_stream_s;
 struct evp_cipher_ctx_st;
@@ -90,6 +91,8 @@ private:
     bool startRecords(const uchar *rekeyBody);
     bool readAppleLayout();
     bool readAppleCursor(int hx, int hy, int w, int h);
+    bool readAdaptive(int x, int y, int w, int h);
+    bool sendEncodings();
     void setState(const QString &state, const QString &error = {});
     void setPhase(const QString &phase);
     void sendPointer();
@@ -120,7 +123,11 @@ private:
     std::atomic_bool m_records{false};
     QByteArray m_inBuf;              // decrypted bytes not read yet (worker thread)
     qsizetype m_inPos = 0;
-    bool m_armed = false;            // worker thread: Apple pushes updates (AutoFrameBufferUpdate)
+    bool m_armed = false;
+    // Apple's Adaptive picture (0x3f3): far less data than ZRLE. Off again (back to ZRLE) if a
+    // rectangle doesn't decode, or with BURROW_VNC_ZRLE=1.
+    AppleAdaptive m_adaptive;
+    bool m_adaptiveOn = false;            // worker thread: Apple pushes updates (AutoFrameBufferUpdate)
     z_stream_s *m_zrle = nullptr;   // one zlib stream for the whole connection (worker thread)
     QByteArray m_zbuf;
     // Pointer state (GUI thread).

@@ -36,6 +36,10 @@ yerleşik Ekran Paylaşımı / Uzaktan Yönetim (Apple Remote Desktop) servisi *
   ile güncellemeler kurulur. Apple'a özgü: sağ/orta fare bitleri yer değiştirir, Option `Meta` olarak gönderilir.
   Biçim zDesk projesinin (MIT, `THIRD_PARTY_NOTICES.md`) macOS 26.5–26.6'da ölçtüğü notlara dayanır; belgelenmemiştir,
   bir macOS güncellemesi bozabilir. Apple modunda pano henüz yok (Apple'ın kendi pano protokolü sonraki adım).
+- **Görüntü formatı (2026-11-15):** Apple modunda Mac'ten Apple'ın kayıplı **Adaptive** formatı (0x3f3; 8×8 karo,
+  tek/iki renk, kopya, JPEG tarzı DCT, kısmi iyileştirme, karo önbelleği) istenir; ZRLE'ye göre çok daha az veri.
+  Çözücü zDesk'in Rust çözücüsünün C++ çevirisi (`AppleAdaptive`), testleri de oradan. Bir dikdörtgen çözülemezse
+  oturum kopmadan ZRLE'ye döner; `BURROW_VNC_ZRLE=1` baştan ZRLE kullanır.
 
 ## Sonuçlar
 

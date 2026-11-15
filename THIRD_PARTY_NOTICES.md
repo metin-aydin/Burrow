@@ -6,7 +6,10 @@ Burrow's own code is MIT licensed (see `LICENSE`). It builds on these projects:
 
 The VNC client's Apple mode (`app/src/vnc/VncSession.cpp`: the 003.889 prelude, the encrypted
 record layer, the display layout and Apple's input quirks) follows the wire format measured and
-documented by zDesk (`docs/apple-vnc-889.md`, `src/vnc_apple.rs`, `src/vnc_record.rs`).
+documented by zDesk (`docs/apple-vnc-889.md`, `src/vnc_apple.rs`, `src/vnc_record.rs`), and
+`app/src/vnc/AppleAdaptive.cpp` is a C++ port of its Adaptive (0x3f3) decoder
+(`frontend/wasm/apple-adaptive/src/decoder.rs`); the decoder tests in `app/tests/tst_vault.cpp` are
+ported from the same file.
 
 https://github.com/andrewtheguy/zdesk
 

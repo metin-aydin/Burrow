@@ -7,15 +7,111 @@
 #include "rdp/KeyMapper.h"
 #include "rdp/RdpClipboard.h"
 #include "vnc/VncSession.h"
+#include "vnc/AppleAdaptive.h"
 #include <QImage>
 #include <QtEndian>
 #include "net/NetCore.h"
 #include "vault/VaultStore.h"
 
+namespace {
+// --- Apple Adaptive (0x3f3): the cases of zDesk's decoder tests, ported ---------------------
+struct BitWriter {
+    QByteArray bytes; quint64 window = 0; int held = 0;
+    BitWriter &put(quint32 v, int n) { window = (window << n) | (v & ((quint64(1) << n) - 1)); held += n;
+        while (held >= 8) { held -= 8; bytes.append(char((window >> held) & 0xff)); } return *this; }
+    BitWriter &bits(const char *t) { for (; *t; ++t) if (*t == '0' || *t == '1') put(*t == '1', 1); return *this; }
+    QByteArray done() { if (held > 0) put(0, 8 - held); return bytes; }
+};
+QByteArray adaptiveTables() { QByteArray b(1, char(2)); b.append(128, char(1)); return b; }
+QByteArray adaptiveFull(BitWriter &cmd, BitWriter &data) {
+    cmd.put(0x6d, 8); data.put(0x6d, 8);
+    const QByteArray c = cmd.done(), d = data.done();
+    const int off = 6 + c.size();
+    QByteArray b; b.append(char(0)).append(char(3)).append(char(5)).append(char(off >> 16)).append(char(off >> 8)).append(char(off));
+    return b + c + d;
+}
+BitWriter adaptiveOne(quint32 command) { BitWriter w; w.bits("0").put(command, 3).bits("0"); return w; }
+quint32 rgbPx(int r, int g, int b) { return 0xff000000u | quint32(r) << 16 | quint32(g) << 8 | quint32(b); }
+bool tileIs(const QImage &f, int x, int y, quint32 px) {
+    for (int i = 0; i < 64; ++i) if (reinterpret_cast<const quint32 *>(f.constScanLine(y + i / 8))[x + i % 8] != px) return false;
+    return true;
+}
+void adaptiveSetup(AppleAdaptive &d, QImage &f, int w, int h) {
+    f = QImage(w, h, QImage::Format_RGB32); f.fill(0xff000000u); d.resize(w, h);
+    bool drew; QString err; QVERIFY(d.decode(f, 0, 0, 0, 0, adaptiveTables(), &drew, &err)); QVERIFY(!drew);
+}
+} // namespace
+
 class TestVault : public QObject
 {
     Q_OBJECT
 private slots:
+
+    void adaptiveWhiteAndClipping()
+    {
+        AppleAdaptive d; QImage f; adaptiveSetup(d, f, 24, 16);
+        BitWriter cmd; cmd.bits("0").put(0, 3).bits("1 0011").put(0, 3).bits("0");
+        BitWriter data; bool drew; QString err;
+        QVERIFY2(d.decode(f, 0, 0, 20, 12, adaptiveFull(cmd, data), &drew, &err), qPrintable(err));
+        for (int y = 0; y < 16; ++y) for (int x = 0; x < 24; ++x)
+            QCOMPARE(reinterpret_cast<const quint32 *>(f.constScanLine(y))[x], (x < 20 && y < 12) ? 0xffffffffu : 0xff000000u);
+    }
+    void adaptiveMaskAndColours()
+    {
+        AppleAdaptive d; QImage f; adaptiveSetup(d, f, 32, 8);
+        BitWriter cmd; cmd.bits("0").put(4, 3).bits("1 0010");
+        BitWriter data;
+        data.bits("0 0").put(76, 8).put(32, 6).put(32, 6);
+        data.bits("1 0").put(76, 8).put(21, 6).put(63, 6).put(29, 8).put(63, 6).put(26, 6);
+        data.put(0, 8); for (int i = 0; i < 8; ++i) data.put(0xf0, 8);
+        data.bits("0 1").bits("1 1").put(0xff, 8);
+        bool drew; QString err;
+        QVERIFY2(d.decode(f, 0, 0, 32, 8, adaptiveFull(cmd, data), &drew, &err), qPrintable(err));
+        QVERIFY(tileIs(f, 0, 0, rgbPx(76, 76, 76)));
+        const quint32 *row = reinterpret_cast<const quint32 *>(f.constScanLine(0));
+        QCOMPARE(row[8], row[11]); QCOMPARE(row[12], row[15]); QVERIFY(row[8] != row[12]);
+        QVERIFY(tileIs(f, 16, 0, rgbPx(76, 76, 76)));
+        QVERIFY(tileIs(f, 24, 0, row[8]));   // a row whose bit is set is the first colour
+    }
+    void adaptiveCopiesAndBlackWhite()
+    {
+        AppleAdaptive d; QImage f; adaptiveSetup(d, f, 16, 16);
+        BitWriter cmd; cmd.bits("0").put(0, 3).bits("0").put(1, 3).bits("0").put(2, 3).bits("0").put(3, 3).bits("0");
+        BitWriter data; data.put(0, 8); for (int i = 0; i < 8; ++i) data.put(0, 8);
+        bool drew; QString err;
+        QVERIFY2(d.decode(f, 0, 0, 16, 16, adaptiveFull(cmd, data), &drew, &err), qPrintable(err));
+        QVERIFY(tileIs(f, 8, 0, 0xffffffffu)); QVERIFY(tileIs(f, 0, 8, 0xffffffffu)); QVERIFY(tileIs(f, 8, 8, 0xff000000u));
+    }
+    void adaptiveDctRefineAndCache()
+    {
+        AppleAdaptive d; QImage f; adaptiveSetup(d, f, 16, 8);
+        auto flat = [](BitWriter &w) { w.bits("0 0 0").bits("00 00").bits("1110 000 0").bits("0 01 0"); };
+        BitWriter cmd; cmd.bits("0").put(5, 3).bits("0").put(0, 3).bits("0");
+        BitWriter data; flat(data);
+        bool drew; QString err;
+        QVERIFY2(d.decode(f, 0, 0, 16, 8, adaptiveFull(cmd, data), &drew, &err), qPrintable(err));
+        QVERIFY(tileIs(f, 0, 0, rgbPx(127, 127, 127)));
+        BitWriter ref; ref.bits("01").put(0, 6).bits("0 1010").bits("0 1010").put(0x6d, 8).put(0x76, 8).put(0x73, 8);
+        QByteArray body; body.append(char(1)).append(char(14)).append(char(19)); body += ref.done();
+        QVERIFY2(d.decode(f, 0, 0, 8, 8, body, &drew, &err), qPrintable(err));
+        QVERIFY(tileIs(f, 0, 0, rgbPx(127, 127, 127))); QVERIFY(tileIs(f, 8, 0, 0xffffffffu));
+        BitWriter later = adaptiveOne(7); BitWriter none;
+        QVERIFY2(d.decode(f, 8, 0, 8, 8, adaptiveFull(later, none), &drew, &err), qPrintable(err));
+        QVERIFY(tileIs(f, 8, 0, rgbPx(127, 127, 127)));
+    }
+    void adaptiveRefusesBadInput()
+    {
+        AppleAdaptive d; QImage f(8, 8, QImage::Format_RGB32); f.fill(0xff000000u); d.resize(8, 8);
+        BitWriter c0 = adaptiveOne(0); BitWriter n0; const QByteArray body = adaptiveFull(c0, n0);
+        bool drew; QString err;
+        QVERIFY(!d.decode(f, 0, 0, 8, 8, body, &drew, &err));   // no tables yet
+        QVERIFY(d.decode(f, 0, 0, 0, 0, adaptiveTables(), &drew, &err));
+        QVERIFY(!d.decode(f, 0, 0, 16, 8, body, &drew, &err));  // outside
+        QByteArray cut = body; cut[cut.size() - 1] = 0;
+        QVERIFY(!d.decode(f, 0, 0, 8, 8, cut, &drew, &err));    // no end mark
+        QVERIFY(d.decode(f, 0, 0, 8, 8, body, &drew, &err));
+        QVERIFY(tileIs(f, 0, 0, 0xffffffffu));
+    }
     // VNC password response (DES, key bits reversed); expected value from `openssl enc -des-ecb`.
     void vncAuthResponse()
     {

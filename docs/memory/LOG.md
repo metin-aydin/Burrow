@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- Ölçüm: Burrow artık darboğaz değil (görünür ekrana dokunan güncellemelerin hepsi kareye dönüşüyor, okuma
+  %25–32 dolu); veri Mac'ten yavaş geliyor. **Apple Adaptive (0x3f3)** eklendi: zDesk çözücüsünün C++ çevirisi
+  (`src/vnc/AppleAdaptive.*`), zDesk testleri tst_vault'a taşındı ve geçiyor; sahte Apple sunucusu gerçek 0x3f3
+  akışı (tablolar, renk karoları, DCT, iyileştirme, önbellek) gönderiyor, uçtan uca doğrulandı. Çözülemeyen
+  dikdörtgende oturum kopmadan ZRLE'ye dönüyor (test edildi). ADR 0008 ve THIRD_PARTY_NOTICES güncellendi.
+
 - GPU görünümü: görüntü gelmeden boş resim düğümü çizildiği için "No QSGTexture provided" uyarısı yağıyordu; düğüm
   artık yalnız görüntü varken var. "view:" satırı görünüme dokunan güncelleme, yenileme ve kare sayısını birlikte
   gösteriyor (kaybın hangi aşamada olduğu görülsün). Kullanıcının ölçümleri Burrow'un çalıştığı Mac'in kendisine

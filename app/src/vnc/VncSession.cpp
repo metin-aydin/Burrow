@@ -28,7 +28,7 @@ enum : quint8 { SecNone = 1, SecVnc = 2, SecApple = 30 };
 enum : qint32 { EncRaw = 0, EncCopyRect = 1, EncZrle = 16, EncDesktopSize = -223, EncExtendedDesktopSize = -308 };
 // Apple's metadata pseudo-encodings (RFB 003.889; measured by the zDesk project, MIT,
 // github.com/andrewtheguy/zdesk docs/apple-vnc-889.md).
-enum : qint32 { EncAppleCursorPos = 0x44c, EncAppleDisplayInfo = 0x44d, EncAppleRekey = 0x44f, EncAppleCursor = 0x450, EncAppleLayout = 0x451 };
+enum : qint32 { EncAppleAdaptive = 0x3f3, EncAppleCursorPos = 0x44c, EncAppleDisplayInfo = 0x44d, EncAppleRekey = 0x44f, EncAppleCursor = 0x450, EncAppleLayout = 0x451 };
 constexpr int kRecordTrailer = 20;                      // SHA-1
 constexpr int kRecordMaxBody = (65535 / 16) * 16 - 2 - kRecordTrailer;
 
@@ -423,17 +423,8 @@ QString VncSession::handshake()
     pf.append(char(32)).append(char(24)).append(char(0)).append(char(1));
     putU16(pf, 255); putU16(pf, 255); putU16(pf, 255);
     pf.append(char(16)).append(char(8)).append(char(0)).append(3, '\0');
-    QByteArray enc;
-    enc.append(char(2)).append(char(0));
-    // Every encoding listed must be readable: the server takes the list as a promise. A Mac reports
-    // its displays only when both DisplayInfo and the layout are listed.
-    const QList<qint32> encodings = m_apple
-        ? QList<qint32>{EncZrle, EncRaw, EncAppleCursorPos, EncAppleDisplayInfo, EncAppleRekey, EncAppleCursor, EncAppleLayout, EncDesktopSize}
-        : QList<qint32>{EncZrle, EncCopyRect, EncRaw, EncExtendedDesktopSize, EncDesktopSize};
-    putU16(enc, quint16(encodings.size()));
-    for (qint32 e : encodings)
-        putU32(enc, quint32(e));
-    if (!writeAll(pf.constData(), size_t(pf.size())) || !writeAll(enc.constData(), size_t(enc.size())))
+    m_adaptiveOn = m_apple && !qEnvironmentVariableIntValue("BURROW_VNC_ZRLE");
+    if (!writeAll(pf.constData(), size_t(pf.size())) || !sendEncodings())
         return unreachable;
     requestUpdate(false);
     return {};
@@ -676,6 +667,62 @@ bool VncSession::readAppleLayout()
     return true;
 }
 
+// Every encoding listed must be readable: the server takes the list as a promise. A Mac reports
+// its displays only when both DisplayInfo and the layout are listed, and codes every rectangle in the
+// first of its codecs listed: Adaptive (0x3f3) when on, else ZRLE.
+bool VncSession::sendEncodings()
+{
+    QList<qint32> encodings;
+    if (m_apple) {
+        encodings = {EncRaw, EncAppleCursorPos, EncAppleDisplayInfo, EncAppleRekey, EncAppleCursor, EncAppleLayout, EncDesktopSize};
+        if (m_adaptiveOn)
+            encodings << EncAppleAdaptive;
+        encodings << EncZrle;
+    } else {
+        encodings = {EncZrle, EncCopyRect, EncRaw, EncExtendedDesktopSize, EncDesktopSize};
+    }
+    QByteArray enc;
+    enc.append(char(2)).append(char(0));
+    putU16(enc, quint16(encodings.size()));
+    for (qint32 e : encodings)
+        putU32(enc, quint32(e));
+    return writeAll(enc.constData(), size_t(enc.size()));
+}
+
+// Apple's Adaptive picture: a u32 length, then a body the decoder draws onto the framebuffer.
+bool VncSession::readAdaptive(int x, int y, int w, int h)
+{
+    quint32 len = 0;
+    if (!readExact(&len, 4))
+        return false;
+    len = qFromBigEndian(len);
+    if (len > 64 * 1024 * 1024)
+        return false;
+    QByteArray body(int(len), '\0');
+    if (!readExact(body.data(), len))
+        return false;
+    QElapsedTimer cpu;
+    cpu.start();
+    bool drew = false;
+    QString error;
+    bool ok;
+    {
+        QMutexLocker lock(&m_frameLock);
+        ok = m_adaptive.decode(m_frame, x, y, w, h, body, &drew, &error);
+    }
+    m_statCpuNs += cpu.nsecsElapsed();
+    if (!ok && m_adaptiveOn) {
+        // The decoder's state no longer matches the Mac's: go back to ZRLE and repaint everything.
+        // (Rectangles still in flight in Adaptive are skipped.)
+        qWarning("vnc: an Adaptive rectangle didn't decode (%s); switching to ZRLE", qPrintable(error));
+        m_adaptiveOn = false;
+        if (!sendEncodings())
+            return false;
+        requestUpdate(false);
+    }
+    return true;
+}
+
 // Apple Remote Desktop sign-in (type 30): Diffie-Hellman, then the user name and password encrypted
 // with AES-128 under MD5 of the shared secret.
 QString VncSession::authApple()
@@ -794,6 +841,7 @@ QString VncSession::authVnc()
 
 void VncSession::resizeFrame(int w, int h)
 {
+    m_adaptive.resize(w, h);   // worker thread, like every decode
     {
         QMutexLocker lock(&m_frameLock);
         m_frame = QImage(w, h, QImage::Format_RGB32);
@@ -903,6 +951,13 @@ bool VncSession::readFramebufferUpdate()
             if (enc == EncAppleLayout) {
                 if (!readAppleLayout())
                     return false;
+                continue;
+            }
+            if (enc == EncAppleAdaptive) {
+                if (!readAdaptive(x, y, w, hh))
+                    return false;
+                m_statPixels += quint64(w) * quint64(hh);
+                dirty = dirty.united(QRect(x, y, w, hh));
                 continue;
             }
             if (enc == EncAppleCursor) {   // the header carries the hotspot and the shape's size
