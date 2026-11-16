@@ -4,6 +4,12 @@ En yeni kayıt en üstte.
 
 ## 2026-11-16
 
+- **Windows'ta GP "Failed to open HTTPS connection" → düzeltildi.** libopenconnect OpenSSL ile derlenmişti; OpenSSL güvenilir
+  sertifikaları derleme makinesinin MSYS2 klasöründe arıyor, kullanıcı PC'sinde hiçbir sunucu doğrulanamıyordu (Burrow
+  sertifika hatasında asla kabul etmez). Artık GnuTLS ile derleniyor (Windows sertifika deposunu okur; Linux/macOS
+  openconnect'i de GnuTLS'li). Duman testi paketteki GnuTLS'in sertifika okuduğunu denetliyor (CI: 567 sertifika).
+  Ayrıca sertifika reddi mesajı artık sonraki genel hatanın altında kaybolmuyor. Gerçek GP bağlantısı kullanıcıda.
+
 - **GitHub varsayılan dalı `master` yapıldı** (kullanıcının isteği, `gh repo edit --default-branch`). Bedeli kullanıcıya
   söylendi ve kabul edildi: "recent pushes" şeridi artık `development` push'larından sonra çıkıyor; yeni PR'lar
   varsayılan olarak `master`'ı hedefliyor. CLAUDE.md, ADR 0002 ve github-settings güncellendi. Günlük iş `development`'ta.
