@@ -1348,32 +1348,32 @@
 <context>
     <name>Tray</name>
     <message>
-        <location filename="../src/app/Tray.cpp" line="54"/>
+        <location filename="../src/app/Tray.cpp" line="85"/>
         <source>Computers</source>
         <translation>Bilgisayarlar</translation>
     </message>
     <message>
-        <location filename="../src/app/Tray.cpp" line="58"/>
+        <location filename="../src/app/Tray.cpp" line="89"/>
         <source>No Computers Yet</source>
         <translation>Henüz Bilgisayar Yok</translation>
     </message>
     <message>
-        <location filename="../src/app/Tray.cpp" line="72"/>
+        <location filename="../src/app/Tray.cpp" line="103"/>
         <source>Open Burrow</source>
         <translation>Burrow&apos;u Aç</translation>
     </message>
     <message>
-        <location filename="../src/app/Tray.cpp" line="73"/>
+        <location filename="../src/app/Tray.cpp" line="104"/>
         <source>Lock</source>
         <translation>Kilitle</translation>
     </message>
     <message>
-        <location filename="../src/app/Tray.cpp" line="75"/>
+        <location filename="../src/app/Tray.cpp" line="106"/>
         <source>Unlock Burrow…</source>
         <translation>Burrow&apos;un Kilidini Aç…</translation>
     </message>
     <message>
-        <location filename="../src/app/Tray.cpp" line="78"/>
+        <location filename="../src/app/Tray.cpp" line="109"/>
         <source>Quit Burrow</source>
         <translation>Burrow&apos;dan Çık</translation>
     </message>

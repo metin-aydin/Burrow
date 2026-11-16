@@ -181,7 +181,7 @@ jobs:
           name: fragment-${{ matrix.platform }}
           path: fragment-${{ matrix.platform }}.json
 
-  # Linux: an AppImage that carries Qt, FreeRDP and openconnect (Ubuntu 24.04 baseline, so it runs on
+  # Linux: an AppImage and a .deb that carry Qt, FreeRDP and openconnect (Ubuntu 24.04 baseline, so they run on
   # 24.04 and newer). No update manifest entry yet: in-app updates on Linux follow later.
   linux:
     needs: prepare
@@ -211,11 +211,11 @@ jobs:
       - name: Package
         run: |
           tools/package-appimage.sh build ${{ needs.prepare.outputs.version }} /opt/burrow-deps
-          cd dist && for f in *.AppImage; do sha256sum "$f" > "$f.sha256"; done
+          cd dist && for f in *.AppImage *.deb; do sha256sum "$f" > "$f.sha256"; done
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "v${{ needs.prepare.outputs.version }}" dist/*.AppImage dist/*.AppImage.sha256 --clobber
+        run: gh release upload "v${{ needs.prepare.outputs.version }}" dist/*.AppImage dist/*.deb dist/*.sha256 --clobber
 
   # Windows (ADR 0010, same shape as JumpDesk): a per-user NSIS installer, which is also the in-app update
   # package, and a portable zip. Unsigned for now: when a code signing certificate arrives, a signing step

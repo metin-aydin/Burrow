@@ -1,8 +1,9 @@
 #!/bin/sh
-# Packs a Linux build into an AppImage with Qt, QML, FreeRDP and openconnect inside.
+# Packs a Linux build into an AppImage with Qt, QML, FreeRDP and openconnect inside, and the same files into a .deb
+# (tools/package-deb.sh).
 # Usage: tools/package-appimage.sh <build dir> <version> [deps prefix]
 #   e.g. tools/package-appimage.sh build 0.4.0 /opt/burrow-deps
-# Output: dist/Burrow-<version>-linux-<arch>.AppImage
+# Output: dist/Burrow-<version>-linux-<arch>.AppImage and dist/burrow_<version>_<debian arch>.deb
 set -eu
 BUILD=$1
 VERSION=$2
@@ -47,3 +48,4 @@ linuxdeploy --appdir "$appdir" \
     --exclude-library 'libgst*' \
     --plugin qt --output appimage
 echo "$LDAI_OUTPUT"
+tools/package-deb.sh "$appdir" "$VERSION"

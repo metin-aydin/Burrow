@@ -33,12 +33,11 @@ Windows (2026-11-15, ADR 0010): kullanıcı "JumpDesk'te nasılsa her şey aynı
 
 Kaynak dal kuralı (2026-11-16, kullanıcı: "master'a sadece development'tan merge edilebilsin"): kural seti PR'ın kaynağını
 sınırlayamıyor → `.github/workflows/release-source.yml` (`pull_request_target`, master'daki hali çalışır, PR'dan kod
-çalıştırmaz) kaynak `development` değilse düşer. **Bekleyen adım:** bu dosya master'a ilk girdiği release'ten SONRA
-`Release source`'u master kural setinin zorunlu kontrollerine ekle (`gh api` PUT rulesets/27312719); önce eklenirse o
-release PR'ı kontrolü hiç alamadığı için kilitlenir.
+çalıştırmaz) kaynak `development` değilse düşer. 0.2.2 ile master'a girdi; aynı gün zorunlu kontrollere eklendi.
+Değiştirilirse: yeni hali ancak master'a girdikten sonra çalışır (pull_request_target).
 
 Henüz yapılmayan:
-Intel paketi; Linux uygulama içi güncellemesi (JumpDesk'te AppImage de güncelleniyor); Windows kod imzalama.
+Intel paketi; Linux uygulama içi güncellemesi (deb ve AppImage) (JumpDesk'te AppImage de güncelleniyor); Windows kod imzalama.
 
 **Nasıl uygulanır:** Yeni CI işi eklenince dal korumasındaki zorunlu kontrol listesini de güncelle.
 Bkz. [[feedback-github-via-mcp]], [[project-github-meta]].
