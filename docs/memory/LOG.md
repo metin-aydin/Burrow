@@ -4,6 +4,24 @@ En yeni kayıt en üstte.
 
 ## 2026-11-15
 
+- **Windows 0.2.0 kurulunca açılmıyordu → düzeltildi.** CI'daki duman testi yalnız `offscreen` ile açıyordu; gerçek
+  Windows eklentisiyle açılınca `module "QtQuick.Controls.Basic" is not installed`. Sebep: windeployqt QML'i `qml\`'e
+  koyuyor, MSYS2 Qt'si `share\qt6\qml`'de arıyor. Paket artık `qt.conf` (Prefix=., Plugins=., QmlImports=qml) taşıyor;
+  duman testi uygulamayı iki kez (offscreen + gerçek eklenti) açıyor. Konsolsuz Windows'ta günlük
+  `%LOCALAPPDATA%\Burrow\burrow.log`'a yazılıyor (`app/src/app/LogFile.*`). Release'e girmesi için 0.2.1 gerekiyor.
+
+- **macOS: başlık ve Dock düzeltmesi** (kullanıcı 0.2.0'da gördü). Pencere kapatılıp tepsiden açılınca Qt NSWindow'u
+  yeniden yaratıyor; yeni pencerede `titleVisibility`/boş toolbar ayarı olmadığı için sistem başlığı "Burrow" header'ın
+  üstüne biniyor, trafik ışıkları kayıyordu. Kapat → "Open Burrow" döngüsüyle (System Events) yeniden üretildi; ayarlar
+  artık her expose'da yeniden uygulanıyor. Ayrıca pencere kapalıyken Dock simgesi gizleniyor (accessory politika),
+  açılınca geri geliyor. Windows'ta gizli pencerenin zaten görev çubuğu düğmesi yok (gerçek Windows'ta denenmedi).
+
+- **v0.2.0 yayımlandı** (PR #3): ilk Windows sürümü (setup.exe 87 MB, portable zip 124 MB, sha256 dosyaları) +
+  mac-arm64 + linux-x64; `latest.json`'da `windows-x64` ve `mac-arm64`. Manifestteki SHA-256 indirilen setup.exe ile
+  eşleşti. `Windows build` master'ın zorunlu kontrollerine eklendi (`gh api`), repo açıklaması "macOS, Windows and
+  Ubuntu" oldu. Kullanıcıda doğrulanacak: Windows'tan GP bağlantısı, gerçek masaüstünde RDP/VNC/pano/tepsi,
+  sonraki sürümde Windows uygulama içi güncellemesi.
+
 - **Windows portu (ADR 0010) — `Windows build` CI'da yeşil.** Kullanıcıyla kararlar: MSYS2 UCRT64 (gcc; cgo ve Go
   c-archive için), paket/imza/güncelleme "JumpDesk'teki gibi" → imzasız NSIS kullanıcı başına kurulum + taşınabilir
   zip, Windows `latest.json`'a girer (SHA-256 + uygulama imzalıysa aynı Authenticode yayıncısı; sessiz kurulum

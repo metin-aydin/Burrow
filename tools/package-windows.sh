@@ -22,6 +22,10 @@ windeployqt=$(command -v windeployqt6 || command -v windeployqt || echo /ucrt64/
 "$windeployqt" --release --qmldir "$ROOT/app/qml" --no-translations --no-system-d3d-compiler \
     --no-opengl-sw "$stage/Burrow.exe"
 
+# MSYS2's Qt looks for QML modules under share/qt6/qml next to Qt6Core.dll; windeployqt puts them in qml\ and the
+# plugins next to Burrow.exe. Without this file the app can't load its interface ("module ... is not installed").
+printf '[Paths]\nPrefix = .\nPlugins = .\nQmlImports = qml\n' > "$stage/qt.conf"
+
 # Every DLL that Burrow, Qt's plugins and those DLLs load from MSYS2 or the deps prefix (FreeRDP, OpenSSL,
 # openconnect, the MinGW runtime...), until nothing new turns up. Windows' own DLLs stay out.
 export PATH="$PREFIX/bin:/ucrt64/bin:$PATH"

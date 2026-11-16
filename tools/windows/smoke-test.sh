@@ -25,16 +25,25 @@ done
 [ "$missing" = 0 ] || exit 1
 echo "All DLLs are packaged."
 
-export BURROW_VAULT="$(cygpath -w "$work/vault/vault.json")" QT_QPA_PLATFORM=offscreen
-PATH="$app:/c/Windows/System32" "$app/Burrow.exe" > "$work/out.log" 2>&1 &
-pid=$!
-sleep 15
-if kill -0 "$pid" 2>/dev/null; then
-    kill "$pid" 2>/dev/null || true
-    echo "Burrow started and kept running."
-    exit 0
-fi
-wait "$pid" && code=0 || code=$?
-echo "::error::Burrow quit at start (exit code $code)"
-cat "$work/out.log"
-exit 1
+# Twice: offscreen (no GPU or desktop needed), then with the real Windows platform plugin and graphics, as a user
+# starts it. Each run must still be going after a while.
+run() {
+    label=$1
+    rm -rf "$work/vault" "$work/out.log"
+    BURROW_VAULT="$(cygpath -w "$work/vault/vault.json")" QT_FORCE_STDERR_LOGGING=1 \
+        PATH="$app:/c/Windows/System32" "$app/Burrow.exe" > "$work/out.log" 2>&1 &
+    pid=$!
+    sleep 15
+    if kill -0 "$pid" 2>/dev/null; then
+        kill "$pid" 2>/dev/null || true
+        echo "Burrow started and kept running ($label)."
+        return 0
+    fi
+    wait "$pid" && code=0 || code=$?
+    echo "::error::Burrow quit at start ($label, exit code $code)"
+    cat "$work/out.log"
+    powershell.exe -NoProfile -Command "Get-WinEvent -FilterHashtable @{LogName='Application'; Id=1000,1026} -MaxEvents 2 -ErrorAction SilentlyContinue | Format-List TimeCreated, Message"
+    return 1
+}
+QT_QPA_PLATFORM=offscreen run offscreen
+QT_QPA_PLATFORM= run windows

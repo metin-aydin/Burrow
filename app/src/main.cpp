@@ -13,6 +13,7 @@
 #include <QWindow>
 
 #include "app/AppController.h"
+#include "app/LogFile.h"
 #include "app/PreviewProvider.h"
 #include "app/Tray.h"
 #include "rdp/RdpView.h"
@@ -58,6 +59,7 @@ private:
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);   // QApplication: the tray menu uses widgets on every platform
+    LogFile::installIfNoConsole();
     useBundledOpenSslModules();
     QGuiApplication::setApplicationName(QStringLiteral("Burrow"));
     QGuiApplication::setApplicationDisplayName(QStringLiteral("Burrow"));
@@ -90,6 +92,7 @@ int main(int argc, char *argv[])
     // Closing the window keeps Burrow in the menu bar / tray; Quit is in the tray menu (and Cmd+Q).
     // The vault auto-locks after inactivity (Settings → Auto-Lock), so a hidden window isn't left unlocked.
     QGuiApplication::setQuitOnLastWindowClosed(false);
+    WindowChrome::dockIconFollowsWindows();
     ActivityFilter activity(&controller);
     app.installEventFilter(&activity);
     Tray tray(&controller);

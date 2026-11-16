@@ -18,6 +18,8 @@ qt_add_executable(burrow
     src/app/AppController.h
     src/app/ListModels.cpp
     src/app/ListModels.h
+    src/app/LogFile.cpp
+    src/app/LogFile.h
     src/app/PreviewProvider.cpp
     src/app/PreviewProvider.h
     src/app/Tray.cpp
