@@ -1,22 +1,53 @@
 #include "app/Tray.h"
 
 #include <QApplication>
+#include <QColor>
+#include <QFile>
+#include <QPainter>
+#include <QPixmap>
+#include <QSvgRenderer>
 #include <QIcon>
 #include <QTimer>
 #include <QWindow>
 
 #include "app/AppController.h"
 
+namespace {
+// Renders a line icon (drawn in black) in another colour, at the sizes panels ask for.
+[[maybe_unused]] QIcon monochromeIcon(const QString &path, const QColor &color)
+{
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly))
+        return {};
+    QByteArray svg = f.readAll();
+    svg.replace("#000", color.name().toLatin1());
+    QSvgRenderer renderer(svg);
+    QIcon icon;
+    for (int size : {16, 22, 24, 32, 48, 64}) {
+        QPixmap pixmap(size, size);
+        pixmap.fill(Qt::transparent);
+        QPainter painter(&pixmap);
+        renderer.render(&painter);
+        painter.end();
+        icon.addPixmap(pixmap);
+    }
+    return icon;
+}
+} // namespace
+
 Tray::Tray(AppController *app, QObject *parent)
     : QObject(parent)
     , m_app(app)
 {
-    // A monochrome template icon on macOS (adapts to light/dark menu bars), the color logo elsewhere.
-#ifdef Q_OS_MACOS
+    // The tunnel mark alone, in one colour: a template icon on macOS (adapts to light/dark menu bars), white on Linux
+    // (GNOME's and Ubuntu's top bar is dark in both themes); the colour logo on Windows.
+#if defined(Q_OS_MACOS)
     QIcon icon(QStringLiteral(":/qt/qml/Burrow/qml/icons/tunnel.svg"));
     icon.setIsMask(true);
-#else
+#elif defined(Q_OS_WIN)
     QIcon icon(QStringLiteral(":/qt/qml/Burrow/resources/icons/256x256.png"));
+#else
+    QIcon icon = monochromeIcon(QStringLiteral(":/qt/qml/Burrow/qml/icons/tunnel.svg"), QColor(Qt::white));
 #endif
     m_icon.setIcon(icon);
     m_icon.setToolTip(QStringLiteral("Burrow"));
