@@ -2,6 +2,11 @@
 
 En yeni kayıt en üstte.
 
+## 2026-11-16
+
+- **v0.2.1 yayımlandı** (PR #5): Windows'ta açılmama (qt.conf) ve macOS başlık/Dock düzeltmeleri. Varlıklar tam;
+  `latest.json` 0.2.1, Windows setup.exe SHA-256'sı manifestle eşleşti. Windows'ta gerçek kurulumla açılış kullanıcıda.
+
 ## 2026-11-15
 
 - **Windows 0.2.0 kurulunca açılmıyordu → düzeltildi.** CI'daki duman testi yalnız `offscreen` ile açıyordu; gerçek
