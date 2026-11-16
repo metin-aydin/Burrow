@@ -96,8 +96,22 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           LD_LIBRARY_PATH: /home/runner/burrow-deps/freerdp/lib
         run: cd build && ctest --output-on-failure
-      - name: AppImage
+      - name: AppImage and deb
         run: tools/package-appimage.sh build 0.0.0-ci /home/runner/burrow-deps
+      # Installs the .deb the way a user does (apt pulls its dependencies) and starts Burrow from it.
+      - name: Install and start the deb
+        run: |
+          sudo apt-get install -y -q ./dist/burrow_0.0.0-ci_amd64.deb
+          export QT_QPA_PLATFORM=offscreen BURROW_VAULT="$RUNNER_TEMP/deb-vault/vault.json"
+          burrow > "$RUNNER_TEMP/deb.log" 2>&1 &
+          pid=$!
+          sleep 15
+          if ! kill -0 "$pid" 2>/dev/null; then
+            echo "::error::Burrow from the deb quit at start"; cat "$RUNNER_TEMP/deb.log"; exit 1
+          fi
+          kill "$pid"
+          echo "Burrow from the deb started and kept running."
+          sudo apt-get remove -y -q burrow
 
   windows:
     name: Windows build

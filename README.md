@@ -100,20 +100,28 @@ Get the latest version from the [Releases](https://github.com/metin-aydin/Burrow
 | Platform | File | Updates |
 | --- | --- | --- |
 | macOS 13 or later (Apple Silicon) | `Burrow-<version>-mac-arm64.dmg` | In the app |
-| Ubuntu 24.04 or later (x86-64), early build | `Burrow-<version>-linux-x64.AppImage` | From the Releases page |
+| Ubuntu 24.04 or later (x86-64), early build | `burrow_<version>_amd64.deb` or `Burrow-<version>-linux-x64.AppImage` | From the Releases page |
 | Windows 10 or later (x86-64), early build | `Burrow-<version>-windows-x64-setup.exe` (or `-portable.zip`) | In the app (installer only) |
 
 On macOS, open the `.dmg` and drag **Burrow** to Applications. The app is signed with Developer ID and notarized
 by Apple.
 
-On Ubuntu, make the AppImage executable and run it:
+On Ubuntu, install the `.deb` with apt, which also installs what it needs from Ubuntu; Burrow then appears in the
+app menu and `burrow` starts it from a terminal:
+
+```bash
+sudo apt install ./burrow_*_amd64.deb
+```
+
+Or make the AppImage executable and run it, without installing:
 
 ```bash
 chmod +x Burrow-*-linux-x64.AppImage
 ./Burrow-*-linux-x64.AppImage
 ```
 
-If it does not start, install FUSE 2 (`sudo apt install libfuse2t64`). The Linux build does not update itself yet.
+If the AppImage does not start, install FUSE 2 (`sudo apt install libfuse2t64`). The Linux build does not update
+itself yet.
 
 On Windows, run the setup file: it installs Burrow for your user only (no administrator rights) and adds Start menu
 and desktop shortcuts. The Windows build is not code-signed yet, so SmartScreen may warn about an unknown publisher:
