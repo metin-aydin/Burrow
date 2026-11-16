@@ -4,6 +4,10 @@ En yeni kayıt en üstte.
 
 ## 2026-11-16
 
+- **GitHub varsayılan dalı `master` yapıldı** (kullanıcının isteği, `gh repo edit --default-branch`). Bedeli kullanıcıya
+  söylendi ve kabul edildi: "recent pushes" şeridi artık `development` push'larından sonra çıkıyor; yeni PR'lar
+  varsayılan olarak `master`'ı hedefliyor. CLAUDE.md, ADR 0002 ve github-settings güncellendi. Günlük iş `development`'ta.
+
 - **`master` yalnız `development`'tan PR alacak:** kullanıcı istedi. Kural seti PR zorunlu tutuyordu ama kaynak dalı
   denetlemiyordu. `release-source.yml` eklendi; zorunlu kontrole bir sonraki release'ten sonra eklenecek
   (project-release-flow). Şimdiye kadarki iki release de zaten `development` → `master` PR'ıydı (#3, #5).
