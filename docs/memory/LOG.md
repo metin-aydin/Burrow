@@ -4,6 +4,9 @@ En yeni kayıt en üstte.
 
 ## 2026-11-16
 
+- **v0.3.0 yayımlandı** (PR #7): ilk Ubuntu `.deb` (`burrow_0.3.0_amd64.deb` + sha256) ve Linux tek renk tepsi simgesi.
+  `Release source` kontrolü bu PR'da ilk kez çalıştı ve geçti.
+
 - **Ubuntu .deb + Linux tek renk tepsi simgesi** (kullanıcının istekleri). `tools/package-deb.sh`, AppImage'ın AppDir'ini
   JumpDesk'teki gibi `/opt/burrow`'a koyar (`/usr/bin/burrow` bağlantısı, menü girdisi, ikon); Qt/FreeRDP/openconnect
   paket içinde, Ubuntu kütüphaneleri `dpkg -S` ile bulunup `Depends`'e yazılır. CI deb'i apt ile kurup Xvfb'de açıyor
