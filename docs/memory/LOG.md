@@ -2,6 +2,25 @@
 
 En yeni kayıt en üstte.
 
+## 2026-11-16
+
+- **Windows'ta GP "Failed to open HTTPS connection" → düzeltildi.** libopenconnect OpenSSL ile derlenmişti; OpenSSL güvenilir
+  sertifikaları derleme makinesinin MSYS2 klasöründe arıyor, kullanıcı PC'sinde hiçbir sunucu doğrulanamıyordu (Burrow
+  sertifika hatasında asla kabul etmez). Artık GnuTLS ile derleniyor (Windows sertifika deposunu okur; Linux/macOS
+  openconnect'i de GnuTLS'li). Duman testi paketteki GnuTLS'in sertifika okuduğunu denetliyor (CI: 567 sertifika).
+  Ayrıca sertifika reddi mesajı artık sonraki genel hatanın altında kaybolmuyor. Gerçek GP bağlantısı kullanıcıda.
+
+- **GitHub varsayılan dalı `master` yapıldı** (kullanıcının isteği, `gh repo edit --default-branch`). Bedeli kullanıcıya
+  söylendi ve kabul edildi: "recent pushes" şeridi artık `development` push'larından sonra çıkıyor; yeni PR'lar
+  varsayılan olarak `master`'ı hedefliyor. CLAUDE.md, ADR 0002 ve github-settings güncellendi. Günlük iş `development`'ta.
+
+- **`master` yalnız `development`'tan PR alacak:** kullanıcı istedi. Kural seti PR zorunlu tutuyordu ama kaynak dalı
+  denetlemiyordu. `release-source.yml` eklendi; zorunlu kontrole bir sonraki release'ten sonra eklenecek
+  (project-release-flow). Şimdiye kadarki iki release de zaten `development` → `master` PR'ıydı (#3, #5).
+
+- **v0.2.1 yayımlandı** (PR #5): Windows'ta açılmama (qt.conf) ve macOS başlık/Dock düzeltmeleri. Varlıklar tam;
+  `latest.json` 0.2.1, Windows setup.exe SHA-256'sı manifestle eşleşti. Windows'ta gerçek kurulumla açılış kullanıcıda.
+
 ## 2026-11-15
 
 - **Windows 0.2.0 kurulunca açılmıyordu → düzeltildi.** CI'daki duman testi yalnız `offscreen` ile açıyordu; gerçek

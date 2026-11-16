@@ -5,7 +5,10 @@
 - Kullanıcının Apple Developer Program hesabı var → imzalama + notarization zorunlu.
 
 ## Branch modeli
-- `development`: varsayılan branch, günlük geliştirme (doğrudan push serbest, silme/zorla push kapalı).
+- `development`: günlük geliştirme (doğrudan push serbest, silme/zorla push kapalı).
+- **Varsayılan dal `master`** (2026-11-16, kullanıcının isteği): "master had recent pushes" şeridi release
+  merge'lerinden sonra çıkmasın diye. Bedeli: şerit artık `development` push'larından sonra çıkar ve GitHub'da yeni
+  PR'lar varsayılan olarak `master`'ı hedefler (Release source kontrolü `development` dışı kaynağı reddeder).
 - `master`: sadece release. Yalnızca `development` → `master` PR merge'ü ile güncellenir (PR zorunlu, CI
   kontrolleri zorunlu, zorla push/silme kapalı). `v*` etiketleri silinemez/güncellenemez.
   (JumpDesk/UPaste'te dal adı `main`; Burrow'da CLAUDE.md gereği `master`.)

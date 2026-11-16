@@ -5,6 +5,7 @@
 # Usage (MSYS2 UCRT64): tools/windows/smoke-test.sh dist/Burrow-<version>-windows-x64-portable.zip
 set -eu
 zip=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
+here=$(cd "$(dirname "$0")" && pwd)
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 cd "$work"
@@ -24,6 +25,13 @@ for f in $(find "$app" -iname '*.exe' -o -iname '*.dll'); do
 done
 [ "$missing" = 0 ] || exit 1
 echo "All DLLs are packaged."
+
+# The packaged GnuTLS must find Windows' trusted certificates, or every VPN server is rejected.
+gcc -O2 -o "$work/trust-check.exe" "$here/trust-check.c" $(pkg-config --cflags --libs gnutls)
+if ! PATH="$app:/c/Windows/System32" "$work/trust-check.exe"; then
+    echo "::error::The packaged GnuTLS can't read Windows' certificate store."
+    exit 1
+fi
 
 # Twice: offscreen (no GPU or desktop needed), then with the real Windows platform plugin and graphics, as a user
 # starts it. Each run must still be going after a while.

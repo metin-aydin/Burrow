@@ -63,6 +63,7 @@ type Tunnel struct {
 	passwordForms int
 	lastOTP       string
 	lastError     string
+	certRejected  bool // the certificate message is the cause; later generic errors don't replace it
 	otpCh         chan string
 	done          chan struct{}
 	closing       bool
@@ -444,7 +445,9 @@ func (t *Tunnel) selectChoice(opt *C.struct_oc_form_opt, want string) bool {
 
 func (t *Tunnel) setError(msg string) {
 	t.mu.Lock()
-	t.lastError = msg
+	if !t.certRejected {
+		t.lastError = msg
+	}
 	t.mu.Unlock()
 }
 
@@ -525,6 +528,9 @@ func goGPProgress(h C.uintptr_t, level C.int, msg *C.char) {
 func goGPCertRejected(h C.uintptr_t, reason *C.char) {
 	if t := fromHandle(h); t != nil {
 		t.setError("The VPN server's certificate isn't trusted: " + C.GoString(reason))
+		t.mu.Lock()
+		t.certRejected = true
+		t.mu.Unlock()
 	}
 }
 

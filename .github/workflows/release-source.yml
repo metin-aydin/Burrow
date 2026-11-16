@@ -1,0 +1,28 @@
+# master only takes pull requests from development (ADR 0002). Rulesets can require a pull request but can't limit
+# where it comes from, so this check fails for any other source branch and is a required check on master.
+# pull_request_target runs the workflow as it is on master, so a pull request can't edit the check to pass; nothing
+# from the pull request is checked out or run.
+name: Release source
+
+on:
+  pull_request_target:
+    branches: [master]
+    types: [opened, reopened, synchronize, edited]
+
+permissions: {}
+
+jobs:
+  source:
+    name: Release source
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull request comes from development
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          if [ "$HEAD_REF" != development ] || [ "$HEAD_REPO" != "$GITHUB_REPOSITORY" ]; then
+            echo "::error::master only takes pull requests from this repository's development branch (got $HEAD_REPO:$HEAD_REF)."
+            exit 1
+          fi
+          echo "OK: $HEAD_REPO:$HEAD_REF"

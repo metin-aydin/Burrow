@@ -46,7 +46,8 @@ type: user | feedback | project | reference
 
 - GitHub işlemleri (repo oluşturma, PR, issue, release vb.) **GitHub MCP** üzerinden yapılır.
   `gh` CLI kurulumu veya tarayıcıdan işlem önerilmez/sorulmaz.
-- Branch'ler: `development` (varsayılan, günlük iş) ve `master` (sadece release).
+- Branch'ler: `development` (günlük iş; tüm commit'ler buraya) ve `master` (GitHub'daki varsayılan dal, sadece release).
+  Varsayılan dal 2026-11-16'da kullanıcının isteğiyle `master` yapıldı; günlük iş yine `development`'ta yapılır.
   `master` yalnızca `development` → `master` PR merge'üyle güncellenir.
 - Commit mesajları **Conventional Commits** formatında (`feat:`, `fix:`, `feat!:` …); sürüm
   numarası bunlardan otomatik hesaplanır. Ayrıntı: `docs/decisions/0002-release-and-auto-update.md`.

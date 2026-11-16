@@ -15,11 +15,11 @@ p=mingw-w64-ucrt-x86_64
 pacman -S --needed --noconfirm \
     $p-gcc $p-cmake $p-ninja $p-pkgconf $p-ntldd $p-nsis \
     $p-qt6-base $p-qt6-declarative $p-qt6-svg $p-qt6-multimedia $p-qt6-tools $p-qt6-translations \
-    $p-freerdp $p-openssl $p-zlib $p-libxml2 $p-lz4 \
+    $p-freerdp $p-openssl $p-gnutls $p-zlib $p-libxml2 $p-lz4 \
     autoconf automake libtool make patch zip
 
 # The stamp names the version and the patch, so changing either rebuilds.
-stamp="$PREFIX/.openconnect-$OPENCONNECT_VERSION-$(sha256sum "$HERE/windows/openconnect-pipe-tun.patch" | cut -c1-12)"
+stamp="$PREFIX/.openconnect-$OPENCONNECT_VERSION-gnutls-$(sha256sum "$HERE/windows/openconnect-pipe-tun.patch" | cut -c1-12)"
 if [ -f "$stamp" ]; then
     echo "libopenconnect $OPENCONNECT_VERSION is already in $PREFIX"
     exit 0
@@ -35,8 +35,10 @@ tar xzf oc.tar.gz
 cd "openconnect-$OPENCONNECT_VERSION"
 patch -p1 < "$HERE/windows/openconnect-pipe-tun.patch"
 # Only the library is built: Burrow drives it in-process and never runs a vpnc-script, so the script
-# path is a placeholder (configure insists on one). OpenSSL rather than GnuTLS: Burrow already ships it.
-./configure --prefix="$PREFIX" --with-openssl --without-gnutls --with-vpnc-script=burrow-none.js \
+# path is a placeholder (configure insists on one). GnuTLS, not OpenSSL: on Windows GnuTLS checks the server's
+# certificate against Windows' own certificate store, while OpenSSL would look in the build machine's MSYS2 folder,
+# which users don't have, and every VPN server would be rejected ("Failed to open HTTPS connection").
+./configure --prefix="$PREFIX" --with-gnutls --without-openssl --with-vpnc-script=burrow-none.js \
     --disable-nls --disable-docs --without-libproxy --without-stoken --without-libpskc --without-libpcsclite \
     --without-gssapi --without-java --disable-dsa-tests
 make -j"$(nproc)" libopenconnect.la
