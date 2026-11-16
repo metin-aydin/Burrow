@@ -4,6 +4,10 @@ En yeni kayıt en üstte.
 
 ## 2026-11-16
 
+- **`master` yalnız `development`'tan PR alacak:** kullanıcı istedi. Kural seti PR zorunlu tutuyordu ama kaynak dalı
+  denetlemiyordu. `release-source.yml` eklendi; zorunlu kontrole bir sonraki release'ten sonra eklenecek
+  (project-release-flow). Şimdiye kadarki iki release de zaten `development` → `master` PR'ıydı (#3, #5).
+
 - **v0.2.1 yayımlandı** (PR #5): Windows'ta açılmama (qt.conf) ve macOS başlık/Dock düzeltmeleri. Varlıklar tam;
   `latest.json` 0.2.1, Windows setup.exe SHA-256'sı manifestle eşleşti. Windows'ta gerçek kurulumla açılış kullanıcıda.
 

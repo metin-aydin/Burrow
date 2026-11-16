@@ -31,6 +31,12 @@ Windows (2026-11-15, ADR 0010): kullanıcı "JumpDesk'te nasılsa her şey aynı
 (`-setup.exe`, kullanıcı başına) + taşınabilir zip; `latest.json`'da `windows-x64` = setup.exe; güncelleme SHA-256 +
 (uygulama imzalıysa) aynı Authenticode yayıncısı, sessiz kurulum `/S /RELAUNCH /WAITPID=`. Windows sertifikası yok.
 
+Kaynak dal kuralı (2026-11-16, kullanıcı: "master'a sadece development'tan merge edilebilsin"): kural seti PR'ın kaynağını
+sınırlayamıyor → `.github/workflows/release-source.yml` (`pull_request_target`, master'daki hali çalışır, PR'dan kod
+çalıştırmaz) kaynak `development` değilse düşer. **Bekleyen adım:** bu dosya master'a ilk girdiği release'ten SONRA
+`Release source`'u master kural setinin zorunlu kontrollerine ekle (`gh api` PUT rulesets/27312719); önce eklenirse o
+release PR'ı kontrolü hiç alamadığı için kilitlenir.
+
 Henüz yapılmayan:
 Intel paketi; Linux uygulama içi güncellemesi (JumpDesk'te AppImage de güncelleniyor); Windows kod imzalama.
 
