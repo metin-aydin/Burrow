@@ -4,6 +4,13 @@ En yeni kayıt en üstte.
 
 ## 2026-11-16
 
+- **Ubuntu .deb + Linux tek renk tepsi simgesi** (kullanıcının istekleri). `tools/package-deb.sh`, AppImage'ın AppDir'ini
+  JumpDesk'teki gibi `/opt/burrow`'a koyar (`/usr/bin/burrow` bağlantısı, menü girdisi, ikon); Qt/FreeRDP/openconnect
+  paket içinde, Ubuntu kütüphaneleri `dpkg -S` ile bulunup `Depends`'e yazılır. CI deb'i apt ile kurup Xvfb'de açıyor
+  (pakette offscreen eklentisi yok; ilk deneme bu yüzden düştü). Release'e `burrow_<v>_amd64.deb` + sha256 eklendi.
+  Linux tepsi simgesi artık beyaz tünel işareti (Ubuntu üst çubuğu koyu). **0.2.2 yayımlandı** (Windows GP sertifika
+  düzeltmesi); `Release source` zorunlu kontrollere eklendi.
+
 - **Windows'ta GP "Failed to open HTTPS connection" → düzeltildi.** libopenconnect OpenSSL ile derlenmişti; OpenSSL güvenilir
   sertifikaları derleme makinesinin MSYS2 klasöründe arıyor, kullanıcı PC'sinde hiçbir sunucu doğrulanamıyordu (Burrow
   sertifika hatasında asla kabul etmez). Artık GnuTLS ile derleniyor (Windows sertifika deposunu okur; Linux/macOS
