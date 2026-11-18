@@ -79,9 +79,14 @@ jobs:
     strategy:
       matrix:
         include:
-          # Apple Silicon. Intel joins when that port lands; Linux and Windows have their own jobs below.
+          # Apple Silicon and Intel, each built natively with its own Homebrew; Linux and Windows have their
+          # own jobs below.
           - os: macos-15
             platform: mac-arm64
+            arch: arm64
+          - os: macos-15-intel
+            platform: mac-x64
+            arch: x86_64
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
@@ -110,7 +115,7 @@ jobs:
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$(brew --prefix freerdp)" \
-            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
             -DBURROW_VERSION=${{ needs.prepare.outputs.version }}
           cmake --build build
           (cd build && ctest --output-on-failure)

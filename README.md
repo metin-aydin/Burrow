@@ -100,6 +100,7 @@ Get the latest version from the [Releases](https://github.com/metin-aydin/Burrow
 | Platform | File | Updates |
 | --- | --- | --- |
 | macOS 13 or later (Apple Silicon) | `Burrow-<version>-mac-arm64.dmg` | In the app |
+| macOS 13 or later (Intel) | `Burrow-<version>-mac-x64.dmg` | In the app |
 | Ubuntu 24.04 or later (x86-64), early build | `burrow_<version>_amd64.deb` or `Burrow-<version>-linux-x64.AppImage` | From the Releases page |
 | Windows 10 or later (x86-64), early build | `Burrow-<version>-windows-x64-setup.exe` (or `-portable.zip`) | In the app (installer only) |
 

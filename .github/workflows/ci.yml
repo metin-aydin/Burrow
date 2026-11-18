@@ -62,6 +62,24 @@ jobs:
           python3 .github/scripts/i18n-check.py app/i18n/*.ts
           git diff --exit-code -- app/i18n || (echo "::error::Run the Burrow_lupdate target and commit app/i18n"; exit 1)
 
+  # Intel Macs get their own package (the release builds it on the same runner); this keeps that build working.
+  macos-intel:
+    name: macOS Intel build
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: netcore/go.mod
+      - name: Install dependencies
+        run: brew install cmake ninja qt freerdp openconnect
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$(brew --prefix freerdp)"
+      - name: Build
+        run: cmake --build build
+      - name: Tests
+        run: cd build && ctest --output-on-failure
+
   linux:
     name: Linux build
     runs-on: ubuntu-24.04

@@ -4,6 +4,9 @@ En yeni kayıt en üstte.
 
 ## 2026-11-19
 
+- **Intel Mac paketi:** release matrisine `macos-15-intel` (`mac-x64`, `CMAKE_OSX_ARCHITECTURES=x86_64`, kendi
+  Homebrew'u) eklendi; CI'a "macOS Intel build" işi. Güncelleyici `mac-x64` anahtarını zaten tanıyordu. OpenSSL
+  araması Intel Homebrew'u (`/usr/local`) da buluyor.
 - **Klasör ve yazıcı paylaşımı (RDP):** cihaz başına, yalnız Windows hedefte görünür, varsayılan kapalı. Klasör
   `freerdp_client_add_device_channel("drive", ad, yol)` ile tek klasör; `FreeRDP_RedirectDrives` bilerek kullanılmıyor
   (tüm sürücüleri paylaşır). Yazıcılar `"printer"` (adsız = hepsi, CUPS). Sekme adı "Sharing And Keyboard".
