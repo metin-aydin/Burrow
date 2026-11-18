@@ -187,7 +187,7 @@ jobs:
           path: fragment-${{ matrix.platform }}.json
 
   # Linux: an AppImage and a .deb that carry Qt, FreeRDP and openconnect (Ubuntu 24.04 baseline, so they run on
-  # 24.04 and newer). No update manifest entry yet: in-app updates on Linux follow later.
+  # 24.04 and newer). Both the AppImage and the .deb update in the app.
   linux:
     needs: prepare
     if: github.ref == 'refs/heads/master'
@@ -217,10 +217,23 @@ jobs:
         run: |
           tools/package-appimage.sh build ${{ needs.prepare.outputs.version }} /opt/burrow-deps
           cd dist && for f in *.AppImage *.deb; do sha256sum "$f" > "$f.sha256"; done
+      # In-app updates: the AppImage replaces itself, a .deb install upgrades through apt (Updater::installLinux).
+      - name: Update manifest fragment
+        run: |
+          v=${{ needs.prepare.outputs.version }}
+          entry() { printf '"%s": {"name": "%s", "sha256": "%s", "size": %s}' "$1" "$2" \
+                      "$(sha256sum "dist/$2" | cut -d' ' -f1)" "$(stat -c %s "dist/$2")"; }
+          printf '{%s, %s}\n' "$(entry linux-x64 "Burrow-$v-linux-x64.AppImage")" \
+            "$(entry linux-x64-deb "burrow_${v}_amd64.deb")" > fragment-linux-x64.json
+          cat fragment-linux-x64.json
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "v${{ needs.prepare.outputs.version }}" dist/*.AppImage dist/*.deb dist/*.sha256 --clobber
+      - uses: actions/upload-artifact@v7
+        with:
+          name: fragment-linux-x64
+          path: fragment-linux-x64.json
 
   # Windows (ADR 0010, same shape as JumpDesk): a per-user NSIS installer, which is also the in-app update
   # package, and a portable zip. Unsigned for now: when a code signing certificate arrives, a signing step

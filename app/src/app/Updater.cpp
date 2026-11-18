@@ -4,6 +4,8 @@
 #include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
+#include <cstdio>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkAccessManager>
@@ -94,16 +96,36 @@ bool Updater::supported() const
     // doesn't update itself, as with JumpDesk.
     return QFile::exists(QDir(QCoreApplication::applicationDirPath()).filePath(QStringLiteral("uninstall.exe")));
 #else
-    return false; // Ubuntu (AppImage/deb) follows.
+    // An AppImage replaces itself (APPIMAGE is the running file); a .deb install is upgraded through apt.
+    return appImagePath().size() > 0 || debInstalled();
 #endif
 }
 
+#if !defined(Q_OS_MACOS) && !defined(Q_OS_WIN)
+QString Updater::appImagePath()
+{
+    const QString p = qEnvironmentVariable("APPIMAGE");
+    return p.endsWith(QLatin1String(".AppImage")) && QFileInfo(p).isFile() ? p : QString();
+}
+
+bool Updater::debInstalled()
+{
+    // The package installs to /opt/burrow (tools/package-deb.sh) and dpkg knows it.
+    return QCoreApplication::applicationDirPath() == QLatin1String("/opt/burrow/bin")
+        && QFile::exists(QStringLiteral("/var/lib/dpkg/info/burrow.list"));
+}
+#endif
+
 QString Updater::assetName(const QString &version)
 {
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN)
     return QStringLiteral("Burrow-%1-%2-setup.exe").arg(version, platformKey());
-#else
+#elif defined(Q_OS_MACOS)
     return QStringLiteral("Burrow-%1-%2.zip").arg(version, platformKey());
+#else
+    if (platformKey() == QLatin1String("linux-x64-deb"))
+        return QStringLiteral("burrow_%1_amd64.deb").arg(version);
+    return QStringLiteral("Burrow-%1-%2.AppImage").arg(version, platformKey());
 #endif
 }
 
@@ -115,7 +137,8 @@ QString Updater::platformKey()
 #elif defined(Q_OS_WIN)
     return QStringLiteral("windows-x64");
 #else
-    return QStringLiteral("linux-x64");
+    // The manifest lists the AppImage and the .deb separately: each copy updates in its own format.
+    return appImagePath().isEmpty() && debInstalled() ? QStringLiteral("linux-x64-deb") : QStringLiteral("linux-x64");
 #endif
 }
 
@@ -256,8 +279,67 @@ void Updater::install()
         return;
     }
     QCoreApplication::quit();
+#else
+    const QString err = installLinux();
+    if (!err.isEmpty()) {
+        setState(QStringLiteral("error"), err);
+        return;
+    }
+    QCoreApplication::quit();
 #endif
 }
+
+#if !defined(Q_OS_MACOS) && !defined(Q_OS_WIN)
+// Linux packages aren't code-signed: the SHA-256 from the release manifest (fetched over HTTPS from GitHub)
+// is the check, made in onDownloaded before this runs.
+QString Updater::installLinux()
+{
+    const QString appImage = appImagePath();
+    if (!appImage.isEmpty()) {
+        // The new AppImage goes next to the running one under a temporary name, then replaces it with a
+        // rename (the running copy keeps working from its open file) and starts.
+        const QFileInfo target(appImage);
+        if (!QFileInfo(target.absolutePath()).isWritable())
+            return tr("Burrow can't write to %1. Download the new version from GitHub.").arg(target.absolutePath());
+        const QString temp = target.absolutePath() + QStringLiteral("/.burrow-update-%1.AppImage").arg(QCoreApplication::applicationPid());
+        QFile::remove(temp);
+        if (!QFile::copy(m_downloadPath, temp))
+            return tr("Couldn't save the update.");
+        QFile::setPermissions(temp, QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner
+                                        | QFileDevice::ReadGroup | QFileDevice::ExeGroup
+                                        | QFileDevice::ReadOther | QFileDevice::ExeOther);
+        if (::rename(QFile::encodeName(temp).constData(), QFile::encodeName(appImage).constData()) != 0) {
+            QFile::remove(temp);
+            return tr("Couldn't replace Burrow with the new version.");
+        }
+        QFile::remove(m_downloadPath);
+        if (!QProcess::startDetached(appImage, {}))
+            return tr("The update is installed; start Burrow again.");
+        return {};
+    }
+    if (debInstalled()) {
+        // apt installs the package (and anything it newly depends on); pkexec asks for the administrator
+        // password in the desktop's own dialog. A detached helper waits for Burrow to quit, so nothing of
+        // the old version is in use, and starts the new one.
+        const QString script = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QStringLiteral("/install-update.sh");
+        QFile s(script);
+        if (!s.open(QIODevice::WriteOnly | QIODevice::Truncate))
+            return tr("Couldn't prepare the update.");
+        s.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
+        s.write(QStringLiteral(
+            "#!/bin/sh\n"
+            "# $1 = the verified .deb\n"
+            "while kill -0 %1 2>/dev/null; do sleep 0.3; done\n"
+            "pkexec /usr/bin/apt-get install -y --allow-downgrades \"$1\" && rm -f \"$1\"\n"
+            "exec /opt/burrow/bin/burrow\n").arg(QCoreApplication::applicationPid()).toUtf8());
+        s.close();
+        if (!QProcess::startDetached(QStringLiteral("/bin/sh"), {script, m_downloadPath}))
+            return tr("Couldn't start the update.");
+        return {};
+    }
+    return tr("This copy of Burrow can't update itself. Download the new version from GitHub.");
+}
+#endif
 
 QString Updater::installMac()
 {

@@ -1555,6 +1555,22 @@
         <translation>Güncelleme kaydedilemedi.</translation>
     </message>
     <message>
+        <source>Burrow can&apos;t write to %1. Download the new version from GitHub.</source>
+        <translation>Burrow %1 klasörüne yazamıyor. Yeni sürümü GitHub&apos;dan indir.</translation>
+    </message>
+    <message>
+        <source>Couldn&apos;t replace Burrow with the new version.</source>
+        <translation>Burrow yeni sürümle değiştirilemedi.</translation>
+    </message>
+    <message>
+        <source>The update is installed; start Burrow again.</source>
+        <translation>Güncelleme kuruldu; Burrow&apos;u yeniden başlat.</translation>
+    </message>
+    <message>
+        <source>This copy of Burrow can&apos;t update itself. Download the new version from GitHub.</source>
+        <translation>Burrow&apos;un bu kopyası kendini güncelleyemiyor. Yeni sürümü GitHub&apos;dan indir.</translation>
+    </message>
+    <message>
         <source>Burrow isn&apos;t running from an app bundle, so it can&apos;t update itself.</source>
         <translation>Burrow bir uygulama paketinden çalışmadığı için kendini güncelleyemiyor.</translation>
     </message>

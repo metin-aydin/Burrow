@@ -38,7 +38,7 @@ sınırlayamıyor → `.github/workflows/release-source.yml` (`pull_request_targ
 Değiştirilirse: yeni hali ancak master'a girdikten sonra çalışır (pull_request_target).
 
 Henüz yapılmayan:
-Intel paketi; Linux uygulama içi güncellemesi (deb ve AppImage) (JumpDesk'te AppImage de güncelleniyor); Windows kod imzalama.
+Windows kod imzalama. (Intel paketi ve Linux uygulama içi güncellemesi 2026-11-19'da eklendi.)
 
 **Nasıl uygulanır:** Yeni CI işi eklenince dal korumasındaki zorunlu kontrol listesini de güncelle.
 Bkz. [[feedback-github-via-mcp]], [[project-github-meta]].

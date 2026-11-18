@@ -4,6 +4,11 @@ En yeni kayıt en üstte.
 
 ## 2026-11-19
 
+- **Linux uygulama içi güncelleme:** AppImage (`$APPIMAGE`) yeni dosyayı yanına yazıp `rename` ile kendinin yerine
+  koyar ve yeniden başlar; .deb kurulumu (`/opt/burrow/bin` + `/var/lib/dpkg/info/burrow.list`) yardımcı betikle
+  Burrow kapanınca `pkexec apt-get install` çalıştırır. Manifest anahtarları `linux-x64` (AppImage) ve
+  `linux-x64-deb`; release'in Linux işi fragment üretiyor. İmza yok, yalnız SHA-256 (Windows imzasız durumu gibi).
+  Gerçek Ubuntu'da denenmedi; ilk deneme bir sonraki iki release arasında olabilir.
 - **Intel Mac paketi:** release matrisine `macos-15-intel` (`mac-x64`, `CMAKE_OSX_ARCHITECTURES=x86_64`, kendi
   Homebrew'u) eklendi; CI'a "macOS Intel build" işi. Güncelleyici `mac-x64` anahtarını zaten tanıyordu. OpenSSL
   araması Intel Homebrew'u (`/usr/local`) da buluyor.
