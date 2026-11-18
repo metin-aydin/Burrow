@@ -709,6 +709,7 @@ QString AppController::startSession(const Model::Device &dev, const QString &use
     p.domain = dev.domain;
     p.keyMap = dev.keyMap;
     p.clipboard = dev.clipboard;
+    p.audio = dev.audio;
     // Start at the size the session window opens with; the view then follows the window. By default
     // the remote desktop gets the Mac's logical size, so text is as large as in Mac apps; "Retina"
     // sends physical pixels with a 200 % scale hint (sharper, but servers that ignore the hint show

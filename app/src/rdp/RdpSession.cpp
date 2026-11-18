@@ -431,6 +431,11 @@ void RdpSession::run()
         setMonitorDefs(s, rects, m_p.scale, true);
     }
     freerdp_settings_set_bool(s, FreeRDP_RedirectClipboard, m_clip->enabled() ? TRUE : FALSE);
+    // Sound: AudioPlayback loads the rdpsnd channel (static and dynamic), played through the platform's
+    // backend (Core Audio, PulseAudio, WinMM); RemoteConsoleAudio asks the server to keep playing it
+    // there; neither tells the server not to play sound at all.
+    freerdp_settings_set_bool(s, FreeRDP_AudioPlayback, m_p.audio == QLatin1String("local") ? TRUE : FALSE);
+    freerdp_settings_set_bool(s, FreeRDP_RemoteConsoleAudio, m_p.audio == QLatin1String("remote") ? TRUE : FALSE);
     // Only NLA/TLS: legacy "RDP security" has no server authentication, so a man in the middle could
     // bypass the certificate pin. Servers that offer only that are refused.
     freerdp_settings_set_bool(s, FreeRDP_RdpSecurity, FALSE);

@@ -25,7 +25,7 @@ BDialog {
         savePw.checked = !!d.savePassword; pwField.text = d.password || ""; autoLogin.checked = !!d.autoLogin
         sessionCombo.value = d.sessionMode || "existing"; lockSw.checked = d.lockOnDisconnect !== false
         onDisc.value = "keep_locked"; clipCombo.value = d.clipboard || "both"
-        keyCombo.value = d.keyMap || "shortcuts"
+        keyCombo.value = d.keyMap || "shortcuts"; audioCombo.value = d.audio || "local"
         displaysCombo.value = d.displays || "window"; retinaSw.checked = !!d.retina
         error = ""
         tab = "general"; tabSeg.value = "general"   // a click breaks the binding, so reset both
@@ -34,6 +34,7 @@ BDialog {
     }
 
     function demoMac() { osSeg.value = "macos" }   // development (--seed-demo, BURROW_DEMO_OPEN=device-mac)
+    function demoSession() { osSeg.value = "ubuntu"; tab = "session"; tabSeg.value = "session" }   // BURROW_DEMO_OPEN=device-session
 
     function save() {
         const m = Object.assign({}, d, {
@@ -43,7 +44,7 @@ BDialog {
             savePassword: savePw.checked, password: savePw.checked ? pwField.text : "",
             autoLogin: savePw.checked && autoLogin.checked,
             lockOnDisconnect: lockSw.checked, onDisconnect: onDisc.value,
-            sessionMode: sessionCombo.value, clipboard: clipCombo.value, keyMap: keyCombo.value,
+            sessionMode: sessionCombo.value, clipboard: clipCombo.value, keyMap: keyCombo.value, audio: audioCombo.value,
             displays: displaysCombo.value, retina: retinaSw.checked
         })
         const err = App.saveDevice(m)
@@ -164,6 +165,16 @@ BDialog {
                       { text: qsTr("Start a new session"), value: "new" },
                       { text: qsTr("Ask every time"), value: "ask" }]
             value: root.d.sessionMode || "existing"
+        }
+        BCombo {
+            id: audioCombo
+            visible: !root.isMac
+            Layout.fillWidth: true
+            label: qsTr("Sound")
+            options: [{ text: qsTr("Play on this computer"), value: "local" },
+                      { text: qsTr("Play on the remote computer"), value: "remote" },
+                      { text: qsTr("Off"), value: "off" }]
+            value: root.d.audio || "local"
         }
         BSwitch {
             id: lockSw

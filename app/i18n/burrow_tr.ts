@@ -95,13 +95,13 @@
         <translation>Tünel üzerinden bağlantı açılamadı.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="840"/>
+        <location filename="../src/app/AppController.cpp" line="841"/>
         <source>The profile name can&apos;t be empty.</source>
         <translation>Profil adı boş olamaz.</translation>
     </message>
     <message>
         <location filename="../src/app/AppController.cpp" line="451"/>
-        <location filename="../src/app/AppController.cpp" line="844"/>
+        <location filename="../src/app/AppController.cpp" line="845"/>
         <source>Server and username can&apos;t be empty.</source>
         <translation>Sunucu ve kullanıcı adı boş olamaz.</translation>
     </message>
@@ -111,47 +111,47 @@
         <translation>Test için bir cihaz host adı gir.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="847"/>
+        <location filename="../src/app/AppController.cpp" line="848"/>
         <source>The OTP key is invalid.</source>
         <translation>OTP anahtarı geçersiz.</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="889"/>
+        <location filename="../src/app/AppController.cpp" line="890"/>
         <source>Direct (No Tunnel)</source>
         <translation>Doğrudan (Tünelsiz)</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="923"/>
+        <location filename="../src/app/AppController.cpp" line="924"/>
         <source>Invalid key</source>
         <translation>Geçersiz anahtar</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="978"/>
+        <location filename="../src/app/AppController.cpp" line="979"/>
         <source>Company VPN</source>
         <translation>Şirket VPN</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="983"/>
+        <location filename="../src/app/AppController.cpp" line="984"/>
         <source>Home Network</source>
         <translation>Ev Ağı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="991"/>
+        <location filename="../src/app/AppController.cpp" line="992"/>
         <source>Work PC</source>
         <translation>İş Bilgisayarı</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="992"/>
+        <location filename="../src/app/AppController.cpp" line="993"/>
         <source>Meeting Room</source>
         <translation>Toplantı Odası</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="993"/>
+        <location filename="../src/app/AppController.cpp" line="994"/>
         <source>Home Desktop</source>
         <translation>Ev Masaüstü</translation>
     </message>
     <message>
-        <location filename="../src/app/AppController.cpp" line="994"/>
+        <location filename="../src/app/AppController.cpp" line="995"/>
         <source>Lab Server</source>
         <translation>Laboratuvar</translation>
     </message>
@@ -442,117 +442,133 @@
         <translation>Her bağlantıda sor</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="171"/>
+        <location filename="../qml/DeviceEditor.qml" line="172"/>
+        <source>Sound</source>
+        <translation>Ses</translation>
+    </message>
+    <message>
+        <location filename="../qml/DeviceEditor.qml" line="173"/>
+        <source>Play on this computer</source>
+        <translation>Bu bilgisayarda çal</translation>
+    </message>
+    <message>
+        <location filename="../qml/DeviceEditor.qml" line="174"/>
+        <source>Play on the remote computer</source>
+        <translation>Uzak bilgisayarda çal</translation>
+    </message>
+    <message>
+        <location filename="../qml/DeviceEditor.qml" line="181"/>
         <source>Lock When Disconnected</source>
         <translation>Bağlantı Kapanınca Kilitle</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="172"/>
+        <location filename="../qml/DeviceEditor.qml" line="182"/>
         <source>Burrow locks the Mac (Control+Command+Q) before closing the connection.</source>
         <translation>Burrow bağlantıyı kapatmadan önce Mac&apos;i kilitler (Control+Command+Q).</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="173"/>
+        <location filename="../qml/DeviceEditor.qml" line="183"/>
         <source>Burrow locks the remote computer (Win+L / Super+L) before closing the connection.</source>
         <translation>Burrow bağlantıyı kapatmadan önce uzak bilgisayarı kilitler (Win+L / Super+L).</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="180"/>
+        <location filename="../qml/DeviceEditor.qml" line="190"/>
         <source>Displays</source>
         <translation>Ekranlar</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="181"/>
+        <location filename="../qml/DeviceEditor.qml" line="191"/>
         <source>One monitor</source>
         <translation>Tek monitör</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="182"/>
+        <location filename="../qml/DeviceEditor.qml" line="192"/>
         <source>One monitor per Mac display</source>
         <translation>Her Mac ekranı için bir monitör</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="191"/>
+        <location filename="../qml/DeviceEditor.qml" line="201"/>
         <source>Each remote monitor opens as a tab. Drag a tab onto another display to give it its own window; Burrow remembers where you put it. Ubuntu&apos;s screen sharing shows only its main monitor; use Remote Login on Ubuntu to get several.</source>
         <translation>Her uzak monitör bir sekme olarak açılır. Bir sekmeyi başka bir ekrana sürükleyerek ayrı pencerede açabilirsin; Burrow nereye koyduğunu hatırlar. Ubuntu&apos;nun ekran paylaşımı yalnızca ana monitörü gösterir; birden fazlası için Ubuntu&apos;da Uzaktan Oturum Açma&apos;yı kullan.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="197"/>
+        <location filename="../qml/DeviceEditor.qml" line="207"/>
         <source>Retina Resolution</source>
         <translation>Retina Çözünürlüğü</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="198"/>
+        <location filename="../qml/DeviceEditor.qml" line="208"/>
         <source>Sharper, but text looks smaller if the remote computer doesn&apos;t scale its display.</source>
         <translation>Daha keskin, ancak uzak bilgisayar ekranını ölçeklemiyorsa yazılar daha küçük görünür.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="213"/>
+        <location filename="../qml/DeviceEditor.qml" line="223"/>
         <source>Clipboard Sharing</source>
         <translation>Pano Paylaşımı</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="214"/>
+        <location filename="../qml/DeviceEditor.qml" line="224"/>
         <source>Both directions</source>
         <translation>Çift yönlü</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="215"/>
+        <location filename="../qml/DeviceEditor.qml" line="225"/>
         <source>Only from this computer to remote</source>
         <translation>Sadece bu bilgisayardan uzağa</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="216"/>
+        <location filename="../qml/DeviceEditor.qml" line="226"/>
         <source>Only from remote to this computer</source>
         <translation>Sadece uzaktan bu bilgisayara</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="217"/>
+        <location filename="../qml/DeviceEditor.qml" line="175"/>
+        <location filename="../qml/DeviceEditor.qml" line="227"/>
         <source>Off</source>
         <translation>Kapalı</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="226"/>
+        <location filename="../qml/DeviceEditor.qml" line="236"/>
         <source>Over VNC only text is shared: files can&apos;t be copied to or from a Mac.</source>
         <translation>VNC üzerinden yalnızca metin paylaşılır: Mac&apos;e ya da Mac&apos;ten dosya kopyalanamaz.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="227"/>
+        <location filename="../qml/DeviceEditor.qml" line="237"/>
         <source>Covers text, images and files. Files from the remote computer are saved on this computer first, up to 2 GB at a time.</source>
         <translation>Metin, görsel ve dosyaları kapsar. Uzak bilgisayardan gelen dosyalar önce bu bilgisayara kaydedilir (bir seferde en fazla 2 GB).</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="235"/>
+        <location filename="../qml/DeviceEditor.qml" line="245"/>
         <source>Keys reach the Mac as they are: Cmd stays Cmd.</source>
         <translation>Tuşlar Mac&apos;e olduğu gibi gider: Cmd, Cmd olarak kalır.</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="242"/>
+        <location filename="../qml/DeviceEditor.qml" line="252"/>
         <source>Mac Shortcuts</source>
         <translation>Mac Kısayolları</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="243"/>
+        <location filename="../qml/DeviceEditor.qml" line="253"/>
         <source>Translate shortcuts (Cmd+C → Ctrl+C)</source>
         <translation>Kısayolları çevir (Cmd+C → Ctrl+C)</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="244"/>
+        <location filename="../qml/DeviceEditor.qml" line="254"/>
         <source>Swap Cmd ↔ Ctrl completely</source>
         <translation>Cmd ↔ Ctrl tamamen yer değiştir</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="245"/>
+        <location filename="../qml/DeviceEditor.qml" line="255"/>
         <source>Off (keys as they are)</source>
         <translation>Kapalı (tuşlar olduğu gibi)</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="261"/>
+        <location filename="../qml/DeviceEditor.qml" line="271"/>
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../qml/DeviceEditor.qml" line="262"/>
+        <location filename="../qml/DeviceEditor.qml" line="272"/>
         <source>Save</source>
         <translation>Kaydet</translation>
     </message>

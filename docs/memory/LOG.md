@@ -31,6 +31,14 @@ En yeni kayıt en üstte.
 - **v0.2.1 yayımlandı** (PR #5): Windows'ta açılmama (qt.conf) ve macOS başlık/Dock düzeltmeleri. Varlıklar tam;
   `latest.json` 0.2.1, Windows setup.exe SHA-256'sı manifestle eşleşti. Windows'ta gerçek kurulumla açılış kullanıcıda.
 
+## 2026-11-18
+
+- **RDP sesi:** kullanıcı Mac'ten Ubuntu'ya bağlanırken ses gelmediğini söyledi. Sebep: Burrow `rdpsnd` kanalını hiç
+  açmıyordu (Homebrew FreeRDP'de `rdpsnd_mac` var). Cihaz başına "Ses" ayarı eklendi (local/remote/off →
+  `FreeRDP_AudioPlayback` / `RemoteConsoleAudio`); Linux FreeRDP derlemesinde PulseAudio açıldı (`libpulse-dev`).
+  Gerçek Ubuntu bağlantısıyla henüz denenmedi. Demo kancası `BURROW_DEMO_OPEN=device-session`.
+- Dependabot uyarıları ve otomatik güvenlik güncellemeleri açıldı (`gh api`), açık uyarı yok.
+
 ## 2026-11-15
 
 - **Windows 0.2.0 kurulunca açılmıyordu → düzeltildi.** CI'daki duman testi yalnız `offscreen` ile açıyordu; gerçek

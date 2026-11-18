@@ -119,6 +119,7 @@ ApplicationWindow {
         onTriggered: {
             if (App.demoOpen === "device") deviceEditor.openFor(App.gallery.count ? "" : "")
             else if (App.demoOpen === "device-mac") { deviceEditor.openFor(""); deviceEditor.demoMac() }
+            else if (App.demoOpen === "device-session") { deviceEditor.openFor(""); deviceEditor.demoSession() }
             else if (App.demoOpen === "tunnels") tunnels.open()
             else if (App.demoOpen === "settings") settings.open()
             else if (App.demoOpen === "combo") { settings.open(); Qt.callLater(settings.demoCombo) }

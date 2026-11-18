@@ -70,6 +70,7 @@ struct Device
     QString sessionMode = QStringLiteral("existing");      // existing | new | ask
     QString clipboard = QStringLiteral("both");            // both | off | to_remote | to_local
     QString keyMap = QStringLiteral("shortcuts");          // shortcuts | swap | off
+    QString audio = QStringLiteral("local");               // local | remote | off (RDP sound)
     QString displays = QStringLiteral("all");              // all (one monitor per Mac display, as tabs) | window
     bool retina = false;     // send the Mac's physical pixels (sharper, but needs remote scaling)
     QJsonObject layout;      // last multi-monitor layout (SPEC §5.1)
