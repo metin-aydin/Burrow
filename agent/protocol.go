@@ -2,8 +2,10 @@
 // screen before Burrow shares it over GNOME's Desktop Sharing, keeps the office monitor off meanwhile and
 // locks the screen again when Burrow leaves or goes quiet.
 //
-// Wire format: one JSON line per TCP connection, request then reply. Both carry an HMAC-SHA256 with the
-// key made at pairing, so the agent only obeys Burrow and Burrow knows it talks to its agent.
+// Wire format, one exchange per TCP connection, each message one JSON line: the agent sends a random
+// challenge, Burrow sends a command signed together with that challenge (HMAC-SHA256 with the key made at
+// pairing), the agent replies, signed the same way. A recorded command is useless on any later connection,
+// even after the agent restarts, and Burrow knows it talks to its own agent.
 package agent
 
 import (
@@ -13,7 +15,6 @@ import (
 	"encoding/base32"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -23,10 +24,6 @@ import (
 const (
 	KeySize     = 32
 	DefaultPort = 47391
-	// MaxSkew is how far a request's clock may be from ours; NonceMemory outlives it, so a request
-	// can't be replayed while its time stamp is still accepted.
-	MaxSkew     = 60 * time.Second
-	NonceMemory = 2 * MaxSkew
 )
 
 // Commands Burrow sends.
@@ -36,12 +33,16 @@ const (
 	CmdEnd   = "end"   // lock, turn the monitor on
 )
 
+// Challenge is the agent's first line on every connection.
+type Challenge struct {
+	V         int    `json:"v"`
+	Challenge string `json:"challenge"`
+}
+
 type Request struct {
-	V     int    `json:"v"`
-	Cmd   string `json:"cmd"`
-	TS    int64  `json:"ts"`
-	Nonce string `json:"nonce"`
-	MAC   string `json:"mac"`
+	V   int    `json:"v"`
+	Cmd string `json:"cmd"`
+	MAC string `json:"mac"`
 }
 
 type Reply struct {
@@ -91,67 +92,43 @@ func mac(key []byte, parts ...string) string {
 	return hex.EncodeToString(m.Sum(nil))
 }
 
-// RequestMAC and ReplyMAC are domain-separated so a reply can never pass as a request.
-func RequestMAC(key []byte, cmd string, ts int64, nonce string) string {
-	return mac(key, "burrow-agent/1 request", cmd, strconv.FormatInt(ts, 10), nonce)
+// RequestMAC and ReplyMAC bind a message to the connection's challenge, and are domain-separated so a
+// reply can never pass as a request.
+func RequestMAC(key []byte, cmd, challenge string) string {
+	return mac(key, "burrow-agent/2 request", cmd, challenge)
 }
 
-func ReplyMAC(key []byte, cmd, nonce string, ok bool) string {
-	return mac(key, "burrow-agent/1 reply", cmd, nonce, strconv.FormatBool(ok))
+func ReplyMAC(key []byte, cmd, challenge string, ok bool) string {
+	return mac(key, "burrow-agent/2 reply", cmd, challenge, strconv.FormatBool(ok))
 }
 
-// NewRequest builds a signed request (Burrow's side; also used by tests and `burrow-agent test`).
-func NewRequest(key []byte, cmd string, now time.Time) Request {
+// NewChallenge makes a connection's challenge: 16 random bytes in hex.
+func NewChallenge() string {
 	n := make([]byte, 16)
 	_, _ = rand.Read(n)
-	nonce := hex.EncodeToString(n)
-	ts := now.Unix()
-	return Request{V: 1, Cmd: cmd, TS: ts, Nonce: nonce, MAC: RequestMAC(key, cmd, ts, nonce)}
+	return hex.EncodeToString(n)
 }
 
-// Verifier checks requests: MAC, clock skew and nonce reuse.
-type Verifier struct {
-	key  []byte
-	mu   sync.Mutex
-	seen map[string]time.Time
+// NewRequest builds a request signed for a challenge (Burrow's side; also used by tests).
+func NewRequest(key []byte, cmd, challenge string) Request {
+	return Request{V: 2, Cmd: cmd, MAC: RequestMAC(key, cmd, challenge)}
 }
-
-func NewVerifier(key []byte) *Verifier { return &Verifier{key: key, seen: map[string]time.Time{}} }
 
 var (
-	ErrBadMAC   = errors.New("bad signature")
-	ErrStale    = errors.New("request time is off by more than a minute")
-	ErrReplayed = errors.New("request was already used")
-	ErrBadCmd   = errors.New("unknown command")
+	ErrBadMAC = errors.New("bad signature")
+	ErrBadCmd = errors.New("unknown command")
 )
 
-func (v *Verifier) Check(r Request, now time.Time) error {
-	if r.V != 1 || len(r.Nonce) != 32 {
-		return ErrBadMAC
-	}
-	if !hmac.Equal([]byte(r.MAC), []byte(RequestMAC(v.key, r.Cmd, r.TS, r.Nonce))) {
+// Check verifies a request against the challenge this connection was given.
+func Check(key []byte, r Request, challenge string) error {
+	if r.V != 2 || !hmac.Equal([]byte(r.MAC), []byte(RequestMAC(key, r.Cmd, challenge))) {
 		return ErrBadMAC
 	}
 	switch r.Cmd {
 	case CmdStart, CmdBeat, CmdEnd:
-	default:
-		return ErrBadCmd
+		return nil
 	}
-	if d := now.Sub(time.Unix(r.TS, 0)); d > MaxSkew || d < -MaxSkew {
-		return ErrStale
-	}
-	v.mu.Lock()
-	defer v.mu.Unlock()
-	for n, t := range v.seen {
-		if now.Sub(t) > NonceMemory {
-			delete(v.seen, n)
-		}
-	}
-	if _, used := v.seen[r.Nonce]; used {
-		return ErrReplayed
-	}
-	v.seen[r.Nonce] = now
-	return nil
+	return ErrBadCmd
 }
 
 // Limiter ignores an address after too many bad signatures in a short time.
@@ -195,5 +172,3 @@ func (l *Limiter) Fail(addr string, now time.Time) {
 		delete(l.fails, addr)
 	}
 }
-
-func (r Request) String() string { return fmt.Sprintf("%s (ts %d)", r.Cmd, r.TS) }

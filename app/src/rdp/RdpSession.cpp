@@ -25,6 +25,8 @@
 #include <winpr/synch.h>
 
 #include "net/LocalSocket.h"
+#include "rdp/AgentLink.h"
+#include <memory>
 
 #include <libnetcore.h>
 
@@ -464,11 +466,29 @@ void RdpSession::run()
     freerdp_settings_set_bool(s, FreeRDP_TlsSecurity, TRUE);
     freerdp_settings_set_bool(s, FreeRDP_NegotiateSecurityLayer, TRUE);
 
+    // Office Screen Helper (Ubuntu, ADR 0003): burrow-agent unlocks the screen first, since GNOME's Desktop
+    // Sharing refuses a locked one, and locks it again when this session ends (the AgentLink going away).
+    std::unique_ptr<AgentLink> agent;
+    QString agentError;
+    if (!m_p.agentKey.isEmpty()) {
+        agent = std::make_unique<AgentLink>(m_p.tunnelHandle, m_p.pinHost.isEmpty() ? m_p.host : m_p.pinHost,
+                                            m_p.agentPort, m_p.agentKey);
+        agentError = agent->send("start");
+        if (agentError.isEmpty()) {
+            qInfo("agent: screen unlocked");
+            agent->startBeats();
+        } else {
+            qWarning("agent: couldn't unlock the screen: %s", qPrintable(agentError));
+        }
+    }
+
     if (!freerdp_connect(instance)) {
         const UINT32 code = freerdp_get_last_error(ctx);
         setState(QStringLiteral("closed"),
                  m_certChanged ? friendlyError(FREERDP_ERROR_CONNECT_CANCELLED)
-                 : m_stop ? QString() : friendlyError(code));
+                 : m_stop ? QString()
+                 : !agentError.isEmpty() ? tr("Couldn't unlock the Ubuntu screen with burrow-agent (%1). Check that it runs there and that the pairing code and port match.").arg(agentError)
+                 : friendlyError(code));
         freerdp_client_context_free(ctx);
         return;
     }
@@ -494,6 +514,7 @@ void RdpSession::run()
     const bool userClosed = m_stop;
     m_instance = nullptr;
     freerdp_disconnect(instance);
+    agent.reset();   // stops the beats and asks the agent to lock the screen
     freerdp_client_context_free(ctx);
     setState(QStringLiteral("closed"),
              userClosed || code == FREERDP_ERROR_SUCCESS ? QString() : friendlyError(code));

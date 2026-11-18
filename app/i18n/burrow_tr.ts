@@ -261,6 +261,10 @@
         <translation>Oturum</translation>
     </message>
     <message>
+        <source>The pairing code isn&apos;t valid. Run burrow-agent install on the Ubuntu computer and copy the code it shows.</source>
+        <translation>Eşleştirme kodu geçerli değil. Ubuntu bilgisayarda burrow-agent install komutunu çalıştırıp gösterdiği kodu kopyala.</translation>
+    </message>
+    <message>
         <source>Name</source>
         <translation>Ad</translation>
     </message>
@@ -391,6 +395,30 @@
     <message>
         <source>Sharper, but text looks smaller if the remote computer doesn&apos;t scale its display.</source>
         <translation>Daha keskin, ancak uzak bilgisayar ekranını ölçeklemiyorsa yazılar daha küçük görünür.</translation>
+    </message>
+    <message>
+        <source>Office Screen</source>
+        <translation>Ofis Ekranı</translation>
+    </message>
+    <message>
+        <source>Office Screen Helper</source>
+        <translation>Ofis Ekranı Yardımcısı</translation>
+    </message>
+    <message>
+        <source>burrow-agent on the Ubuntu computer unlocks its screen when you connect, keeps its monitor off and locks the screen again when you leave. While you&apos;re connected the screen there is unlocked: someone at that desk who moves the mouse sees it for a few seconds.</source>
+        <translation>Ubuntu bilgisayardaki burrow-agent, bağlandığında ekranın kilidini açar, monitörü kapalı tutar ve ayrıldığında ekranı yeniden kilitler. Sen bağlıyken oradaki ekran kilitsizdir: o masada fareyi oynatan biri birkaç saniyeliğine görür.</translation>
+    </message>
+    <message>
+        <source>Pairing Code</source>
+        <translation>Eşleştirme Kodu</translation>
+    </message>
+    <message>
+        <source>Shown by burrow-agent install on the Ubuntu computer.</source>
+        <translation>Ubuntu bilgisayarda burrow-agent install komutu gösterir.</translation>
+    </message>
+    <message>
+        <source>Agent Port</source>
+        <translation>Agent Portu</translation>
     </message>
     <message>
         <source>Clipboard Sharing</source>
@@ -830,6 +858,10 @@
     <message>
         <source>Couldn&apos;t start the RDP engine.</source>
         <translation>RDP motoru başlatılamadı.</translation>
+    </message>
+    <message>
+        <source>Couldn&apos;t unlock the Ubuntu screen with burrow-agent (%1). Check that it runs there and that the pairing code and port match.</source>
+        <translation>burrow-agent ile Ubuntu ekranının kilidi açılamadı (%1). Agent&apos;ın orada çalıştığını ve eşleştirme kodu ile portun doğru olduğunu kontrol et.</translation>
     </message>
 </context>
 <context>

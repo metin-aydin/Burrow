@@ -46,6 +46,8 @@ qt_add_executable(burrow
     src/rdp/RdpClipboard.cpp
     src/rdp/RdpClipboard.h
     src/rdp/RdpSession.cpp
+    src/rdp/AgentLink.cpp
+    src/rdp/AgentLink.h
     src/rdp/RdpSession.h
     src/rdp/RemoteSession.h
     src/vnc/VncSession.cpp
@@ -141,7 +143,7 @@ if(Qt6Test_FOUND)
         src/rdp/RdpClipboard.cpp src/rdp/RdpClipboard.h
         src/app/AppController.cpp src/app/AppController.h src/app/ListModels.cpp src/app/ListModels.h
         src/app/PreviewProvider.cpp src/app/PreviewProvider.h src/app/TunnelManager.cpp src/app/TunnelManager.h
-        src/rdp/RdpSession.cpp src/rdp/RdpSession.h src/rdp/RemoteSession.h src/net/LocalSocket.cpp src/net/LocalSocket.h src/vnc/VncSession.cpp src/vnc/VncSession.h src/vnc/AppleAdaptive.cpp src/vnc/AppleAdaptive.h src/rdp/FreeRdpEngine.cpp src/rdp/FreeRdpEngine.h src/rdp/RdpEngine.h)
+        src/rdp/RdpSession.cpp src/rdp/RdpSession.h src/rdp/AgentLink.cpp src/rdp/AgentLink.h src/rdp/RemoteSession.h src/net/LocalSocket.cpp src/net/LocalSocket.h src/vnc/VncSession.cpp src/vnc/VncSession.h src/vnc/AppleAdaptive.cpp src/vnc/AppleAdaptive.h src/rdp/FreeRdpEngine.cpp src/rdp/FreeRdpEngine.h src/rdp/RdpEngine.h)
     target_compile_definitions(tst_vault PRIVATE BURROW_DEMO_ASSETS="${CMAKE_SOURCE_DIR}/docs/assets/demo")
     target_compile_definitions(tst_vault PRIVATE BURROW_TEST_DATA="${CMAKE_CURRENT_SOURCE_DIR}/tests"
                                                  BURROW_VERSION="${PROJECT_VERSION}")

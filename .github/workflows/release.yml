@@ -226,7 +226,9 @@ jobs:
       - name: Package
         run: |
           tools/package-appimage.sh build ${{ needs.prepare.outputs.version }} /opt/burrow-deps
-          cd dist && for f in *.AppImage *.deb; do sha256sum "$f" > "$f.sha256"; done
+          # burrow-agent (ADR 0003) for the Ubuntu computers Burrow connects to: static, no C dependencies.
+          (cd agent && CGO_ENABLED=0 go build -trimpath -ldflags=-s -o ../dist/burrow-agent-linux-x64 ./cmd/burrow-agent)
+          cd dist && for f in *.AppImage *.deb burrow-agent-linux-x64; do sha256sum "$f" > "$f.sha256"; done
       # In-app updates: the AppImage replaces itself, a .deb install upgrades through apt (Updater::installLinux).
       - name: Update manifest fragment
         run: |
@@ -239,7 +241,7 @@ jobs:
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "v${{ needs.prepare.outputs.version }}" dist/*.AppImage dist/*.deb dist/*.sha256 --clobber
+        run: gh release upload "v${{ needs.prepare.outputs.version }}" dist/*.AppImage dist/*.deb dist/burrow-agent-linux-x64 dist/*.sha256 --clobber
       - uses: actions/upload-artifact@v7
         with:
           name: fragment-linux-x64

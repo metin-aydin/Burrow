@@ -52,11 +52,16 @@ Ubuntu cihazı tanımlarken görünür, kapatılabilir; kapalıyken Burrow agent
   şifreli saklanır. `burrow-agent pair` yeni anahtar üretir (eskisi geçersiz olur), `uninstall` kaldırır.
 - **Ağ:** TCP 47391 (değiştirilebilir), tüm arayüzler: ofis bilgisayarı VPN/Tailscale ile LAN adresinden
   erişiliyor, ADR'nin "yalnız tünel arayüzü" fikri uygulanamaz; güvenlik kimlik doğrulamadan gelir.
-- **Kimlik doğrulama (ADR'deki anahtar çifti yerine):** ortak anahtarla HMAC-SHA256, iki yönlü. İstek
-  `cmd`, `ts`, `nonce`, `mac`; yanıt istek nonce'una bağlı ayrı bir MAC taşır (Burrow da agent'ı doğrular). Anahtar
-  çiftinin buradaki tek artısı (Ubuntu'da yalnız açık anahtar durması) anlamsız: anahtar dosyasını okuyabilen zaten
-  o oturumun sahibi. Tekrar saldırısına karşı ±60 sn zaman damgası + 2 dk nonce belleği; bir adresten dakikada 5
-  hatalı MAC → o adres 5 dk yok sayılır.
+- **Kimlik doğrulama (ADR'deki anahtar çifti yerine):** ortak anahtarla HMAC-SHA256, iki yönlü ve bağlantıya
+  bağlı: agent her bağlantıda tek kullanımlık rastgele bir değer (challenge) gönderir, Burrow komutu onunla birlikte
+  imzalar, agent'ın yanıtı da aynı değerle imzalıdır (Burrow agent'ı doğrular). Kaydedilmiş bir komut sonraki hiçbir
+  bağlantıda, agent yeniden başlasa bile, işe yaramaz (ilk tasarımdaki zaman damgası + nonce belleği, yeniden
+  başlatmada tekrar penceresi bıraktığı için güvenlik incelemesi üzerine değiştirildi). Anahtar çiftinin buradaki
+  tek artısı (Ubuntu'da yalnız açık anahtar durması) anlamsız: anahtar dosyasını okuyabilen zaten o oturumun
+  sahibi. Bir adresten dakikada 5 hatalı imza → o adres 5 dk yok sayılır; hatalı imzaya yanıt verilmez.
+- **Güvenli tarafta kalma:** kilit başarısız olursa her 2 sn yeniden denenir ve o arada monitör kapalı tutulur;
+  servis durdurulurken açık oturum kilitlenir; oturum sürerken çöken agent yeniden açılınca (durum dosyası
+  `~/.config/burrow-agent/session`) ekranı kilitler.
 - **Komutlar:** `start` (kilidi aç, monitörü kapat, 20 sn'lik kira başlat), `beat` (kirayı uzat; Burrow 5 sn'de bir
   gönderir), `end` (kilitle, monitörü aç). Kira dolarsa (bağlantı koptu, Mac uyudu) agent kilitler ve monitörü açar.
   Bağlıyken agent 2 sn'de bir monitörün kapalı olduğunu denetler, uyandıysa yeniden kapatır.

@@ -14,6 +14,7 @@ BDialog {
     // Macs are reached over VNC (Screen Sharing, ADR 0008); everything else over RDP.
     readonly property bool isMac: osSeg.value === "macos"
     readonly property bool isWindows: osSeg.value === "windows"
+    readonly property bool isUbuntu: osSeg.value === "ubuntu"
     property string folderPath: ""   // the folder picked for sharing (kept while the switch is off)
 
     function openFor(id) {
@@ -30,6 +31,7 @@ BDialog {
         onDisc.value = "keep_locked"; clipCombo.value = d.clipboard || "both"
         keyCombo.value = d.keyMap || "shortcuts"; audioCombo.value = d.audio || "local"
         folderSw.checked = !!d.sharedFolder; folderPath = d.sharedFolder || ""; printerSw.checked = !!d.sharePrinters
+        helperSw.checked = !!d.officeHelper; agentCodeField.text = d.agentCode || ""; agentPortField.text = String(d.agentPort || 47391)
         displaysCombo.value = d.displays || "window"; retinaSw.checked = !!d.retina
         error = ""
         tab = "general"; tabSeg.value = "general"   // a click breaks the binding, so reset both
@@ -39,7 +41,7 @@ BDialog {
 
     function demoMac() { osSeg.value = "macos" }   // development (--seed-demo, BURROW_DEMO_OPEN=device-mac)
     function demoSharing() { osSeg.value = "windows"; tab = "input"; tabSeg.value = "input"; folderPath = "/Users/demo/Projects"; folderSw.checked = true; printerSw.checked = true }   // BURROW_DEMO_OPEN=device-sharing
-    function demoSession() { osSeg.value = "ubuntu"; tab = "session"; tabSeg.value = "session" }   // BURROW_DEMO_OPEN=device-session
+    function demoSession() { osSeg.value = "ubuntu"; tab = "session"; tabSeg.value = "session"; helperSw.checked = true; agentCodeField.text = "AAAQ-EAYE-AUDA-OCAJ-BIFQ-YDIO-B4IB-CEQT-CQKR-MFYY-DENB-WHA5-DYPQ" }   // BURROW_DEMO_OPEN=device-session
 
     function save() {
         const m = Object.assign({}, d, {
@@ -51,8 +53,16 @@ BDialog {
             lockOnDisconnect: lockSw.checked, onDisconnect: onDisc.value,
             sessionMode: sessionCombo.value, clipboard: clipCombo.value, keyMap: keyCombo.value, audio: audioCombo.value,
             sharedFolder: isWindows && folderSw.checked ? folderPath : "", sharePrinters: isWindows && printerSw.checked,
-            displays: displaysCombo.value, retina: retinaSw.checked
+            displays: displaysCombo.value, retina: retinaSw.checked,
+            // The Office Screen Helper exists only for Ubuntu devices (the user's rule); the code stays saved.
+            officeHelper: isUbuntu && helperSw.checked, agentCode: agentCodeField.text.trim(),
+            agentPort: parseInt(agentPortField.text) || 47391
         })
+        if (m.officeHelper && !App.validAgentCode(m.agentCode)) {
+            error = qsTr("The pairing code isn't valid. Run burrow-agent install on the Ubuntu computer and copy the code it shows.")
+            tab = "session"; tabSeg.value = "session"
+            return
+        }
         const err = App.saveDevice(m)
         if (err) { error = err; tab = "general"; tabSeg.value = "general"; return }
         close()
@@ -214,6 +224,35 @@ BDialog {
             title: qsTr("Retina Resolution")
             description: qsTr("Sharper, but text looks smaller if the remote computer doesn't scale its display.")
             checked: !!root.d.retina
+        }
+
+        // Office Screen Helper (ADR 0003): Ubuntu only, off unless switched on here.
+        SectionTitle { visible: root.isUbuntu; text: qsTr("Office Screen") }
+        BSwitch {
+            id: helperSw
+            visible: root.isUbuntu
+            Layout.fillWidth: true
+            title: qsTr("Office Screen Helper")
+            description: qsTr("burrow-agent on the Ubuntu computer unlocks its screen when you connect, keeps its monitor off and locks the screen again when you leave. While you're connected the screen there is unlocked: someone at that desk who moves the mouse sees it for a few seconds.")
+        }
+        RowLayout {
+            visible: root.isUbuntu && helperSw.checked
+            Layout.fillWidth: true
+            spacing: 10
+            BField {
+                id: agentCodeField
+                Layout.fillWidth: true
+                label: qsTr("Pairing Code")
+                password: true
+                hint: qsTr("Shown by burrow-agent install on the Ubuntu computer.")
+            }
+            BField {
+                id: agentPortField
+                Layout.preferredWidth: 110
+                label: qsTr("Agent Port")
+                field.inputMethodHints: Qt.ImhDigitsOnly
+                field.validator: IntValidator { bottom: 1; top: 65535 }
+            }
         }
         // "Sign out on disconnect" comes later; until then the session is always kept (locked).
         QtObject { id: onDisc; property string value: "keep_locked" }

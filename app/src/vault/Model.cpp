@@ -79,7 +79,8 @@ QJsonObject deviceToJsonImpl(const Device &d)
             {"savePassword", d.savePassword}, {"autoLogin", d.autoLogin},
             {"tunnelId", d.tunnelId}, {"lockOnDisconnect", d.lockOnDisconnect},
             {"onDisconnect", d.onDisconnect}, {"sessionMode", d.sessionMode},
-            {"clipboard", d.clipboard}, {"keyMap", d.keyMap}, {"audio", d.audio}, {"sharedFolder", d.sharedFolder}, {"sharePrinters", d.sharePrinters}, {"displays", d.displays}, {"retina", d.retina},
+            {"clipboard", d.clipboard}, {"keyMap", d.keyMap}, {"audio", d.audio}, {"sharedFolder", d.sharedFolder}, {"sharePrinters", d.sharePrinters},
+            {"officeHelper", d.officeHelper}, {"agentCode", d.agentCode}, {"agentPort", d.agentPort}, {"displays", d.displays}, {"retina", d.retina},
             {"layout", d.layout},
             {"certFingerprint", d.certFingerprint}};
 }
@@ -107,6 +108,9 @@ Device deviceFromJsonImpl(const QJsonObject &o)
     d.audio = o.value("audio").toString(d.audio);
     d.sharedFolder = o.value("sharedFolder").toString();
     d.sharePrinters = o.value("sharePrinters").toBool();
+    d.officeHelper = o.value("officeHelper").toBool();
+    d.agentCode = o.value("agentCode").toString();
+    d.agentPort = o.value("agentPort").toInt(d.agentPort);
     d.displays = o.value("displays").toString(d.displays);
     d.retina = o.value("retina").toBool(d.retina);
     d.layout = o.value("layout").toObject();

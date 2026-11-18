@@ -128,7 +128,8 @@ public:
     // QR codes (authenticator exports): return the decoded text or "".
     Q_INVOKABLE QString decodeQrImage(const QVariant &image) const;   // QImage (e.g. a camera frame grab)
     Q_INVOKABLE QString decodeQrFile(const QUrl &file) const;
-    Q_INVOKABLE QString localPath(const QUrl &url) const;   // a picked file or folder as a path of this OS
+    Q_INVOKABLE QString localPath(const QUrl &url) const;
+    Q_INVOKABLE bool validAgentCode(const QString &code) const;   // a burrow-agent pairing code?   // a picked file or folder as a path of this OS
     Q_INVOKABLE QString decodeQrClipboard() const;
     Q_INVOKABLE QString clipboardText() const;
 

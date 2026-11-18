@@ -6,6 +6,7 @@
 #include "app/AppController.h"
 #include "app/Updater.h"
 #include "net/LocalSocket.h"
+#include "rdp/AgentLink.h"
 #include "rdp/KeyMapper.h"
 #include <QUrl>
 #include "rdp/RdpClipboard.h"
@@ -268,6 +269,41 @@ private slots:
             sent = localsocket::sendSome(fds[0], "x", 1);
         QVERIFY(sent < 0);
         localsocket::close(fds[0]);
+    }
+
+    // Same vector as agent/vector_test.go: Burrow and burrow-agent sign and read pairing codes alike.
+    void agentProtocol()
+    {
+        QByteArray key(32, 0);
+        for (int i = 0; i < 32; ++i)
+            key[i] = char(i);
+        const QString code = QStringLiteral("AAAQ-EAYE-AUDA-OCAJ-BIFQ-YDIO-B4IB-CEQT-CQKR-MFYY-DENB-WHA5-DYPQ");
+        QCOMPARE(AgentLink::keyFromCode(code), key);
+        QCOMPARE(AgentLink::keyFromCode(code.toLower().replace(QLatin1Char('-'), QLatin1Char(' '))), key);
+        QVERIFY(AgentLink::keyFromCode(QStringLiteral("AAAQ-EAYE")).isEmpty());
+        QVERIFY(AgentLink::keyFromCode(code + QStringLiteral("!")).isEmpty());
+        const QString challenge = QStringLiteral("00112233445566778899aabbccddeeff");
+        QCOMPARE(AgentLink::requestMac(key, QStringLiteral("start"), challenge),
+                 QStringLiteral("7c6812ec4944545f6ffb049854f474a54a3df34075e15adf094493e904a6a30a"));
+        QCOMPARE(AgentLink::replyMac(key, QStringLiteral("start"), challenge, true),
+                 QStringLiteral("84d0e3a8d3e7c631e7b73c6962b41faa979564b4520cfda7598c6a02aa80e9b2"));
+    }
+
+    // End to end against a real burrow-agent, when one is given: BURROW_AGENT_TEST=<host>:<port>:<pairing code>
+    // (for example agent/cmd/fake-agent). Skipped otherwise.
+    void agentRoundTrip()
+    {
+        const QStringList t = qEnvironmentVariable("BURROW_AGENT_TEST").split(QLatin1Char(':'));
+        if (t.size() != 3)
+            QSKIP("BURROW_AGENT_TEST not set");
+        const QByteArray key = AgentLink::keyFromCode(t.at(2));
+        QVERIFY(!key.isEmpty());
+        AgentLink link(0, t.at(0), quint16(t.at(1).toInt()), key);
+        QCOMPARE(link.send("start"), QString());
+        QCOMPARE(link.send("beat"), QString());
+        AgentLink wrong(0, t.at(0), quint16(t.at(1).toInt()), QByteArray(32, 'x'));
+        QVERIFY(!wrong.send("end").isEmpty());
+        link.stop();   // sends end
     }
 
     void updaterFlow()

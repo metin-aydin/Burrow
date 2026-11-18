@@ -1,9 +1,12 @@
 package agent
 
 import (
+	"errors"
 	"io"
 	"log"
 	"net"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
@@ -14,6 +17,7 @@ type fakeDesktop struct {
 	mu         sync.Mutex
 	locked     bool
 	monitorOff bool
+	failLock   bool
 	calls      []string
 }
 
@@ -28,6 +32,9 @@ func (f *fakeDesktop) Unlock() error {
 func (f *fakeDesktop) Lock() error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	if f.failLock {
+		return errors.New("lock failed")
+	}
 	f.locked = true
 	f.record("lock")
 	return nil
@@ -64,36 +71,30 @@ func TestPairingCodeRoundTrip(t *testing.T) {
 	}
 }
 
-func TestVerifier(t *testing.T) {
+func TestCheck(t *testing.T) {
 	key, _ := NewKey()
 	other, _ := NewKey()
-	now := time.Unix(1_800_000_000, 0)
-	v := NewVerifier(key)
+	ch := NewChallenge()
 
-	r := NewRequest(key, CmdStart, now)
-	if err := v.Check(r, now); err != nil {
+	if err := Check(key, NewRequest(key, CmdStart, ch), ch); err != nil {
 		t.Fatalf("valid request rejected: %v", err)
 	}
-	if err := v.Check(r, now.Add(time.Second)); err != ErrReplayed {
-		t.Fatalf("replay not caught: %v", err)
+	// A request recorded on one connection is worthless on the next (another challenge).
+	if err := Check(key, NewRequest(key, CmdStart, ch), NewChallenge()); err != ErrBadMAC {
+		t.Fatalf("replay on a new connection accepted: %v", err)
 	}
-	if err := v.Check(NewRequest(other, CmdStart, now), now); err != ErrBadMAC {
+	if err := Check(key, NewRequest(other, CmdStart, ch), ch); err != ErrBadMAC {
 		t.Fatalf("wrong key accepted: %v", err)
 	}
-	if err := v.Check(NewRequest(key, CmdStart, now.Add(-2*time.Minute)), now); err != ErrStale {
-		t.Fatalf("old request accepted: %v", err)
-	}
-	tampered := NewRequest(key, CmdBeat, now)
+	tampered := NewRequest(key, CmdBeat, ch)
 	tampered.Cmd = CmdStart // signed as beat, sent as start
-	if err := v.Check(tampered, now); err != ErrBadMAC {
+	if err := Check(key, tampered, ch); err != ErrBadMAC {
 		t.Fatalf("tampered command accepted: %v", err)
 	}
-	bad := NewRequest(key, "shell", now)
-	if err := v.Check(bad, now); err != ErrBadCmd {
+	if err := Check(key, NewRequest(key, "shell", ch), ch); err != ErrBadCmd {
 		t.Fatalf("unknown command accepted: %v", err)
 	}
-	// A reply MAC never verifies as a request MAC (domain separation).
-	if ReplyMAC(key, CmdStart, r.Nonce, true) == RequestMAC(key, CmdStart, r.TS, r.Nonce) {
+	if ReplyMAC(key, CmdStart, ch, true) == RequestMAC(key, CmdStart, ch) {
 		t.Fatal("reply and request MACs coincide")
 	}
 }
@@ -154,6 +155,53 @@ func TestLeaseLifecycle(t *testing.T) {
 	_ = s.Handle(CmdEnd)
 	if locked, off := d.state(); !locked || off || s.Active() {
 		t.Fatal("end didn't lock")
+	}
+}
+
+func TestFailsClosed(t *testing.T) {
+	key, _ := NewKey()
+	d := &fakeDesktop{locked: true}
+	s := NewServer(key, d, quiet())
+	s.StateFile = filepath.Join(t.TempDir(), "session")
+
+	// A lock that fails is retried, and the monitor stays off until it works.
+	_ = s.Handle(CmdStart)
+	d.mu.Lock()
+	d.failLock = true
+	d.mu.Unlock()
+	_ = s.Handle(CmdEnd)
+	if locked, off := d.state(); locked || !off {
+		t.Fatalf("after a failed lock: locked=%v monitorOff=%v", locked, off)
+	}
+	d.mu.Lock()
+	d.failLock = false
+	d.mu.Unlock()
+	s.Tick()
+	if locked, off := d.state(); !locked || off {
+		t.Fatalf("lock not retried: locked=%v monitorOff=%v", locked, off)
+	}
+
+	// Stopping the agent during a session locks the screen.
+	_ = s.Handle(CmdStart)
+	s.Shutdown()
+	if locked, _ := d.state(); !locked {
+		t.Fatal("shutdown left the screen unlocked")
+	}
+
+	// An agent that died mid-session locks the screen when it starts again.
+	_ = s.Handle(CmdStart)
+	if _, err := os.Stat(s.StateFile); err != nil {
+		t.Fatal("no state file during a session")
+	}
+	d2 := &fakeDesktop{}
+	again := NewServer(key, d2, quiet())
+	again.StateFile = s.StateFile
+	again.Recover()
+	if locked, _ := d2.state(); !locked {
+		t.Fatal("restart after a crash didn't lock")
+	}
+	if _, err := os.Stat(s.StateFile); !os.IsNotExist(err) {
+		t.Fatal("state file left behind after locking")
 	}
 }
 

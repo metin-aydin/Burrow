@@ -17,8 +17,10 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"github.com/metin-aydin/Burrow/agent"
 )
@@ -144,6 +146,35 @@ func printCode(key []byte, port int) {
 	fmt.Printf("Keep the code private: with it and access to this network, someone could unlock this screen.\n")
 }
 
+// serve runs the service. Stopping it (systemd sends SIGTERM) closes the listener, and Serve then locks
+// an open session; a session left open by a crash is locked when the service starts again.
+func serve(port int) error {
+	key, err := readKey()
+	if err != nil {
+		return err
+	}
+	logger := log.New(os.Stderr, "", 0)
+	srv := agent.NewServer(key, agent.GNOME{}, logger)
+	srv.StateFile = filepath.Join(configDir(), "session")
+	srv.Recover()
+	l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	if err != nil {
+		return err
+	}
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGTERM, syscall.SIGINT)
+	go func() {
+		<-sig
+		logger.Printf("stopping")
+		l.Close()
+	}()
+	logger.Printf("listening on port %d", port)
+	if err := srv.Serve(l); err != nil && !errors.Is(err, net.ErrClosed) {
+		return err
+	}
+	return nil
+}
+
 func main() {
 	log.SetFlags(0)
 	if len(os.Args) < 2 {
@@ -157,15 +188,7 @@ func main() {
 	var err error
 	switch os.Args[1] {
 	case "run":
-		var key []byte
-		if key, err = readKey(); err == nil {
-			var l net.Listener
-			if l, err = net.Listen("tcp", fmt.Sprintf(":%d", *port)); err == nil {
-				logger := log.New(os.Stderr, "", 0)
-				logger.Printf("listening on port %d", *port)
-				err = agent.NewServer(key, agent.GNOME{}, logger).Serve(l)
-			}
-		}
+		err = serve(*port)
 	case "install":
 		err = install(*port)
 	case "pair":
