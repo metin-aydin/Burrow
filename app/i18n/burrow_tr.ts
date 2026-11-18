@@ -15,6 +15,10 @@
         <source>The helper couldn&apos;t be started: %1</source>
         <translation>Yardımcı başlatılamadı: %1</translation>
     </message>
+    <message>
+        <source>The helper gave an answer Burrow doesn&apos;t understand.</source>
+        <translation>Yardımcı, Burrow&apos;un anlamadığı bir yanıt verdi.</translation>
+    </message>
 </context>
 <context>
     <name>AppController</name>
@@ -1145,8 +1149,8 @@
         <translation>Kurulu değil. Kurulursa başka bir bilgisayardaki Burrow bu masaüstünü açabilir: bağlandığında bu ekranın kilidini açar, monitörü kapalı tutar ve ayrıldığında ekranı yeniden kilitler.</translation>
     </message>
     <message>
-        <source>Running. On your other computer, enter this pairing code and port %1 in the device&apos;s Office Screen Helper.</source>
-        <translation>Çalışıyor. Diğer bilgisayarında cihazın Ofis Ekranı Yardımcısı&apos;na bu eşleştirme kodunu ve %1 portunu gir.</translation>
+        <source>Running. On your other computer, enter the pairing code and port %1 in the device&apos;s Office Screen Helper.</source>
+        <translation>Çalışıyor. Diğer bilgisayarında cihazın Ofis Ekranı Yardımcısı&apos;na eşleştirme kodunu ve %1 portunu gir.</translation>
     </message>
     <message>
         <source>Installed but not running. Install it again to restart it.</source>
@@ -1159,6 +1163,10 @@
     <message>
         <source>Install Helper</source>
         <translation>Yardımcıyı Kur</translation>
+    </message>
+    <message>
+        <source>Show Code</source>
+        <translation>Kodu Göster</translation>
     </message>
     <message>
         <source>Copy Code</source>

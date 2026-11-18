@@ -17,7 +17,10 @@ import (
 // It fails closed: a lock that didn't work is retried (monitor kept off meanwhile), stopping the agent
 // locks an open session, and an agent that died mid-session locks the screen when it starts again.
 type Server struct {
-	Key     []byte
+	Key []byte
+	// KeyFunc, when set, reads the key for every connection instead of Key: a new pairing code works and
+	// the old one stops at once, and a removed key file (uninstall) makes the agent obey no one.
+	KeyFunc func() ([]byte, error)
 	Desktop Desktop
 	Lease   time.Duration // how long a start or beat keeps the screen unlocked (Burrow beats every 5 s)
 	Now     func() time.Time
@@ -184,6 +187,15 @@ func (s *Server) serveConn(c net.Conn) {
 		return
 	}
 	_ = c.SetDeadline(now.Add(10 * time.Second))
+	key := s.Key
+	if s.KeyFunc != nil {
+		k, err := s.KeyFunc()
+		if err != nil {
+			s.Log.Printf("no pairing key, refusing %s: %v", host, err)
+			return
+		}
+		key = k
+	}
 	challenge := NewChallenge()
 	b, _ := json.Marshal(Challenge{V: 2, Challenge: challenge})
 	if _, err := c.Write(append(b, '\n')); err != nil {
@@ -198,24 +210,24 @@ func (s *Server) serveConn(c net.Conn) {
 		s.limiter.Fail(host, now)
 		return
 	}
-	if err := Check(s.Key, req, challenge); err != nil {
+	if err := Check(key, req, challenge); err != nil {
 		if errors.Is(err, ErrBadMAC) {
 			s.limiter.Fail(host, now)
 			s.Log.Printf("rejected a request from %s: %v", host, err)
 			return // no reply: an unauthenticated peer learns nothing
 		}
-		s.reply(c, req.Cmd, challenge, err)
+		s.reply(c, key, req.Cmd, challenge, err)
 		return
 	}
-	s.reply(c, req.Cmd, challenge, s.Handle(req.Cmd))
+	s.reply(c, key, req.Cmd, challenge, s.Handle(req.Cmd))
 }
 
-func (s *Server) reply(c net.Conn, cmd, challenge string, err error) {
+func (s *Server) reply(c net.Conn, key []byte, cmd, challenge string, err error) {
 	r := Reply{OK: err == nil}
 	if err != nil {
 		r.Error = err.Error()
 	}
-	r.MAC = ReplyMAC(s.Key, cmd, challenge, r.OK)
+	r.MAC = ReplyMAC(key, cmd, challenge, r.OK)
 	b, _ := json.Marshal(r)
 	_, _ = c.Write(append(b, '\n'))
 }

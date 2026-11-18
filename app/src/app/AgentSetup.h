@@ -20,7 +20,7 @@ class AgentSetup : public QObject
     Q_PROPERTY(bool suggest READ suggest NOTIFY changed)
     Q_PROPERTY(bool busy READ busy NOTIFY changed)
     Q_PROPERTY(QString error READ error NOTIFY changed)
-    Q_PROPERTY(QString code READ code NOTIFY changed)   // pairing code, once installed
+    Q_PROPERTY(QString code READ code NOTIFY changed)   // pairing code: only after install, New Code or Show Code
     Q_PROPERTY(int port READ port NOTIFY changed)
 public:
     explicit AgentSetup(QObject *parent = nullptr);
@@ -36,10 +36,11 @@ public:
 
     Q_INVOKABLE void install();
     Q_INVOKABLE void newCode();     // a new pairing key; the old code stops working
+    Q_INVOKABLE void showCode();    // reads the current code (never shown without being asked for)
     Q_INVOKABLE void uninstall();
     Q_INVOKABLE void refresh();
     Q_INVOKABLE void dismiss();     // "Not Now": the gallery stops suggesting it (Settings still has it)
-    Q_INVOKABLE void copyCode() const;
+    Q_INVOKABLE void copyCode() const;   // the clipboard is cleared again after a minute
 
 signals:
     void changed();

@@ -9,6 +9,7 @@
 #include <QJsonObject>
 #include <QProcess>
 #include <QSettings>
+#include <QTimer>
 
 namespace {
 const char kDismissed[] = "agent/suggestionDismissed";
@@ -52,6 +53,11 @@ void AgentSetup::newCode()
     run(QStringLiteral("pair"));
 }
 
+void AgentSetup::showCode()
+{
+    run(QStringLiteral("code"));
+}
+
 void AgentSetup::uninstall()
 {
     run(QStringLiteral("uninstall"));
@@ -65,8 +71,16 @@ void AgentSetup::dismiss()
 
 void AgentSetup::copyCode() const
 {
-    if (!m_code.isEmpty())
-        QGuiApplication::clipboard()->setText(m_code);
+    if (m_code.isEmpty())
+        return;
+    QGuiApplication::clipboard()->setText(m_code);
+    // A pairing code shouldn't stay on the clipboard: cleared after a minute, unless something else was
+    // copied meanwhile.
+    const QString copied = m_code;
+    QTimer::singleShot(60 * 1000, QGuiApplication::clipboard(), [copied] {
+        if (QGuiApplication::clipboard()->text() == copied)
+            QGuiApplication::clipboard()->clear();
+    });
 }
 
 void AgentSetup::run(const QString &command)
@@ -76,12 +90,12 @@ void AgentSetup::run(const QString &command)
     m_error.clear();
     if (m_demo) {
         // Pretend, so the screens can be seen on a Mac: a fixed, harmless code (the shared test vector).
-        m_installed = command != QLatin1String("uninstall");
-        m_running = m_installed;
-        m_code = m_installed ? QStringLiteral("AAAQ-EAYE-AUDA-OCAJ-BIFQ-YDIO-B4IB-CEQT-CQKR-MFYY-DENB-WHA5-DYPQ") : QString();
         if (command == QLatin1String("status")) {
             m_installed = m_running = false;
             m_code.clear();
+        } else {
+            m_installed = m_running = command != QLatin1String("uninstall");
+            m_code = m_installed ? QStringLiteral("AAAQ-EAYE-AUDA-OCAJ-BIFQ-YDIO-B4IB-CEQT-CQKR-MFYY-DENB-WHA5-DYPQ") : QString();
         }
         emit changed();
         return;
@@ -97,6 +111,8 @@ void AgentSetup::run(const QString &command)
         const QByteArray out = p->readAllStandardOutput();
         if (status != QProcess::NormalExit || out.trimmed().isEmpty()) {
             m_error = tr("The helper couldn't be set up: %1").arg(QString::fromLocal8Bit(p->readAllStandardError()).trimmed());
+            m_running = false;
+            m_code.clear();
             emit changed();
             return;
         }
@@ -118,13 +134,22 @@ void AgentSetup::run(const QString &command)
 
 void AgentSetup::read(const QByteArray &json)
 {
-    const QJsonObject o = QJsonDocument::fromJson(json).object();
-    if (o.contains(QLatin1String("error"))) {
-        m_error = o.value("error").toString();
+    QJsonParseError parse{};
+    const QJsonObject o = QJsonDocument::fromJson(json, &parse).object();
+    // Anything but a clear answer forgets what was shown (code, running): never a stale "running" or code.
+    if (parse.error != QJsonParseError::NoError || o.contains(QLatin1String("error"))
+        || !o.value("installed").isBool()) {
+        m_error = o.value("error").toString(tr("The helper gave an answer Burrow doesn't understand."));
+        m_running = false;
+        m_code.clear();
         return;
     }
     m_installed = o.value("installed").toBool();
     m_running = o.value("running").toBool();
-    m_code = m_installed ? o.value("code").toString() : QString();
+    // status never carries the code; install, pair and code do. Keep a code already shown otherwise.
+    if (!m_installed)
+        m_code.clear();
+    else if (o.contains(QLatin1String("code")))
+        m_code = o.value("code").toString();
     m_port = o.value("port").toInt(m_port);
 }

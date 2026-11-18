@@ -250,3 +250,52 @@ func TestOverTheNetwork(t *testing.T) {
 		t.Fatal("not locked after end")
 	}
 }
+
+func TestKeyRotationAndRemoval(t *testing.T) {
+	oldKey, _ := NewKey()
+	newKey, _ := NewKey()
+	var mu sync.Mutex
+	current, missing := oldKey, false
+	d := &fakeDesktop{locked: true}
+	s := NewServer(nil, d, quiet())
+	s.KeyFunc = func() ([]byte, error) {
+		mu.Lock()
+		defer mu.Unlock()
+		if missing {
+			return nil, errors.New("no key file")
+		}
+		return current, nil
+	}
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer l.Close()
+	go s.Serve(l)
+	send := func(key []byte) error {
+		c, err := net.Dial("tcp", l.Addr().String())
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer c.Close()
+		return Send(c, key, CmdBeat)
+	}
+	if err := send(oldKey); err != nil {
+		t.Fatalf("old key before rotation: %v", err)
+	}
+	mu.Lock()
+	current = newKey // `burrow-agent pair`
+	mu.Unlock()
+	if send(oldKey) == nil {
+		t.Fatal("old code still works after a new one was made")
+	}
+	if err := send(newKey); err != nil {
+		t.Fatalf("new key: %v", err)
+	}
+	mu.Lock()
+	missing = true // `burrow-agent uninstall` removed the key, the service still runs
+	mu.Unlock()
+	if send(newKey) == nil {
+		t.Fatal("obeyed without a key file")
+	}
+}

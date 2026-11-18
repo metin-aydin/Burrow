@@ -181,6 +181,7 @@ func serve(port int) error {
 	}
 	logger := log.New(os.Stderr, "", 0)
 	srv := agent.NewServer(key, agent.GNOME{}, logger)
+	srv.KeyFunc = readKey
 	srv.StateFile = filepath.Join(configDir(), "session")
 	srv.Recover()
 	l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
@@ -229,21 +230,18 @@ func main() {
 	case "pair":
 		var key []byte
 		if key, err = writeKey(); err == nil {
-			restartErr := systemctl("restart", unitName)
+			// The running agent reads the key on every connection: the new code works and the old one stops
+			// now, with no restart.
 			if *asJSON {
 				err = printJSON(key, *port)
 				break
-			}
-			if restartErr != nil {
-				fmt.Println("The service isn't installed yet; run `burrow-agent install`.")
 			}
 			fmt.Println("New pairing key made; the old code no longer works.")
 			printCode(key, *port)
 		}
 	case "status":
 		if *asJSON {
-			key, _ := readKey()
-			err = printJSON(key, *port)
+			err = printJSON(nil, *port) // never the code: only `code`, `install` and `pair` show it
 			break
 		}
 		if systemctl("is-active", "--quiet", unitName) == nil {
@@ -254,12 +252,20 @@ func main() {
 			fmt.Println("burrow-agent isn't running; run `burrow-agent install`.")
 		}
 	case "uninstall":
+		// The key goes first: a service that can't be stopped then obeys no one.
+		if rmErr := os.Remove(keyPath()); rmErr != nil && !os.IsNotExist(rmErr) {
+			err = fmt.Errorf("couldn't remove the pairing key: %w", rmErr)
+			break
+		}
 		_ = systemctl("disable", "--now", unitName)
 		home, _ := os.UserHomeDir()
 		_ = os.Remove(unitPath())
 		_ = systemctl("daemon-reload")
-		_ = os.Remove(keyPath())
 		_ = os.Remove(filepath.Join(home, ".local", "bin", "burrow-agent"))
+		if systemctl("is-active", "--quiet", unitName) == nil {
+			err = errors.New("the service is still running; its key is gone, so it obeys no one. Log out and back in to stop it")
+			break
+		}
 		if *asJSON {
 			err = printJSON(nil, *port)
 			break

@@ -133,7 +133,7 @@ BDialog {
         color: App.agentSetup.error !== "" ? Theme.danger : Theme.textSecondary
         text: App.agentSetup.error !== "" ? App.agentSetup.error
               : !App.agentSetup.installed ? qsTr("Not installed. With it, Burrow on another computer can open this desktop: it unlocks this screen when you connect, keeps the monitor off and locks the screen again when you leave.")
-              : App.agentSetup.running ? qsTr("Running. On your other computer, enter this pairing code and port %1 in the device's Office Screen Helper.").arg(App.agentSetup.port)
+              : App.agentSetup.running ? qsTr("Running. On your other computer, enter the pairing code and port %1 in the device's Office Screen Helper.").arg(App.agentSetup.port)
               : qsTr("Installed but not running. Install it again to restart it.")
     }
     TextEdit {
@@ -159,6 +159,13 @@ BDialog {
             variant: "primary"
             text: qsTr("Install Helper")
             onClicked: App.agentSetup.install()
+        }
+        BButton {
+            visible: App.agentSetup.installed && App.agentSetup.code === ""
+            enabled: !App.agentSetup.busy
+            iconName: "eye"
+            text: qsTr("Show Code")
+            onClicked: App.agentSetup.showCode()
         }
         BButton {
             visible: App.agentSetup.code !== ""

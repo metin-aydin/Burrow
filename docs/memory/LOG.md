@@ -9,6 +9,10 @@ En yeni kayıt en üstte.
   `burrow-agent install --json` ile kurar ve eşleştirme kodunu aynı barda (Kopyala/Tamam) gösterir; "Şimdi Değil"
   QSettings'e yazılır. Ayarlar'da durum/kod/yeni kod/kaldır bölümü. `AgentSetup` (C++), agent'a `--json` ve `code`.
   Demo kancaları: `BURROW_DEMO_AGENT=1`, `BURROW_DEMO_OPEN=agent-code`. Gerçek Ubuntu'da denenmedi.
+- **Güvenlik incelemesi (4 bulgu) düzeltildi:** agent anahtarı her bağlantıda dosyadan okur (yeni kod anında geçerli,
+  eski anında geçersiz; anahtar silinince kimseyi dinlemez); `uninstall` önce anahtarı siler, servis durmazsa hata
+  verir; `status` kodu hiç göstermez, Ayarlar'da "Kodu Göster" ile istenir; kopyalanan kod 1 dk sonra panodan
+  silinir; Burrow belirsiz/hatalı yanıtta kodu ve "çalışıyor" bilgisini unutur.
 - **burrow-agent yazıldı (`agent/`, ADR 0003 tasarımı):** kullanıcı ödünü kabul etti, şartı cihaz başına Ubuntu'ya
   özel kapatılabilir ayar. Go, yalnız standart kütüphane, `go 1.22` (Ubuntu'nun Go'su derler); modül yolu
   `github.com/metin-aydin/Burrow/agent` (`go install …/agent/cmd/burrow-agent@development` çalışsın diye).
