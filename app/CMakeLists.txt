@@ -64,11 +64,13 @@ qt_add_qml_module(burrow
     RESOURCES ${BURROW_ICONS} resources/icons/256x256.png
 )
 
-# Translations: English is the source language; Turkish ships as a compiled catalog.
+# Translations: English is the source language; Turkish ships as a compiled catalog. No source locations
+# in the catalog: line numbers changed with every edit above a string, so CI's "catalog is up to date"
+# check failed on commits that touched no text at all.
 qt_add_translations(burrow
     TS_FILES i18n/burrow_tr.ts
     RESOURCE_PREFIX /i18n
-    LUPDATE_OPTIONS -no-obsolete)
+    LUPDATE_OPTIONS -no-obsolete -locations none)
 
 if(APPLE)
     enable_language(OBJCXX)

@@ -4,6 +4,11 @@ En yeni kayıt en üstte.
 
 ## 2026-11-19
 
+- **Tekrarlayan CI hatasının sebebi bulundu:** son 7 başarısız koşunun 5'i `macOS build → Translations`; hepsinde
+  "0 new" metin, fark yalnız `burrow_tr.ts`'teki `<location line=…>` numaralarıydı (metnin üstüne satır eklenen her
+  düzenleme bozuyordu). `qt_add_translations` → `LUPDATE_OPTIONS -no-obsolete -locations none`; katalogdan 410
+  konum satırı silindi; satır kaydırma testiyle doğrulandı. Diğer iki hata (Linux deb kurulumu, Windows paketli
+  uygulama açılışı) yeni platform işinin tek seferlik hatalarıydı ve sonraki commit'lerde düzelmişti.
 - **Açılır menü seçenekleri ve tooltip'ler Title Case:** 21 seçenek + 1 tooltip (İngilizce kaynak ve Türkçe çeviri),
   kural hafızaya eklendi. Türkçe arayüzde ekran görüntüsüyle taşma kontrol edildi.
 - **Tüm monitörler görünümü (issue #8):** oturum penceresinde sekmelerin en solunda ikon düğme (`monitors.svg`);

@@ -24,8 +24,9 @@ Yapıldı (2026-11-15): `release` ortamı (yalnız `master`) ve 5 secret'ın hep
 `master` dalı ve kural setleri 2026-11-15'te kuruldu. İlk release v0.1.0 aynı gün çıktı; imza + notarization
 CI'da doğrulandı. Linux AppImage release'te var ama `latest.json`'da yok (Linux'ta uygulama içi güncelleme yok).
 
-**Dikkat:** Başka bir oturum kaynak dosyalarda satır kaydırırsa CI'ın Translations adımı düşer; PR'dan önce
-`cmake --build build --target Burrow_lupdate` çalıştırıp `app/i18n`'i commit et.
+**Çeviri kataloğu (2026-11-19):** `lupdate -locations none`; katalogda satır numarası yok, bu yüzden metne
+dokunmayan düzenlemeler CI'ın Translations adımını artık düşürmez. Yeni/değişen metinde yine
+`cmake --build build --target Burrow_lupdate` çalıştırıp Türkçesini ekle ve `app/i18n`'i commit et.
 
 Windows (2026-11-15, ADR 0010): kullanıcı "JumpDesk'te nasılsa her şey aynı olsun" dedi → imzasız NSIS kurulum
 (`-setup.exe`, kullanıcı başına) + taşınabilir zip; `latest.json`'da `windows-x64` = setup.exe; güncelleme SHA-256 +
