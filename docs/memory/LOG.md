@@ -9,6 +9,12 @@ En yeni kayıt en üstte.
   Burrow kapanınca `pkexec apt-get install` çalıştırır. Manifest anahtarları `linux-x64` (AppImage) ve
   `linux-x64-deb`; release'in Linux işi fragment üretiyor. İmza yok, yalnız SHA-256 (Windows imzasız durumu gibi).
   Gerçek Ubuntu'da denenmedi; ilk deneme bir sonraki iki release arasında olabilir.
+- **Linux güncelleyicisi sertleştirildi (otomatik güvenlik incelemesi, 3 bulgu):** .deb ve betik 0700 rastgele
+  klasörde, `NewOnly` ile; root (pkexec) paketi kendi `mktemp` klasörüne kopyalayıp SHA-256'yı orada doğruluyor,
+  sonra kuruyor; `--allow-downgrades` kaldırıldı. AppImage `QSaveFile` ile değişiyor, yazılacak bayt yeniden
+  doğrulanıyor, başkalarının yazabildiği klasörde güncelleme reddediliyor. `BURROW_UPDATE_URL` artık yalnız test
+  derlemelerinde (ADR 0002 güncellendi). Kalan risk (bilinçli): Linux paketleri imzasız, güven GitHub + HTTPS +
+  manifest SHA-256 (imzasız Windows ile aynı); imzalı manifest (minisign) ileride.
 - **Intel Mac paketi:** release matrisine `macos-15-intel` (`mac-x64`, `CMAKE_OSX_ARCHITECTURES=x86_64`, kendi
   Homebrew'u) eklendi; CI'a "macOS Intel build" işi. Güncelleyici `mac-x64` anahtarını zaten tanıyordu. OpenSSL
   araması Intel Homebrew'u (`/usr/local`) da buluyor.

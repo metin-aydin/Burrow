@@ -39,7 +39,8 @@ yazılmaz; kullanıcı kendisi ekler. Eksikse macOS derlemesi hata verip yayın�
 
 ## Uygulama içi güncelleme (`app/src/app/Updater.*`)
 - Manifest: `https://github.com/metin-aydin/Burrow/releases/latest/download/latest.json` (sunucu yok).
-  `BURROW_UPDATE_URL` yalnız https kabul eder (birim testleri derleme bayrağıyla file:// kullanır). Dosya adı
+  `BURROW_UPDATE_URL` yalnız birim testi derlemelerinde geçerlidir (2026-11-19: release'te herhangi bir https adresine
+  izin vermek, yalnız SHA-256 ile doğrulanan Linux/imzasız Windows paketlerinde kurulacak şeyi seçtirirdi). Dosya adı
   manifestten yol olarak alınmaz; `Burrow-<X.Y.Z>-<platform>.zip` olmak zorundadır.
 - Davranış (JumpDesk ile aynı): açılıştan 15 sn sonra ve 6 saatte bir denetim (yalnız paketli sürüm, ayarlardan
   kapatılabilir); yeni sürümde bildirim + galeri başlığında "Güncelleme X" çipi; **sormadan indirmez**;

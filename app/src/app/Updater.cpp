@@ -5,7 +5,7 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
-#include <cstdio>
+#include <QSaveFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkAccessManager>
@@ -51,17 +51,16 @@ Updater::Updater(QObject *parent)
     : QObject(parent)
     , m_net(new QNetworkAccessManager(this))
 {
-    // BURROW_UPDATE_URL points the updater at another manifest (staging). Release builds accept only
-    // https; the unit tests are built with BURROW_UPDATER_ALLOW_INSECURE to use file:// fixtures.
+    // BURROW_UPDATE_URL points the updater at another manifest, in builds made for the unit tests only
+    // (BURROW_UPDATER_ALLOW_INSECURE, file:// fixtures). A release build always reads GitHub: where the
+    // packages are checked by SHA-256 alone (Linux, unsigned Windows), whoever could set the variable
+    // would otherwise choose what gets installed.
     m_manifestUrl = QUrl(QString::fromLatin1(kDefaultManifest));
-    const QUrl env(qEnvironmentVariable("BURROW_UPDATE_URL"));
 #ifdef BURROW_UPDATER_ALLOW_INSECURE
-    const bool allowed = env.isValid();
-#else
-    const bool allowed = env.isValid() && env.scheme() == QLatin1String("https");
-#endif
-    if (!env.isEmpty() && allowed)
+    const QUrl env(qEnvironmentVariable("BURROW_UPDATE_URL"));
+    if (!env.isEmpty() && env.isValid())
         m_manifestUrl = env;
+#endif
 
     connect(&m_timer, &QTimer::timeout, this, [this] {
         m_timer.setInterval(kIntervalMs);
@@ -294,46 +293,73 @@ void Updater::install()
 // is the check, made in onDownloaded before this runs.
 QString Updater::installLinux()
 {
+    // The verified bytes again, from the download: whatever is installed is checked right before use.
+    QFile in(m_downloadPath);
+    if (!in.open(QIODevice::ReadOnly))
+        return tr("Couldn't prepare the update.");
+    const QByteArray data = in.readAll();
+    in.close();
+    if (QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex() != m_assetSha256.toLatin1())
+        return tr("The downloaded update failed verification and was discarded.");
+
     const QString appImage = appImagePath();
     if (!appImage.isEmpty()) {
-        // The new AppImage goes next to the running one under a temporary name, then replaces it with a
-        // rename (the running copy keeps working from its open file) and starts.
-        const QFileInfo target(appImage);
-        if (!QFileInfo(target.absolutePath()).isWritable())
-            return tr("Burrow can't write to %1. Download the new version from GitHub.").arg(target.absolutePath());
-        const QString temp = target.absolutePath() + QStringLiteral("/.burrow-update-%1.AppImage").arg(QCoreApplication::applicationPid());
-        QFile::remove(temp);
-        if (!QFile::copy(m_downloadPath, temp))
+        // QSaveFile writes a randomly named file next to the running AppImage (created exclusively, never
+        // through an existing file or link) and renames it over the AppImage only once complete; the
+        // running copy keeps working from its open file. A folder other users can write to is refused.
+        const QFileInfo dir(QFileInfo(appImage).absolutePath());
+        if (!dir.isWritable())
+            return tr("Burrow can't write to %1. Download the new version from GitHub.").arg(dir.absoluteFilePath());
+        if (dir.permissions() & (QFileDevice::WriteGroup | QFileDevice::WriteOther))
+            return tr("Other users can change files in %1, so Burrow doesn't update itself there. Download the new version from GitHub.")
+                .arg(dir.absoluteFilePath());
+        QSaveFile out(appImage);
+        if (!out.open(QIODevice::WriteOnly) || out.write(data) != data.size())
             return tr("Couldn't save the update.");
-        QFile::setPermissions(temp, QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner
-                                        | QFileDevice::ReadGroup | QFileDevice::ExeGroup
-                                        | QFileDevice::ReadOther | QFileDevice::ExeOther);
-        if (::rename(QFile::encodeName(temp).constData(), QFile::encodeName(appImage).constData()) != 0) {
-            QFile::remove(temp);
+        out.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner
+                           | QFileDevice::ReadGroup | QFileDevice::ExeGroup | QFileDevice::ReadOther | QFileDevice::ExeOther);
+        if (!out.commit())
             return tr("Couldn't replace Burrow with the new version.");
-        }
         QFile::remove(m_downloadPath);
         if (!QProcess::startDetached(appImage, {}))
             return tr("The update is installed; start Burrow again.");
         return {};
     }
     if (debInstalled()) {
-        // apt installs the package (and anything it newly depends on); pkexec asks for the administrator
-        // password in the desktop's own dialog. A detached helper waits for Burrow to quit, so nothing of
-        // the old version is in use, and starts the new one.
-        const QString script = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QStringLiteral("/install-update.sh");
-        QFile s(script);
-        if (!s.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        // Staged in a private (0700, random name) folder. The helper waits for Burrow to quit, then asks for
+        // the administrator password (pkexec); as root it copies the package where only root can write,
+        // checks its SHA-256 there and only then installs it, so nothing can swap the file in between.
+        QTemporaryDir staging(QDir::tempPath() + QStringLiteral("/burrow-update-XXXXXX"));
+        if (!staging.isValid())
             return tr("Couldn't prepare the update.");
+        staging.setAutoRemove(false);
+        QFile::setPermissions(staging.path(), QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
+        const QString deb = QDir(staging.path()).filePath(QStringLiteral("burrow.deb"));
+        QFile d(deb);
+        if (!d.open(QIODevice::WriteOnly | QIODevice::NewOnly) || d.write(data) != data.size()) {
+            QDir(staging.path()).removeRecursively();
+            return tr("Couldn't save the update.");
+        }
+        d.close();
+        QFile::remove(m_downloadPath);
+        const QString script = QDir(staging.path()).filePath(QStringLiteral("install.sh"));
+        QFile s(script);
+        if (!s.open(QIODevice::WriteOnly | QIODevice::NewOnly)) {
+            QDir(staging.path()).removeRecursively();
+            return tr("Couldn't prepare the update.");
+        }
         s.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
         s.write(QStringLiteral(
             "#!/bin/sh\n"
-            "# $1 = the verified .deb\n"
+            "# $1 = staged .deb, $2 = its SHA-256, $3 = staging folder\n"
             "while kill -0 %1 2>/dev/null; do sleep 0.3; done\n"
-            "pkexec /usr/bin/apt-get install -y --allow-downgrades \"$1\" && rm -f \"$1\"\n"
+            "pkexec /bin/sh -c 'set -e; d=$(mktemp -d); trap \"rm -rf \\\"${d:?}\\\"\" EXIT; "
+            "cp -- \"$1\" \"$d/burrow.deb\"; echo \"$2  $d/burrow.deb\" | sha256sum -c --quiet -; "
+            "apt-get install -y \"$d/burrow.deb\"' sh \"$1\" \"$2\"\n"
+            "rm -rf \"${3:?}\"\n"
             "exec /opt/burrow/bin/burrow\n").arg(QCoreApplication::applicationPid()).toUtf8());
         s.close();
-        if (!QProcess::startDetached(QStringLiteral("/bin/sh"), {script, m_downloadPath}))
+        if (!QProcess::startDetached(QStringLiteral("/bin/sh"), {script, deb, m_assetSha256, staging.path()}))
             return tr("Couldn't start the update.");
         return {};
     }

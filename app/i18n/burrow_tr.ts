@@ -1559,6 +1559,10 @@
         <translation>Burrow %1 klasörüne yazamıyor. Yeni sürümü GitHub&apos;dan indir.</translation>
     </message>
     <message>
+        <source>Other users can change files in %1, so Burrow doesn&apos;t update itself there. Download the new version from GitHub.</source>
+        <translation>%1 klasöründeki dosyaları başka kullanıcılar da değiştirebildiği için Burrow orada kendini güncellemiyor. Yeni sürümü GitHub&apos;dan indir.</translation>
+    </message>
+    <message>
         <source>Couldn&apos;t replace Burrow with the new version.</source>
         <translation>Burrow yeni sürümle değiştirilemedi.</translation>
     </message>
