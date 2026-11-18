@@ -24,7 +24,9 @@ cp app/resources/icons/256x256.png "$pkg/usr/share/icons/hicolor/256x256/apps/bu
 # System libraries the bundled files load (anything ldd resolves outside /opt/burrow), mapped to their packages.
 deps=$(
     find "$pkg/opt/burrow" -type f \( -name '*.so*' -o -perm -u+x \) -exec sh -c 'file -b "$1" | grep -q ELF' _ {} \; -print |
-    while read -r f; do LD_LIBRARY_PATH="$pkg/opt/burrow/lib" ldd "$f" 2>/dev/null; done |
+    # `|| true`: ldd fails on a static file (burrow-agent), which has no libraries to list; under set -e that
+    # would end the loop early and leave the list empty.
+    while read -r f; do LD_LIBRARY_PATH="$pkg/opt/burrow/lib" ldd "$f" 2>/dev/null || true; done |
     awk '/=> \// {print $3}' | grep -v "^$pkg/" | sort -u |
     while read -r lib; do dpkg -S "$(readlink -f "$lib")" 2>/dev/null || dpkg -S "$lib" 2>/dev/null || true; done |
     cut -d: -f1 | sort -u | tr '\n' ',' | sed 's/,$//; s/,/, /g'
