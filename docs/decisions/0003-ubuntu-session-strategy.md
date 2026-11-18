@@ -22,10 +22,22 @@ Kullanıcı Ubuntu'ya yardımcı servis kurulabileceğini onayladı (sudo var).
    güvenlik duvarını ayarlar, agent'ı kurar, eşleştirme kodu üretir.
 
 ## Doğrulanacaklar (prototipte)
-- [ ] `loginctl unlock-session` kullanıcı yetkisiyle (polkit) çalışıyor mu, GNOME Shell kilidi açıyor mu?
+- [x] `loginctl unlock-session` kullanıcı yetkisiyle (polkit) çalışıyor mu? **Evet** (GNOME 47, uzak oturumda; fiziksel
+  oturumda aynısı bekleniyor, denenmedi).
 - [ ] Kilit açıldıktan sonra Desktop Sharing bağlantısı kabul ediliyor mu (22.04 / 24.04 / 26.04)?
 - [ ] Monitör kapalıyken (PowerSaveMode) ekran paylaşımı görüntü vermeye devam ediyor mu?
 - [ ] Super+L / `lock-session` sonrası bir sonraki bağlantı agent ile sorunsuz mu?
+
+## Doğrulama sonuçları (2026-11-19, `tools/agent-probe.sh`)
+Makine: **Ubuntu 24.10, GNOME Shell 47.0, gnome-remote-desktop 47.0** (ADR'nin varsaydığı 24.04/GNOME 46 değil).
+Betik bir **uzak oturumda** çalıştı (`Remote=yes`, koltuk/seat yok): kullanıcı Remote Login ile bağlıydı; fiziksel
+ekran oturumu denenmedi.
+- `loginctl lock-session` / `unlock-session` **systemd kullanıcı servisinden çalışıyor** (rc=0, `LockedHint`
+  yes → no; GNOME'un `Lock` arayüzüyle kilitlenen oturum da `unlock-session` ile açıldı). polkit eylemi
+  `auth_admin_keep` olmasına rağmen oturum sahibi kendi oturumunu açabiliyor; "textual authentication agent"
+  hatası yalnız gürültü. Yani agent'ın root'a ihtiyacı yok.
+- Mutter `PowerSaveMode` 3/0 kullanıcı servisinden kabul edildi (rc=0); uzak oturumda olduğu için görüntüye etkisi
+  ölçülmedi.
 
 ## Güvenlik notu
 Agent oturum kilidini açabildiği için en hassas bileşen. Anahtarı ele geçiren biri kilidi açabilir;
