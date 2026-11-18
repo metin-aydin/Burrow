@@ -93,8 +93,18 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: netcore/go.mod
+      # Apple Silicon uses Homebrew's FreeRDP; Intel's bottle is too old (3.30), so the pinned one is built from
+      # source there (fresh, not from a cache: this build gets signed).
       - name: Install dependencies
-        run: brew install cmake ninja qt freerdp openconnect
+        run: |
+          if [ "${{ matrix.arch }}" = x86_64 ]; then
+            brew install cmake ninja pkgconf qt openconnect ffmpeg jpeg-turbo openssl@3
+            tools/mac-freerdp.sh "$RUNNER_TEMP/freerdp"
+            echo "FREERDP_PREFIX=$RUNNER_TEMP/freerdp" >> "$GITHUB_ENV"
+          else
+            brew install cmake ninja qt freerdp openconnect
+            echo "FREERDP_PREFIX=$(brew --prefix freerdp)" >> "$GITHUB_ENV"
+          fi
       # The macOS build must be signed with Developer ID and notarized; without the secrets the release stops
       # (an unsigned app is blocked by Gatekeeper and cannot update itself). Same secret names as JumpDesk.
       - name: Check signing secrets
@@ -114,7 +124,7 @@ jobs:
       - name: Build
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$(brew --prefix freerdp)" \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$FREERDP_PREFIX" \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
             -DBURROW_VERSION=${{ needs.prepare.outputs.version }}
           cmake --build build

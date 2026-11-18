@@ -277,10 +277,12 @@ private slots:
         const QString platform = Updater::platformKey();
         const QString assetName = Updater::assetName("9.9.9");
         QCOMPARE(assetName, QString("Burrow-9.9.9-" + platform
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN)
                                     + "-setup.exe"
-#else
+#elif defined(Q_OS_MACOS)
                                     + ".zip"
+#else
+                                    + ".AppImage"   // not run from an AppImage or the .deb: the AppImage name
 #endif
                                     ));
         QFile asset(m_dir.filePath(assetName));

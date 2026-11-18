@@ -4,6 +4,10 @@ En yeni kayıt en üstte.
 
 ## 2026-11-19
 
+- **Intel CI düştü → düzeltildi:** Homebrew'un Intel FreeRDP'si 3.30'da kalmış (Burrow 3.33+ istiyor).
+  `tools/mac-freerdp.sh` sabit sürümü (linux-deps.sh ile aynı commit) Homebrew seçenekleriyle kaynaktan derliyor
+  (FFmpeg/H.264, CUPS, Mac ses); CI önbellekliyor, release imzalı paket için sıfırdan derliyor. Bu Mac'te denendi.
+  Ayrıca Linux birim testi `.AppImage` adını bekleyecek şekilde düzeltildi (güncelleyici değişikliği bozmuştu).
 - **Linux uygulama içi güncelleme:** AppImage (`$APPIMAGE`) yeni dosyayı yanına yazıp `rename` ile kendinin yerine
   koyar ve yeniden başlar; .deb kurulumu (`/opt/burrow/bin` + `/var/lib/dpkg/info/burrow.list`) yardımcı betikle
   Burrow kapanınca `pkexec apt-get install` çalıştırır. Manifest anahtarları `linux-x64` (AppImage) ve

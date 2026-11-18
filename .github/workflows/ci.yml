@@ -63,6 +63,7 @@ jobs:
           git diff --exit-code -- app/i18n || (echo "::error::Run the Burrow_lupdate target and commit app/i18n"; exit 1)
 
   # Intel Macs get their own package (the release builds it on the same runner); this keeps that build working.
+  # Homebrew's Intel FreeRDP is too old (3.30), so tools/mac-freerdp.sh builds the pinned one, cached like Linux's.
   macos-intel:
     name: macOS Intel build
     runs-on: macos-15-intel
@@ -72,9 +73,23 @@ jobs:
         with:
           go-version-file: netcore/go.mod
       - name: Install dependencies
-        run: brew install cmake ninja qt freerdp openconnect
+        run: brew install cmake ninja pkgconf qt openconnect ffmpeg jpeg-turbo openssl@3
+      - name: Restore FreeRDP
+        id: freerdp
+        uses: actions/cache/restore@v4
+        with:
+          path: /Users/runner/burrow-freerdp
+          key: mac-freerdp-${{ runner.arch }}-${{ hashFiles('tools/mac-freerdp.sh') }}
+      - name: Build FreeRDP
+        run: tools/mac-freerdp.sh /Users/runner/burrow-freerdp
+      - name: Save FreeRDP
+        if: github.event_name == 'push' && steps.freerdp.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /Users/runner/burrow-freerdp
+          key: mac-freerdp-${{ runner.arch }}-${{ hashFiles('tools/mac-freerdp.sh') }}
       - name: Configure
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$(brew --prefix freerdp)"
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_PREFIX_PATH="$(brew --prefix qt);/Users/runner/burrow-freerdp"
       - name: Build
         run: cmake --build build
       - name: Tests
