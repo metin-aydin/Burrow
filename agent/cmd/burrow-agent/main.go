@@ -3,12 +3,18 @@
 //
 //	burrow-agent install     copy itself to ~/.local/bin, make a pairing key, start the user service
 //	burrow-agent pair        make a new pairing key (the old code stops working)
+//	burrow-agent code        show the pairing code again
 //	burrow-agent status      show whether the service runs and a session is active
+//
+// Burrow on Ubuntu runs these itself (install, code, pair, status, uninstall) with --json, which prints
+// one JSON object instead of the text: {"installed","running","code","port"} or {"error"}.
+//
 //	burrow-agent uninstall   stop and remove the service and the key
 //	burrow-agent run         the service itself (started by systemd)
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -78,7 +84,7 @@ func systemctl(args ...string) error {
 	return nil
 }
 
-func install(port int) error {
+func install(port int, asJSON bool) error {
 	if os.Geteuid() == 0 {
 		return errors.New("run this as yourself, not root: the agent works in your own desktop session")
 	}
@@ -134,9 +140,29 @@ WantedBy=default.target
 		return err
 	}
 	_ = systemctl("restart", unitName)
+	if asJSON {
+		return printJSON(key, port)
+	}
 	fmt.Printf("burrow-agent is running and starts with your session (port %d).\n\n", port)
 	printCode(key, port)
 	return nil
+}
+
+func unitPath() string {
+	home, _ := os.UserHomeDir()
+	return filepath.Join(home, ".config", "systemd", "user", unitName)
+}
+
+// printJSON reports the state for Burrow: installed (service file present), running, and the code.
+func printJSON(key []byte, port int) error {
+	out := map[string]any{"port": port}
+	_, err := os.Stat(unitPath())
+	out["installed"] = err == nil
+	out["running"] = systemctl("is-active", "--quiet", unitName) == nil
+	if key != nil {
+		out["code"] = agent.PairingCode(key)
+	}
+	return json.NewEncoder(os.Stdout).Encode(out)
 }
 
 func printCode(key []byte, port int) {
@@ -183,6 +209,7 @@ func main() {
 	}
 	fs := flag.NewFlagSet(os.Args[1], flag.ExitOnError)
 	port := fs.Int("port", agent.DefaultPort, "TCP port Burrow connects to")
+	asJSON := fs.Bool("json", false, "print one JSON object (for Burrow)")
 	_ = fs.Parse(os.Args[2:])
 
 	var err error
@@ -190,17 +217,35 @@ func main() {
 	case "run":
 		err = serve(*port)
 	case "install":
-		err = install(*port)
+		err = install(*port, *asJSON)
+	case "code":
+		var key []byte
+		key, err = readKey()
+		if *asJSON {
+			err = printJSON(key, *port) // without a key: installed=false, no code
+		} else if err == nil {
+			printCode(key, *port)
+		}
 	case "pair":
 		var key []byte
 		if key, err = writeKey(); err == nil {
-			if systemctl("restart", unitName) != nil {
+			restartErr := systemctl("restart", unitName)
+			if *asJSON {
+				err = printJSON(key, *port)
+				break
+			}
+			if restartErr != nil {
 				fmt.Println("The service isn't installed yet; run `burrow-agent install`.")
 			}
 			fmt.Println("New pairing key made; the old code no longer works.")
 			printCode(key, *port)
 		}
 	case "status":
+		if *asJSON {
+			key, _ := readKey()
+			err = printJSON(key, *port)
+			break
+		}
 		if systemctl("is-active", "--quiet", unitName) == nil {
 			fmt.Println("burrow-agent is running. Recent events:")
 			out, _ := exec.Command("journalctl", "--user", "-u", unitName, "-n", "10", "--no-pager", "-o", "cat").CombinedOutput()
@@ -211,15 +256,23 @@ func main() {
 	case "uninstall":
 		_ = systemctl("disable", "--now", unitName)
 		home, _ := os.UserHomeDir()
-		_ = os.Remove(filepath.Join(home, ".config", "systemd", "user", unitName))
+		_ = os.Remove(unitPath())
 		_ = systemctl("daemon-reload")
 		_ = os.Remove(keyPath())
 		_ = os.Remove(filepath.Join(home, ".local", "bin", "burrow-agent"))
+		if *asJSON {
+			err = printJSON(nil, *port)
+			break
+		}
 		fmt.Println("burrow-agent is removed.")
 	default:
 		err = fmt.Errorf("unknown command %q", os.Args[1])
 	}
 	if err != nil {
+		if *asJSON {
+			_ = json.NewEncoder(os.Stdout).Encode(map[string]string{"error": err.Error()})
+			os.Exit(1)
+		}
 		log.Fatal("burrow-agent: ", err)
 	}
 }

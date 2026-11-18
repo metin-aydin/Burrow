@@ -64,6 +64,8 @@ QtObject {
     readonly property int titleBarControlHeight: 32
     readonly property int titleBarMargin: (titleBarHeight - titleBarControlHeight) / 2
     readonly property string fontFamily: Qt.application.font.family
+    // Only for codes and data people copy or compare character by character (pairing codes), never as decoration.
+    readonly property string monoFont: Qt.platform.os === "osx" ? "Menlo" : Qt.platform.os === "windows" ? "Consolas" : "monospace"
 
     // Type scale by role (system font, macOS density). Use these, never a literal pixelSize.
     // Headings step up in size *and* sit on more space above than below, so a section reads apart

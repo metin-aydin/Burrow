@@ -123,6 +123,66 @@ BDialog {
         }
     }
 
+    // burrow-agent on this computer (Burrow on Ubuntu, ADR 0003): its state, the pairing code, a new code, removal.
+    SectionTitle { visible: App.agentSetup.available; text: qsTr("Office Screen Helper") }
+    Text {
+        visible: App.agentSetup.available
+        Layout.fillWidth: true
+        wrapMode: Text.WordWrap
+        font.pixelSize: Theme.fontLabel
+        color: App.agentSetup.error !== "" ? Theme.danger : Theme.textSecondary
+        text: App.agentSetup.error !== "" ? App.agentSetup.error
+              : !App.agentSetup.installed ? qsTr("Not installed. With it, Burrow on another computer can open this desktop: it unlocks this screen when you connect, keeps the monitor off and locks the screen again when you leave.")
+              : App.agentSetup.running ? qsTr("Running. On your other computer, enter this pairing code and port %1 in the device's Office Screen Helper.").arg(App.agentSetup.port)
+              : qsTr("Installed but not running. Install it again to restart it.")
+    }
+    TextEdit {
+        visible: App.agentSetup.available && App.agentSetup.code !== ""
+        text: App.agentSetup.code
+        readOnly: true
+        selectByMouse: true
+        color: Theme.text
+        selectionColor: Theme.accent
+        selectedTextColor: Theme.accentText
+        font.family: Theme.monoFont
+        font.pixelSize: Theme.fontBody
+        Accessible.name: qsTr("Pairing Code")
+    }
+    RowLayout {
+        visible: App.agentSetup.available
+        spacing: 8
+        Spinner { visible: App.agentSetup.busy }
+        Item { Layout.fillWidth: true }
+        BButton {
+            visible: !App.agentSetup.installed || !App.agentSetup.running
+            enabled: !App.agentSetup.busy
+            variant: "primary"
+            text: qsTr("Install Helper")
+            onClicked: App.agentSetup.install()
+        }
+        BButton {
+            visible: App.agentSetup.code !== ""
+            enabled: !App.agentSetup.busy
+            iconName: "copy"
+            text: qsTr("Copy Code")
+            onClicked: App.agentSetup.copyCode()
+        }
+        BButton {
+            visible: App.agentSetup.installed
+            enabled: !App.agentSetup.busy
+            text: qsTr("New Code")
+            tip: qsTr("Makes A New Pairing Code; The Old One Stops Working")
+            onClicked: App.agentSetup.newCode()
+        }
+        BButton {
+            visible: App.agentSetup.installed
+            enabled: !App.agentSetup.busy
+            variant: "danger"
+            text: qsTr("Remove")
+            onClicked: App.agentSetup.uninstall()
+        }
+    }
+
     SectionTitle { text: qsTr("About") }
     Text { text: App.versionInfo; color: Theme.textSecondary; font.pixelSize: Theme.fontLabel }
 

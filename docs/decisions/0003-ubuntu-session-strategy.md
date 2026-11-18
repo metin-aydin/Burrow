@@ -47,7 +47,11 @@ Ubuntu cihazı tanımlarken görünür, kapatılabilir; kapalıyken Burrow agent
 
 - **Program:** `agent/` (ayrı Go modülü, yalnız standart kütüphane; `loginctl` ve `gdbus` çağırır). systemd
   **kullanıcı** servisi; root gerekmez (2026-11-19 denemesi: oturum sahibi kendi oturumunu kilitleyip açabiliyor).
-- **Kurulum:** `burrow-agent install` → 32 baytlık rastgele anahtar (`~/.config/burrow-agent/key`, 0600), servis
+- **Kurulum (2026-11-19, kullanıcı: "agent'ı elle kurmamalıyız"):** agent Burrow'un Linux paketlerinin (AppImage,
+  .deb) içinde gelir. Burrow Ubuntu'da (GNOME oturumu) çalışırken ana ekranda bir öneri barı neden gerektiğini
+  anlatır; "Yardımcıyı Kur" paketteki agent'la `install --json` çalıştırır (root gerekmez) ve eşleştirme kodunu
+  aynı barda gösterir. "Şimdi Değil" barı kapatır; Ayarlar → Ofis Ekranı Yardımcısı durumu, kodu, yeni kod ve
+  kaldırmayı her zaman sunar. Elle kurulum yine mümkün: `burrow-agent install` → 32 baytlık rastgele anahtar (`~/.config/burrow-agent/key`, 0600), servis
   dosyası, servisi başlatır ve **eşleştirme kodunu** bir kez gösterir. Kod Burrow'da cihaz ayarına girilir, kasada
   şifreli saklanır. `burrow-agent pair` yeni anahtar üretir (eskisi geçersiz olur), `uninstall` kaldırır.
 - **Ağ:** TCP 47391 (değiştirilebilir), tüm arayüzler: ofis bilgisayarı VPN/Tailscale ile LAN adresinden

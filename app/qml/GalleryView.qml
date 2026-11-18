@@ -22,6 +22,7 @@ Rectangle {
     // Development screenshots only (BURROW_DEMO_OPEN=nomatch).
     function demoSearch(t) { search.text = t }
     // Cmd+F (Main.qml).
+    function demoAgentInstalled() { agentBar.installing = true; App.agentSetup.install() }   // BURROW_DEMO_OPEN=agent-code
     function focusSearch() { search.forceActiveFocus(); search.selectAll() }
 
     ColumnLayout {
@@ -116,6 +117,122 @@ Rectangle {
                 }
             }
             Chip { text: qsTr("Direct"); selected: root.filterTunnel === ""; onClicked: root.filterTunnel = "" }
+        }
+
+        // --- burrow-agent suggestion (Burrow on Ubuntu, ADR 0003) -------------------
+        // Inline, not a dialog: it asks for nothing urgent. After a click it shows the pairing code here.
+        Rectangle {
+            id: agentBar
+            property bool showCode: false   // just installed: the code stays until Done
+            property bool installing: false
+            readonly property var setup: App.agentSetup
+            Layout.fillWidth: true
+            Layout.leftMargin: 28
+            Layout.rightMargin: 28
+            Layout.topMargin: 16
+            visible: setup.suggest || installing || showCode
+            implicitHeight: barRow.implicitHeight + 28
+            radius: Theme.radius
+            color: Theme.surfaceRaised
+            border.width: 1
+            border.color: Theme.border
+            Accessible.role: Accessible.Grouping
+            Accessible.name: barTitle.text
+
+            RowLayout {
+                id: barRow
+                anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter; leftMargin: 18; rightMargin: 14 }
+                spacing: 14
+                Icon { name: "monitor"; size: 20; color: Theme.accent; Layout.alignment: Qt.AlignTop; Layout.topMargin: 1 }
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 3
+                    Text {
+                        id: barTitle
+                        Layout.fillWidth: true
+                        text: agentBar.showCode ? qsTr("This Computer Is Ready To Be Reached")
+                                                : qsTr("Reach This Computer's Desktop From Home")
+                        color: Theme.text
+                        font.pixelSize: Theme.fontBody
+                        font.weight: Font.DemiBold
+                        wrapMode: Text.WordWrap
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        visible: !agentBar.showCode && agentBar.setup.error === ""
+                        text: qsTr("Install the Office Screen Helper so Burrow on another computer can open this desktop with its windows as you left them. It unlocks this screen when you connect, keeps the monitor off and locks the screen again when you leave. No administrator password needed.")
+                        color: Theme.textSecondary
+                        font.pixelSize: Theme.fontLabel
+                        wrapMode: Text.WordWrap
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        visible: agentBar.setup.error !== "" && !agentBar.showCode
+                        text: agentBar.setup.error
+                        color: Theme.danger
+                        font.pixelSize: Theme.fontLabel
+                        wrapMode: Text.WordWrap
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        visible: agentBar.showCode
+                        text: qsTr("On your other computer, edit this device in Burrow → Session → Office Screen Helper, and enter this pairing code and port %1. Settings shows the code again.").arg(agentBar.setup.port)
+                        color: Theme.textSecondary
+                        font.pixelSize: Theme.fontLabel
+                        wrapMode: Text.WordWrap
+                    }
+                    TextEdit {
+                        visible: agentBar.showCode
+                        Layout.topMargin: 6
+                        text: agentBar.setup.code
+                        readOnly: true
+                        selectByMouse: true
+                        color: Theme.text
+                        selectionColor: Theme.accent
+                        selectedTextColor: Theme.accentText
+                        font.family: Theme.monoFont
+                        font.pixelSize: Theme.fontBody
+                        Accessible.name: qsTr("Pairing Code")
+                    }
+                }
+                Spinner { visible: agentBar.setup.busy; Layout.alignment: Qt.AlignVCenter }
+                BButton {
+                    visible: !agentBar.showCode && !agentBar.setup.busy
+                    variant: "ghost"
+                    text: qsTr("Not Now")
+                    onClicked: agentBar.setup.dismiss()
+                }
+                BButton {
+                    visible: !agentBar.showCode && !agentBar.setup.busy
+                    variant: "primary"
+                    text: agentBar.setup.error !== "" ? qsTr("Try Again") : qsTr("Install Helper")
+                    onClicked: { agentBar.installing = true; agentBar.setup.install() }
+                }
+                BButton {
+                    visible: agentBar.showCode
+                    iconName: "copy"
+                    text: qsTr("Copy Code")
+                    onClicked: agentBar.setup.copyCode()
+                }
+                BButton {
+                    visible: agentBar.showCode
+                    variant: "primary"
+                    text: qsTr("Done")
+                    onClicked: agentBar.showCode = false
+                }
+            }
+            Connections {
+                target: App.agentSetup
+                function onChanged() {
+                    if (!agentBar.installing || App.agentSetup.busy)
+                        return
+                    // Done: show the code; on an error stay open with it and Try Again.
+                    if (App.agentSetup.installed && App.agentSetup.code !== "") {
+                        agentBar.installing = false
+                        agentBar.showCode = true
+                    }
+                }
+            }
         }
 
         // --- Grid ------------------------------------------------------------

@@ -47,6 +47,8 @@ qt_add_executable(burrow
     src/rdp/RdpClipboard.h
     src/rdp/RdpSession.cpp
     src/rdp/AgentLink.cpp
+    src/app/AgentSetup.cpp
+    src/app/AgentSetup.h
     src/rdp/AgentLink.h
     src/rdp/RdpSession.h
     src/rdp/RemoteSession.h
@@ -139,7 +141,7 @@ find_package(Qt6 6.5 QUIET COMPONENTS Test)
 if(Qt6Test_FOUND)
     qt_add_executable(tst_vault tests/tst_vault.cpp
         src/vault/Model.cpp src/vault/VaultStore.cpp src/net/NetCore.cpp
-        src/app/Updater.cpp src/app/Updater.h src/rdp/KeyMapper.cpp src/rdp/KeyMapper.h
+        src/app/Updater.cpp src/app/Updater.h src/app/AgentSetup.cpp src/app/AgentSetup.h src/rdp/KeyMapper.cpp src/rdp/KeyMapper.h
         src/rdp/RdpClipboard.cpp src/rdp/RdpClipboard.h
         src/app/AppController.cpp src/app/AppController.h src/app/ListModels.cpp src/app/ListModels.h
         src/app/PreviewProvider.cpp src/app/PreviewProvider.h src/app/TunnelManager.cpp src/app/TunnelManager.h

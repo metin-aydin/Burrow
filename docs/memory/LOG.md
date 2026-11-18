@@ -4,6 +4,11 @@ En yeni kayıt en üstte.
 
 ## 2026-11-19
 
+- **Agent Burrow'dan kuruluyor (kullanıcı isteği):** agent Linux paketlerine (AppImage/.deb, `usr/bin/burrow-agent`)
+  giriyor; Burrow Ubuntu'da (`XDG_CURRENT_DESKTOP` GNOME + paketteki ikili) galeride öneri barı gösterir, tıklayınca
+  `burrow-agent install --json` ile kurar ve eşleştirme kodunu aynı barda (Kopyala/Tamam) gösterir; "Şimdi Değil"
+  QSettings'e yazılır. Ayarlar'da durum/kod/yeni kod/kaldır bölümü. `AgentSetup` (C++), agent'a `--json` ve `code`.
+  Demo kancaları: `BURROW_DEMO_AGENT=1`, `BURROW_DEMO_OPEN=agent-code`. Gerçek Ubuntu'da denenmedi.
 - **burrow-agent yazıldı (`agent/`, ADR 0003 tasarımı):** kullanıcı ödünü kabul etti, şartı cihaz başına Ubuntu'ya
   özel kapatılabilir ayar. Go, yalnız standart kütüphane, `go 1.22` (Ubuntu'nun Go'su derler); modül yolu
   `github.com/metin-aydin/Burrow/agent` (`go install …/agent/cmd/burrow-agent@development` çalışsın diye).

@@ -2,6 +2,21 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="tr">
 <context>
+    <name>AgentSetup</name>
+    <message>
+        <source>The helper couldn&apos;t be set up: %1</source>
+        <translation>Yardımcı kurulamadı: %1</translation>
+    </message>
+    <message>
+        <source>The helper couldn&apos;t be set up.</source>
+        <translation>Yardımcı kurulamadı.</translation>
+    </message>
+    <message>
+        <source>The helper couldn&apos;t be started: %1</source>
+        <translation>Yardımcı başlatılamadı: %1</translation>
+    </message>
+</context>
+<context>
     <name>AppController</name>
     <message>
         <source>Burrow %1 is available. Install it from Settings.</source>
@@ -567,6 +582,46 @@
         <translation>Doğrudan</translation>
     </message>
     <message>
+        <source>This Computer Is Ready To Be Reached</source>
+        <translation>Bu Bilgisayara Artık Uzaktan Ulaşılabilir</translation>
+    </message>
+    <message>
+        <source>Reach This Computer&apos;s Desktop From Home</source>
+        <translation>Bu Bilgisayarın Masaüstüne Evden Ulaş</translation>
+    </message>
+    <message>
+        <source>Install the Office Screen Helper so Burrow on another computer can open this desktop with its windows as you left them. It unlocks this screen when you connect, keeps the monitor off and locks the screen again when you leave. No administrator password needed.</source>
+        <translation>Ofis Ekranı Yardımcısı&apos;nı kurarsan başka bir bilgisayardaki Burrow bu masaüstünü pencereleri bıraktığın gibi açabilir. Bağlandığında bu ekranın kilidini açar, monitörü kapalı tutar ve ayrıldığında ekranı yeniden kilitler. Yönetici parolası gerekmez.</translation>
+    </message>
+    <message>
+        <source>On your other computer, edit this device in Burrow → Session → Office Screen Helper, and enter this pairing code and port %1. Settings shows the code again.</source>
+        <translation>Diğer bilgisayarında Burrow&apos;da bu cihazı düzenle → Oturum → Ofis Ekranı Yardımcısı&apos;na bu eşleştirme kodunu ve %1 portunu gir. Kodu Ayarlar&apos;da yeniden görebilirsin.</translation>
+    </message>
+    <message>
+        <source>Pairing Code</source>
+        <translation>Eşleştirme Kodu</translation>
+    </message>
+    <message>
+        <source>Not Now</source>
+        <translation>Şimdi Değil</translation>
+    </message>
+    <message>
+        <source>Try Again</source>
+        <translation>Tekrar Dene</translation>
+    </message>
+    <message>
+        <source>Install Helper</source>
+        <translation>Yardımcıyı Kur</translation>
+    </message>
+    <message>
+        <source>Copy Code</source>
+        <translation>Kodu Kopyala</translation>
+    </message>
+    <message>
+        <source>Done</source>
+        <translation>Bitti</translation>
+    </message>
+    <message>
         <source>No devices match &quot;%1&quot;.</source>
         <translation>&quot;%1&quot; ile eşleşen cihaz yok.</translation>
     </message>
@@ -1080,6 +1135,46 @@
     <message>
         <source>Restart And Update</source>
         <translation>Yeniden Başlat Ve Güncelle</translation>
+    </message>
+    <message>
+        <source>Office Screen Helper</source>
+        <translation>Ofis Ekranı Yardımcısı</translation>
+    </message>
+    <message>
+        <source>Not installed. With it, Burrow on another computer can open this desktop: it unlocks this screen when you connect, keeps the monitor off and locks the screen again when you leave.</source>
+        <translation>Kurulu değil. Kurulursa başka bir bilgisayardaki Burrow bu masaüstünü açabilir: bağlandığında bu ekranın kilidini açar, monitörü kapalı tutar ve ayrıldığında ekranı yeniden kilitler.</translation>
+    </message>
+    <message>
+        <source>Running. On your other computer, enter this pairing code and port %1 in the device&apos;s Office Screen Helper.</source>
+        <translation>Çalışıyor. Diğer bilgisayarında cihazın Ofis Ekranı Yardımcısı&apos;na bu eşleştirme kodunu ve %1 portunu gir.</translation>
+    </message>
+    <message>
+        <source>Installed but not running. Install it again to restart it.</source>
+        <translation>Kurulu ama çalışmıyor. Yeniden başlatmak için tekrar kur.</translation>
+    </message>
+    <message>
+        <source>Pairing Code</source>
+        <translation>Eşleştirme Kodu</translation>
+    </message>
+    <message>
+        <source>Install Helper</source>
+        <translation>Yardımcıyı Kur</translation>
+    </message>
+    <message>
+        <source>Copy Code</source>
+        <translation>Kodu Kopyala</translation>
+    </message>
+    <message>
+        <source>New Code</source>
+        <translation>Yeni Kod</translation>
+    </message>
+    <message>
+        <source>Makes A New Pairing Code; The Old One Stops Working</source>
+        <translation>Yeni Bir Eşleştirme Kodu Oluşturur; Eskisi Artık Çalışmaz</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Kaldır</translation>
     </message>
     <message>
         <source>About</source>
