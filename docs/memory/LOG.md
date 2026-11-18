@@ -4,6 +4,11 @@ En yeni kayıt en üstte.
 
 ## 2026-11-19
 
+- **burrow-agent yazıldı (`agent/`, ADR 0003 tasarımı):** kullanıcı ödünü kabul etti, şartı cihaz başına Ubuntu'ya
+  özel kapatılabilir ayar. Go, yalnız standart kütüphane, `go 1.22` (Ubuntu'nun Go'su derler); modül yolu
+  `github.com/metin-aydin/Burrow/agent` (`go install …/agent/cmd/burrow-agent@development` çalışsın diye).
+  HMAC-SHA256 iki yönlü, ±60 sn + nonce belleği, adres başına hatalı MAC sınırı; start/beat/end + 20 sn kira, 2 sn'de
+  bir monitör denetimi. `install/pair/status/uninstall/run`. Testler (`-race`) geçti; CI'ın Go işine eklendi.
 - **Intel CI düştü → düzeltildi:** Homebrew'un Intel FreeRDP'si 3.30'da kalmış (Burrow 3.33+ istiyor).
   `tools/mac-freerdp.sh` sabit sürümü (linux-deps.sh ile aynı commit) Homebrew seçenekleriyle kaynaktan derliyor
   (FFmpeg/H.264, CUPS, Mac ses); CI önbellekliyor, release imzalı paket için sıfırdan derliyor. Bu Mac'te denendi.

@@ -39,6 +39,30 @@ ekran oturumu denenmedi.
 - Mutter `PowerSaveMode` 3/0 kullanıcı servisinden kabul edildi (rc=0); uzak oturumda olduğu için görüntüye etkisi
   ölçülmedi.
 
+## burrow-agent tasarımı (2026-11-19, kullanıcıyla kararlaştırıldı)
+Kullanıcı ofisteki masaüstüne (Desktop Sharing) bağlanmak istiyor ve şu ödünü **kabul etti**: bağlıyken ofisteki
+oturum kilitsizdir (GNOME fiziksel ekranla uzak görüntüyü ayıramaz); biri ofiste fareyi oynatırsa monitör anlık
+açılır, masaüstü birkaç saniye görünür ve kullanılabilir. Kullanıcının şartı: **cihaz başına bir ayar**, yalnız
+Ubuntu cihazı tanımlarken görünür, kapatılabilir; kapalıyken Burrow agent'a hiç bağlanmaz.
+
+- **Program:** `agent/` (ayrı Go modülü, yalnız standart kütüphane; `loginctl` ve `gdbus` çağırır). systemd
+  **kullanıcı** servisi; root gerekmez (2026-11-19 denemesi: oturum sahibi kendi oturumunu kilitleyip açabiliyor).
+- **Kurulum:** `burrow-agent install` → 32 baytlık rastgele anahtar (`~/.config/burrow-agent/key`, 0600), servis
+  dosyası, servisi başlatır ve **eşleştirme kodunu** bir kez gösterir. Kod Burrow'da cihaz ayarına girilir, kasada
+  şifreli saklanır. `burrow-agent pair` yeni anahtar üretir (eskisi geçersiz olur), `uninstall` kaldırır.
+- **Ağ:** TCP 47391 (değiştirilebilir), tüm arayüzler: ofis bilgisayarı VPN/Tailscale ile LAN adresinden
+  erişiliyor, ADR'nin "yalnız tünel arayüzü" fikri uygulanamaz; güvenlik kimlik doğrulamadan gelir.
+- **Kimlik doğrulama (ADR'deki anahtar çifti yerine):** ortak anahtarla HMAC-SHA256, iki yönlü. İstek
+  `cmd`, `ts`, `nonce`, `mac`; yanıt istek nonce'una bağlı ayrı bir MAC taşır (Burrow da agent'ı doğrular). Anahtar
+  çiftinin buradaki tek artısı (Ubuntu'da yalnız açık anahtar durması) anlamsız: anahtar dosyasını okuyabilen zaten
+  o oturumun sahibi. Tekrar saldırısına karşı ±60 sn zaman damgası + 2 dk nonce belleği; bir adresten dakikada 5
+  hatalı MAC → o adres 5 dk yok sayılır.
+- **Komutlar:** `start` (kilidi aç, monitörü kapat, 20 sn'lik kira başlat), `beat` (kirayı uzat; Burrow 5 sn'de bir
+  gönderir), `end` (kilitle, monitörü aç). Kira dolarsa (bağlantı koptu, Mac uyudu) agent kilitler ve monitörü açar.
+  Bağlıyken agent 2 sn'de bir monitörün kapalı olduğunu denetler, uyandıysa yeniden kapatır.
+- **Burrow:** `start` RDP'den önce tünel üzerinden gönderilir (aynı `NetcoreConnectFD` yolu); başarısız olursa
+  bağlanma yine denenir (ekran zaten açık olabilir) ve bağlantı adımlarında uyarı görünür.
+
 ## Güvenlik notu
 Agent oturum kilidini açabildiği için en hassas bileşen. Anahtarı ele geçiren biri kilidi açabilir;
 bu yüzden agent anahtarı istemcide şifreli kasada, Ubuntu'da sadece kullanıcıya okunur dosyada tutulur

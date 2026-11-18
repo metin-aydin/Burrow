@@ -25,6 +25,13 @@ jobs:
       - name: Test
         working-directory: netcore
         run: go test -race ./...
+      # burrow-agent (ADR 0003): its own module, standard library only.
+      - name: Agent vet and test
+        working-directory: agent
+        run: |
+          test -z "$(gofmt -l .)" || { gofmt -l .; echo "::error::Run gofmt on agent/"; exit 1; }
+          go vet ./...
+          go test -race ./...
 
   vulncheck:
     name: Known Go vulnerabilities
