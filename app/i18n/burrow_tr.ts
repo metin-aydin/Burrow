@@ -428,18 +428,18 @@
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="164"/>
-        <source>Connect to the existing session</source>
-        <translation>Mevcut oturuma bağlan</translation>
+        <source>Connect To The Existing Session</source>
+        <translation>Mevcut Oturuma Bağlan</translation>
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="165"/>
-        <source>Start a new session</source>
-        <translation>Yeni oturum aç</translation>
+        <source>Start A New Session</source>
+        <translation>Yeni Oturum Aç</translation>
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="166"/>
-        <source>Ask every time</source>
-        <translation>Her bağlantıda sor</translation>
+        <source>Ask Every Time</source>
+        <translation>Her Bağlantıda Sor</translation>
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="173"/>
@@ -448,13 +448,13 @@
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="174"/>
-        <source>Play on this computer</source>
-        <translation>Bu bilgisayarda çal</translation>
+        <source>Play On This Computer</source>
+        <translation>Bu Bilgisayarda Çal</translation>
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="175"/>
-        <source>Play on the remote computer</source>
-        <translation>Uzak bilgisayarda çal</translation>
+        <source>Play On The Remote Computer</source>
+        <translation>Uzak Bilgisayarda Çal</translation>
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="182"/>
@@ -478,8 +478,8 @@
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="192"/>
-        <source>One monitor</source>
-        <translation>Tek monitör</translation>
+        <source>One Monitor</source>
+        <translation>Tek Monitör</translation>
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="202"/>
@@ -503,18 +503,18 @@
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="225"/>
-        <source>Both directions</source>
-        <translation>Çift yönlü</translation>
+        <source>Both Directions</source>
+        <translation>Çift Yönlü</translation>
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="226"/>
-        <source>Only from this computer to remote</source>
-        <translation>Sadece bu bilgisayardan uzağa</translation>
+        <source>Only From This Computer To Remote</source>
+        <translation>Sadece Bu Bilgisayardan Uzağa</translation>
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="227"/>
-        <source>Only from remote to this computer</source>
-        <translation>Sadece uzaktan bu bilgisayara</translation>
+        <source>Only From Remote To This Computer</source>
+        <translation>Sadece Uzaktan Bu Bilgisayara</translation>
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="176"/>
@@ -524,8 +524,8 @@
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="193"/>
-        <source>One monitor per display of this computer</source>
-        <translation>Bu bilgisayarın her ekranı için bir monitör</translation>
+        <source>One Monitor Per Display Of This Computer</source>
+        <translation>Bu Bilgisayarın Her Ekranı İçin Bir Monitör</translation>
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="237"/>
@@ -549,18 +549,18 @@
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="254"/>
-        <source>Translate shortcuts (Cmd+C → Ctrl+C)</source>
-        <translation>Kısayolları çevir (Cmd+C → Ctrl+C)</translation>
+        <source>Translate Shortcuts (Cmd+C → Ctrl+C)</source>
+        <translation>Kısayolları Çevir (Cmd+C → Ctrl+C)</translation>
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="255"/>
-        <source>Swap Cmd ↔ Ctrl completely</source>
-        <translation>Cmd ↔ Ctrl tamamen yer değiştir</translation>
+        <source>Swap Cmd ↔ Ctrl Completely</source>
+        <translation>Cmd ↔ Ctrl Tamamen Yer Değiştir</translation>
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="256"/>
-        <source>Off (keys as they are)</source>
-        <translation>Kapalı (tuşlar olduğu gibi)</translation>
+        <source>Off (Keys As They Are)</source>
+        <translation>Kapalı (Tuşlar Olduğu Gibi)</translation>
     </message>
     <message>
         <location filename="../qml/DeviceEditor.qml" line="272"/>
@@ -1023,8 +1023,8 @@
     </message>
     <message>
         <location filename="../qml/SessionWindow.qml" line="303"/>
-        <source>Show all monitors together</source>
-        <translation>Tüm monitörleri birlikte göster</translation>
+        <source>Show All Monitors Together</source>
+        <translation>Tüm Monitörleri Birlikte Göster</translation>
     </message>
     <message>
         <location filename="../qml/SessionWindow.qml" line="424"/>
@@ -1151,23 +1151,23 @@
     </message>
     <message>
         <location filename="../qml/SettingsDialog.qml" line="40"/>
-        <source>After 5 minutes of inactivity</source>
-        <translation>5 dakika işlem yapılmazsa</translation>
+        <source>After 5 Minutes Of Inactivity</source>
+        <translation>5 Dakika İşlem Yapılmazsa</translation>
     </message>
     <message>
         <location filename="../qml/SettingsDialog.qml" line="41"/>
-        <source>After 15 minutes of inactivity</source>
-        <translation>15 dakika işlem yapılmazsa</translation>
+        <source>After 15 Minutes Of Inactivity</source>
+        <translation>15 Dakika İşlem Yapılmazsa</translation>
     </message>
     <message>
         <location filename="../qml/SettingsDialog.qml" line="42"/>
-        <source>After 30 minutes of inactivity</source>
-        <translation>30 dakika işlem yapılmazsa</translation>
+        <source>After 30 Minutes Of Inactivity</source>
+        <translation>30 Dakika İşlem Yapılmazsa</translation>
     </message>
     <message>
         <location filename="../qml/SettingsDialog.qml" line="43"/>
-        <source>After 1 hour of inactivity</source>
-        <translation>1 saat işlem yapılmazsa</translation>
+        <source>After 1 Hour Of Inactivity</source>
+        <translation>1 Saat İşlem Yapılmazsa</translation>
     </message>
     <message>
         <location filename="../qml/SettingsDialog.qml" line="44"/>
@@ -1539,13 +1539,13 @@
     </message>
     <message>
         <location filename="../qml/TunnelEditor.qml" line="234"/>
-        <source>Append to password</source>
-        <translation>Şifrenin sonuna ekle</translation>
+        <source>Append To Password</source>
+        <translation>Şifrenin Sonuna Ekle</translation>
     </message>
     <message>
         <location filename="../qml/TunnelEditor.qml" line="234"/>
-        <source>Separate prompt (challenge)</source>
-        <translation>Ayrı soru (challenge)</translation>
+        <source>Separate Prompt (Challenge)</source>
+        <translation>Ayrı Soru (Challenge)</translation>
     </message>
     <message>
         <location filename="../qml/TunnelEditor.qml" line="235"/>
@@ -1554,13 +1554,13 @@
     </message>
     <message>
         <location filename="../qml/TunnelEditor.qml" line="236"/>
-        <source>Automatic (authenticator key)</source>
-        <translation>Otomatik (authenticator anahtarı)</translation>
+        <source>Automatic (Authenticator Key)</source>
+        <translation>Otomatik (Authenticator Anahtarı)</translation>
     </message>
     <message>
         <location filename="../qml/TunnelEditor.qml" line="236"/>
-        <source>Enter manually each time</source>
-        <translation>Her bağlantıda elle gir</translation>
+        <source>Enter Manually Each Time</source>
+        <translation>Her Bağlantıda Elle Gir</translation>
     </message>
     <message>
         <location filename="../qml/TunnelEditor.qml" line="246"/>

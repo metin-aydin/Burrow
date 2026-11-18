@@ -37,10 +37,10 @@ BDialog {
     BCombo {
         Layout.fillWidth: true
         label: qsTr("Auto-Lock")
-        options: [{ text: qsTr("After 5 minutes of inactivity"), value: 5 },
-                  { text: qsTr("After 15 minutes of inactivity"), value: 15 },
-                  { text: qsTr("After 30 minutes of inactivity"), value: 30 },
-                  { text: qsTr("After 1 hour of inactivity"), value: 60 },
+        options: [{ text: qsTr("After 5 Minutes Of Inactivity"), value: 5 },
+                  { text: qsTr("After 15 Minutes Of Inactivity"), value: 15 },
+                  { text: qsTr("After 30 Minutes Of Inactivity"), value: 30 },
+                  { text: qsTr("After 1 Hour Of Inactivity"), value: 60 },
                   { text: qsTr("Never"), value: 0 }]
         value: App.autoLockMinutes
         onValueChanged: if (value !== App.autoLockMinutes) App.autoLockMinutes = value

@@ -10,7 +10,7 @@ Her satır bir hafıza kaydını gösterir. Kayıt içerikleri ilgili dosyadadı
 - [GitHub MCP veya gh](feedback-github-via-mcp.md) — GitHub işleri MCP ya da gh CLI ile, tarayıcıya gönderme
 - [Release ve otomatik güncelleme](project-release-flow.md) — JumpDesk/UPaste ile aynı akış, gizli değer adları, eksikler
 - [Kimlik doğrulamada tekrar yok](feedback-auth-retry-safety.md) — test betiği hesabı kilitletti; ilk hatada dur
-- [Arayüz: Baş Harfler Büyük](feedback-ui-title-case.md) — buton/başlık/menü/input etiketlerinde her kelimenin baş harfi büyük
+- [Arayüz: Baş Harfler Büyük](feedback-ui-title-case.md) — buton/başlık/menü/etiket/dropdown seçeneği/tooltip'te her kelimenin baş harfi büyük
 - [GitHub repo bilgileri](project-github-meta.md) — About alanı uygulandı; değerler docs/github-settings.md'de
 - [Marka: logo ve renk](project-brand.md) — Toprak rengi logo, ikon üretimi, tema renkleri
 - [AI slop tasarım yasak](feedback-no-ai-slop-design.md) — Impeccable proje içinde kurulu; QML'de yasak kalıplar, hook yok

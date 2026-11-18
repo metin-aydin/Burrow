@@ -300,7 +300,7 @@ Window {
                     onClicked: { win.allMonitors = true; view.forceActiveFocus() }
                 }
                 BToolTip {
-                    text: qsTr("Show all monitors together")
+                    text: qsTr("Show All Monitors Together")
                     visible: allMouse.containsMouse && !allMouse.pressed
                 }
             }

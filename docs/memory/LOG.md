@@ -4,6 +4,8 @@ En yeni kayıt en üstte.
 
 ## 2026-11-19
 
+- **Açılır menü seçenekleri ve tooltip'ler Title Case:** 21 seçenek + 1 tooltip (İngilizce kaynak ve Türkçe çeviri),
+  kural hafızaya eklendi. Türkçe arayüzde ekran görüntüsüyle taşma kontrol edildi.
 - **Tüm monitörler görünümü (issue #8):** oturum penceresinde sekmelerin en solunda ikon düğme (`monitors.svg`);
   uzak masaüstünün tamamını tek görünümde gösterir, sekmeye tıklayınca o monitöre döner. Kullanıcı: tüm
   platformlarda, ayarlarda değil. Bu görünüm uzak çözünürlüğü değiştirmez (`RdpView`: çoklu monitörde `monitor=-1`

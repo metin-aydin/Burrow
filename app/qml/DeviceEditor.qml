@@ -161,9 +161,9 @@ BDialog {
             visible: !root.isMac
             Layout.fillWidth: true
             label: qsTr("Session")
-            options: [{ text: qsTr("Connect to the existing session"), value: "existing" },
-                      { text: qsTr("Start a new session"), value: "new" },
-                      { text: qsTr("Ask every time"), value: "ask" }]
+            options: [{ text: qsTr("Connect To The Existing Session"), value: "existing" },
+                      { text: qsTr("Start A New Session"), value: "new" },
+                      { text: qsTr("Ask Every Time"), value: "ask" }]
             value: root.d.sessionMode || "existing"
         }
         BCombo {
@@ -171,8 +171,8 @@ BDialog {
             visible: !root.isMac
             Layout.fillWidth: true
             label: qsTr("Sound")
-            options: [{ text: qsTr("Play on this computer"), value: "local" },
-                      { text: qsTr("Play on the remote computer"), value: "remote" },
+            options: [{ text: qsTr("Play On This Computer"), value: "local" },
+                      { text: qsTr("Play On The Remote Computer"), value: "remote" },
                       { text: qsTr("Off"), value: "off" }]
             value: root.d.audio || "local"
         }
@@ -189,8 +189,8 @@ BDialog {
             visible: !root.isMac
             Layout.fillWidth: true
             label: qsTr("Displays")
-            options: [{ text: qsTr("One monitor"), value: "window" },
-                      { text: qsTr("One monitor per display of this computer"), value: "all" }]
+            options: [{ text: qsTr("One Monitor"), value: "window" },
+                      { text: qsTr("One Monitor Per Display Of This Computer"), value: "all" }]
             value: root.d.displays || "window"
         }
         Text {
@@ -222,9 +222,9 @@ BDialog {
             id: clipCombo
             Layout.fillWidth: true
             label: qsTr("Clipboard Sharing")
-            options: [{ text: qsTr("Both directions"), value: "both" },
-                      { text: qsTr("Only from this computer to remote"), value: "to_remote" },
-                      { text: qsTr("Only from remote to this computer"), value: "to_local" },
+            options: [{ text: qsTr("Both Directions"), value: "both" },
+                      { text: qsTr("Only From This Computer To Remote"), value: "to_remote" },
+                      { text: qsTr("Only From Remote To This Computer"), value: "to_local" },
                       { text: qsTr("Off"), value: "off" }]
             value: root.d.clipboard || "both"
         }
@@ -251,9 +251,9 @@ BDialog {
             visible: !root.isMac && Qt.platform.os === "osx"
             Layout.fillWidth: true
             label: qsTr("Mac Shortcuts")
-            options: [{ text: qsTr("Translate shortcuts (Cmd+C → Ctrl+C)"), value: "shortcuts" },
-                      { text: qsTr("Swap Cmd ↔ Ctrl completely"), value: "swap" },
-                      { text: qsTr("Off (keys as they are)"), value: "off" }]
+            options: [{ text: qsTr("Translate Shortcuts (Cmd+C → Ctrl+C)"), value: "shortcuts" },
+                      { text: qsTr("Swap Cmd ↔ Ctrl Completely"), value: "swap" },
+                      { text: qsTr("Off (Keys As They Are)"), value: "off" }]
             value: root.d.keyMap || "shortcuts"
         }
     }
