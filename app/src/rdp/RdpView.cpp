@@ -32,9 +32,12 @@ RdpView::RdpView(QQuickItem *parent)
         // Logical pixels unless the device uses Retina resolution (then scale() is 200 on Retina).
         const qreal dpr = m_session->scale() / 100.0;
         const QSize px(qRound(width() * dpr), qRound(height() * dpr));
-        // A view of one monitor of several resizes that monitor; otherwise the whole desktop follows.
+        // A view of one monitor of several resizes that monitor; a view of all of them only looks (the
+        // monitors keep their own sizes); a single-monitor desktop follows the view.
         if (m_monitor >= 0 && m_session->multiMonitor())
             m_session->requestMonitorSize(m_monitor, px);
+        else if (m_session->multiMonitor())
+            return;
         else
             m_session->requestResize(px, m_session->scale());
     });

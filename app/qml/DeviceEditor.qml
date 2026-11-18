@@ -190,7 +190,7 @@ BDialog {
             Layout.fillWidth: true
             label: qsTr("Displays")
             options: [{ text: qsTr("One monitor"), value: "window" },
-                      { text: qsTr("One monitor per Mac display"), value: "all" }]
+                      { text: qsTr("One monitor per display of this computer"), value: "all" }]
             value: root.d.displays || "window"
         }
         Text {

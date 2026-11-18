@@ -2,6 +2,15 @@
 
 En yeni kayıt en üstte.
 
+## 2026-11-19
+
+- **Tüm monitörler görünümü (issue #8):** oturum penceresinde sekmelerin en solunda ikon düğme (`monitors.svg`);
+  uzak masaüstünün tamamını tek görünümde gösterir, sekmeye tıklayınca o monitöre döner. Kullanıcı: tüm
+  platformlarda, ayarlarda değil. Bu görünüm uzak çözünürlüğü değiştirmez (`RdpView`: çoklu monitörde `monitor=-1`
+  yeniden boyutlandırma istemez) ve düzen kaydına monitör boyutu yazmaz. Cihaz ayarındaki "One monitor per Mac
+  display" metni "…per display of this computer" oldu. `freerdp-shadow-cli` + `BURROW_DEMO_SPLIT=3` +
+  yeni `BURROW_DEMO_ALL=1` (`BURROW_GRAB` ile) ile görüntü alınarak doğrulandı.
+
 ## 2026-11-18
 
 - **RDP sesi:** kullanıcı Mac'ten Ubuntu'ya bağlanırken ses gelmediğini söyledi. Sebep: Burrow `rdpsnd` kanalını hiç

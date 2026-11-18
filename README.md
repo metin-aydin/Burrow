@@ -66,7 +66,7 @@ changes. Secrets are never written to logs. To report a vulnerability, see [SECU
   fallback, GNOME Remote Login hand-over and certificate pinning.
 - **Screen Sharing to Macs** with a built-in VNC client that speaks Apple's protocol: sign in with the Mac's user,
   encrypted session, the Mac's displays as tabs, Adaptive picture quality and the Mac's own pointer shapes.
-- **Multi-monitor**: one remote monitor per tab; drag a tab onto another display to give it its own window, full
+- **Multi-monitor**: one remote monitor per tab, or all of them at once with the button left of the tabs; drag a tab onto another display to give it its own window, full
   screen if you like. Burrow remembers the layout for each computer.
 - **Tunnels**: GlobalProtect with OTP (TOTP SHA-1/256/512), Tailscale and Headscale, Cloudflare Access. See
   [Tunnels inside the app](#tunnels-inside-the-app).
