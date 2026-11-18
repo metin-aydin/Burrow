@@ -2,6 +2,7 @@ import QtQuick
 import Burrow.Core
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
+import QtQuick.Dialogs
 
 // Add / edit a computer (SPEC §4, §4.1).
 BDialog {
@@ -12,6 +13,8 @@ BDialog {
     property string tab: "general"
     // Macs are reached over VNC (Screen Sharing, ADR 0008); everything else over RDP.
     readonly property bool isMac: osSeg.value === "macos"
+    readonly property bool isWindows: osSeg.value === "windows"
+    property string folderPath: ""   // the folder picked for sharing (kept while the switch is off)
 
     function openFor(id) {
         d = id ? App.device(id) : App.newDevice()
@@ -26,6 +29,7 @@ BDialog {
         sessionCombo.value = d.sessionMode || "existing"; lockSw.checked = d.lockOnDisconnect !== false
         onDisc.value = "keep_locked"; clipCombo.value = d.clipboard || "both"
         keyCombo.value = d.keyMap || "shortcuts"; audioCombo.value = d.audio || "local"
+        folderSw.checked = !!d.sharedFolder; folderPath = d.sharedFolder || ""; printerSw.checked = !!d.sharePrinters
         displaysCombo.value = d.displays || "window"; retinaSw.checked = !!d.retina
         error = ""
         tab = "general"; tabSeg.value = "general"   // a click breaks the binding, so reset both
@@ -34,6 +38,7 @@ BDialog {
     }
 
     function demoMac() { osSeg.value = "macos" }   // development (--seed-demo, BURROW_DEMO_OPEN=device-mac)
+    function demoSharing() { osSeg.value = "windows"; tab = "input"; tabSeg.value = "input"; folderPath = "/Users/demo/Projects"; folderSw.checked = true; printerSw.checked = true }   // BURROW_DEMO_OPEN=device-sharing
     function demoSession() { osSeg.value = "ubuntu"; tab = "session"; tabSeg.value = "session" }   // BURROW_DEMO_OPEN=device-session
 
     function save() {
@@ -45,6 +50,7 @@ BDialog {
             autoLogin: savePw.checked && autoLogin.checked,
             lockOnDisconnect: lockSw.checked, onDisconnect: onDisc.value,
             sessionMode: sessionCombo.value, clipboard: clipCombo.value, keyMap: keyCombo.value, audio: audioCombo.value,
+            sharedFolder: isWindows && folderSw.checked ? folderPath : "", sharePrinters: isWindows && printerSw.checked,
             displays: displaysCombo.value, retina: retinaSw.checked
         })
         const err = App.saveDevice(m)
@@ -61,7 +67,7 @@ BDialog {
                                { text: qsTr("Clipboard"), value: "input" }]
                             : [{ text: qsTr("General"), value: "general" },
                                { text: qsTr("Session"), value: "session" },
-                               { text: qsTr("Clipboard And Keyboard"), value: "input" }]
+                               { text: qsTr("Sharing And Keyboard"), value: "input" }]
         value: root.tab
         onValueChanged: root.tab = value
     }
@@ -256,6 +262,47 @@ BDialog {
                       { text: qsTr("Off (Keys As They Are)"), value: "off" }]
             value: root.d.keyMap || "shortcuts"
         }
+
+        // Files and printers: Windows only (GNOME's RDP server and a Mac's Screen Sharing don't offer them).
+        SectionTitle { visible: root.isWindows; text: qsTr("Files And Printers") }
+        BSwitch {
+            id: folderSw
+            visible: root.isWindows
+            Layout.fillWidth: true
+            title: qsTr("Share A Folder")
+            description: qsTr("The remote computer sees this folder as a drive and can read and change its files. Nothing else on this computer is shared.")
+            onToggled: if (checked && root.folderPath === "") folderDialog.open()
+        }
+        RowLayout {
+            visible: root.isWindows && folderSw.checked
+            Layout.fillWidth: true
+            spacing: 10
+            Text {
+                Layout.fillWidth: true
+                text: root.folderPath !== "" ? root.folderPath : qsTr("No folder chosen")
+                color: root.folderPath !== "" ? Theme.text : Theme.textSecondary
+                font.pixelSize: Theme.fontLabel
+                elide: Text.ElideMiddle
+            }
+            BButton {
+                text: qsTr("Choose Folder…")
+                onClicked: folderDialog.open()
+            }
+        }
+        BSwitch {
+            id: printerSw
+            visible: root.isWindows
+            Layout.fillWidth: true
+            title: qsTr("Share Printers")
+            description: qsTr("Documents printed on the remote computer can come out of this computer's printers.")
+        }
+    }
+    FolderDialog {
+        id: folderDialog
+        title: qsTr("Choose A Folder To Share")
+        onAccepted: root.folderPath = App.localPath(selectedFolder)
+        // Cancelled before any folder was picked: nothing to share.
+        onRejected: if (root.folderPath === "") folderSw.checked = false
     }
 
     Text {

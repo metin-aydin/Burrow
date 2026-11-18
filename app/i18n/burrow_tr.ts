@@ -261,10 +261,6 @@
         <translation>Oturum</translation>
     </message>
     <message>
-        <source>Clipboard And Keyboard</source>
-        <translation>Pano Ve Klavye</translation>
-    </message>
-    <message>
         <source>Name</source>
         <translation>Ad</translation>
     </message>
@@ -417,6 +413,10 @@
         <translation>Kapalı</translation>
     </message>
     <message>
+        <source>Sharing And Keyboard</source>
+        <translation>Paylaşım Ve Klavye</translation>
+    </message>
+    <message>
         <source>One Monitor Per Display Of This Computer</source>
         <translation>Bu Bilgisayarın Her Ekranı İçin Bir Monitör</translation>
     </message>
@@ -447,6 +447,38 @@
     <message>
         <source>Off (Keys As They Are)</source>
         <translation>Kapalı (Tuşlar Olduğu Gibi)</translation>
+    </message>
+    <message>
+        <source>Files And Printers</source>
+        <translation>Dosyalar Ve Yazıcılar</translation>
+    </message>
+    <message>
+        <source>Share A Folder</source>
+        <translation>Klasör Paylaş</translation>
+    </message>
+    <message>
+        <source>The remote computer sees this folder as a drive and can read and change its files. Nothing else on this computer is shared.</source>
+        <translation>Uzak bilgisayar bu klasörü bir sürücü olarak görür, içindeki dosyaları okuyup değiştirebilir. Bu bilgisayardaki başka hiçbir şey paylaşılmaz.</translation>
+    </message>
+    <message>
+        <source>No folder chosen</source>
+        <translation>Klasör seçilmedi</translation>
+    </message>
+    <message>
+        <source>Choose Folder…</source>
+        <translation>Klasör Seç…</translation>
+    </message>
+    <message>
+        <source>Share Printers</source>
+        <translation>Yazıcıları Paylaş</translation>
+    </message>
+    <message>
+        <source>Documents printed on the remote computer can come out of this computer&apos;s printers.</source>
+        <translation>Uzak bilgisayarda yazdırılan belgeler bu bilgisayarın yazıcılarından çıkabilir.</translation>
+    </message>
+    <message>
+        <source>Choose A Folder To Share</source>
+        <translation>Paylaşılacak Klasörü Seç</translation>
     </message>
     <message>
         <source>Cancel</source>

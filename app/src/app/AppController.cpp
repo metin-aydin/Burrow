@@ -710,6 +710,8 @@ QString AppController::startSession(const Model::Device &dev, const QString &use
     p.keyMap = dev.keyMap;
     p.clipboard = dev.clipboard;
     p.audio = dev.audio;
+    p.sharedFolder = dev.sharedFolder;
+    p.sharePrinters = dev.sharePrinters;
     // Start at the size the session window opens with; the view then follows the window. By default
     // the remote desktop gets the Mac's logical size, so text is as large as in Mac apps; "Retina"
     // sends physical pixels with a 200 % scale hint (sharper, but servers that ignore the hint show
@@ -951,6 +953,11 @@ QString decodeQr(QImage img)
 QString AppController::decodeQrImage(const QVariant &image) const
 {
     return decodeQr(qvariant_cast<QImage>(image));
+}
+
+QString AppController::localPath(const QUrl &url) const
+{
+    return QDir::toNativeSeparators(url.toLocalFile());
 }
 
 QString AppController::decodeQrFile(const QUrl &file) const

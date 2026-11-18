@@ -1,6 +1,8 @@
 #include "rdp/RdpSession.h"
 
 #include <QCoreApplication>
+#include <QFile>
+#include <QFileInfo>
 #include <cstring>
 #include <QRect>
 
@@ -436,6 +438,24 @@ void RdpSession::run()
     // there; neither tells the server not to play sound at all.
     freerdp_settings_set_bool(s, FreeRDP_AudioPlayback, m_p.audio == QLatin1String("local") ? TRUE : FALSE);
     freerdp_settings_set_bool(s, FreeRDP_RemoteConsoleAudio, m_p.audio == QLatin1String("remote") ? TRUE : FALSE);
+    // Device redirection, opt-in per device: exactly the folder the user picked (never RedirectDrives,
+    // which shares every drive) and this computer's printers. Windows servers support both; GNOME's
+    // doesn't offer them.
+    const QFileInfo folder(m_p.sharedFolder);
+    if (!m_p.sharedFolder.isEmpty() && folder.isDir()) {
+        const QByteArray path = QFile::encodeName(folder.absoluteFilePath());
+        QByteArray name = folder.fileName().toUtf8();
+        if (name.isEmpty())
+            name = "Burrow";   // a drive root such as "/" or "C:\" has no name of its own
+        const char *const drive[] = {"drive", name.constData(), path.constData()};
+        if (!freerdp_client_add_device_channel(s, 3, drive))
+            qWarning("rdp: couldn't share the folder");
+    }
+    if (m_p.sharePrinters) {
+        const char *const printer[] = {"printer"};   // no name: every printer of this computer
+        if (!freerdp_client_add_device_channel(s, 1, printer))
+            qWarning("rdp: couldn't share the printers");
+    }
     // Only NLA/TLS: legacy "RDP security" has no server authentication, so a man in the middle could
     // bypass the certificate pin. Servers that offer only that are refused.
     freerdp_settings_set_bool(s, FreeRDP_RdpSecurity, FALSE);

@@ -4,6 +4,10 @@ En yeni kayıt en üstte.
 
 ## 2026-11-19
 
+- **Klasör ve yazıcı paylaşımı (RDP):** cihaz başına, yalnız Windows hedefte görünür, varsayılan kapalı. Klasör
+  `freerdp_client_add_device_channel("drive", ad, yol)` ile tek klasör; `FreeRDP_RedirectDrives` bilerek kullanılmıyor
+  (tüm sürücüleri paylaşır). Yazıcılar `"printer"` (adsız = hepsi, CUPS). Sekme adı "Sharing And Keyboard".
+  Demo kancası `device-sharing`. Gerçek Windows sunucusunda denenmedi (yerel shadow sunucusu rdpdr desteklemiyor).
 - **Tekrarlayan CI hatasının sebebi bulundu:** son 7 başarısız koşunun 5'i `macOS build → Translations`; hepsinde
   "0 new" metin, fark yalnız `burrow_tr.ts`'teki `<location line=…>` numaralarıydı (metnin üstüne satır eklenen her
   düzenleme bozuyordu). `qt_add_translations` → `LUPDATE_OPTIONS -no-obsolete -locations none`; katalogdan 410
