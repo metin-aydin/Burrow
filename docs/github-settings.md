@@ -19,7 +19,7 @@ What the repository should have on GitHub itself (not in files). Applied through
 - **Default branch:** `master` (since 2026-11-16; daily work still goes to `development`).
 - **`development`** (ruleset): block force pushes and deletion; direct pushes allowed.
 - **`master`** (ruleset): changes only through a pull request from `development` (merge commits only);
-  required status checks `Go netcore tests`, `macOS build`, `Release scripts`, `Linux build`, `Windows build` (CI) and `Analyze (go)`,
+  required status checks `Go netcore tests`, `macOS build`, `Release scripts`, `Linux build`, `Windows build`, `macOS Intel build` (CI) and `Analyze (go)`,
   `Analyze (actions)` (CodeQL), and `Release source` (only pull requests from `development`,
   `.github/workflows/release-source.yml`; required since 2026-11-16); block force pushes and deletion. `master` was created at the first commit
   with the Release workflow disabled for that moment, so creating the branch published nothing; the first

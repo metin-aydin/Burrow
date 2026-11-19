@@ -85,6 +85,9 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
   — oturumu kapatma henüz yok, arayüzde gizli (2026-11-15).
 - **Oturum seçimi:** "Mevcut oturuma bağlan" / "Yeni oturum aç" / "Her bağlantıda sor"
   (ayrıntı §5.2).
+- **Ses (RDP):** "Bu bilgisayarda çal" (varsayılan) / "Uzak bilgisayarda çal" / "Kapalı" (2026-11-18).
+- **Klasör paylaş / Yazıcıları paylaş (RDP, yalnız Windows):** seçilen tek klasör uzak bilgisayarda sürücü olur;
+  yazıcılar bu bilgisayarınkiler. İkisi de varsayılan kapalı (2026-11-19).
 
 ## 5. RDP istemcisi
 
@@ -165,7 +168,8 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
 - [ ] GP sunucusunda HIP kontrolü var mı? (openconnect ile ön test)
 - [ ] Doğrudan gateway girişi tek OTP ile çalışıyor mu?
 - [ ] Teknoloji yığını kesinleştirme (bkz. aşağı)
-- [ ] Ses, sürücü yönlendirme, yazıcı: ilk sürümde yok
+- [x] Ses çıkışı (RDP): 2026-11-18. Klasör ve yazıcı paylaşımı (yalnız Windows, cihaz başına, varsayılan kapalı):
+  2026-11-19. Mikrofon: henüz yok
 
 ## 8. Teknoloji (KARAR: docs/decisions/0001-tech-stack.md)
 

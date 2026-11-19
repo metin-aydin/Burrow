@@ -4,8 +4,14 @@ find_package(FreeRDP 3.33 REQUIRED)
 find_package(FreeRDP-Client 3.33 REQUIRED)
 find_package(WinPR 3.33 REQUIRED)
 # VNC (ADR 0008): Apple sign-in (DH + AES), VNC password (DES) and ZRLE (zlib).
-if(APPLE AND NOT OPENSSL_ROOT_DIR AND EXISTS /opt/homebrew/opt/openssl@3)
-    set(OPENSSL_ROOT_DIR /opt/homebrew/opt/openssl@3)
+# Homebrew's OpenSSL 3 rather than the system's LibreSSL: /opt/homebrew on Apple Silicon, /usr/local on Intel.
+if(APPLE AND NOT OPENSSL_ROOT_DIR)
+    foreach(prefix /opt/homebrew /usr/local)
+        if(EXISTS ${prefix}/opt/openssl@3)
+            set(OPENSSL_ROOT_DIR ${prefix}/opt/openssl@3)
+            break()
+        endif()
+    endforeach()
 endif()
 find_package(OpenSSL 3 REQUIRED COMPONENTS Crypto)
 find_package(ZLIB REQUIRED)
@@ -40,6 +46,10 @@ qt_add_executable(burrow
     src/rdp/RdpClipboard.cpp
     src/rdp/RdpClipboard.h
     src/rdp/RdpSession.cpp
+    src/rdp/AgentLink.cpp
+    src/app/AgentSetup.cpp
+    src/app/AgentSetup.h
+    src/rdp/AgentLink.h
     src/rdp/RdpSession.h
     src/rdp/RemoteSession.h
     src/vnc/VncSession.cpp
@@ -64,11 +74,13 @@ qt_add_qml_module(burrow
     RESOURCES ${BURROW_ICONS} resources/icons/256x256.png
 )
 
-# Translations: English is the source language; Turkish ships as a compiled catalog.
+# Translations: English is the source language; Turkish ships as a compiled catalog. No source locations
+# in the catalog: line numbers changed with every edit above a string, so CI's "catalog is up to date"
+# check failed on commits that touched no text at all.
 qt_add_translations(burrow
     TS_FILES i18n/burrow_tr.ts
     RESOURCE_PREFIX /i18n
-    LUPDATE_OPTIONS -no-obsolete)
+    LUPDATE_OPTIONS -no-obsolete -locations none)
 
 if(APPLE)
     enable_language(OBJCXX)
@@ -129,11 +141,11 @@ find_package(Qt6 6.5 QUIET COMPONENTS Test)
 if(Qt6Test_FOUND)
     qt_add_executable(tst_vault tests/tst_vault.cpp
         src/vault/Model.cpp src/vault/VaultStore.cpp src/net/NetCore.cpp
-        src/app/Updater.cpp src/app/Updater.h src/rdp/KeyMapper.cpp src/rdp/KeyMapper.h
+        src/app/Updater.cpp src/app/Updater.h src/app/AgentSetup.cpp src/app/AgentSetup.h src/rdp/KeyMapper.cpp src/rdp/KeyMapper.h
         src/rdp/RdpClipboard.cpp src/rdp/RdpClipboard.h
         src/app/AppController.cpp src/app/AppController.h src/app/ListModels.cpp src/app/ListModels.h
         src/app/PreviewProvider.cpp src/app/PreviewProvider.h src/app/TunnelManager.cpp src/app/TunnelManager.h
-        src/rdp/RdpSession.cpp src/rdp/RdpSession.h src/rdp/RemoteSession.h src/net/LocalSocket.cpp src/net/LocalSocket.h src/vnc/VncSession.cpp src/vnc/VncSession.h src/vnc/AppleAdaptive.cpp src/vnc/AppleAdaptive.h src/rdp/FreeRdpEngine.cpp src/rdp/FreeRdpEngine.h src/rdp/RdpEngine.h)
+        src/rdp/RdpSession.cpp src/rdp/RdpSession.h src/rdp/AgentLink.cpp src/rdp/AgentLink.h src/rdp/RemoteSession.h src/net/LocalSocket.cpp src/net/LocalSocket.h src/vnc/VncSession.cpp src/vnc/VncSession.h src/vnc/AppleAdaptive.cpp src/vnc/AppleAdaptive.h src/rdp/FreeRdpEngine.cpp src/rdp/FreeRdpEngine.h src/rdp/RdpEngine.h)
     target_compile_definitions(tst_vault PRIVATE BURROW_DEMO_ASSETS="${CMAKE_SOURCE_DIR}/docs/assets/demo")
     target_compile_definitions(tst_vault PRIVATE BURROW_TEST_DATA="${CMAKE_CURRENT_SOURCE_DIR}/tests"
                                                  BURROW_VERSION="${PROJECT_VERSION}")

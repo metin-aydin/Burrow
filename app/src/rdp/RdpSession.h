@@ -34,6 +34,11 @@ public:
         QSize size{1600, 1000};
         QString keyMap = QStringLiteral("shortcuts");
         QString clipboard = QStringLiteral("both");
+        QString audio = QStringLiteral("local");   // local (play here) | remote (leave on the server) | off
+        QString sharedFolder;            // shown on the remote computer as a drive; empty = no drive at all
+        bool sharePrinters = false;
+        QByteArray agentKey;             // burrow-agent pairing key (Ubuntu, ADR 0003); empty = don't use it
+        quint16 agentPort = 47391;
         int scale = 100;                 // desktop scale factor in percent (200 on Retina)
         bool lockOnDisconnect = false;   // send Win/Super+L before closing
         QString knownFingerprint;        // pin "host:port|sha256" confirmed by the user earlier

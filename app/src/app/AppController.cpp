@@ -1,4 +1,5 @@
 #include "app/AppController.h"
+#include "rdp/AgentLink.h"
 
 #include <QJsonDocument>
 #include <QBuffer>
@@ -709,6 +710,14 @@ QString AppController::startSession(const Model::Device &dev, const QString &use
     p.domain = dev.domain;
     p.keyMap = dev.keyMap;
     p.clipboard = dev.clipboard;
+    p.audio = dev.audio;
+    p.sharedFolder = dev.sharedFolder;
+    p.sharePrinters = dev.sharePrinters;
+    // The Office Screen Helper only for Ubuntu devices that have it switched on (the user's rule).
+    if (dev.os == QLatin1String("ubuntu") && dev.officeHelper) {
+        p.agentKey = AgentLink::keyFromCode(dev.agentCode);
+        p.agentPort = quint16(qBound(1, dev.agentPort, 65535));
+    }
     // Start at the size the session window opens with; the view then follows the window. By default
     // the remote desktop gets the Mac's logical size, so text is as large as in Mac apps; "Retina"
     // sends physical pixels with a 200 % scale hint (sharper, but servers that ignore the hint show
@@ -950,6 +959,16 @@ QString decodeQr(QImage img)
 QString AppController::decodeQrImage(const QVariant &image) const
 {
     return decodeQr(qvariant_cast<QImage>(image));
+}
+
+bool AppController::validAgentCode(const QString &code) const
+{
+    return !AgentLink::keyFromCode(code).isEmpty();
+}
+
+QString AppController::localPath(const QUrl &url) const
+{
+    return QDir::toNativeSeparators(url.toLocalFile());
 }
 
 QString AppController::decodeQrFile(const QUrl &file) const

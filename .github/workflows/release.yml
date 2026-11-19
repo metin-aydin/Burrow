@@ -79,17 +79,32 @@ jobs:
     strategy:
       matrix:
         include:
-          # Apple Silicon. Intel joins when that port lands; Linux and Windows have their own jobs below.
+          # Apple Silicon and Intel, each built natively with its own Homebrew; Linux and Windows have their
+          # own jobs below.
           - os: macos-15
             platform: mac-arm64
+            arch: arm64
+          - os: macos-15-intel
+            platform: mac-x64
+            arch: x86_64
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with:
           go-version-file: netcore/go.mod
+      # Apple Silicon uses Homebrew's FreeRDP; Intel's bottle is too old (3.30), so the pinned one is built from
+      # source there (fresh, not from a cache: this build gets signed).
       - name: Install dependencies
-        run: brew install cmake ninja qt freerdp openconnect
+        run: |
+          if [ "${{ matrix.arch }}" = x86_64 ]; then
+            brew install cmake ninja pkgconf qt openconnect ffmpeg jpeg-turbo openssl@3
+            tools/mac-freerdp.sh "$RUNNER_TEMP/freerdp"
+            echo "FREERDP_PREFIX=$RUNNER_TEMP/freerdp" >> "$GITHUB_ENV"
+          else
+            brew install cmake ninja qt freerdp openconnect
+            echo "FREERDP_PREFIX=$(brew --prefix freerdp)" >> "$GITHUB_ENV"
+          fi
       # The macOS build must be signed with Developer ID and notarized; without the secrets the release stops
       # (an unsigned app is blocked by Gatekeeper and cannot update itself). Same secret names as JumpDesk.
       - name: Check signing secrets
@@ -109,8 +124,8 @@ jobs:
       - name: Build
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$(brew --prefix freerdp)" \
-            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$FREERDP_PREFIX" \
+            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
             -DBURROW_VERSION=${{ needs.prepare.outputs.version }}
           cmake --build build
           (cd build && ctest --output-on-failure)
@@ -182,7 +197,7 @@ jobs:
           path: fragment-${{ matrix.platform }}.json
 
   # Linux: an AppImage and a .deb that carry Qt, FreeRDP and openconnect (Ubuntu 24.04 baseline, so they run on
-  # 24.04 and newer). No update manifest entry yet: in-app updates on Linux follow later.
+  # 24.04 and newer). Both the AppImage and the .deb update in the app.
   linux:
     needs: prepare
     if: github.ref == 'refs/heads/master'
@@ -211,11 +226,26 @@ jobs:
       - name: Package
         run: |
           tools/package-appimage.sh build ${{ needs.prepare.outputs.version }} /opt/burrow-deps
-          cd dist && for f in *.AppImage *.deb; do sha256sum "$f" > "$f.sha256"; done
+          # burrow-agent (ADR 0003) for the Ubuntu computers Burrow connects to: static, no C dependencies.
+          (cd agent && CGO_ENABLED=0 go build -trimpath -ldflags=-s -o ../dist/burrow-agent-linux-x64 ./cmd/burrow-agent)
+          cd dist && for f in *.AppImage *.deb burrow-agent-linux-x64; do sha256sum "$f" > "$f.sha256"; done
+      # In-app updates: the AppImage replaces itself, a .deb install upgrades through apt (Updater::installLinux).
+      - name: Update manifest fragment
+        run: |
+          v=${{ needs.prepare.outputs.version }}
+          entry() { printf '"%s": {"name": "%s", "sha256": "%s", "size": %s}' "$1" "$2" \
+                      "$(sha256sum "dist/$2" | cut -d' ' -f1)" "$(stat -c %s "dist/$2")"; }
+          printf '{%s, %s}\n' "$(entry linux-x64 "Burrow-$v-linux-x64.AppImage")" \
+            "$(entry linux-x64-deb "burrow_${v}_amd64.deb")" > fragment-linux-x64.json
+          cat fragment-linux-x64.json
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "v${{ needs.prepare.outputs.version }}" dist/*.AppImage dist/*.deb dist/*.sha256 --clobber
+        run: gh release upload "v${{ needs.prepare.outputs.version }}" dist/*.AppImage dist/*.deb dist/burrow-agent-linux-x64 dist/*.sha256 --clobber
+      - uses: actions/upload-artifact@v7
+        with:
+          name: fragment-linux-x64
+          path: fragment-linux-x64.json
 
   # Windows (ADR 0010, same shape as JumpDesk): a per-user NSIS installer, which is also the in-app update
   # package, and a portable zip. Unsigned for now: when a code signing certificate arrives, a signing step

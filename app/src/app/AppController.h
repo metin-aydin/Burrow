@@ -10,6 +10,7 @@
 #include "app/ListModels.h"
 #include "app/TunnelManager.h"
 #include "app/Updater.h"
+#include "app/AgentSetup.h"
 #include "rdp/RdpSession.h"
 #include "vnc/VncSession.h"
 #include "vault/VaultStore.h"
@@ -28,6 +29,7 @@ class AppController : public QObject
     Q_PROPERTY(TunnelModel *tunnels READ tunnels CONSTANT)
     Q_PROPERTY(DeviceFilterModel *gallery READ gallery CONSTANT)
     Q_PROPERTY(Updater *updater READ updater CONSTANT)
+    Q_PROPERTY(AgentSetup *agentSetup READ agentSetup CONSTANT)   // burrow-agent on this computer (Ubuntu)
     Q_PROPERTY(QVariantMap tunnelStates READ tunnelStates NOTIFY tunnelStatesChanged)
     Q_PROPERTY(QString versionInfo READ versionInfo CONSTANT)
     Q_PROPERTY(int autoLockMinutes READ autoLockMinutes WRITE setAutoLockMinutes NOTIFY autoLockChanged)
@@ -42,6 +44,7 @@ public:
     TunnelModel *tunnels() { return &m_tunnels; }
     DeviceFilterModel *gallery() { return &m_gallery; }
     Updater *updater() { return &m_updater; }
+    AgentSetup *agentSetup() { return &m_agentSetup; }
     QVariantMap tunnelStates() const { return m_tunnelMgr.states(); }
     QString versionInfo() const;
     VaultStore *store() { return &m_store; }
@@ -128,6 +131,8 @@ public:
     // QR codes (authenticator exports): return the decoded text or "".
     Q_INVOKABLE QString decodeQrImage(const QVariant &image) const;   // QImage (e.g. a camera frame grab)
     Q_INVOKABLE QString decodeQrFile(const QUrl &file) const;
+    Q_INVOKABLE QString localPath(const QUrl &url) const;
+    Q_INVOKABLE bool validAgentCode(const QString &code) const;   // a burrow-agent pairing code?   // a picked file or folder as a path of this OS
     Q_INVOKABLE QString decodeQrClipboard() const;
     Q_INVOKABLE QString clipboardText() const;
 
@@ -167,6 +172,7 @@ private:
     TunnelModel m_tunnels;
     DeviceFilterModel m_gallery;
     Updater m_updater;
+    AgentSetup m_agentSetup;
     TunnelManager m_tunnelMgr{&m_store};
     QList<Pending> m_pending;
     QHash<RemoteSession *, QString> m_sessionTunnels;   // session -> tunnel it runs through

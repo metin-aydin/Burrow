@@ -194,6 +194,9 @@ int main(int argc, char *argv[])
                     auto *qw = qobject_cast<QQuickWindow *>(w);
                     if (!qw || !qw->isVisible())
                         continue;
+                    // BURROW_DEMO_ALL=1 shows every monitor at once in session windows first.
+                    if (qEnvironmentVariableIntValue("BURROW_DEMO_ALL") && qw->property("allMonitors").isValid())
+                        qw->setProperty("allMonitors", true);
                     QString file = grab;
                     if (n > 0)
                         file.replace(QStringLiteral(".png"), QStringLiteral("-%1.png").arg(n));

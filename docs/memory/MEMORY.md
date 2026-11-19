@@ -10,10 +10,11 @@ Her satır bir hafıza kaydını gösterir. Kayıt içerikleri ilgili dosyadadı
 - [GitHub MCP veya gh](feedback-github-via-mcp.md) — GitHub işleri MCP ya da gh CLI ile, tarayıcıya gönderme
 - [Release ve otomatik güncelleme](project-release-flow.md) — JumpDesk/UPaste ile aynı akış, gizli değer adları, eksikler
 - [Kimlik doğrulamada tekrar yok](feedback-auth-retry-safety.md) — test betiği hesabı kilitletti; ilk hatada dur
-- [Arayüz: Baş Harfler Büyük](feedback-ui-title-case.md) — buton/başlık/menü/input etiketlerinde her kelimenin baş harfi büyük
+- [Arayüz: Baş Harfler Büyük](feedback-ui-title-case.md) — buton/başlık/menü/etiket/dropdown seçeneği/tooltip'te her kelimenin baş harfi büyük
 - [GitHub repo bilgileri](project-github-meta.md) — About alanı uygulandı; değerler docs/github-settings.md'de
 - [Marka: logo ve renk](project-brand.md) — Toprak rengi logo, ikon üretimi, tema renkleri
 - [AI slop tasarım yasak](feedback-no-ai-slop-design.md) — Impeccable proje içinde kurulu; QML'de yasak kalıplar, hook yok
+- [Ubuntu iş bilgisayarı](project-ubuntu-work-pc.md) — metin-pc: Ubuntu 24.10 / GNOME 47; ofisteki masaüstüne (Desktop Sharing) bağlanmak istiyor
 - [Lokal derleme](reference-local-build.md) — bu Mac'te Xcode SDK bayrakları şart; go yolu
 - [Araştırmalar](../research/) — RDP motoru/UI ve tünel/TOTP araştırmaları (2026-11-14)
 - [Kararlar (ADR)](../decisions/) — 0001 teknoloji yığını, 0002 release + otomatik güncelleme, 0003 Ubuntu oturum stratejisi (burrow-agent), 0004 kasa (Touch ID kaldırıldı), 0005 QML arayüz, 0006 çoklu dil, 0007 Cloudflare tüneli, 0008 macOS VNC, 0009 macOS dosya aktarımı (SSFileCopy tersine mühendislik), 0010 Windows portu (MSYS2, NSIS, JumpDesk gibi güncelleme)

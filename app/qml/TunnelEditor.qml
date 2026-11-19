@@ -231,9 +231,9 @@ BDialog {
             RowLayout {
                 spacing: 12
                 BCombo { id: otpMode; Layout.fillWidth: true; label: qsTr("OTP Type")
-                    options: [{ text: qsTr("Append to password"), value: "append" }, { text: qsTr("Separate prompt (challenge)"), value: "separate" }] }
+                    options: [{ text: qsTr("Append To Password"), value: "append" }, { text: qsTr("Separate Prompt (Challenge)"), value: "separate" }] }
                 BCombo { id: otpSource; Layout.fillWidth: true; label: qsTr("OTP Source")
-                    options: [{ text: qsTr("Automatic (authenticator key)"), value: "totp" }, { text: qsTr("Enter manually each time"), value: "manual" }] }
+                    options: [{ text: qsTr("Automatic (Authenticator Key)"), value: "totp" }, { text: qsTr("Enter Manually Each Time"), value: "manual" }] }
             }
             // What the chosen OTP type means at sign-in, so the choice isn't a guess.
             Text {

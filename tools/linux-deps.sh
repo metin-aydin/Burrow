@@ -25,7 +25,7 @@ export DEBIAN_FRONTEND=noninteractive
 $SUDO apt-get update -q
 $SUDO apt-get install -y -q --no-install-recommends \
     build-essential cmake ninja-build pkg-config git curl ca-certificates file python3-pip python3-venv \
-    libopenconnect-dev libssl-dev zlib1g-dev libcjson-dev libusb-1.0-0-dev libkrb5-dev \
+    libopenconnect-dev libpulse-dev libssl-dev zlib1g-dev libcjson-dev libusb-1.0-0-dev libkrb5-dev \
     libgl1-mesa-dev libegl1-mesa-dev libxkbcommon-dev libxkbcommon-x11-0 libfontconfig1-dev libfreetype-dev \
     libx11-xcb1 libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
     libxcb-shape0 libxcb-xinerama0 libxcb-xkb1 libdbus-1-3 libpulse0 libgstreamer-plugins-base1.0-0 \
@@ -47,7 +47,8 @@ if [ "$("$PREFIX/qt/bin/qmake" -query QT_VERSION 2>/dev/null)" != "$QT_VERSION" 
     $PSUDO mv "$WORK/qt-install/$QT_VERSION/$(ls "$WORK/qt-install/$QT_VERSION" | head -n1)" "$PREFIX/qt"
 fi
 
-# FreeRDP: only the client library pieces Burrow uses (no X11/SDL/Wayland clients, no server).
+# FreeRDP: only the client library pieces Burrow uses (no X11/SDL/Wayland clients, no server); sound through PulseAudio
+# (PipeWire serves it on current Ubuntu).
 if [ ! -f "$PREFIX/freerdp/lib/cmake/FreeRDP3/FreeRDPConfig.cmake" ] \
    && [ ! -f "$PREFIX/freerdp/lib64/cmake/FreeRDP3/FreeRDPConfig.cmake" ]; then
     src="$WORK/freerdp-src"
@@ -61,7 +62,7 @@ if [ ! -f "$PREFIX/freerdp/lib/cmake/FreeRDP3/FreeRDPConfig.cmake" ] \
         -DWITH_CLIENT_SDL=OFF -DWITH_CLIENT_SDL2=OFF -DWITH_CLIENT_SDL3=OFF -DWITH_X11=OFF -DWITH_WAYLAND=OFF \
         -DWITH_SERVER=OFF -DWITH_SHADOW=OFF -DWITH_PROXY=OFF -DWITH_PLATFORM_SERVER=OFF -DWITH_SAMPLE=OFF \
         -DWITH_FFMPEG=OFF -DWITH_SWSCALE=OFF -DWITH_DSP_FFMPEG=OFF -DWITH_CUPS=OFF -DWITH_PCSC=OFF \
-        -DWITH_PULSE=OFF -DWITH_ALSA=OFF -DWITH_OSS=OFF -DWITH_FUSE=OFF -DWITH_MANPAGES=OFF \
+        -DWITH_PULSE=ON -DWITH_ALSA=OFF -DWITH_OSS=OFF -DWITH_FUSE=OFF -DWITH_MANPAGES=OFF \
         -DWITH_WEBVIEW=OFF -DCHANNEL_URBDRC=OFF -DBUILD_TESTING=OFF -DWITH_CLIENT_CHANNELS=ON
     cmake --build "$WORK/freerdp-build"
     $PSUDO cmake --install "$WORK/freerdp-build"

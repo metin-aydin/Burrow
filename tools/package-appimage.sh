@@ -28,6 +28,9 @@ chmod +x "$tools/linuxdeploy" "$tools/linuxdeploy-plugin-qt"
 
 appdir=$(mktemp -d)/AppDir
 DESTDIR="$appdir" cmake --install "$BUILD" --prefix /usr
+# burrow-agent (ADR 0003) rides along: Burrow on Ubuntu offers to install it from here, so the computer can be
+# reached from Burrow elsewhere. Static, no C dependencies; the .deb gets it too (it is made from this AppDir).
+(cd agent && CGO_ENABLED=0 go build -trimpath -ldflags=-s -o "$appdir/usr/bin/burrow-agent" ./cmd/burrow-agent)
 mkdir -p "$appdir/usr/share/icons/hicolor/256x256/apps"
 cp app/resources/icons/256x256.png "$appdir/usr/share/icons/hicolor/256x256/apps/burrow.png"
 

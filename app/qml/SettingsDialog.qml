@@ -37,10 +37,10 @@ BDialog {
     BCombo {
         Layout.fillWidth: true
         label: qsTr("Auto-Lock")
-        options: [{ text: qsTr("After 5 minutes of inactivity"), value: 5 },
-                  { text: qsTr("After 15 minutes of inactivity"), value: 15 },
-                  { text: qsTr("After 30 minutes of inactivity"), value: 30 },
-                  { text: qsTr("After 1 hour of inactivity"), value: 60 },
+        options: [{ text: qsTr("After 5 Minutes Of Inactivity"), value: 5 },
+                  { text: qsTr("After 15 Minutes Of Inactivity"), value: 15 },
+                  { text: qsTr("After 30 Minutes Of Inactivity"), value: 30 },
+                  { text: qsTr("After 1 Hour Of Inactivity"), value: 60 },
                   { text: qsTr("Never"), value: 0 }]
         value: App.autoLockMinutes
         onValueChanged: if (value !== App.autoLockMinutes) App.autoLockMinutes = value
@@ -120,6 +120,73 @@ BDialog {
             variant: "primary"
             text: qsTr("Restart And Update")
             onClicked: App.updater.install()
+        }
+    }
+
+    // burrow-agent on this computer (Burrow on Ubuntu, ADR 0003): its state, the pairing code, a new code, removal.
+    SectionTitle { visible: App.agentSetup.available; text: qsTr("Office Screen Helper") }
+    Text {
+        visible: App.agentSetup.available
+        Layout.fillWidth: true
+        wrapMode: Text.WordWrap
+        font.pixelSize: Theme.fontLabel
+        color: App.agentSetup.error !== "" ? Theme.danger : Theme.textSecondary
+        text: App.agentSetup.error !== "" ? App.agentSetup.error
+              : !App.agentSetup.installed ? qsTr("Not installed. With it, Burrow on another computer can open this desktop: it unlocks this screen when you connect, keeps the monitor off and locks the screen again when you leave.")
+              : App.agentSetup.running ? qsTr("Running. On your other computer, enter the pairing code and port %1 in the device's Office Screen Helper.").arg(App.agentSetup.port)
+              : qsTr("Installed but not running. Install it again to restart it.")
+    }
+    TextEdit {
+        visible: App.agentSetup.available && App.agentSetup.code !== ""
+        text: App.agentSetup.code
+        readOnly: true
+        selectByMouse: true
+        color: Theme.text
+        selectionColor: Theme.accent
+        selectedTextColor: Theme.accentText
+        font.family: Theme.monoFont
+        font.pixelSize: Theme.fontBody
+        Accessible.name: qsTr("Pairing Code")
+    }
+    RowLayout {
+        visible: App.agentSetup.available
+        spacing: 8
+        Spinner { visible: App.agentSetup.busy }
+        Item { Layout.fillWidth: true }
+        BButton {
+            visible: !App.agentSetup.installed || !App.agentSetup.running
+            enabled: !App.agentSetup.busy
+            variant: "primary"
+            text: qsTr("Install Helper")
+            onClicked: App.agentSetup.install()
+        }
+        BButton {
+            visible: App.agentSetup.installed && App.agentSetup.code === ""
+            enabled: !App.agentSetup.busy
+            iconName: "eye"
+            text: qsTr("Show Code")
+            onClicked: App.agentSetup.showCode()
+        }
+        BButton {
+            visible: App.agentSetup.code !== ""
+            enabled: !App.agentSetup.busy
+            iconName: "copy"
+            text: qsTr("Copy Code")
+            onClicked: App.agentSetup.copyCode()
+        }
+        BButton {
+            visible: App.agentSetup.installed
+            enabled: !App.agentSetup.busy
+            text: qsTr("New Code")
+            tip: qsTr("Makes A New Pairing Code; The Old One Stops Working")
+            onClicked: App.agentSetup.newCode()
+        }
+        BButton {
+            visible: App.agentSetup.installed
+            enabled: !App.agentSetup.busy
+            variant: "danger"
+            text: qsTr("Remove")
+            onClicked: App.agentSetup.uninstall()
         }
     }
 

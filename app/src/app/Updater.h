@@ -12,7 +12,8 @@ class QNetworkReply;
 // verifies the SHA-256 from the release manifest and, on macOS, that the new app carries the same
 // Developer ID team signature before replacing the running bundle. On Windows (ADR 0010) the update is
 // the installer, run silently; when the running Burrow is Authenticode-signed the installer must be
-// validly signed by the same publisher (electron-updater's rule, as in JumpDesk).
+// validly signed by the same publisher (electron-updater's rule, as in JumpDesk). On Linux an AppImage
+// replaces itself and a .deb install is upgraded with apt through pkexec; both are checked by SHA-256 only.
 class Updater : public QObject
 {
     Q_OBJECT
@@ -60,6 +61,11 @@ private:
     QString installMac();
 #ifdef Q_OS_WIN
     QString installWindows();
+#endif
+#if !defined(Q_OS_MACOS) && !defined(Q_OS_WIN)
+    QString installLinux();
+    static QString appImagePath();   // the running AppImage, or empty
+    static bool debInstalled();      // installed from the .deb (in /opt/burrow)
 #endif
 
     QNetworkAccessManager *m_net;

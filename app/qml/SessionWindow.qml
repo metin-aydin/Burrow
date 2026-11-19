@@ -34,6 +34,10 @@ Window {
     readonly property var monitors: session && session.state === "connected" ? session.monitors : []
     readonly property bool tabbed: monitors.length > 1
     property int currentMonitor: 0
+    // The button left of the tabs shows every remote monitor at once, side by side as on the remote
+    // computer; clicking a tab goes back to that monitor alone. Not remembered: each connection starts
+    // on a monitor.
+    property bool allMonitors: false
     property var detached: ({})           // monitor index -> MonitorWindow
     property int detachedCount: 0
     property var tabOrder: []             // monitor indices in tab order (user can reorder)
@@ -144,7 +148,7 @@ Window {
                 const w = d ? d.viewSize.width : view.width, h = d ? d.viewSize.height : view.height
                 return [Math.round(w * k) & ~1, Math.round(h * k)]
             })
-            if (sizes.length > 0 && sizes.every(s => s[0] >= 200 && s[1] >= 200))
+            if (sizes.length > 0 && sizes.every(s => s[0] >= 200 && s[1] >= 200) && !win.allMonitors)
                 out.sizes = sizes
             out.order = win.tabOrder
             out.names = win.tabNames
@@ -153,6 +157,7 @@ Window {
     }
     // Puts tabs and windows back the way they were last time.
     onTabbedChanged: {
+        if (!tabbed) allMonitors = false
         if (!tabbed || restored) return
         const layout = App.device(deviceId).layout || {}
         const n = monitors.length
@@ -232,14 +237,15 @@ Window {
     readonly property bool showTabs: tabbed && visibleTabs.length > 1
     FontMetrics { id: tabMetrics; font.pixelSize: Theme.fontLabel; font.weight: Font.Medium }
     function tabWidth(i) { return Math.ceil(tabMetrics.advanceWidth(tabName(i))) + 36 }
+    readonly property int stripStart: 44   // the "all monitors" button, then the tabs
     function tabX(i) {
-        let x = 0
+        let x = stripStart
         for (let j = 0; j < visibleTabs.length && visibleTabs[j] !== i; ++j) x += tabWidth(visibleTabs[j]) + 2
         return x
     }
     // The tab under x (in tab-strip coordinates), or -1 past the last one.
     function tabAtX(x) {
-        let pos = 0
+        let pos = stripStart
         for (let j = 0; j < visibleTabs.length; ++j) {
             const w = tabWidth(visibleTabs[j])
             if (x < pos + w / 2) return visibleTabs[j]
@@ -257,12 +263,53 @@ Window {
         Item {
             id: strip
             anchors { left: parent.left; leftMargin: 8; right: parent.right; top: parent.top; bottom: parent.bottom }
+            // Every monitor at once (like the remote computer's own desktop).
+            Rectangle {
+                id: allButton
+                x: 0
+                y: parent.height - height
+                width: 36
+                height: 32
+                radius: 7
+                color: win.allMonitors ? Theme.bg : allMouse.containsMouse || activeFocus ? Theme.hover : "transparent"
+                // Joins the desktop below it while it is the view shown, like a current tab.
+                Rectangle {
+                    anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+                    height: 8
+                    color: parent.color
+                    visible: win.allMonitors
+                }
+                Icon {
+                    anchors.centerIn: parent
+                    name: "monitors"
+                    size: 16
+                    color: win.allMonitors ? Theme.text : Theme.textSecondary
+                }
+                activeFocusOnTab: true
+                Accessible.role: Accessible.Button
+                Accessible.name: qsTr("All Monitors")
+                Accessible.checkable: true
+                Accessible.checked: win.allMonitors
+                Accessible.onPressAction: win.allMonitors = true
+                Keys.onSpacePressed: win.allMonitors = true
+                Keys.onReturnPressed: win.allMonitors = true
+                MouseArea {
+                    id: allMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: { win.allMonitors = true; view.forceActiveFocus() }
+                }
+                BToolTip {
+                    text: qsTr("Show All Monitors Together")
+                    visible: allMouse.containsMouse && !allMouse.pressed
+                }
+            }
             Repeater {
                 model: win.monitors.length
                 Rectangle {
                     id: tab
                     required property int index
-                    readonly property bool current: win.currentMonitor === index
+                    readonly property bool current: !win.allMonitors && win.currentMonitor === index
                     readonly property bool shown: win.visibleTabs.indexOf(index) >= 0
                     readonly property bool editing: editor.visible
                     visible: shown
@@ -332,6 +379,7 @@ Window {
                         onPressed: (m) => {
                             if (m.button === Qt.RightButton) { tabMenu.monitor = tab.index; tabMenu.popup(); return }
                             win.currentMonitor = tab.index
+                            win.allMonitors = false
                             pressAt = Qt.point(m.x, m.y)
                         }
                         onDoubleClicked: (m) => { if (m.button === Qt.LeftButton) editor.begin() }
@@ -347,7 +395,7 @@ Window {
                             // Inside the window: the tab follows the pointer along the strip and the
                             // others make room. Outside: a floating label follows the pointer.
                             const p = mapToItem(strip, m.x, m.y)
-                            dragX = Math.max(0, p.x - pressAt.x)
+                            dragX = Math.max(win.stripStart, p.x - pressAt.x)
                             if (!outside) {
                                 const over = win.tabAtX(p.x)
                                 if (over !== tab.index) win.moveTab(tab.index, over)
@@ -448,7 +496,7 @@ Window {
         id: view
         anchors { left: parent.left; right: parent.right; top: win.showTabs ? tabBar.bottom : parent.top; bottom: parent.bottom }
         session: win.session
-        monitor: win.tabbed ? win.currentMonitor : -1
+        monitor: win.tabbed && !win.allMonitors ? win.currentMonitor : -1
         onWidthChanged: win.scheduleSave()
         onHeightChanged: win.scheduleSave()
         focus: true

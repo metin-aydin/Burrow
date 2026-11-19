@@ -1,6 +1,8 @@
 #include "rdp/RdpSession.h"
 
 #include <QCoreApplication>
+#include <QFile>
+#include <QFileInfo>
 #include <cstring>
 #include <QRect>
 
@@ -23,6 +25,8 @@
 #include <winpr/synch.h>
 
 #include "net/LocalSocket.h"
+#include "rdp/AgentLink.h"
+#include <memory>
 
 #include <libnetcore.h>
 
@@ -431,6 +435,29 @@ void RdpSession::run()
         setMonitorDefs(s, rects, m_p.scale, true);
     }
     freerdp_settings_set_bool(s, FreeRDP_RedirectClipboard, m_clip->enabled() ? TRUE : FALSE);
+    // Sound: AudioPlayback loads the rdpsnd channel (static and dynamic), played through the platform's
+    // backend (Core Audio, PulseAudio, WinMM); RemoteConsoleAudio asks the server to keep playing it
+    // there; neither tells the server not to play sound at all.
+    freerdp_settings_set_bool(s, FreeRDP_AudioPlayback, m_p.audio == QLatin1String("local") ? TRUE : FALSE);
+    freerdp_settings_set_bool(s, FreeRDP_RemoteConsoleAudio, m_p.audio == QLatin1String("remote") ? TRUE : FALSE);
+    // Device redirection, opt-in per device: exactly the folder the user picked (never RedirectDrives,
+    // which shares every drive) and this computer's printers. Windows servers support both; GNOME's
+    // doesn't offer them.
+    const QFileInfo folder(m_p.sharedFolder);
+    if (!m_p.sharedFolder.isEmpty() && folder.isDir()) {
+        const QByteArray path = QFile::encodeName(folder.absoluteFilePath());
+        QByteArray name = folder.fileName().toUtf8();
+        if (name.isEmpty())
+            name = "Burrow";   // a drive root such as "/" or "C:\" has no name of its own
+        const char *const drive[] = {"drive", name.constData(), path.constData()};
+        if (!freerdp_client_add_device_channel(s, 3, drive))
+            qWarning("rdp: couldn't share the folder");
+    }
+    if (m_p.sharePrinters) {
+        const char *const printer[] = {"printer"};   // no name: every printer of this computer
+        if (!freerdp_client_add_device_channel(s, 1, printer))
+            qWarning("rdp: couldn't share the printers");
+    }
     // Only NLA/TLS: legacy "RDP security" has no server authentication, so a man in the middle could
     // bypass the certificate pin. Servers that offer only that are refused.
     freerdp_settings_set_bool(s, FreeRDP_RdpSecurity, FALSE);
@@ -439,11 +466,29 @@ void RdpSession::run()
     freerdp_settings_set_bool(s, FreeRDP_TlsSecurity, TRUE);
     freerdp_settings_set_bool(s, FreeRDP_NegotiateSecurityLayer, TRUE);
 
+    // Office Screen Helper (Ubuntu, ADR 0003): burrow-agent unlocks the screen first, since GNOME's Desktop
+    // Sharing refuses a locked one, and locks it again when this session ends (the AgentLink going away).
+    std::unique_ptr<AgentLink> agent;
+    QString agentError;
+    if (!m_p.agentKey.isEmpty()) {
+        agent = std::make_unique<AgentLink>(m_p.tunnelHandle, m_p.pinHost.isEmpty() ? m_p.host : m_p.pinHost,
+                                            m_p.agentPort, m_p.agentKey);
+        agentError = agent->send("start");
+        if (agentError.isEmpty()) {
+            qInfo("agent: screen unlocked");
+            agent->startBeats();
+        } else {
+            qWarning("agent: couldn't unlock the screen: %s", qPrintable(agentError));
+        }
+    }
+
     if (!freerdp_connect(instance)) {
         const UINT32 code = freerdp_get_last_error(ctx);
         setState(QStringLiteral("closed"),
                  m_certChanged ? friendlyError(FREERDP_ERROR_CONNECT_CANCELLED)
-                 : m_stop ? QString() : friendlyError(code));
+                 : m_stop ? QString()
+                 : !agentError.isEmpty() ? tr("Couldn't unlock the Ubuntu screen with burrow-agent (%1). Check that it runs there and that the pairing code and port match.").arg(agentError)
+                 : friendlyError(code));
         freerdp_client_context_free(ctx);
         return;
     }
@@ -469,6 +514,7 @@ void RdpSession::run()
     const bool userClosed = m_stop;
     m_instance = nullptr;
     freerdp_disconnect(instance);
+    agent.reset();   // stops the beats and asks the agent to lock the screen
     freerdp_client_context_free(ctx);
     setState(QStringLiteral("closed"),
              userClosed || code == FREERDP_ERROR_SUCCESS ? QString() : friendlyError(code));

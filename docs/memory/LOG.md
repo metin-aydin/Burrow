@@ -2,7 +2,74 @@
 
 En yeni kayıt en üstte.
 
+## 2026-11-19
+
+- **Agent Burrow'dan kuruluyor (kullanıcı isteği):** agent Linux paketlerine (AppImage/.deb, `usr/bin/burrow-agent`)
+  giriyor; Burrow Ubuntu'da (`XDG_CURRENT_DESKTOP` GNOME + paketteki ikili) galeride öneri barı gösterir, tıklayınca
+  `burrow-agent install --json` ile kurar ve eşleştirme kodunu aynı barda (Kopyala/Tamam) gösterir; "Şimdi Değil"
+  QSettings'e yazılır. Ayarlar'da durum/kod/yeni kod/kaldır bölümü. `AgentSetup` (C++), agent'a `--json` ve `code`.
+  Demo kancaları: `BURROW_DEMO_AGENT=1`, `BURROW_DEMO_OPEN=agent-code`. Gerçek Ubuntu'da denenmedi.
+- **Güvenlik incelemesi (4 bulgu) düzeltildi:** agent anahtarı her bağlantıda dosyadan okur (yeni kod anında geçerli,
+  eski anında geçersiz; anahtar silinince kimseyi dinlemez); `uninstall` önce anahtarı siler, servis durmazsa hata
+  verir; `status` kodu hiç göstermez, Ayarlar'da "Kodu Göster" ile istenir; kopyalanan kod 1 dk sonra panodan
+  silinir; Burrow belirsiz/hatalı yanıtta kodu ve "çalışıyor" bilgisini unutur.
+- **burrow-agent yazıldı (`agent/`, ADR 0003 tasarımı):** kullanıcı ödünü kabul etti, şartı cihaz başına Ubuntu'ya
+  özel kapatılabilir ayar. Go, yalnız standart kütüphane, `go 1.22` (Ubuntu'nun Go'su derler); modül yolu
+  `github.com/metin-aydin/Burrow/agent` (`go install …/agent/cmd/burrow-agent@development` çalışsın diye).
+  HMAC-SHA256 iki yönlü, ±60 sn + nonce belleği, adres başına hatalı MAC sınırı; start/beat/end + 20 sn kira, 2 sn'de
+  bir monitör denetimi. `install/pair/status/uninstall/run`. Testler (`-race`) geçti; CI'ın Go işine eklendi.
+- **Agent güvenlik incelemesi (5 bulgu) düzeltildi:** protokol bağlantı başına challenge'a geçti (sürüm 2; yeniden
+  başlatmada tekrar penceresi kalmadı), kilit başarısızsa yeniden deneme + monitör kapalı, SIGTERM/çökme sonrası
+  kilitleme, istemcide okuma sınırı ve sabit süreli karşılaştırma. Burrow tarafı `AgentLink` (C++): ortak test
+  vektörü (`agent/vector_test.go` ↔ `tst_vault agentProtocol`) ve `agent/cmd/fake-agent` ile uçtan uca denendi.
+- **Intel CI düştü → düzeltildi:** Homebrew'un Intel FreeRDP'si 3.30'da kalmış (Burrow 3.33+ istiyor).
+  `tools/mac-freerdp.sh` sabit sürümü (linux-deps.sh ile aynı commit) Homebrew seçenekleriyle kaynaktan derliyor
+  (FFmpeg/H.264, CUPS, Mac ses); CI önbellekliyor, release imzalı paket için sıfırdan derliyor. Bu Mac'te denendi.
+  Ayrıca Linux birim testi `.AppImage` adını bekleyecek şekilde düzeltildi (güncelleyici değişikliği bozmuştu).
+- **Linux uygulama içi güncelleme:** AppImage (`$APPIMAGE`) yeni dosyayı yanına yazıp `rename` ile kendinin yerine
+  koyar ve yeniden başlar; .deb kurulumu (`/opt/burrow/bin` + `/var/lib/dpkg/info/burrow.list`) yardımcı betikle
+  Burrow kapanınca `pkexec apt-get install` çalıştırır. Manifest anahtarları `linux-x64` (AppImage) ve
+  `linux-x64-deb`; release'in Linux işi fragment üretiyor. İmza yok, yalnız SHA-256 (Windows imzasız durumu gibi).
+  Gerçek Ubuntu'da denenmedi; ilk deneme bir sonraki iki release arasında olabilir.
+- **Linux güncelleyicisi sertleştirildi (otomatik güvenlik incelemesi, 3 bulgu):** .deb ve betik 0700 rastgele
+  klasörde, `NewOnly` ile; root (pkexec) paketi kendi `mktemp` klasörüne kopyalayıp SHA-256'yı orada doğruluyor,
+  sonra kuruyor; `--allow-downgrades` kaldırıldı. AppImage `QSaveFile` ile değişiyor, yazılacak bayt yeniden
+  doğrulanıyor, başkalarının yazabildiği klasörde güncelleme reddediliyor. `BURROW_UPDATE_URL` artık yalnız test
+  derlemelerinde (ADR 0002 güncellendi). Kalan risk (bilinçli): Linux paketleri imzasız, güven GitHub + HTTPS +
+  manifest SHA-256 (imzasız Windows ile aynı); imzalı manifest (minisign) ileride.
+- **Intel Mac paketi:** release matrisine `macos-15-intel` (`mac-x64`, `CMAKE_OSX_ARCHITECTURES=x86_64`, kendi
+  Homebrew'u) eklendi; CI'a "macOS Intel build" işi. Güncelleyici `mac-x64` anahtarını zaten tanıyordu. OpenSSL
+  araması Intel Homebrew'u (`/usr/local`) da buluyor.
+- **Klasör ve yazıcı paylaşımı (RDP):** cihaz başına, yalnız Windows hedefte görünür, varsayılan kapalı. Klasör
+  `freerdp_client_add_device_channel("drive", ad, yol)` ile tek klasör; `FreeRDP_RedirectDrives` bilerek kullanılmıyor
+  (tüm sürücüleri paylaşır). Yazıcılar `"printer"` (adsız = hepsi, CUPS). Sekme adı "Sharing And Keyboard".
+  Demo kancası `device-sharing`. Gerçek Windows sunucusunda denenmedi (yerel shadow sunucusu rdpdr desteklemiyor).
+- **Tekrarlayan CI hatasının sebebi bulundu:** son 7 başarısız koşunun 5'i `macOS build → Translations`; hepsinde
+  "0 new" metin, fark yalnız `burrow_tr.ts`'teki `<location line=…>` numaralarıydı (metnin üstüne satır eklenen her
+  düzenleme bozuyordu). `qt_add_translations` → `LUPDATE_OPTIONS -no-obsolete -locations none`; katalogdan 410
+  konum satırı silindi; satır kaydırma testiyle doğrulandı. Diğer iki hata (Linux deb kurulumu, Windows paketli
+  uygulama açılışı) yeni platform işinin tek seferlik hatalarıydı ve sonraki commit'lerde düzelmişti.
+- **Açılır menü seçenekleri ve tooltip'ler Title Case:** 21 seçenek + 1 tooltip (İngilizce kaynak ve Türkçe çeviri),
+  kural hafızaya eklendi. Türkçe arayüzde ekran görüntüsüyle taşma kontrol edildi.
+- **Tüm monitörler görünümü (issue #8):** oturum penceresinde sekmelerin en solunda ikon düğme (`monitors.svg`);
+  uzak masaüstünün tamamını tek görünümde gösterir, sekmeye tıklayınca o monitöre döner. Kullanıcı: tüm
+  platformlarda, ayarlarda değil. Bu görünüm uzak çözünürlüğü değiştirmez (`RdpView`: çoklu monitörde `monitor=-1`
+  yeniden boyutlandırma istemez) ve düzen kaydına monitör boyutu yazmaz. Cihaz ayarındaki "One monitor per Mac
+  display" metni "…per display of this computer" oldu. `freerdp-shadow-cli` + `BURROW_DEMO_SPLIT=3` +
+  yeni `BURROW_DEMO_ALL=1` (`BURROW_GRAB` ile) ile görüntü alınarak doğrulandı.
+
+## 2026-11-18
+
+- **RDP sesi:** kullanıcı Mac'ten Ubuntu'ya bağlanırken ses gelmediğini söyledi. Sebep: Burrow `rdpsnd` kanalını hiç
+  açmıyordu (Homebrew FreeRDP'de `rdpsnd_mac` var). Cihaz başına "Ses" ayarı eklendi (local/remote/off →
+  `FreeRDP_AudioPlayback` / `RemoteConsoleAudio`); Linux FreeRDP derlemesinde PulseAudio açıldı (`libpulse-dev`).
+  Gerçek Ubuntu bağlantısıyla henüz denenmedi. Demo kancası `BURROW_DEMO_OPEN=device-session`.
+- Dependabot uyarıları ve otomatik güvenlik güncellemeleri açıldı (`gh api`), açık uyarı yok.
+
 ## 2026-11-16
+
+- **v0.3.0 yayımlandı** (PR #7): ilk Ubuntu `.deb` (`burrow_0.3.0_amd64.deb` + sha256) ve Linux tek renk tepsi simgesi.
+  `Release source` kontrolü bu PR'da ilk kez çalıştı ve geçti.
 
 - **Ubuntu .deb + Linux tek renk tepsi simgesi** (kullanıcının istekleri). `tools/package-deb.sh`, AppImage'ın AppDir'ini
   JumpDesk'teki gibi `/opt/burrow`'a koyar (`/usr/bin/burrow` bağlantısı, menü girdisi, ikon); Qt/FreeRDP/openconnect
