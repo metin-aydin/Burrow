@@ -659,6 +659,21 @@ QSize AppController::sessionWindowSize() const
     return QSize(qMax(800, int(avail.width() * 0.9)), qMax(560, int(avail.height() * 0.9)));
 }
 
+QVariantList AppController::displayCenters() const
+{
+    QList<QScreen *> ordered = QGuiApplication::screens();
+    if (QScreen *primary = QGuiApplication::primaryScreen()) {
+        ordered.removeOne(primary);
+        ordered.prepend(primary);
+    }
+    QVariantList out;
+    for (const QScreen *sc : std::as_const(ordered)) {
+        const QPoint c = sc->geometry().center();
+        out.append(QVariantMap{{"x", c.x()}, {"y", c.y()}});
+    }
+    return out;
+}
+
 void AppController::stopTunnelIfIdle(const QString &tunnelId)
 {
     if (m_tunnelTesting.contains(tunnelId))
@@ -743,9 +758,10 @@ QString AppController::startSession(const Model::Device &dev, const QString &use
         ordered.removeOne(QGuiApplication::primaryScreen());
         ordered.prepend(QGuiApplication::primaryScreen());
         // The sizes the monitors had at the end of the last session (they follow their windows), if the
-        // number of displays is the same: then nothing needs resizing once connected.
+        // number of displays is the same and they were measured in the same mode (full screen or in
+        // windows): then nothing needs resizing once connected.
         const QJsonArray saved = dev.layout.value("sizes").toArray();
-        if (saved.size() == screens.size()) {
+        if (saved.size() == screens.size() && dev.layout.value("sizesFullScreen").toBool() == dev.fullScreen) {
             int x = 0, h = 0;
             for (int i = 0; i < saved.size(); ++i) {
                 const QJsonArray wh = saved.at(i).toArray();

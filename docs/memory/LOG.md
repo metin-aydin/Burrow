@@ -2,6 +2,16 @@
 
 En yeni kayıt en üstte.
 
+## 2026-11-24
+
+- **Tam ekran ve tüm monitörler (issue #11, eetaskin):** cihaz ayarına "Open In Full Screen" (`Device.fullScreen`,
+  varsayılan kapalı). Tek pencerede oturum penceresi tam ekran açılır; "her ekran için bir monitör" (RDP) modunda
+  monitör i, ekran i'ye (ana ekran ilk, `App.displayCenters()`) tam ekran yerleşir. Bu mod `main`/`detached`
+  düzen kaydına yazmaz (kapatınca eski düzen döner); kaydedilen monitör boyutları `sizesFullScreen` ile işaretlenir,
+  mod değişince kullanılmaz. Mac (VNC) cihazlarda yalnız pencere tam ekran olur. `freerdp-shadow-cli` +
+  `BURROW_DEMO_SPLIT=3` + yeni `BURROW_DEMO_FULL=1` ile bu Mac'in 3 ekranında doğrulandı (üç pencere de doğru ekranda
+  tam ekran); tek pencere modu da denendi.
+
 ## 2026-11-19
 
 - **0.4.0 yayımlandı** (PR #9, merge `58b3a7a`): Ofis Ekranı Yardımcısı, ses, tüm monitörler, klasör/yazıcı paylaşımı, Intel

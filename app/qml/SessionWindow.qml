@@ -44,6 +44,12 @@ Window {
     property var tabNames: ({})           // monitor index -> name given by the user
     property bool restored: false
     property bool ending: false           // the session is closing: don't record windows going away
+    // "Open In Full Screen" (device setting): this window starts full screen; with one remote monitor per
+    // display of this computer, each monitor fills its own display instead of the remembered layout.
+    // Neither changes the remembered layout, so switching the setting off brings that back.
+    readonly property bool startFull: !!App.device(deviceId).fullScreen
+    readonly property bool spreadFull: startFull && App.device(deviceId).displays === "all"
+                                       && App.device(deviceId).protocol !== "vnc"
 
     function isDetached(i) { return !!detached[i] }
     // Tabs still in this window, in the user's order.
@@ -127,8 +133,9 @@ Window {
             const out = Object.assign({}, App.device(win.deviceId).layout || {})
             // This window: the display it is on and whether it is full screen.
             const ms = win.screen
-            out.main = { screen: ms ? ms.name : "", x: ms ? ms.virtualX + ms.width / 2 : 0,
-                         y: ms ? ms.virtualY + ms.height / 2 : 0, fullscreen: win.visibility === Window.FullScreen }
+            if (!win.startFull)
+                out.main = { screen: ms ? ms.name : "", x: ms ? ms.virtualX + ms.width / 2 : 0,
+                             y: ms ? ms.virtualY + ms.height / 2 : 0, fullscreen: win.visibility === Window.FullScreen }
             if (!win.tabbed || !win.restored) { App.saveDeviceLayout(win.deviceId, out); return }
             const list = []
             for (const k in win.detached) {
@@ -139,7 +146,7 @@ Window {
                             x: sc ? sc.virtualX + sc.width / 2 : 0, y: sc ? sc.virtualY + sc.height / 2 : 0,
                             fullscreen: w.visibility === Window.FullScreen })
             }
-            out.detached = list
+            if (!win.spreadFull) out.detached = list
             // The size each monitor's picture has (its own window, or the tab view): the next connection
             // starts with exactly these, as some servers can't change them while connected.
             const k = win.session ? win.session.scale / 100 : 1
@@ -148,8 +155,10 @@ Window {
                 const w = d ? d.viewSize.width : view.width, h = d ? d.viewSize.height : view.height
                 return [Math.round(w * k) & ~1, Math.round(h * k)]
             })
-            if (sizes.length > 0 && sizes.every(s => s[0] >= 200 && s[1] >= 200) && !win.allMonitors)
+            if (sizes.length > 0 && sizes.every(s => s[0] >= 200 && s[1] >= 200) && !win.allMonitors) {
                 out.sizes = sizes
+                out.sizesFullScreen = win.startFull   // full-screen sizes fit only full-screen windows
+            }
             out.order = win.tabOrder
             out.names = win.tabNames
             App.saveDeviceLayout(win.deviceId, out)
@@ -170,6 +179,15 @@ Window {
         tabNames = names
         currentMonitor = order[0]
         restored = true
+        if (spreadFull) {
+            // Monitor i on display i (the main display first), each full screen; one display at a time,
+            // as macOS animates each. Monitors without a display of their own stay as tabs here.
+            currentMonitor = 0
+            const centers = App.displayCenters()
+            for (let i = 1; i < n && i < centers.length; ++i)
+                detach(i, screenAt(centers[i].x, centers[i].y), true, 500 + 700 * (i - 1))
+            return
+        }
         const list = layout.detached || []
         let k = 0
         for (let j = 0; j < list.length; ++j) {
@@ -186,14 +204,16 @@ Window {
     // opens centred on the main display.
     Component.onCompleted: {
         const saved = (App.device(deviceId).layout || {}).main || {}
-        const sc = (saved.x !== undefined ? screenAt(saved.x, saved.y) : null) || screenNamed(saved.screen || "")
+        const first = spreadFull ? App.displayCenters()[0] : null
+        const sc = (first ? screenAt(first.x, first.y) : null)
+                   || (saved.x !== undefined ? screenAt(saved.x, saved.y) : null) || screenNamed(saved.screen || "")
                    || screen
         if (sc) {
             screen = sc
             x = sc.virtualX + (sc.width - width) / 2
             y = sc.virtualY + Math.max(0, sc.height - height) / 2
         }
-        if (saved.fullscreen) fullTimer.start()
+        if (saved.fullscreen || startFull) fullTimer.start()
     }
     // After the window has appeared on its display (macOS takes hidden windows full screen on the main one).
     Timer { id: fullTimer; interval: 300; onTriggered: win.showFullScreen() }
