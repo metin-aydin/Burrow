@@ -2,8 +2,23 @@
 
 En yeni kayıt en üstte.
 
+## 2026-11-24
+
+- **Tam ekran ve tüm monitörler (issue #11, eetaskin):** cihaz ayarına "Open In Full Screen" (`Device.fullScreen`,
+  varsayılan kapalı). Tek pencerede oturum penceresi tam ekran açılır; "her ekran için bir monitör" (RDP) modunda
+  monitör i, ekran i'ye (ana ekran ilk, `App.displayCenters()`) tam ekran yerleşir. Bu mod `main`/`detached`
+  düzen kaydına yazmaz (kapatınca eski düzen döner); kaydedilen monitör boyutları `sizesFullScreen` ile işaretlenir,
+  mod değişince kullanılmaz. Mac (VNC) cihazlarda yalnız pencere tam ekran olur. `freerdp-shadow-cli` +
+  `BURROW_DEMO_SPLIT=3` + yeni `BURROW_DEMO_FULL=1` ile bu Mac'in 3 ekranında doğrulandı (üç pencere de doğru ekranda
+  tam ekran); tek pencere modu da denendi.
+
 ## 2026-11-19
 
+- **0.4.0 yayımlandı** (PR #9, merge `58b3a7a`): Ofis Ekranı Yardımcısı, ses, tüm monitörler, klasör/yazıcı paylaşımı, Intel
+  Mac paketi, Linux uygulama içi güncelleme. İlk kez `mac-x64` (imzalı + notarize, `spctl` kabul) ve
+  `burrow-agent-linux-x64`; `.deb` içinde `/opt/burrow/bin/burrow-agent` doğrulandı; `latest.json`: linux-x64,
+  linux-x64-deb, mac-arm64, mac-x64, windows-x64. PR'da macOS işi bir kez runner DNS hatasıyla düştü, yeniden
+  çalıştırınca geçti. Issue #8 kendiliğinden kapandı (commit mesajındaki `Closes #8`). Gerçek Ubuntu'da agent ve Linux güncelleyicisi henüz denenmedi.
 - **Agent Burrow'dan kuruluyor (kullanıcı isteği):** agent Linux paketlerine (AppImage/.deb, `usr/bin/burrow-agent`)
   giriyor; Burrow Ubuntu'da (`XDG_CURRENT_DESKTOP` GNOME + paketteki ikili) galeride öneri barı gösterir, tıklayınca
   `burrow-agent install --json` ile kurar ve eşleştirme kodunu aynı barda (Kopyala/Tamam) gösterir; "Şimdi Değil"

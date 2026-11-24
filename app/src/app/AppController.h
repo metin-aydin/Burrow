@@ -114,6 +114,9 @@ public:
     Q_INVOKABLE void saveDeviceLayout(const QString &deviceId, const QVariantMap &layout);
     // Logical size a session window opens with on the main display.
     Q_INVOKABLE QSize sessionWindowSize() const;
+    // The centre of each display in desktop coordinates, the main display first: remote monitor i of a
+    // session that spans every display (displays == "all") belongs on display i.
+    Q_INVOKABLE QVariantList displayCenters() const;
 
     // Stores a preview image for a device (called by the RDP session on close).
     void setPreview(const QString &deviceId, const QImage &image);

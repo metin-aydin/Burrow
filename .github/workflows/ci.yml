@@ -83,7 +83,7 @@ jobs:
         run: brew install cmake ninja pkgconf qt openconnect ffmpeg jpeg-turbo openssl@3
       - name: Restore FreeRDP
         id: freerdp
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: /Users/runner/burrow-freerdp
           key: mac-freerdp-${{ runner.arch }}-${{ hashFiles('tools/mac-freerdp.sh') }}
@@ -91,7 +91,7 @@ jobs:
         run: tools/mac-freerdp.sh /Users/runner/burrow-freerdp
       - name: Save FreeRDP
         if: github.event_name == 'push' && steps.freerdp.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: /Users/runner/burrow-freerdp
           key: mac-freerdp-${{ runner.arch }}-${{ hashFiles('tools/mac-freerdp.sh') }}
@@ -115,7 +115,7 @@ jobs:
       # so a pull request can't plant binaries that later runs would execute.
       - name: Restore Qt and FreeRDP
         id: deps
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: /home/runner/burrow-deps
           key: linux-deps-${{ runner.arch }}-${{ hashFiles('tools/linux-deps.sh') }}
@@ -123,7 +123,7 @@ jobs:
         run: tools/linux-deps.sh /home/runner/burrow-deps
       - name: Save Qt and FreeRDP
         if: github.event_name == 'push' && steps.deps.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: /home/runner/burrow-deps
           key: linux-deps-${{ runner.arch }}-${{ hashFiles('tools/linux-deps.sh') }}
@@ -177,7 +177,7 @@ jobs:
       # the cache; pull requests may read it but never fill it.
       - name: Restore libopenconnect
         id: deps
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: C:/burrow-deps
           key: windows-deps-${{ hashFiles('tools/windows-deps.sh', 'tools/windows/openconnect-pipe-tun.patch') }}
@@ -185,7 +185,7 @@ jobs:
         run: tools/windows-deps.sh C:/burrow-deps
       - name: Save libopenconnect
         if: github.event_name == 'push' && steps.deps.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: C:/burrow-deps
           key: windows-deps-${{ hashFiles('tools/windows-deps.sh', 'tools/windows/openconnect-pipe-tun.patch') }}

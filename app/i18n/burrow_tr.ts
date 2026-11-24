@@ -408,6 +408,18 @@
         <translation>Her uzak monitör bir sekme olarak açılır. Bir sekmeyi başka bir ekrana sürükleyerek ayrı pencerede açabilirsin; Burrow nereye koyduğunu hatırlar. Ubuntu&apos;nun ekran paylaşımı yalnızca ana monitörü gösterir; birden fazlası için Ubuntu&apos;da Uzaktan Oturum Açma&apos;yı kullan.</translation>
     </message>
     <message>
+        <source>Open In Full Screen</source>
+        <translation>Tam Ekran Aç</translation>
+    </message>
+    <message>
+        <source>Each remote monitor fills its own display when you connect. Press %1 to leave full screen.</source>
+        <translation>Bağlandığında her uzak monitör kendi ekranını kaplar. Tam ekrandan çıkmak için %1 tuşlarına bas.</translation>
+    </message>
+    <message>
+        <source>The session window fills the display when you connect. Press %1 to leave full screen.</source>
+        <translation>Bağlandığında oturum penceresi ekranı kaplar. Tam ekrandan çıkmak için %1 tuşlarına bas.</translation>
+    </message>
+    <message>
         <source>Retina Resolution</source>
         <translation>Retina Çözünürlüğü</translation>
     </message>

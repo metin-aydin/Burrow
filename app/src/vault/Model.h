@@ -78,6 +78,7 @@ struct Device
     int agentPort = 47391;
     QString displays = QStringLiteral("all");              // all (one monitor per Mac display, as tabs) | window
     bool retina = false;     // send the Mac's physical pixels (sharper, but needs remote scaling)
+    bool fullScreen = false; // open the session full screen (with "all": each remote monitor on its own display)
     QJsonObject layout;      // last multi-monitor layout (SPEC §5.1)
     QString certFingerprint; // TOFU pin of the RDP server certificate
 };

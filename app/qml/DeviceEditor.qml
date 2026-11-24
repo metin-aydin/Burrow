@@ -33,6 +33,7 @@ BDialog {
         folderSw.checked = !!d.sharedFolder; folderPath = d.sharedFolder || ""; printerSw.checked = !!d.sharePrinters
         helperSw.checked = !!d.officeHelper; agentCodeField.text = d.agentCode || ""; agentPortField.text = String(d.agentPort || 47391)
         displaysCombo.value = d.displays || "window"; retinaSw.checked = !!d.retina
+        fullSw.checked = !!d.fullScreen
         error = ""
         tab = "general"; tabSeg.value = "general"   // a click breaks the binding, so reset both
         open()
@@ -53,7 +54,7 @@ BDialog {
             lockOnDisconnect: lockSw.checked, onDisconnect: onDisc.value,
             sessionMode: sessionCombo.value, clipboard: clipCombo.value, keyMap: keyCombo.value, audio: audioCombo.value,
             sharedFolder: isWindows && folderSw.checked ? folderPath : "", sharePrinters: isWindows && printerSw.checked,
-            displays: displaysCombo.value, retina: retinaSw.checked,
+            displays: displaysCombo.value, retina: retinaSw.checked, fullScreen: fullSw.checked,
             // The Office Screen Helper exists only for Ubuntu devices (the user's rule); the code stays saved.
             officeHelper: isUbuntu && helperSw.checked, agentCode: agentCodeField.text.trim(),
             agentPort: parseInt(agentPortField.text) || 47391
@@ -216,6 +217,18 @@ BDialog {
             color: Theme.textSecondary
             font.pixelSize: Theme.fontLabel
             text: qsTr("Each remote monitor opens as a tab. Drag a tab onto another display to give it its own window; Burrow remembers where you put it. Ubuntu's screen sharing shows only its main monitor; use Remote Login on Ubuntu to get several.")
+        }
+        BSwitch {
+            id: fullSw
+            Layout.fillWidth: true
+            // Qt's Ctrl+Meta: Command+Control on a Mac, Ctrl+Windows / Ctrl+Super elsewhere.
+            readonly property string keys: Qt.platform.os === "osx" ? "Control+Command+F"
+                                         : Qt.platform.os === "windows" ? "Ctrl+Win+F" : "Ctrl+Super+F"
+            title: qsTr("Open In Full Screen")
+            description: (displaysCombo.value === "all" && !root.isMac
+                          ? qsTr("Each remote monitor fills its own display when you connect. Press %1 to leave full screen.")
+                          : qsTr("The session window fills the display when you connect. Press %1 to leave full screen.")).arg(keys)
+            checked: !!root.d.fullScreen
         }
         BSwitch {
             id: retinaSw

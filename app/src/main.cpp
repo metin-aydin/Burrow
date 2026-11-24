@@ -147,6 +147,8 @@ int main(int argc, char *argv[])
                 }
                 // BURROW_DEMO_DISPLAYS=all spans every display (multi-monitor test).
                 d["displays"] = qEnvironmentVariable("BURROW_DEMO_DISPLAYS", QStringLiteral("window"));
+                // BURROW_DEMO_FULL=1 switches on "Open In Full Screen".
+                d["fullScreen"] = qEnvironmentVariableIntValue("BURROW_DEMO_FULL") != 0;
                 // BURROW_DEMO_LAYOUT=<json> pre-sets the saved monitor layout (tabs/windows restore test).
                 const QByteArray layout = qgetenv("BURROW_DEMO_LAYOUT");
                 if (!layout.isEmpty())

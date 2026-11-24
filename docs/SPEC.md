@@ -125,6 +125,9 @@ kayıtlı bilgisayarlara RDP ile bağlanan masaüstü uygulaması.
   geri sekmeye birleştirilebilir.
 - **Son düzen cihaz bazında hatırlanır** (sekme/pencere, hangi fiziksel monitör, tam ekran,
   çözünürlük) ve sonraki bağlantıda aynen uygulanır.
+- Cihaz bazında **"Tam Ekran Aç"** (issue #11): bağlanınca oturum penceresi tam ekran açılır; "her ekran için
+  bir monitör" modunda her uzak monitör bu bilgisayarın kendi ekranını tam ekran kaplar (ana ekran ilk).
+  Hatırlanan düzeni değiştirmez; kapatılınca o düzen geri gelir.
 
 ### 5.2 Oturum seçimi (mevcut oturum / yeni oturum)
 - Sorun: Ubuntu'ya uzaktan bağlanınca işyerindeki açık oturum kapanıyor (veya tersi); en son

@@ -184,6 +184,7 @@ private slots:
         d.password = "rdp-secret";
         d.tunnelId = t.id;
         d.os = "ubuntu";
+        d.fullScreen = true;
         s.doc().devices.append(d);
         QCOMPARE(s.save(), VaultStore::Result::Ok);
         s.lock();
@@ -200,6 +201,8 @@ private slots:
         QCOMPARE(s.doc().devices.size(), 1);
         QCOMPARE(s.doc().devices[0].password, QString("rdp-secret"));
         QCOMPARE(s.doc().devices[0].os, QString("ubuntu"));
+        QVERIFY(s.doc().devices[0].fullScreen);
+        QVERIFY(!Model::deviceFromJson(QJsonObject{}).fullScreen);   // older vaults: off
         QCOMPARE(s.doc().tunnels[0].gpPassword, QString()); // savePassword off
         QCOMPARE(s.doc().tunnels[0].totp.algorithm, QString("SHA512"));
         QVERIFY(s.doc().tunnel(d.tunnelId));
