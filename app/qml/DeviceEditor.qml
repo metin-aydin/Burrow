@@ -221,9 +221,7 @@ BDialog {
         BSwitch {
             id: fullSw
             Layout.fillWidth: true
-            // Qt's Ctrl+Meta: Command+Control on a Mac, Ctrl+Windows / Ctrl+Super elsewhere.
-            readonly property string keys: Qt.platform.os === "osx" ? "Control+Command+F"
-                                         : Qt.platform.os === "windows" ? "Ctrl+Win+F" : "Ctrl+Super+F"
+            readonly property string keys: Theme.fullScreenKeysText
             title: qsTr("Open In Full Screen")
             description: (displaysCombo.value === "all" && !root.isMac
                           ? qsTr("Each remote monitor fills its own display when you connect. Press %1 to leave full screen.")

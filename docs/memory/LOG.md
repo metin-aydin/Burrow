@@ -2,6 +2,18 @@
 
 En yeni kayıt en üstte.
 
+## 2026-11-25
+
+- **Windows issue'ları #13, #14, #15 (tek commit, `development`):**
+  - #13: Windows'ta `Ctrl+Win+F` sistemce ayrılmış (Find Computers). Tam ekran kısayolu artık `Theme.fullScreenKeys`:
+    Windows'ta `Ctrl+Alt+Enter` (ana ve keypad Enter), diğerlerinde `Ctrl+Meta+F`. DeviceEditor ipucu
+    `Theme.fullScreenKeysText`'ten gelir. Kısayolu ayarlanabilir yapma istenmişti, yapılmadı.
+  - #14: Her ekran için bir monitör + tam ekranda pencere sürüklenince imleç monitör kenarında kalıyordu (fare
+    tutulan pencereye grab'li, `toRemote` kendi monitörüne kırpıyor). `RdpView::dragToRemote`: imleç kendi görünümünün
+    dışındaysa aynı oturumun imleç altındaki görünümüyle (global konum) eşler. Gerçek Windows'ta denenmedi.
+  - #15: Windows'ta `QQuickWindow::NativeTextRendering` (ClearType). Gerçek Windows'ta denenmedi.
+  - macOS'ta derleme + `tst_vault` geçti, QML offscreen hatasız yüklendi.
+
 ## 2026-11-24
 
 - **0.5.0 yayımlandı** (PR #12, merge `0349f3a`): "Open In Full Screen" (issue #11). Merge'e kullanıcının aynı anda

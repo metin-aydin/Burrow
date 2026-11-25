@@ -64,6 +64,12 @@ QtObject {
     readonly property int titleBarControlHeight: 32
     readonly property int titleBarMargin: (titleBarHeight - titleBarControlHeight) / 2
     readonly property string fontFamily: Qt.application.font.family
+    // Full-screen toggle for session windows. Windows reserves Ctrl+Win+F (Find Computers), so there it is
+    // Ctrl+Alt+Enter (main or keypad Enter). Qt's Ctrl+Meta is Command+Control on a Mac.
+    readonly property var fullScreenKeys: Qt.platform.os === "windows" ? ["Ctrl+Alt+Return", "Ctrl+Alt+Enter"]
+                                                                      : ["Ctrl+Meta+F"]
+    readonly property string fullScreenKeysText: Qt.platform.os === "osx" ? "Control+Command+F"
+                                               : Qt.platform.os === "windows" ? "Ctrl+Alt+Enter" : "Ctrl+Super+F"
     // Only for codes and data people copy or compare character by character (pairing codes), never as decoration.
     readonly property string monoFont: Qt.platform.os === "osx" ? "Menlo" : Qt.platform.os === "windows" ? "Consolas" : "monospace"
 
