@@ -4,6 +4,8 @@ En yeni kayıt en üstte.
 
 ## 2026-11-25
 
+- **0.5.1 yayımlandı** (PR #16, merge `7bc7a81`): issue #13, #14, #15 düzeltmeleri; issue'lar `Closes` ile kapandı.
+  Release işinin tüm adımları geçti; mac-arm64, mac-x64, windows-x64 (setup + portable), linux AppImage + deb ve `latest.json` yüklendi.
 - **Windows issue'ları #13, #14, #15 (tek commit, `development`):**
   - #13: Windows'ta `Ctrl+Win+F` sistemce ayrılmış (Find Computers). Tam ekran kısayolu artık `Theme.fullScreenKeys`:
     Windows'ta `Ctrl+Alt+Enter` (ana ve keypad Enter), diğerlerinde `Ctrl+Meta+F`. DeviceEditor ipucu
