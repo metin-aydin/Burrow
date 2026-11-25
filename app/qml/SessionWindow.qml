@@ -653,5 +653,5 @@ Window {
     // Short status lines from the session (files copied on the remote computer, for example).
     Toast { id: sessionToast }
 
-    Shortcut { sequence: "Ctrl+Meta+F"; onActivated: win.visibility === Window.FullScreen ? win.showNormal() : win.showFullScreen() }
+    Shortcut { sequences: Theme.fullScreenKeys; onActivated: win.visibility === Window.FullScreen ? win.showNormal() : win.showFullScreen() }
 }

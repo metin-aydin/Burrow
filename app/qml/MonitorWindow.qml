@@ -35,5 +35,5 @@ Window {
         Component.onCompleted: forceActiveFocus()
     }
 
-    Shortcut { sequence: "Ctrl+Meta+F"; onActivated: mw.visibility === Window.FullScreen ? mw.showNormal() : mw.showFullScreen() }
+    Shortcut { sequences: Theme.fullScreenKeys; onActivated: mw.visibility === Window.FullScreen ? mw.showNormal() : mw.showFullScreen() }
 }

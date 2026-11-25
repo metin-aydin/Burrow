@@ -21,6 +21,7 @@ class RdpView : public QQuickItem
     Q_PROPERTY(int monitor READ monitor WRITE setMonitor NOTIFY monitorChanged)
 public:
     explicit RdpView(QQuickItem *parent = nullptr);
+    ~RdpView() override;
 
     RemoteSession *session() const { return m_session; }
     void setSession(RemoteSession *s);
@@ -51,6 +52,9 @@ private:
     QRect sourceRect() const;   // the part of the desktop this view shows
     QRectF targetRect() const;
     QPoint toRemote(const QPointF &p) const;
+    // While a button is held the mouse stays grabbed by this view, so a drag past its edge is mapped
+    // through the view of the same session under the cursor (another remote monitor's window).
+    QPoint dragToRemote(const QMouseEvent *e) const;
     unsigned scancodeFor(const QKeyEvent *e) const;
     static quint32 keysymFor(const QKeyEvent *e);   // X keysym for VNC sessions
     QHash<quint32, quint32> m_keysymsDown;          // native key -> keysym sent on press

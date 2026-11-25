@@ -67,6 +67,11 @@ int main(int argc, char *argv[])
     QGuiApplication::setApplicationVersion(QStringLiteral(BURROW_VERSION));
     QGuiApplication::setWindowIcon(QIcon(QStringLiteral(":/qt/qml/Burrow/resources/icons/256x256.png")));
     QQuickStyle::setStyle(QStringLiteral("Basic"));
+#ifdef Q_OS_WIN
+    // Qt Quick's own glyph rendering has no ClearType or pixel-grid hinting and looks soft next to
+    // native Windows apps; Burrow hardly scales or animates text, so native rendering costs nothing.
+    QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
+#endif
 
     AppController controller;
     // --seed-demo: fill an empty vault with sample devices and previews (development only).

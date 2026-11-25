@@ -2,8 +2,24 @@
 
 En yeni kayıt en üstte.
 
+## 2026-11-25
+
+- **Windows issue'ları #13, #14, #15 (tek commit, `development`):**
+  - #13: Windows'ta `Ctrl+Win+F` sistemce ayrılmış (Find Computers). Tam ekran kısayolu artık `Theme.fullScreenKeys`:
+    Windows'ta `Ctrl+Alt+Enter` (ana ve keypad Enter), diğerlerinde `Ctrl+Meta+F`. DeviceEditor ipucu
+    `Theme.fullScreenKeysText`'ten gelir. Kısayolu ayarlanabilir yapma istenmişti, yapılmadı.
+  - #14: Her ekran için bir monitör + tam ekranda pencere sürüklenince imleç monitör kenarında kalıyordu (fare
+    tutulan pencereye grab'li, `toRemote` kendi monitörüne kırpıyor). `RdpView::dragToRemote`: imleç kendi görünümünün
+    dışındaysa aynı oturumun imleç altındaki görünümüyle (global konum) eşler. Gerçek Windows'ta denenmedi.
+  - #15: Windows'ta `QQuickWindow::NativeTextRendering` (ClearType). Gerçek Windows'ta denenmedi.
+  - macOS'ta derleme + `tst_vault` geçti, QML offscreen hatasız yüklendi.
+
 ## 2026-11-24
 
+- **0.5.0 yayımlandı** (PR #12, merge `0349f3a`): "Open In Full Screen" (issue #11). Merge'e kullanıcının aynı anda
+  aldığı dependabot PR #10 (actions/cache 4→6) da girdi. Release işinin tüm adımları geçti; `latest.json`: linux-x64,
+  linux-x64-deb, mac-arm64, mac-x64, windows-x64. Repoda auto-merge kapalı: CI'ı `gh pr checks --watch` ile bekleyip
+  MCP ile merge edildi. Not: uygulamanın PR durum önbelleği CI bitmeden "CLEAN" gösterebiliyor, merge 405 döndü.
 - **Tam ekran ve tüm monitörler (issue #11, eetaskin):** cihaz ayarına "Open In Full Screen" (`Device.fullScreen`,
   varsayılan kapalı). Tek pencerede oturum penceresi tam ekran açılır; "her ekran için bir monitör" (RDP) modunda
   monitör i, ekran i'ye (ana ekran ilk, `App.displayCenters()`) tam ekran yerleşir. Bu mod `main`/`detached`

@@ -11,9 +11,18 @@
 
 #include <winpr/input.h>
 
+namespace {
+QList<RdpView *> &allViews()
+{
+    static QList<RdpView *> views;
+    return views;
+}
+} // namespace
+
 RdpView::RdpView(QQuickItem *parent)
     : QQuickItem(parent)
 {
+    allViews().append(this);
     setFlag(ItemHasContents, true);
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton | Qt::MiddleButton);
     setAcceptHoverEvents(true);
@@ -41,6 +50,11 @@ RdpView::RdpView(QQuickItem *parent)
         else
             m_session->requestResize(px, m_session->scale());
     });
+}
+
+RdpView::~RdpView()
+{
+    allViews().removeOne(this);
 }
 
 void RdpView::geometryChange(const QRectF &newGeometry, const QRectF &oldGeometry)
@@ -262,6 +276,22 @@ QPoint RdpView::toRemote(const QPointF &p) const
                   src.top() + qBound(0, int((p.y() - r.top()) * sy), src.height() - 1));
 }
 
+QPoint RdpView::dragToRemote(const QMouseEvent *e) const
+{
+    const QPointF local = e->position();
+    if (contains(local) || !m_session || !m_session->multiMonitor())
+        return toRemote(local);
+    const QPointF global = e->globalPosition();
+    for (const RdpView *v : std::as_const(allViews())) {
+        if (v == this || v->m_session != m_session || !v->isVisible() || !v->window() || !v->window()->isVisible())
+            continue;
+        const QPointF there = v->mapFromGlobal(global);
+        if (v->contains(there))
+            return v->toRemote(there);
+    }
+    return toRemote(local);
+}
+
 void RdpView::mousePressEvent(QMouseEvent *e)
 {
     forceActiveFocus();
@@ -275,7 +305,7 @@ void RdpView::mousePressEvent(QMouseEvent *e)
 void RdpView::mouseReleaseEvent(QMouseEvent *e)
 {
     if (m_session) {
-        const QPoint p = toRemote(e->position());
+        const QPoint p = dragToRemote(e);
         m_session->sendMouseButton(e->button(), false, p.x(), p.y());
     }
     e->accept();
@@ -284,7 +314,7 @@ void RdpView::mouseReleaseEvent(QMouseEvent *e)
 void RdpView::mouseMoveEvent(QMouseEvent *e)
 {
     if (m_session) {
-        const QPoint p = toRemote(e->position());
+        const QPoint p = dragToRemote(e);
         m_session->sendMouseMove(p.x(), p.y());
     }
 }
